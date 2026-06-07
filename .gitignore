@@ -1,0 +1,26 @@
+# Node
+node_modules/
+dist/
+
+# .NET
+bin/
+obj/
+appsettings.Development.json
+
+# Python
+venv/
+__pycache__/
+*.pyc
+.env
+
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
