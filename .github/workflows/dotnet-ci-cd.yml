@@ -20,10 +20,10 @@ jobs:
         dotnet-version: '7.0.x'
 
     - name: Restore dependencies
-      run: dotnet restore Salasel.sln
+      run: dotnet restore backend-dotnet/Salasel.sln
 
     - name: Build Solution
-      run: dotnet build Salasel.sln --no-restore --configuration Release
+      run: dotnet build backend-dotnet/Salasel.sln --no-restore --configuration Release
 
   docker:
     needs: build
