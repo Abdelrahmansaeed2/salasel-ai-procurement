@@ -11,4 +11,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Salasel.Infrastructure\Salasel.Infrastructure.csproj" />
+    <ProjectReference Include="..\Salasel.Application\Salasel.Application.csproj" />
+  </ItemGroup>
+
 </Project>

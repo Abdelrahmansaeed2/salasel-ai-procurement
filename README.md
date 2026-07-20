@@ -12,7 +12,7 @@ Merchants use voice notes in colloquial Egyptian Arabic to manage inventory, whi
 Built with a highly scalable Microservices Architecture to separate operational transactional logic from the AI reasoning layers.
 
 * **Mobile Interface (Merchants):** `Flutter` (Cross-platform voice-first UI)
-* **Web Dashboard (Suppliers):** `React.js` (Real-time order tracking)
+* **Web Dashboard (Suppliers):** `Angular` (Real-time order tracking)
 * **Core Backend & Rules Engine:** `.NET Core Web API` (Business logic, ACID transactions)
 * **Database:** `SQL Server` (Entity Framework Core)
 * **AI Microservice:** `Python / FastAPI`
@@ -33,3 +33,34 @@ Developed by Team 8 as part of the Information Technology Institute (ITI) 9-Mont
 * Daniel Samy
 * Mohamed Abdelgawad Mohamed
 * Muhammed Reda Abdel Elmoamen
+
+## How to Run Locally
+
+### 1. Backend (.NET Core API)
+```bash
+cd backend
+dotnet restore
+dotnet run
+```
+*Note: Ensure SQL Server is running and the connection string in `appsettings.json` is configured.*
+
+### 2. Frontend (Angular Web Dashboard)
+```bash
+cd frontend
+npm install
+npm start
+```
+
+### 3. AI Service (Python / FastAPI)
+```bash
+cd ai_service
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+### 4. Mobile Interface (Flutter)
+```bash
+cd mobile
+flutter pub get
+flutter run
+```

@@ -9,6 +9,7 @@ appsettings.Development.json
 
 # Python
 venv/
+.tmp_venv/
 __pycache__/
 *.pyc
 .env
