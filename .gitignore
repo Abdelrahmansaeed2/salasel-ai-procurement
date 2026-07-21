@@ -26,3 +26,5 @@ build/
 *.suo
 *.user
 setup_ai_only.sh
+.antigravity/mcp.json
+frontend/src/environments/environment.ts
