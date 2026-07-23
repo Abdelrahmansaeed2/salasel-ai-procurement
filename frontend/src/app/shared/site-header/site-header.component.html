@@ -1,0 +1,24 @@
+<header class="navbar" [class.navbar--scrolled]="isScrolled()">
+  <div class="navbar__inner">
+    <div class="navbar__actions">
+      <button type="button" class="btn btn--primary btn--sm">ابدأ الآن</button>
+      <button type="button" class="link-btn">انضم كشريك</button>
+    </div>
+
+    <nav class="navbar__links" [class.navbar__links--open]="isMobileMenuOpen()">
+      @for (link of navLinks; track link.label) {
+        <a [routerLink]="link.route" class="navbar__link" [class.navbar__link--active]="link.label === activeLink">{{ link.label }}</a>
+      }
+    </nav>
+
+    <a routerLink="/" class="navbar__brand">
+      <img src="assets/images/salasel-logo.png" alt="سلاسل" class="navbar__logo" />
+    </a>
+
+    <button type="button" class="navbar__toggle" (click)="toggleMobileMenu()" [attr.aria-expanded]="isMobileMenuOpen()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</header>
