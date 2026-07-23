@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Salasel.Application.DTOs;
 using Salasel.Application.Interfaces;
@@ -6,6 +7,7 @@ namespace Salasel.API.Controllers;
 
 [ApiController]
 [Route("api/v1/procurement")]
+[Authorize(Roles = "Merchant,Admin")]
 public class ProcurementController : ControllerBase
 {
     private readonly IProcurementService _procurementService;
@@ -18,6 +20,8 @@ public class ProcurementController : ControllerBase
     [HttpPost("voice")]
     public async Task<IActionResult> ProcessVoice([FromBody] VoiceProcurementRequestDto request)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
         var logId = await _procurementService.LogVoiceProcurementAsync(request);
         return Ok(new { Message = "Voice processed successfully", LogID = logId });
     }

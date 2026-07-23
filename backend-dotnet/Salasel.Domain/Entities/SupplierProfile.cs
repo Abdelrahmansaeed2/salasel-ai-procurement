@@ -10,6 +10,6 @@ public class SupplierProfile
     public string PaymentTerms { get; set; } = string.Empty;
     public bool IsActiveForRouting { get; set; }
 
-    public ICollection<OrderSplits> OrderSplits { get; set; } = new List<OrderSplits>();
-    public ICollection<SupplierCatalogs> SupplierCatalogs { get; set; } = new List<SupplierCatalogs>();
+    public ICollection<OrderSplit> OrderSplits { get; set; } = new List<OrderSplit>();
+    public ICollection<SupplierCatalog> SupplierCatalogs { get; set; } = new List<SupplierCatalog>();
 }

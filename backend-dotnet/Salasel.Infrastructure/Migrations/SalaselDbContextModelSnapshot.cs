@@ -22,7 +22,7 @@ namespace Salasel.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Salasel.Domain.Entities.FraudPreventionLimits", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.FraudPreventionLimit", b =>
                 {
                     b.Property<int>("RuleID")
                         .ValueGeneratedOnAdd()
@@ -37,8 +37,8 @@ namespace Salasel.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<int>("RuleType")
-                        .HasColumnType("int");
+                    b.Property<byte>("RuleType")
+                        .HasColumnType("tinyint");
 
                     b.HasKey("RuleID");
 
@@ -105,7 +105,7 @@ namespace Salasel.Infrastructure.Migrations
                     b.ToTable("MerchantsProfiles");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.OrderSplits", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.OrderSplit", b =>
                 {
                     b.Property<int>("SplitID")
                         .ValueGeneratedOnAdd()
@@ -113,8 +113,8 @@ namespace Salasel.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SplitID"));
 
-                    b.Property<int>("FulfillmentStatus")
-                        .HasColumnType("int");
+                    b.Property<byte>("FulfillmentStatus")
+                        .HasColumnType("tinyint");
 
                     b.Property<int>("ParentOrderID")
                         .HasColumnType("int");
@@ -142,7 +142,7 @@ namespace Salasel.Infrastructure.Migrations
                     b.ToTable("OrderSplits");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.OrderTransactions", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.OrderTransaction", b =>
                 {
                     b.Property<int>("OrderID")
                         .ValueGeneratedOnAdd()
@@ -150,8 +150,8 @@ namespace Salasel.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderID"));
 
-                    b.Property<int>("ApprovalStatus")
-                        .HasColumnType("int");
+                    b.Property<byte>("ApprovalStatus")
+                        .HasColumnType("tinyint");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -175,7 +175,7 @@ namespace Salasel.Infrastructure.Migrations
                     b.ToTable("OrderTransactions");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.SupplierCatalogs", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.SupplierCatalog", b =>
                 {
                     b.Property<int>("CatalogID")
                         .ValueGeneratedOnAdd()
@@ -243,7 +243,7 @@ namespace Salasel.Infrastructure.Migrations
                     b.ToTable("SupplierProfiles");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.SystemAuditLogs", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.SystemAuditLog", b =>
                 {
                     b.Property<int>("AuditID")
                         .ValueGeneratedOnAdd()
@@ -285,7 +285,7 @@ namespace Salasel.Infrastructure.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -300,14 +300,18 @@ namespace Salasel.Infrastructure.Migrations
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("UserID");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.VoiceProcurementLogs", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.VoiceProcurementLog", b =>
                 {
                     b.Property<int>("LogID")
                         .ValueGeneratedOnAdd()
@@ -366,9 +370,9 @@ namespace Salasel.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.OrderSplits", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.OrderSplit", b =>
                 {
-                    b.HasOne("Salasel.Domain.Entities.OrderTransactions", "ParentOrder")
+                    b.HasOne("Salasel.Domain.Entities.OrderTransaction", "ParentOrder")
                         .WithMany("OrderSplits")
                         .HasForeignKey("ParentOrderID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -385,7 +389,7 @@ namespace Salasel.Infrastructure.Migrations
                     b.Navigation("Supplier");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.OrderTransactions", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.OrderTransaction", b =>
                 {
                     b.HasOne("Salasel.Domain.Entities.MerchantsProfile", "Merchant")
                         .WithMany("OrderTransactions")
@@ -393,7 +397,7 @@ namespace Salasel.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Salasel.Domain.Entities.VoiceProcurementLogs", "VoiceLog")
+                    b.HasOne("Salasel.Domain.Entities.VoiceProcurementLog", "VoiceLog")
                         .WithMany("OrderTransactions")
                         .HasForeignKey("VoiceLogID")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -403,7 +407,7 @@ namespace Salasel.Infrastructure.Migrations
                     b.Navigation("VoiceLog");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.SupplierCatalogs", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.SupplierCatalog", b =>
                 {
                     b.HasOne("Salasel.Domain.Entities.SupplierProfile", "Supplier")
                         .WithMany("SupplierCatalogs")
@@ -425,7 +429,7 @@ namespace Salasel.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.SystemAuditLogs", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.SystemAuditLog", b =>
                 {
                     b.HasOne("Salasel.Domain.Entities.User", "AdminUser")
                         .WithMany("SystemAuditLogs")
@@ -436,7 +440,7 @@ namespace Salasel.Infrastructure.Migrations
                     b.Navigation("AdminUser");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.VoiceProcurementLogs", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.VoiceProcurementLog", b =>
                 {
                     b.HasOne("Salasel.Domain.Entities.MerchantsProfile", "Merchant")
                         .WithMany("VoiceProcurementLogs")
@@ -456,7 +460,7 @@ namespace Salasel.Infrastructure.Migrations
                     b.Navigation("VoiceProcurementLogs");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.OrderTransactions", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.OrderTransaction", b =>
                 {
                     b.Navigation("OrderSplits");
                 });
@@ -477,7 +481,7 @@ namespace Salasel.Infrastructure.Migrations
                     b.Navigation("SystemAuditLogs");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.VoiceProcurementLogs", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.VoiceProcurementLog", b =>
                 {
                     b.Navigation("OrderTransactions");
                 });

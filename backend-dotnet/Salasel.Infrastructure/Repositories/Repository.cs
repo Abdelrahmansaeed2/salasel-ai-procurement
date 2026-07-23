@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Salasel.Application.Interfaces;
+using Salasel.Domain.Interfaces;
 using Salasel.Infrastructure.Data;
+using System.Linq.Expressions;
 
 namespace Salasel.Infrastructure.Repositories;
 
@@ -22,29 +24,64 @@ public class Repository<T> : IRepository<T> where T : class
 
     public async Task<IEnumerable<T>> GetAllAsync()
     {
-        return await _dbSet.ToListAsync();
+        return await _dbSet.AsNoTracking().ToListAsync();
     }
 
-    public async Task<T> AddAsync(T entity)
+    public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Where(predicate)
+            .ToListAsync();
+    }
+
+    public async Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _dbSet.SingleOrDefaultAsync(predicate);
+    }
+
+    public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _dbSet.AnyAsync(predicate);
+    }
+
+    public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
+    {
+        return predicate == null
+            ? await _dbSet.CountAsync()
+            : await _dbSet.CountAsync(predicate);
+    }
+
+    public async Task AddAsync(T entity)
     {
         await _dbSet.AddAsync(entity);
-        await _context.SaveChangesAsync();
-        return entity;
     }
 
-    public async Task UpdateAsync(T entity)
+    public async Task AddRangeAsync(IEnumerable<T> entities)
+    {
+        await _dbSet.AddRangeAsync(entities);
+    }
+
+    public Task UpdateAsync(T entity)
     {
         _dbSet.Update(entity);
-        await _context.SaveChangesAsync();
+        return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(int id)
+    public Task RemoveAsync(T entity)
     {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _dbSet.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
+        _dbSet.Remove(entity);
+        return Task.CompletedTask;
+    }
+
+    public Task RemoveRangeAsync(IEnumerable<T> entities)
+    {
+        _dbSet.RemoveRange(entities);
+        return Task.CompletedTask;
+    }
+
+    public Task<int> SaveChangesAsync()
+    {
+        return _context.SaveChangesAsync();
     }
 }

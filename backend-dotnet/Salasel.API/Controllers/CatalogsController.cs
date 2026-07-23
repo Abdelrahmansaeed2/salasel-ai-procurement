@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Salasel.Application.DTOs;
 using Salasel.Application.Interfaces;
@@ -6,6 +7,7 @@ namespace Salasel.API.Controllers;
 
 [ApiController]
 [Route("api/v1/suppliers/catalogs")]
+[Authorize(Roles = "Supplier,Admin")]
 public class CatalogsController : ControllerBase
 {
     private readonly ICatalogService _catalogService;
@@ -18,6 +20,8 @@ public class CatalogsController : ControllerBase
     [HttpPost("upload")]
     public async Task<IActionResult> UploadCatalog([FromBody] CatalogUploadRequestDto request)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
         var catalogId = await _catalogService.UploadCatalogAsync(request);
         return Ok(new { Message = "Catalog uploaded successfully", CatalogID = catalogId });
     }
