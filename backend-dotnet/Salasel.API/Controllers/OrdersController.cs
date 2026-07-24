@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Salasel.Application.DTOs;
 using Salasel.Application.Interfaces;
 
@@ -6,6 +7,7 @@ namespace Salasel.API.Controllers;
 
 [ApiController]
 [Route("api/v1/orders")]
+[Authorize]
 public class OrdersController : ControllerBase
 {
     private readonly IOrderExecutionService _orderExecutionService;

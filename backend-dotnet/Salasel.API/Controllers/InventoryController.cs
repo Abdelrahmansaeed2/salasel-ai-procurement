@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Salasel.Application.Interfaces;
 
 namespace Salasel.API.Controllers;
 
 [ApiController]
 [Route("api/v1/inventory")]
+[Authorize]
 public class InventoryController : ControllerBase
 {
     private readonly IInventoryService _inventoryService;

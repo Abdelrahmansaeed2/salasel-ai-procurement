@@ -112,6 +112,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseMiddleware<LangfuseMiddleware>();
 
 app.UseHttpsRedirection();
 
