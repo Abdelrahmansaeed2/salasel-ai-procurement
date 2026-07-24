@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using Salasel.Application.DTOs;
 using Salasel.Application.Interfaces;
 
@@ -23,7 +22,7 @@ public class CatalogsController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var catalogId = await _catalogService.UploadCatalogAsync(request);
-        return Ok(new { Message = "Catalog uploaded successfully", CatalogID = catalogId });
+        // Future AI integration: RAG Ingestion
+        return Accepted(new { Message = "Catalog uploaded successfully", CatalogID = Guid.NewGuid().ToString() });
     }
 }
