@@ -7,20 +7,21 @@ using Salasel.Application.DTOs;
 using Salasel.Application.Interfaces;
 using Salasel.Domain.Entities;
 using Salasel.Domain.Enums;
+using Salasel.Domain.Interfaces;
 
 namespace Salasel.Application.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly IRepository<User> _userRepository;
-    private readonly IRepository<MerchantsProfile> _merchantRepository;
-    private readonly IRepository<SupplierProfile> _supplierRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IMerchantProfileRepository _merchantRepository;
+    private readonly ISupplierProfileRepository _supplierRepository;
     private readonly IConfiguration _configuration;
 
     public AuthService(
-        IRepository<User> userRepository,
-        IRepository<MerchantsProfile> merchantRepository,
-        IRepository<SupplierProfile> supplierRepository,
+        IUserRepository userRepository,
+        IMerchantProfileRepository merchantRepository,
+        ISupplierProfileRepository supplierRepository,
         IConfiguration configuration)
     {
         _userRepository = userRepository;
@@ -31,8 +32,7 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request)
     {
-        var existingUser = (await _userRepository.GetAllAsync()).FirstOrDefault(u => u.Email == request.Email);
-        if (existingUser != null)
+        if (await _userRepository.EmailExistsAsync(request.Email))
         {
             throw new Exception("Email already exists.");
         }
@@ -42,15 +42,15 @@ public class AuthService : IAuthService
             FullName = request.FullName,
             Email = request.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            Role = request.Role.ToString(),
+            Role = request.Role,
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };
 
         await _userRepository.AddAsync(user);
+        await _userRepository.SaveChangesAsync();
 
-        // Also create the profile depending on the role
-        if (user.Role == UserRole.Merchant.ToString())
+        if (user.Role == UserRole.Merchant)
         {
             await _merchantRepository.AddAsync(new MerchantsProfile
             {
@@ -58,11 +58,11 @@ public class AuthService : IAuthService
                 ShopName = $"{user.FullName}'s Store",
                 LocationLat = 0m,
                 LocationLng = 0m,
-                ContactPhone = "Unknown",
+                ContactPhone = "N/A",
                 IsVerified = false
             });
         }
-        else if (user.Role == UserRole.Supplier.ToString())
+        else if (user.Role == UserRole.Supplier)
         {
             await _supplierRepository.AddAsync(new SupplierProfile
             {
@@ -73,6 +73,8 @@ public class AuthService : IAuthService
                 IsActiveForRouting = true
             });
         }
+
+        await _userRepository.SaveChangesAsync();
 
         var token = GenerateJwtToken(user, 720); // 30 days for login
 
@@ -86,7 +88,7 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request)
     {
-        var user = (await _userRepository.GetAllAsync()).FirstOrDefault(u => u.Email == request.Email);
+        var user = await _userRepository.GetByEmailAsync(request.Email);
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
             throw new Exception("Invalid email or password.");
@@ -109,7 +111,7 @@ public class AuthService : IAuthService
 
     public async Task<string> GeneratePasswordResetTokenAsync(ForgotPasswordRequestDto request)
     {
-        var user = (await _userRepository.GetAllAsync()).FirstOrDefault(u => u.Email == request.Email);
+        var user = await _userRepository.GetByEmailAsync(request.Email);
         if (user == null)
         {
             // Do not reveal that the user does not exist
@@ -117,7 +119,7 @@ public class AuthService : IAuthService
         }
 
         // Generate a short-lived token (15 mins) specifically for reset
-        var resetToken = GenerateJwtToken(user, 0.25); 
+        var resetToken = GenerateJwtToken(user, 0.25);
         return resetToken;
     }
 
@@ -150,6 +152,7 @@ public class AuthService : IAuthService
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
             await _userRepository.UpdateAsync(user);
+            await _userRepository.SaveChangesAsync();
 
             return true;
         }

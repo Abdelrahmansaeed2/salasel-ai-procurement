@@ -8,11 +8,11 @@ public class User
     public string FullName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
-    public string Role { get; set; } = string.Empty; // Merchant, Supplier, Admin
+    public UserRole Role { get; set; } // Merchant, Supplier, Admin
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public MerchantsProfile? MerchantsProfile { get; set; }
     public SupplierProfile? SupplierProfile { get; set; }
-    public ICollection<SystemAuditLogs> SystemAuditLogs { get; set; } = new List<SystemAuditLogs>();
+    public ICollection<SystemAuditLog> SystemAuditLogs { get; set; } = new List<SystemAuditLog>();
 }

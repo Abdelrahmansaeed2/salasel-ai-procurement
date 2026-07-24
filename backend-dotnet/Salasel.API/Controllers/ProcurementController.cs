@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Salasel.Application.DTOs;
@@ -7,7 +8,7 @@ namespace Salasel.API.Controllers;
 
 [ApiController]
 [Route("api/v1/procurement")]
-[Authorize]
+[Authorize(Roles = "Merchant,Admin")]
 public class ProcurementController : ControllerBase
 {
     private readonly IProcurementService _procurementService;
@@ -20,10 +21,9 @@ public class ProcurementController : ControllerBase
     [HttpPost("voice")]
     public async Task<IActionResult> ProcessVoice([FromForm] IFormFile audioFile)
     {
-        if (audioFile == null || audioFile.Length == 0)
-            return BadRequest(new { Message = "Audio file is required." });
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        // Future AI integration: Transcribe and parse with LangGraph
-        return Accepted(new { Message = "Voice processed successfully", LogID = Guid.NewGuid().ToString() });
+        var logId = await _procurementService.LogVoiceProcurementAsync(request);
+        return Ok(new { Message = "Voice processed successfully", LogID = logId });
     }
 }

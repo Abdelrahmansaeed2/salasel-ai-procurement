@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Salasel.Application.DTOs;
@@ -7,7 +8,7 @@ namespace Salasel.API.Controllers;
 
 [ApiController]
 [Route("api/v1/suppliers/catalogs")]
-[Authorize]
+[Authorize(Roles = "Supplier,Admin")]
 public class CatalogsController : ControllerBase
 {
     private readonly ICatalogService _catalogService;
@@ -20,10 +21,9 @@ public class CatalogsController : ControllerBase
     [HttpPost("upload")]
     public async Task<IActionResult> UploadCatalog([FromForm] IFormFile pdfCatalog)
     {
-        if (pdfCatalog == null || pdfCatalog.Length == 0)
-            return BadRequest(new { Message = "PDF catalog file is required." });
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        // Future AI integration: RAG Ingestion
-        return Accepted(new { Message = "Catalog uploaded successfully", CatalogID = Guid.NewGuid().ToString() });
+        var catalogId = await _catalogService.UploadCatalogAsync(request);
+        return Ok(new { Message = "Catalog uploaded successfully", CatalogID = catalogId });
     }
 }

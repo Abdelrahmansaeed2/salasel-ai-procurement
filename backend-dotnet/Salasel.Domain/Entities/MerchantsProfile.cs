@@ -12,6 +12,6 @@ public class MerchantsProfile
     public bool IsVerified { get; set; }
 
     public ICollection<MerchantInventory> Inventories { get; set; } = new List<MerchantInventory>();
-    public ICollection<VoiceProcurementLogs> VoiceProcurementLogs { get; set; } = new List<VoiceProcurementLogs>();
-    public ICollection<OrderTransactions> OrderTransactions { get; set; } = new List<OrderTransactions>();
+    public ICollection<VoiceProcurementLog> VoiceProcurementLogs { get; set; } = new List<VoiceProcurementLog>();
+    public ICollection<OrderTransaction> OrderTransactions { get; set; } = new List<OrderTransaction>();
 }
