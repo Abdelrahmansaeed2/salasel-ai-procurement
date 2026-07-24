@@ -2,46 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:country_picker/country_picker.dart' as cp;
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import 'otp_screen.dart';
+import '../controllers/login_controller.dart';
 
-
-class PhoneEntryScreen extends StatefulWidget {
+class PhoneEntryScreen extends StatelessWidget {
   const PhoneEntryScreen({super.key});
 
   @override
-  State<PhoneEntryScreen> createState() => _PhoneEntryScreenState();
-}
-
-class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
-  final TextEditingController _phoneController = TextEditingController();
-  bool _hasText = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _phoneController.addListener(_onPhoneChanged);
-  }
-
-  void _onPhoneChanged() {
-    final hasText = _phoneController.text.trim().isNotEmpty;
-    if (hasText != _hasText) {
-      setState(() => _hasText = hasText);
-    }
-  }
-
-  @override
-  void dispose() {
-    _phoneController
-      ..removeListener(_onPhoneChanged)
-      ..dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    
+    final LoginController controller = Get.put(LoginController());
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -53,66 +27,26 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 48),
-
-               
                 const _SalaselLogo(),
-
                 const SizedBox(height: 36),
-
                 const _WelcomeSection(),
-
                 const SizedBox(height: 32),
-
-                _PhoneFieldSection(controller: _phoneController),
-
+                _PhoneFieldSection(controller: controller),
                 const SizedBox(height: 24),
-
-                
-                _ContinueButton(
-                  enabled: _hasText,
-                  onPressed: _hasText
-                      ? () {
-                          Navigator.of(context).push(
-                            PageRouteBuilder<void>(
-                              pageBuilder:
-                                  (context, animation, secondaryAnimation) =>
-                                      OtpScreen(
-                                        phoneNumber: _phoneController.text,
-                                      ),
-                              transitionsBuilder: (context, animation,
-                                  secondaryAnimation, child) {
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: child,
-                                );
-                              },
-                              transitionDuration:
-                                  const Duration(milliseconds: 350),
-                            ),
-                          );
-                        }
-                      : null,
-                ),
-
+                Obx(() => _ContinueButton(
+                      enabled: controller.hasText.value,
+                      onPressed: controller.hasText.value
+                          ? controller.submitLogin
+                          : null,
+                    )),
                 const SizedBox(height: 20),
-
-            
                 const _OrDivider(),
-
                 const SizedBox(height: 20),
-
-                
                 const _WhatsAppButton(),
-
                 const SizedBox(height: 48),
-
-               
                 const _FeatureRow(),
-
                 const SizedBox(height: 32),
-
                 const _FooterTerms(),
-
                 const SizedBox(height: 24),
               ],
             ),
@@ -122,8 +56,6 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
     );
   }
 }
-
-
 
 class _SalaselLogo extends StatelessWidget {
   const _SalaselLogo();
@@ -141,7 +73,6 @@ class _SalaselLogo extends StatelessWidget {
   }
 }
 
-
 class _WelcomeSection extends StatelessWidget {
   const _WelcomeSection();
 
@@ -150,7 +81,6 @@ class _WelcomeSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        
         Directionality(
           textDirection: TextDirection.ltr,
           child: Row(
@@ -167,7 +97,6 @@ class _WelcomeSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        // Subtitle – Centered Arabic text
         Text(
           'أدخل رقم هاتفك لتسجيل الدخول أو إنشاء حساب',
           style: AppTextStyles.welcomeSubtitle,
@@ -179,18 +108,15 @@ class _WelcomeSection extends StatelessWidget {
   }
 }
 
-
 class _PhoneFieldSection extends StatelessWidget {
   const _PhoneFieldSection({required this.controller});
-
-  final TextEditingController controller;
+  final LoginController controller;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-       
         Text(
           'رقم الهاتف',
           style: AppTextStyles.fieldLabel,
@@ -204,42 +130,17 @@ class _PhoneFieldSection extends StatelessWidget {
   }
 }
 
-
-final cp.Country _initialCountry = cp.Country(
-  phoneCode: '966',
-  countryCode: 'SA',
-  e164Sc: 966,
-  geographic: true,
-  level: 1,
-  name: 'Saudi Arabia',
-  example: '512345678',
-  displayName: 'Saudi Arabia (SA) [+966]',
-  displayNameNoCountryCode: 'Saudi Arabia',
-  e164Key: '966-SA-0',
-);
-
-class _PhoneInputField extends StatefulWidget {
+class _PhoneInputField extends StatelessWidget {
   const _PhoneInputField({required this.controller});
+  final LoginController controller;
 
-  final TextEditingController controller;
-
-  @override
-  State<_PhoneInputField> createState() => _PhoneInputFieldState();
-}
-
-class _PhoneInputFieldState extends State<_PhoneInputField> {
-  bool _isFocused = false;
-  cp.Country _selectedCountry = _initialCountry;
-
-  void _showCountryPicker() {
+  void _showCountryPicker(BuildContext context) {
     cp.showCountryPicker(
       context: context,
       showPhoneCode: true,
-      favorite: const ['SA', 'EG'], // Put Saudi and Egypt at top
+      favorite: const ['SA', 'EG'],
       onSelect: (cp.Country country) {
-        setState(() {
-          _selectedCountry = country;
-        });
+        controller.updateCountry(country);
       },
       countryListTheme: cp.CountryListThemeData(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -268,55 +169,54 @@ class _PhoneInputFieldState extends State<_PhoneInputField> {
   @override
   Widget build(BuildContext context) {
     return Focus(
-      onFocusChange: (hasFocus) => setState(() => _isFocused = hasFocus),
+      onFocusChange: (hasFocus) => controller.setFocus(hasFocus),
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Row(
           children: [
-       
-            _CountryCodeBox(
-              country: _selectedCountry,
-              onTap: _showCountryPicker,
-            ),
-
+            Obx(() => _CountryCodeBox(
+                  country: controller.selectedCountry.value,
+                  onTap: () => _showCountryPicker(context),
+                )),
             const SizedBox(width: 12),
-
             Expanded(
-              child: Container(
-                height: 54,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  border: Border.all(
-                    color: _isFocused ? AppColors.borderFocused : AppColors.border,
-                    width: _isFocused ? 1.5 : 1.0,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: TextField(
-                  controller: widget.controller,
-                  textDirection: TextDirection.ltr,
-                  textAlign: TextAlign.center,
-                  keyboardType: TextInputType.phone,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  maxLength: 9,
-                  decoration: InputDecoration(
-                    hintText: '5X XXX XXXX',
-                    hintStyle: AppTextStyles.fieldHint.copyWith(
-                      color: AppColors.textSecondary.withValues(alpha: 0.6),
-                      fontSize: 15,
+              child: Obx(() => Container(
+                    height: 54,
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      border: Border.all(
+                        color: controller.isFocused.value
+                            ? AppColors.borderFocused
+                            : AppColors.border,
+                        width: controller.isFocused.value ? 1.5 : 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    border: InputBorder.none,
-                    counterText: '',
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  style: AppTextStyles.fieldValue.copyWith(
-                    fontSize: 16,
-                    letterSpacing: 1.5,
-                  ),
-                ),
-              ),
+                    alignment: Alignment.center,
+                    child: TextField(
+                      controller: controller.phoneController,
+                      textDirection: TextDirection.ltr,
+                      textAlign: TextAlign.center,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      maxLength: 9,
+                      decoration: InputDecoration(
+                        hintText: '5X XXX XXXX',
+                        hintStyle: AppTextStyles.fieldHint.copyWith(
+                          color: AppColors.textSecondary.withValues(alpha: 0.6),
+                          fontSize: 15,
+                        ),
+                        border: InputBorder.none,
+                        counterText: '',
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      style: AppTextStyles.fieldValue.copyWith(
+                        fontSize: 16,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  )),
             ),
           ],
         ),
@@ -325,7 +225,6 @@ class _PhoneInputFieldState extends State<_PhoneInputField> {
   }
 }
 
-/// The separate Country Code Box on the right side.
 class _CountryCodeBox extends StatelessWidget {
   const _CountryCodeBox({
     required this.country,
@@ -345,25 +244,16 @@ class _CountryCodeBox extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          border: Border.all(
-            color: AppColors.border,
-            width: 1.0,
-          ),
+          border: Border.all(color: AppColors.border, width: 1.0),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Directionality(
-          // LTR flow inside the box: [Flag] -> [DialCode] -> [Arrow]
           textDirection: TextDirection.ltr,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Country Flag
-              Text(
-                country.flagEmoji,
-                style: const TextStyle(fontSize: 20),
-              ),
+              Text(country.flagEmoji, style: const TextStyle(fontSize: 20)),
               const SizedBox(width: 8),
-              // Dial code text
               Text(
                 '+${country.phoneCode}',
                 style: AppTextStyles.dialCode.copyWith(
@@ -372,8 +262,7 @@ class _CountryCodeBox extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              // Dropdown Arrow
-              Icon(
+              const Icon(
                 Icons.keyboard_arrow_down_rounded,
                 size: 18,
                 color: AppColors.textSecondary,
@@ -385,8 +274,6 @@ class _CountryCodeBox extends StatelessWidget {
     );
   }
 }
-
-
 
 class _ContinueButton extends StatelessWidget {
   const _ContinueButton({required this.enabled, this.onPressed});
@@ -430,7 +317,6 @@ class _ContinueButton extends StatelessWidget {
     );
   }
 }
-
 
 class _OrDivider extends StatelessWidget {
   const _OrDivider();
@@ -476,7 +362,6 @@ class _WhatsAppButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Text (on the right in RTL)
                 Text(
                   'تسجيل عبر واتساب',
                   style: AppTextStyles.whatsappButton.copyWith(
@@ -485,7 +370,6 @@ class _WhatsAppButton extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                // WhatsApp icon (on the left in RTL)
                 SvgPicture.asset(
                   'assets/icons/whatsapp_icon.svg',
                   width: 24,
@@ -504,18 +388,9 @@ class _FeatureRow extends StatelessWidget {
   const _FeatureRow();
 
   static const _features = [
-    _FeatureItem(
-      icon: Icons.local_shipping_outlined,
-      label: 'شبكة موردين\nسريعة',
-    ),
-    _FeatureItem(
-      icon: Icons.add_circle_outline_rounded,
-      label: 'طلب بالذكاء\nالاصطناعي',
-    ),
-    _FeatureItem(
-      icon: Icons.verified_user_outlined,
-      label: 'تسجيل آمن',
-    ),
+    _FeatureItem(icon: Icons.local_shipping_outlined, label: 'شبكة موردين\nسريعة'),
+    _FeatureItem(icon: Icons.add_circle_outline_rounded, label: 'طلب بالذكاء\nالاصطناعي'),
+    _FeatureItem(icon: Icons.verified_user_outlined, label: 'تسجيل آمن'),
   ];
 
   @override
@@ -535,7 +410,6 @@ class _FeatureItem {
 
 class _FeatureCard extends StatelessWidget {
   const _FeatureCard({required this.item});
-
   final _FeatureItem item;
 
   @override
@@ -552,11 +426,7 @@ class _FeatureCard extends StatelessWidget {
               color: AppColors.primary.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              item.icon,
-              color: AppColors.primary,
-              size: 22,
-            ),
+            child: Icon(item.icon, color: AppColors.primary, size: 22),
           ),
           const SizedBox(height: 8),
           Text(
@@ -572,8 +442,6 @@ class _FeatureCard extends StatelessWidget {
   }
 }
 
-
-
 class _FooterTerms extends StatelessWidget {
   const _FooterTerms();
 
@@ -582,7 +450,6 @@ class _FooterTerms extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Line 1 – centered label
         Text(
           'بالمتابعة، أنت توافق على',
           style: AppTextStyles.footerBody,
@@ -590,7 +457,6 @@ class _FooterTerms extends StatelessWidget {
           textDirection: TextDirection.rtl,
         ),
         const SizedBox(height: 6),
-        // Line 2 – centered links with underline
         Directionality(
           textDirection: TextDirection.rtl,
           child: Row(
@@ -600,25 +466,18 @@ class _FooterTerms extends StatelessWidget {
                 onTap: () {},
                 child: Text(
                   'سياسة الخصوصية',
-                  style: AppTextStyles.footerLink.copyWith(
-                    decoration: TextDecoration.underline,
-                  ),
+                  style: AppTextStyles.footerLink.copyWith(decoration: TextDecoration.underline),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  'و',
-                  style: AppTextStyles.footerBody,
-                ),
+                child: Text('و', style: AppTextStyles.footerBody),
               ),
               GestureDetector(
                 onTap: () {},
                 child: Text(
                   'شروط الاستخدام',
-                  style: AppTextStyles.footerLink.copyWith(
-                    decoration: TextDecoration.underline,
-                  ),
+                  style: AppTextStyles.footerLink.copyWith(decoration: TextDecoration.underline),
                 ),
               ),
             ],

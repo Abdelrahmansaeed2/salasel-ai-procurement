@@ -1,23 +1,18 @@
-
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../controllers/welcomepage_controller.dart';
 
-class StoresScreen extends StatefulWidget {
+class StoresScreen extends StatelessWidget {
   const StoresScreen({super.key});
 
   @override
-  State<StoresScreen> createState() => _StoresScreenState();
-}
-
-class _StoresScreenState extends State<StoresScreen> {
-  int _currentIndex = 0; // 0 for Home
-
-  @override
   Widget build(BuildContext context) {
+    Get.put(WelcomePageController());
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: _buildAppBar(),
@@ -29,49 +24,35 @@ class _StoresScreenState extends State<StoresScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Welcome Text ──────────────────────────────────────────
                 Text(
                   'مرحبًا أحمد',
-                  style: GoogleFonts.cairo(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: AppTextStyles.welcomeTitle.copyWith(fontSize: 24),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'اختر متجرك للمتابعة أو قم بإنشاء متجر جديد.',
-                  style: GoogleFonts.cairo(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.textSecondary,
-                  ),
+                  style: AppTextStyles.welcomeSubtitle.copyWith(fontSize: 14),
                 ),
                 const SizedBox(height: 32),
-
                 Row(
                   children: [
                     Text(
                       'متاجرك المسجلة',
-                      style: GoogleFonts.cairo(
+                      style: AppTextStyles.fieldValue.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
                       ),
                     ),
                     const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
                         color: const Color(0xFFEFF6FF),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         '2 متاجر',
-                        style: GoogleFonts.cairo(
+                        style: AppTextStyles.fieldValue.copyWith(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF2563EB),
@@ -81,7 +62,6 @@ class _StoresScreenState extends State<StoresScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-
                 const _StoreCard(
                   title: 'بقالة أحمد',
                   category: 'مواد غذائية',
@@ -100,8 +80,6 @@ class _StoresScreenState extends State<StoresScreen> {
                   icon: Icons.restaurant_menu_outlined,
                 ),
                 const SizedBox(height: 16),
-
-                
                 const _AddStoreCard(),
                 const SizedBox(height: 32),
               ],
@@ -119,7 +97,6 @@ class _StoresScreenState extends State<StoresScreen> {
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: false,
-      // In RTL, leading is on the right.
       leadingWidth: 80,
       leading: Padding(
         padding: const EdgeInsets.only(right: 20),
@@ -128,7 +105,6 @@ class _StoresScreenState extends State<StoresScreen> {
           fit: BoxFit.contain,
         ),
       ),
-      // Actions are on the left.
       actions: [
         IconButton(
           icon: const Icon(Icons.notifications_none_rounded),
@@ -146,6 +122,8 @@ class _StoresScreenState extends State<StoresScreen> {
   }
 
   Widget _buildBottomNav() {
+    final WelcomePageController controller = Get.find();
+    
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
@@ -159,37 +137,37 @@ class _StoresScreenState extends State<StoresScreen> {
             ),
           ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _NavItem(
-              icon: Icons.person_outline_rounded,
-              label: 'حسابي',
-              isSelected: _currentIndex == 3,
-              onTap: () => setState(() => _currentIndex = 3),
-            ),
-            _NavItem(
-              icon: Icons.receipt_long_outlined,
-              label: 'الطلبات',
-              badgeCount: 4,
-              isSelected: _currentIndex == 2,
-              onTap: () => setState(() => _currentIndex = 2),
-            ),
-            _NavItem(
-              icon: Icons.inventory_2_outlined,
-              label: 'المخزون',
-              badgeCount: 7,
-              isSelected: _currentIndex == 1,
-              onTap: () => setState(() => _currentIndex = 1),
-            ),
-            _NavItem(
-              icon: Icons.home_outlined,
-              label: 'الرئيسية',
-              isSelected: _currentIndex == 0,
-              onTap: () => setState(() => _currentIndex = 0),
-            ),
-          ],
-        ),
+        child: Obx(() => Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _NavItem(
+                  icon: Icons.person_outline_rounded,
+                  label: 'حسابي',
+                  isSelected: controller.currentIndex.value == 3,
+                  onTap: () => controller.setIndex(3),
+                ),
+                _NavItem(
+                  icon: Icons.receipt_long_outlined,
+                  label: 'الطلبات',
+                  badgeCount: 4,
+                  isSelected: controller.currentIndex.value == 2,
+                  onTap: () => controller.setIndex(2),
+                ),
+                _NavItem(
+                  icon: Icons.inventory_2_outlined,
+                  label: 'المخزون',
+                  badgeCount: 7,
+                  isSelected: controller.currentIndex.value == 1,
+                  onTap: () => controller.setIndex(1),
+                ),
+                _NavItem(
+                  icon: Icons.home_outlined,
+                  label: 'الرئيسية',
+                  isSelected: controller.currentIndex.value == 0,
+                  onTap: () => controller.setIndex(0),
+                ),
+              ],
+            )),
       ),
     );
   }
@@ -229,12 +207,10 @@ class _StoreCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Top section
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                // Icon
                 Container(
                   width: 48,
                   height: 48,
@@ -245,22 +221,20 @@ class _StoreCard extends StatelessWidget {
                   child: Icon(icon, color: const Color(0xFF2563EB), size: 24),
                 ),
                 const SizedBox(width: 12),
-                // Texts
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         title,
-                        style: GoogleFonts.cairo(
+                        style: AppTextStyles.fieldValue.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
                         ),
                       ),
                       Text(
                         category,
-                        style: GoogleFonts.cairo(
+                        style: AppTextStyles.fieldValue.copyWith(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: AppColors.textSecondary,
@@ -269,13 +243,9 @@ class _StoreCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Status Badge
                 if (isActive)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: const Color(0xFFD1FAE5),
                       borderRadius: BorderRadius.circular(20),
@@ -283,13 +253,12 @@ class _StoreCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
+                        Text(
                           'نشط',
-                          style: TextStyle(
+                          style: AppTextStyles.fieldValue.copyWith(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF059669),
-                            fontFamily: 'Cairo',
+                            color: const Color(0xFF059669),
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -307,22 +276,16 @@ class _StoreCard extends StatelessWidget {
               ],
             ),
           ),
-          // Divider
           const Divider(height: 1, color: AppColors.border),
-          // Bottom section
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                const Icon(
-                  Icons.location_on_outlined,
-                  size: 16,
-                  color: AppColors.textSecondary,
-                ),
+                const Icon(Icons.location_on_outlined, size: 16, color: AppColors.textSecondary),
                 const SizedBox(width: 4),
                 Text(
                   location,
-                  style: GoogleFonts.cairo(
+                  style: AppTextStyles.fieldValue.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textSecondary,
@@ -339,7 +302,7 @@ class _StoreCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  style: GoogleFonts.cairo(
+                  style: AppTextStyles.fieldValue.copyWith(
                     fontSize: 12,
                     color: AppColors.textSecondary,
                   ),
@@ -375,26 +338,21 @@ class _AddStoreCard extends StatelessWidget {
                   color: Color(0xFFF1F5F9),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.add,
-                  size: 28,
-                  color: AppColors.textPrimary,
-                ),
+                child: const Icon(Icons.add, size: 28, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 16),
               Text(
                 'تسجيل متجر جديد',
-                style: GoogleFonts.cairo(
+                style: AppTextStyles.fieldValue.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 'ابدأ بإنشاء عمل جديد وابدأ الطلب عبر الذكاء\nالاصطناعي.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.cairo(
+                style: AppTextStyles.fieldValue.copyWith(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                   color: AppColors.textSecondary,
@@ -435,7 +393,6 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Top indicator for selected item
             if (isSelected)
               Container(
                 width: 32,
@@ -447,7 +404,7 @@ class _NavItem extends StatelessWidget {
                 ),
               )
             else
-              const SizedBox(height: 9), // placeholder to maintain height
+              const SizedBox(height: 9),
             Stack(
               clipBehavior: Clip.none,
               children: [
@@ -459,7 +416,7 @@ class _NavItem extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(4),
                       decoration: const BoxDecoration(
-                        color: Color(0xFFEF4444), // red
+                        color: Color(0xFFEF4444),
                         shape: BoxShape.circle,
                       ),
                       child: Text(
@@ -478,7 +435,7 @@ class _NavItem extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
-              style: GoogleFonts.cairo(
+              style: AppTextStyles.fieldValue.copyWith(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                 color: color,
@@ -493,7 +450,6 @@ class _NavItem extends StatelessWidget {
 
 class _DashedRectPainter extends CustomPainter {
   _DashedRectPainter({required this.color});
-
   final Color color;
 
   @override
@@ -510,7 +466,6 @@ class _DashedRectPainter extends CustomPainter {
     );
     path.addRRect(rrect);
 
-    // Create dashed effect
     final dashPath = Path();
     const dashWidth = 8.0;
     const dashSpace = 6.0;
@@ -524,7 +479,7 @@ class _DashedRectPainter extends CustomPainter {
         );
         distance += dashWidth + dashSpace;
       }
-      distance = 0.0; // reset for next contour
+      distance = 0.0;
     }
 
     canvas.drawPath(dashPath, paint);

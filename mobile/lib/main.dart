@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'core/theme/app_colors.dart';
+import 'core/controllers/settings_controller.dart';
+import 'core/localization/app_translations.dart';
+import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/screens/login_entry_screen.dart';
 import 'features/splash/presentation/screens/splash_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Lock to portrait mode for mobile
+  
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  final prefs = await SharedPreferences.getInstance();
+  Get.put(SettingsController(prefs));
+
   runApp(const SalaselApp());
 }
 
@@ -22,38 +29,34 @@ class SalaselApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    final SettingsController settingsController = Get.find();
+    final langCode = settingsController.currentLanguage.value;
+    final locale = langCode == 'en' ? const Locale('en', 'US') : const Locale('ar', 'AE');
+
+    return GetMaterialApp(
       title: 'سلاسل',
       debugShowCheckedModeBanner: false,
-      // ── Localization ─────────────────────────────────────────────────────
+      
+      translations: AppTranslations(),
+      locale: locale,
+      fallbackLocale: const Locale('ar', 'AE'),
+
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      locale: const Locale('ar', 'SA'),
       supportedLocales: const [
-        Locale('ar', 'SA'),
+        Locale('ar', 'AE'),
         Locale('en', 'US'),
       ],
 
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          brightness: Brightness.light,
-        ),
-        scaffoldBackgroundColor: AppColors.background,
-        textTheme: GoogleFonts.cairoTextTheme(),
-        splashColor: AppColors.primary.withValues(alpha: 0.08),
-        highlightColor: AppColors.primary.withValues(alpha: 0.04),
-      ),
+      theme: AppTheme.getTheme(langCode),
       home: const _AppEntry(),
     );
   }
 }
 
-/// Root widget that shows the Splash and navigates to [PhoneEntryScreen].
 class _AppEntry extends StatelessWidget {
   const _AppEntry();
 
@@ -62,17 +65,10 @@ class _AppEntry extends StatelessWidget {
     return SplashScreen(
       displayDuration: const Duration(seconds: 3),
       onTimeout: () {
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder<void>(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const PhoneEntryScreen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            transitionDuration: const Duration(milliseconds: 400),
-          ),
-        );
+        
+        Get.off(() => const PhoneEntryScreen(),
+            transition: Transition.fadeIn,
+            duration: const Duration(milliseconds: 400));
       },
     );
   }

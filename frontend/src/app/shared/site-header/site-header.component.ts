@@ -25,8 +25,9 @@ export class SiteHeaderComponent {
   readonly navLinks: NavLink[] = [
     { label: 'تواصل معنا', route: '/contact' },
     { label: 'الأسعار', route: null },
-    { label: 'الموردين', route: null },
-    { label: 'الحزمة التقنية', route: null },
+    { label: 'الموردين', route: '/suppliers' },
+    { label: 'المطورين', route: null },
+    { label: 'الحزمة التقنية', route: '/features-ai' },
     { label: 'من نحن', route: '/about' },
     { label: 'المنصة', route: '/' },
   ];
