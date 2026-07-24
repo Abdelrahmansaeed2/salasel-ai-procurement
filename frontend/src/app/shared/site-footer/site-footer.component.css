@@ -1,0 +1,126 @@
+:host {
+  display: block;
+}
+
+.footer {
+  background: #f8fafc;
+  border-top: 0.8px solid #e2e8f0;
+  padding: 80px 0;
+}
+
+.footer__top {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 80px;
+  display: grid;
+  grid-template-columns: 172.8px 172.8px 172.8px 172.8px 429px;
+  column-gap: 40px;
+  row-gap: 40px;
+  justify-content: center;
+}
+
+.footer__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.footer__logo {
+  width: 70px;
+  height: 47px;
+}
+
+.footer__brand p {
+  margin: 0;
+  padding-top: 16px;
+  font-family: Cairo, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 21.125px;
+  color: #62748e;
+  text-align: right;
+}
+
+.footer__column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.footer__column h4 {
+  margin: 0;
+  font-family: Cairo, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16.5px;
+  letter-spacing: 0.55px;
+  text-transform: uppercase;
+  color: #90a1b9;
+}
+
+.footer__column ul {
+  list-style: none;
+  margin: 0;
+  padding: 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  width: 100%;
+}
+
+.footer__column a {
+  font-family: Cairo, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19.5px;
+  color: #62748e;
+}
+
+.footer__bottom {
+  max-width: 1280px;
+  margin: 40px auto 0;
+  padding: 28px 80px 0;
+  border-top: 0.8px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer__social {
+  display: flex;
+  gap: 16px;
+}
+
+.footer__social a {
+  font-family: Cairo, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #90a1b9;
+}
+
+.footer__bottom p {
+  margin: 0;
+  font-family: Cairo, sans-serif;
+  font-size: 12px;
+  color: #90a1b9;
+}
+
+@media (max-width: 1024px) {
+  .footer__top {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .footer__top {
+    grid-template-columns: 1fr;
+    padding: 0 24px;
+  }
+
+  .footer__bottom {
+    padding: 28px 24px 0;
+  }
+}

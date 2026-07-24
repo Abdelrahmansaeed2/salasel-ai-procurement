@@ -146,3 +146,5 @@ yarn.lock
 *.temp
 *.bak
 *~
+.antigravity/mcp.json
+frontend/src/environments/environment.ts
