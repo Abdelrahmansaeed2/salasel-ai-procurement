@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Salasel.Domain.Entities;
 using Salasel.Domain.Interfaces;
@@ -21,10 +21,8 @@ public class AuditLogsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SystemAuditLog>>> GetAll()
     {
-      return Ok(await _repository.GetAllAsync());
+        return Ok(await _repository.GetAllAsync());
     }
-
-
     [HttpGet("{id:int}")]
     public async Task<ActionResult<SystemAuditLog>> GetById(int id)
     {
