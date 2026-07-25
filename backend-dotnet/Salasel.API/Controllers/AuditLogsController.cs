@@ -10,6 +10,7 @@ namespace Salasel.API.Controllers;
 [Authorize(Roles = "Admin")]
 public class AuditLogsController : ControllerBase
 {
+
     private readonly IRepository<SystemAuditLog> _repository;
 
     public AuditLogsController(IRepository<SystemAuditLog> repository)
