@@ -9,6 +9,8 @@ import 'core/localization/app_translations.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/screens/login_entry_screen.dart';
 import 'features/splash/presentation/screens/splash_screen.dart';
+import 'features/voice_order/presentation/screens/mic_permission_screen.dart';
+import 'features/notifications/presentation/screens/notifications_permission_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,10 +67,15 @@ class _AppEntry extends StatelessWidget {
     return SplashScreen(
       displayDuration: const Duration(seconds: 3),
       onTimeout: () {
-        
+        // ا
         Get.off(() => const PhoneEntryScreen(),
             transition: Transition.fadeIn,
             duration: const Duration(milliseconds: 400));
+            
+        
+        // Get.off(() => const MicPermissionScreen(),
+        //     transition: Transition.fadeIn,
+        //     duration: const Duration(milliseconds: 400));
       },
     );
   }
