@@ -1,37 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:country_picker/country_picker.dart' as cp;
-import '../screens/otp_screen.dart';
+import '../../../../features/stores/presentation/screens/welcomepage_screen.dart';
+import '../../../../features/home/presentation/screens/home_screen.dart';
 
 class LoginController extends GetxController {
-  final TextEditingController phoneController = TextEditingController();
-  
+  static const String welcomeEmail = 'welcome@salasel.com';
+  static const String welcomePassword = '123456';
+  static const String homeEmail = 'home@salasel.com';
+  static const String homePassword = '123456';
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
   RxBool hasText = false.obs;
   RxBool isFocused = false.obs;
-  
-  final Rx<cp.Country> selectedCountry = cp.Country(
-    phoneCode: '966',
-    countryCode: 'SA',
-    e164Sc: 966,
-    geographic: true,
-    level: 1,
-    name: 'Saudi Arabia',
-    example: '512345678',
-    displayName: 'Saudi Arabia (SA) [+966]',
-    displayNameNoCountryCode: 'Saudi Arabia',
-    e164Key: '966-SA-0',
-  ).obs;
+  RxString errorMessage = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    phoneController.addListener(_onPhoneChanged);
+    emailController.addListener(_onTextChanged);
+    passwordController.addListener(_onTextChanged);
   }
 
-  void _onPhoneChanged() {
-    final textExists = phoneController.text.trim().isNotEmpty;
+  void _onTextChanged() {
+    final textExists = emailController.text.trim().isNotEmpty && passwordController.text.trim().isNotEmpty;
     if (textExists != hasText.value) {
       hasText.value = textExists;
+    }
+    if (errorMessage.value.isNotEmpty) {
+      errorMessage.value = '';
     }
   }
 
@@ -39,24 +37,35 @@ class LoginController extends GetxController {
     isFocused.value = focused;
   }
 
-  void updateCountry(cp.Country country) {
-    selectedCountry.value = country;
-  }
-
   void submitLogin() {
-    if (hasText.value) {
-      Get.to(
-        () => OtpScreen(phoneNumber: phoneController.text),
+    if (!hasText.value) return;
+
+    final email = emailController.text.trim().toLowerCase();
+    final password = passwordController.text.trim();
+
+    if (email == welcomeEmail && password == welcomePassword) {
+      Get.offAll(
+        () => const StoresScreen(),
         transition: Transition.fadeIn,
         duration: const Duration(milliseconds: 350),
       );
+    } else if (email == homeEmail && password == homePassword) {
+      Get.offAll(
+        () => const HomeScreen(),
+        transition: Transition.fadeIn,
+        duration: const Duration(milliseconds: 350),
+      );
+    } else {
+      errorMessage.value = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
     }
   }
 
   @override
   void onClose() {
-    phoneController.removeListener(_onPhoneChanged);
-    phoneController.dispose();
+    emailController.removeListener(_onTextChanged);
+    passwordController.removeListener(_onTextChanged);
+    emailController.dispose();
+    passwordController.dispose();
     super.onClose();
   }
 }
