@@ -1,0 +1,28 @@
+<footer class="footer">
+  <div class="footer__top">
+    <div class="footer__brand">
+      <img src="assets/images/salasel-logo.png" alt="سلاسل" class="footer__logo" />
+      <p>منصة المشتريات بالذكاء الاصطناعي لمصر ومنطقة الشرق الأوسط.</p>
+    </div>
+
+    @for (column of footerColumns; track column.title) {
+      <div class="footer__column">
+        <h4>{{ column.title }}</h4>
+        <ul>
+          @for (link of column.links; track link.label) {
+            <li><a [routerLink]="link.route">{{ link.label }}</a></li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+
+  <div class="footer__bottom">
+    <div class="footer__social">
+      @for (social of socialLinks; track social) {
+        <a href="#">{{ social }}</a>
+      }
+    </div>
+    <p>صُنع بـ ❤️ في مصر. © ٢٠٢٥ سلاسل</p>
+  </div>
+</footer>

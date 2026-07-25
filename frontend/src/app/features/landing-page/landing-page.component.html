@@ -1,0 +1,251 @@
+<div class="scroll-progress" [style.width.%]="scrollProgress()"></div>
+
+<app-site-header activeLink="المنصة" />
+
+<main>
+  <section class="hero">
+    <div class="hero__content">
+      <h1 class="hero__title">
+        <span class="hero__title-line">طلب المخزون أصبح</span>
+        <span class="hero__title-line hero__title-line--gradient">
+          <span>كالكلام</span>
+          <span>بسيطا</span>
+        </span>
+      </h1>
+
+      <p class="hero__paragraph">
+        التاجر يطلب بضائعه بصوته بالعامية المصرية — المورد يستلم أمر شراء منظم في ثوانٍ. منصة B2B تحوّل سلاسل
+        التوريد في مصر ومنطقة MENA.
+      </p>
+
+      <div class="hero__actions">
+        <button type="button" class="btn btn--gradient">
+          احجز عرضاً تجريبياً مجاناً
+          <img src="assets/icons/arrow-right-1.svg" alt="" class="btn__icon" />
+        </button>
+        <button type="button" class="btn btn--light">
+          <img src="assets/icons/play-circle.svg" alt="" class="btn__icon" />
+          شاهد العرض
+        </button>
+      </div>
+
+      <div class="hero__badges">
+        <span class="hero__badges-label">مبني على:</span>
+        @for (badge of techBadges; track badge.label) {
+          <span class="tech-badge" [style.--badge-color]="badge.color">
+            <span class="tech-badge__dot" [style.backgroundColor]="badge.color"></span>
+            {{ badge.label }}
+          </span>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="voice-demo">
+    <button type="button" class="voice-demo__mic" [class.voice-demo__mic--active]="isVoiceDemoActive()" (click)="toggleVoiceDemo()">
+      <img src="assets/icons/solution-mic.svg" alt="" />
+    </button>
+    <canvas #waveformCanvas class="voice-demo__canvas" width="1000" height="140"></canvas>
+    <p class="voice-demo__hint">
+      {{ isVoiceDemoActive() ? 'جاري الاستماع… تكلم الآن' : 'اضغط للمحاكاة الصوتية للطلب' }}
+    </p>
+  </section>
+
+  <section class="metrics" appReveal (revealed)="onMetricsRevealed()">
+    <div class="metrics__grid">
+      @for (metric of metrics; track metric.label) {
+        <div class="metric-item" [style.transition-delay.ms]="$index * 60">
+          <div class="metric-item__label" [class.metric-item__label--cyan]="metric.accent === 'cyan'">
+            <img [src]="'assets/icons/' + metric.icon + '.svg'" alt="" />
+            <span>{{ metric.label }}</span>
+          </div>
+          <div class="metric-item__value" [class.metric-item__value--cyan]="metric.accent === 'cyan'">
+            {{ animatedMetricValues()[$index] }}
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="problem">
+    <div class="section-heading" appReveal>
+      <span class="section-heading__eyebrow">المشكلة والحل</span>
+      <h2 class="section-heading__title">من الفوضى إلى النظام</h2>
+    </div>
+
+    <div class="problem__grid">
+      <div class="problem__card problem__card--negative" appReveal>
+        <div class="problem__card-head">
+          <h3>بدون سلاسل</h3>
+          <span class="problem__emoji">😓</span>
+        </div>
+        <ul class="problem__list">
+          @for (item of problemItems; track item.text) {
+            <li class="problem__list-item problem__list-item--negative">
+              <span>{{ item.text }}</span>
+              <img [src]="'assets/icons/' + item.icon + '.svg'" alt="" />
+            </li>
+          }
+        </ul>
+      </div>
+
+      <div class="problem__card problem__card--positive" appReveal [style.transition-delay.ms]="120">
+        <div class="problem__card-head">
+          <h3>مع سلاسل</h3>
+          <span class="problem__emoji">🚀</span>
+        </div>
+        <ul class="problem__list">
+          @for (item of solutionItems; track item.text) {
+            <li class="problem__list-item problem__list-item--positive">
+              <span>{{ item.text }}</span>
+              <img [src]="'assets/icons/' + item.icon + '.svg'" alt="" />
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <div class="section-heading" appReveal>
+      <span class="section-heading__eyebrow">كيف يعمل</span>
+      <h2 class="section-heading__title">من الكلام إلى التوصيل في ستة خطوات</h2>
+      <p class="section-heading__paragraph">
+        العملية كلها لا تستغرق أكثر من ثماني ثوانٍ — من لحظة الطلب حتى تأكيد المورد.
+      </p>
+    </div>
+
+    <div class="steps-grid">
+      @for (step of steps; track step.number) {
+        <div class="step-card" appReveal [style.transition-delay.ms]="$index * 80">
+          <div class="step-card__head">
+            <div class="step-card__icon">
+              <img [src]="'assets/icons/' + step.icon + '.svg'" alt="" />
+            </div>
+            <div class="step-card__number">{{ step.number }}</div>
+          </div>
+          <h3 class="step-card__title">{{ step.title }}</h3>
+          <p class="step-card__description">{{ step.description }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="section-heading" appReveal>
+      <span class="section-heading__eyebrow">المميزات</span>
+      <h2 class="section-heading__title">كل ما تحتاجه في منصة واحدة</h2>
+    </div>
+
+    <div class="features-grid">
+      @for (feature of features; track feature.title) {
+        <div class="feature-card" appReveal [style.transition-delay.ms]="$index * 60">
+          <div class="feature-card__icon" [style.--feature-color]="feature.color">
+            <img [src]="'assets/icons/' + feature.icon + '.svg'" alt="" />
+          </div>
+          <h3 class="feature-card__title">{{ feature.title }}</h3>
+          <p class="feature-card__description">{{ feature.description }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="segments">
+    <div class="section-heading" appReveal>
+      <span class="section-heading__eyebrow">لمن سلاسل؟</span>
+      <h2 class="section-heading__title">حل واحد — طرفان يستفيدان</h2>
+    </div>
+
+    <div class="segments__grid">
+      @for (segment of segments; track segment.title) {
+        <div class="segment-card" appReveal [style.transition-delay.ms]="$index * 100" [style.borderColor]="segment.borderColor">
+          <div class="segment-card__head">
+            <div class="segment-card__heading">
+              <h3 [style.color]="segment.titleColor">{{ segment.title }}</h3>
+              <p>{{ segment.subtitle }}</p>
+            </div>
+            <div class="segment-card__emoji">{{ segment.emoji }}</div>
+          </div>
+
+          <ul class="segment-card__benefits">
+            @for (benefit of segment.benefits; track benefit.text) {
+              <li>
+                <img [src]="'assets/icons/' + benefit.icon + '.svg'" alt="" />
+                <span>{{ benefit.text }}</span>
+              </li>
+            }
+          </ul>
+
+          <button type="button" class="btn btn--full" [style.backgroundColor]="segment.buttonColor">
+            {{ segment.buttonLabel }}
+            <img src="assets/icons/arrow-right-2.svg" alt="" class="btn__icon" />
+          </button>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="testimonials">
+    <div class="section-heading" appReveal>
+      <span class="section-heading__eyebrow">آراء العملاء</span>
+      <h2 class="section-heading__title">ماذا يقول مستخدمونا؟</h2>
+    </div>
+
+    <div class="testimonials__grid">
+      @for (testimonial of testimonials; track $index) {
+        <article class="testimonial-card" appReveal [style.transition-delay.ms]="$index * 100">
+          <img src="assets/icons/quote.svg" alt="" class="testimonial-card__quote" />
+          <p class="testimonial-card__text">"{{ testimonial.quote }}"</p>
+          <div class="testimonial-card__author">
+            <div>
+              <h4>{{ testimonial.name }}</h4>
+              <span>{{ testimonial.role }}</span>
+            </div>
+            <img [src]="'assets/images/' + testimonial.avatar + '.png'" alt="" class="testimonial-card__avatar" />
+          </div>
+        </article>
+      }
+    </div>
+
+    <div class="testimonials__dots">
+      @for (dot of testimonialDots; track dot) {
+        <button
+          type="button"
+          class="testimonials__dot"
+          [class.testimonials__dot--active]="dot === activeTestimonialIndex()"
+          (click)="setActiveTestimonial(dot)"
+          [attr.aria-label]="'الانتقال إلى الشريحة ' + (dot + 1)"
+        ></button>
+      }
+    </div>
+  </section>
+
+  <section class="cta" appReveal>
+    <span class="cta__eyebrow">ابدأ الآن</span>
+    <h2 class="cta__title">جاهز لتحديث سلسلة توريدك؟</h2>
+    <p class="cta__paragraph">انضم لأكثر من ٢٨٠٠ تاجر و١٨٣ مورد يستخدمون ساليسل يومياً في مصر ومنطقة MENA.</p>
+
+    <div class="cta__actions">
+      <button type="button" class="btn btn--white">
+        احجز عرضاً تجريبياً
+        <img src="assets/icons/arrow-right-3.svg" alt="" class="btn__icon" />
+      </button>
+      <button type="button" class="btn btn--outline">انضم كشريك مورد</button>
+    </div>
+  </section>
+
+  <app-site-footer />
+</main>
+
+<button
+  type="button"
+  class="scroll-top"
+  [class.scroll-top--visible]="showScrollTop()"
+  (click)="scrollToTop()"
+  aria-label="العودة إلى الأعلى"
+>
+  <svg width="18" height="18" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M8 12.6667V3.33334" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M4 7.33334L8 3.33334L12 7.33334" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>
+</button>

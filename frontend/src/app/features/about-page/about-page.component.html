@@ -1,0 +1,130 @@
+<app-site-header activeLink="من نحن" />
+
+<main>
+  <section class="hero">
+    <div class="hero__content">
+      <h1 class="hero__title">
+        <span class="hero__title-line">إعادة صياغة سلاسل التوريد</span>
+        <span class="hero__title-line hero__title-line--gradient">بالذكاء الاصطناعي</span>
+      </h1>
+
+      <p class="hero__paragraph">
+        تمكّن "سلاسل" منظومة تجارة التجزئة في مصر عبر رقمنة العمليات التقليدية وربط صغار التجار بكبار الموردين من
+        خلال تقنيات المعالجة الصوتية والذكاء الاصطناعي التوليدي.
+      </p>
+
+      <div class="hero__actions">
+        <button type="button" class="btn btn--gradient">
+          شاهد المنتج
+          <img src="assets/icons/arrow-right-1.svg" alt="" class="btn__icon" />
+        </button>
+        <button type="button" class="btn btn--light">اقرأ قصتنا</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="mission">
+    <div class="section-heading" appReveal>
+      <span class="section-heading__eyebrow">رسالتنا</span>
+      <h2 class="section-heading__title">لماذا سالاسل؟</h2>
+      <p class="section-heading__paragraph">
+        سوق الجملة في مصر بحجم ٤٠+ مليار دولار، ولكنه يعمل بأدوات الثمانينيات. نحن هنا لنغيّر هذا.
+      </p>
+    </div>
+
+    <div class="mission__grid">
+      @for (card of missionCards; track card.title) {
+        <div class="mission-card" appReveal [style.transition-delay.ms]="$index * 100">
+          <div class="mission-card__icon" [style.backgroundColor]="card.iconBackground">
+            <img [src]="'assets/icons/' + card.icon + '.svg'" alt="" />
+          </div>
+          <h3 class="mission-card__title">{{ card.title }}</h3>
+          <p class="mission-card__description">{{ card.description }}</p>
+          <div class="mission-card__stat">
+            <span class="mission-card__stat-value" [style.color]="card.statColor">{{ card.statValue }}</span>
+            <span class="mission-card__stat-label">{{ card.statLabel }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="problem">
+    <div class="problem__heading" appReveal>
+      <h2 class="problem__title">تحديات القطاع التقليدي</h2>
+      <p class="problem__paragraph">تواجه التجارة الإقليمية فجوات تقنية تؤدي إلى خسائر اقتصادية كبيرة.</p>
+    </div>
+
+    <div class="problem__grid">
+      <div class="stat-card" appReveal>
+        <span class="stat-card__value stat-card__value--danger">{{ lostSalesCard.value }}</span>
+        <span class="stat-card__eyebrow">{{ lostSalesCard.eyebrow }}</span>
+        <p class="stat-card__description">{{ lostSalesCard.description }}</p>
+      </div>
+
+      <div class="scatter-card" appReveal [style.transition-delay.ms]="100">
+        <h3 class="scatter-card__title">بيانات مبعثرة</h3>
+        <span class="scatter-card__eyebrow">أزمة التواصل غير المهيكل</span>
+        <p class="scatter-card__description">
+          الاعتماد الكلي على تطبيقات المحادثة يمنع التكامل مع أنظمة المخزون ويحجب الرؤية التحليلية لاتخاذ قرارات
+          استراتيجية.
+        </p>
+      </div>
+
+      <div class="stat-card" appReveal [style.transition-delay.ms]="200">
+        <span class="stat-card__value stat-card__value--danger">{{ unreliableOrdersCard.value }}</span>
+        <span class="stat-card__eyebrow">{{ unreliableOrdersCard.eyebrow }}</span>
+        <p class="stat-card__description">{{ unreliableOrdersCard.description }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="leadership">
+    <div class="section-heading" appReveal>
+      <span class="section-heading__eyebrow">فريق القيادة</span>
+      <h2 class="section-heading__title">الفريق المؤسس</h2>
+      <p class="section-heading__paragraph">فريق متنوع يجمع بين الخبرة التقنية العميقة ومعرفة السوق المصري من الداخل.</p>
+    </div>
+
+    <div class="team__grid">
+      @for (member of teamMembers; track $index) {
+        <div class="team-card" appReveal [style.transition-delay.ms]="$index * 80">
+          <div class="team-card__photo">
+            <img src="assets/images/team-founder.png" alt="{{ member.name }}" />
+            <span class="team-card__badge">{{ member.englishName }}</span>
+          </div>
+          <div class="team-card__body">
+            <h3 class="team-card__name">{{ member.name }}</h3>
+            <p class="team-card__role">{{ member.role }}</p>
+            <p class="team-card__bio">{{ member.bio }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="partners" appReveal>
+    <span class="partners__eyebrow">مدعومون بتقنيات شركاء النجاح</span>
+    <div class="partners__logos">
+      @for (partner of technologyPartners; track partner) {
+        <span class="partners__logo">{{ partner }}</span>
+      }
+    </div>
+  </section>
+
+  <section class="cta" appReveal>
+    <span class="cta__eyebrow">ابدأ الآن</span>
+    <h2 class="cta__title">انضم إلى مستقبل المشتريات.</h2>
+    <p class="cta__paragraph">اختبر قوة المشتريات المدعومة بالذكاء الاصطناعي وحوّل عمليات التجزئة الخاصة بك اليوم.</p>
+
+    <div class="cta__actions">
+      <button type="button" class="btn btn--white">
+        ابدأ الآن مجاناً
+        <img src="assets/icons/arrow-right-blue.svg" alt="" class="btn__icon" />
+      </button>
+      <button type="button" class="btn btn--outline">تواصل مع المبيعات</button>
+    </div>
+  </section>
+
+  <app-site-footer />
+</main>
