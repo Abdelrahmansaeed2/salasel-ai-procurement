@@ -128,7 +128,7 @@ public class AuthService : IAuthService
         try
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!);
 
             // Validate token
             tokenHandler.ValidateToken(request.Token, new TokenValidationParameters
@@ -165,7 +165,7 @@ public class AuthService : IAuthService
     private string GenerateJwtToken(User user, double expirationHours)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
+        var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(new[]

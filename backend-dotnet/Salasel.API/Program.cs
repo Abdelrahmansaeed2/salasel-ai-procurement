@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+
 using Salasel.Application.Interfaces;
 using Salasel.Application.Services;
 using Salasel.Infrastructure.Data;
@@ -14,6 +16,18 @@ using Salasel.API.Middlewares;
 using Salasel.Domain.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .WriteTo.Seq("https://seq.otlob-egy.online")
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 // Add DbContext
 builder.Services.AddDbContext<SalaselDbContext>(options =>
@@ -114,6 +128,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -126,6 +141,9 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<LangfuseMiddleware>();
 
 app.UseHttpsRedirection();
+
+app.UseSerilogRequestLogging(); // <-- Records HTTP request times extremely fast
+
 
 app.UseCors("AllowAll");
 
