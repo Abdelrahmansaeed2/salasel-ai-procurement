@@ -17,5 +17,6 @@ jobs:
           username: toor
           port: ${{ secrets.SERVER_SSH_PORT }}
           password: ${{ secrets.SERVER_PASSWORD }}
+          command_timeout: 30m
           script: |
             sudo su -c "cd /opt/backend-dotnet/backend-dotnet/ && ./deploy.sh"
