@@ -17,6 +17,7 @@ public class CatalogsController : ControllerBase
         _catalogService = catalogService;
     }
 
+
     [HttpPost("upload")]
     public async Task<IActionResult> UploadCatalog([FromForm] IFormFile pdfCatalog)
     {
