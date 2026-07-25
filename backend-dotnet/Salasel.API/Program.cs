@@ -24,7 +24,7 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .WriteTo.Console()
     .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
-    .WriteTo.Seq(builder.Configuration["Seq:Url"] ?? "https://seq.otlob-egy.online")
+    .WriteTo.Seq(builder.Configuration["Seq:Url"] ?? "http://seq:5341")
     .CreateLogger();
 
 builder.Host.UseSerilog();
