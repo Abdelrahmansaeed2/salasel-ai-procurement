@@ -1,0 +1,247 @@
+{
+  "info": {
+    "name": "Salasel API (Sprint 0)",
+    "description": "Complete backend API collection for Salasel.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Test Merchant\",\n  \"email\": \"test@merchant.com\",\n  \"password\": \"Password123!\",\n  \"role\": 1\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5039/api/v1/auth/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5039",
+              "path": ["api", "v1", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@merchant.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5039/api/v1/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5039",
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@merchant.com\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5039/api/v1/auth/forgot-password",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5039",
+              "path": ["api", "v1", "auth", "forgot-password"]
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"<PASTE_RESET_TOKEN>\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5039/api/v1/auth/reset-password",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5039",
+              "path": ["api", "v1", "auth", "reset-password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Integrations",
+      "item": [
+        {
+          "name": "Process Voice Note",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "<PASTE_LOGIN_TOKEN>",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "audioFile",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:5039/api/v1/procurement/voice",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5039",
+              "path": ["api", "v1", "procurement", "voice"]
+            }
+          }
+        },
+        {
+          "name": "Upload Catalog",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "<PASTE_LOGIN_TOKEN>",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "pdfCatalog",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:5039/api/v1/suppliers/catalogs/upload",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5039",
+              "path": ["api", "v1", "suppliers", "catalogs", "upload"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Execution & Tracking",
+      "item": [
+        {
+          "name": "Execute Order",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "<PASTE_LOGIN_TOKEN>",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"merchantId\": 1,\n  \"voiceLogId\": 123,\n  \"totalOrderCost\": 1500.50,\n  \"splits\": [\n    {\n      \"supplierId\": 5,\n      \"sku\": \"SKU-999\",\n      \"quantityOrdered\": 100,\n      \"subTotalCost\": 1500.50\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5039/api/v1/orders/execute",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5039",
+              "path": ["api", "v1", "orders", "execute"]
+            }
+          }
+        },
+        {
+          "name": "Get Inventory Status",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "<PASTE_LOGIN_TOKEN>",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5039/api/v1/inventory/status?merchantId=1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5039",
+              "path": ["api", "v1", "inventory", "status"],
+              "query": [
+                {
+                  "key": "merchantId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -23,7 +23,7 @@ public class GlobalExceptionMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception occurred.");
+            _logger.LogError(ex, "An unhandled exception occurred while processing request {RequestPath} with Method {RequestMethod}", context.Request.Path, context.Request.Method);
             await HandleExceptionAsync(context, ex);
         }
     }
