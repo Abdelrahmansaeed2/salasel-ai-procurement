@@ -17,20 +17,20 @@ public class AuditLogsController : ControllerBase
         _repository = repository;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<SystemAuditLog>>> GetAll()
-    {
-        return Ok(await _repository.GetAllAsync());
-    }
+    //[HttpGet]
+    //public async Task<ActionResult<IEnumerable<SystemAuditLog>>> GetAll()
+    //{
+    //    return Ok(await _repository.GetAllAsync());
+    //}
 
 
-    [HttpGet("{id:int}")]
-    public async Task<ActionResult<SystemAuditLog>> GetById(int id)
-    {
-        var log = await _repository.GetByIdAsync(id);
-        if (log == null) return NotFound();
-        return Ok(log);
-    }
+    //[HttpGet("{id:int}")]
+    //public async Task<ActionResult<SystemAuditLog>> GetById(int id)
+    //{
+    //    var log = await _repository.GetByIdAsync(id);
+    //    if (log == null) return NotFound();
+    //    return Ok(log);
+    //}
 
     [HttpGet("admin/{adminUserId:int}")]
     public async Task<ActionResult<IEnumerable<SystemAuditLog>>> GetByAdmin(int adminUserId)
