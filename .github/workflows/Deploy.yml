@@ -16,7 +16,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: root
           port: ${{ secrets.SERVER_SSH_PORT }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            cd /opt/backend-dotnet/backend-dotnet/
+            cd /opt/backend-dotnet/backend/dotnet/
             ./deploy.sh
