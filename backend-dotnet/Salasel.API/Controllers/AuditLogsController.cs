@@ -23,6 +23,7 @@ public class AuditLogsController : ControllerBase
     //    return Ok(await _repository.GetAllAsync());
     //}
 
+
     [HttpGet("{id:int}")]
     public async Task<ActionResult<SystemAuditLog>> GetById(int id)
     {
