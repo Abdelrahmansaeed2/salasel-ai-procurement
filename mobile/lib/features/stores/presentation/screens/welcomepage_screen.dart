@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../shop_registration/presentation/screens/register_shop_screen.dart';
 import '../controllers/welcomepage_controller.dart';
 
 class StoresScreen extends StatelessWidget {
@@ -324,7 +325,11 @@ class _AddStoreCard extends StatelessWidget {
     return CustomPaint(
       painter: _DashedRectPainter(color: const Color(0xFFCBD5E1)),
       child: InkWell(
-        onTap: () {},
+        onTap: () => Get.to(
+          () => const RegisterShopScreen(),
+          transition: Transition.cupertino,
+          duration: const Duration(milliseconds: 350),
+        ),
         borderRadius: BorderRadius.circular(16),
         child: Container(
           width: double.infinity,
