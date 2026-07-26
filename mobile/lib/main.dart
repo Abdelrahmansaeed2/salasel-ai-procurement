@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/controllers/settings_controller.dart';
 import 'core/localization/app_translations.dart';
 import 'core/theme/app_theme.dart';
-import 'features/auth/presentation/screens/login_entry_screen.dart';
+import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/splash/presentation/screens/splash_screen.dart';
 
 void main() async {
@@ -74,8 +74,7 @@ class _AppEntry extends StatelessWidget {
     return SplashScreen(
       displayDuration: Duration(seconds: 3),
       onTimeout: () {
-        // ا
-        Get.off(() => PhoneEntryScreen(),
+        Get.off(() => const LoginScreen(),
             transition: Transition.fadeIn,
             duration: Duration(milliseconds: 400));
             

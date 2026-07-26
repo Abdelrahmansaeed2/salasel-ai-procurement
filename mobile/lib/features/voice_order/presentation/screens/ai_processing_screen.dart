@@ -342,40 +342,43 @@ class _StepsList extends StatelessWidget {
   Widget _buildStack(int activeIndex) {
     final progress = activeIndex / (controller.steps.length - 1);
 
-    return Stack(
-      children: [
-        Positioned(
-          right: 19.w,
-          top: 20.h,
-          bottom: 20.h,
-          child: Container(width: 2.w, color: Color(0xFF27272A)),
-        ),
-        Positioned(
-          right: 19.w,
-          top: 20.h,
-          child: AnimatedContainer(
-            duration: Duration(milliseconds: 400),
-            width: 2.w,
-            height: 232.h * progress,
-            color: Color(0xFF2563EB),
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Stack(
+        children: [
+          Positioned(
+            right: 19.w,
+            top: 20.h,
+            bottom: 20.h,
+            child: Container(width: 2.w, color: Color(0xFF27272A)),
           ),
-        ),
-        Column(
-          children: List.generate(controller.steps.length, (index) {
-            final step = controller.steps[index];
-            final state = controller.stateOf(index);
-            return Padding(
-              padding: EdgeInsets.only(bottom: 24.h),
-              child: _StepTile(
-                title: step.title,
-                subtitle: step.subtitle,
-                state: state,
-                icon: _stepIcons[index],
-              ),
-            );
-          }),
-        ),
-      ],
+          Positioned(
+            right: 19.w,
+            top: 20.h,
+            child: AnimatedContainer(
+              duration: Duration(milliseconds: 400),
+              width: 2.w,
+              height: 232.h * progress,
+              color: Color(0xFF2563EB),
+            ),
+          ),
+          Column(
+            children: List.generate(controller.steps.length, (index) {
+              final step = controller.steps[index];
+              final state = controller.stateOf(index);
+              return Padding(
+                padding: EdgeInsets.only(bottom: 24.h),
+                child: _StepTile(
+                  title: step.title,
+                  subtitle: step.subtitle,
+                  state: state,
+                  icon: _stepIcons[index],
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
     );
   }
 }

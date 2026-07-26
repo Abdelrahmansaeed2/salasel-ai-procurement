@@ -1,35 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../features/stores/presentation/screens/welcomepage_screen.dart';
-import '../../../../features/home/presentation/screens/home_screen.dart';
+
 import '../../../../core/network/api_client.dart';
-import '../screens/register_screen.dart';
+import '../screens/login_screen.dart';
 
-class LoginController extends GetxController {
-  static const String welcomeEmail = 'welcome@salasel.com';
-  static const String welcomePassword = '123456';
-  static const String homeEmail = 'home@salasel.com';
-  static const String homePassword = '123456';
-
+class RegisterController extends GetxController {
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  
+
   final ApiClient _apiClient = ApiClient();
 
   RxBool hasText = false.obs;
-  RxBool isFocused = false.obs;
   RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
+    nameController.addListener(_onTextChanged);
     emailController.addListener(_onTextChanged);
     passwordController.addListener(_onTextChanged);
   }
 
   void _onTextChanged() {
-    final textExists = emailController.text.trim().isNotEmpty && passwordController.text.trim().isNotEmpty;
+    final textExists = nameController.text.trim().isNotEmpty &&
+        emailController.text.trim().isNotEmpty &&
+        passwordController.text.trim().isNotEmpty;
     if (textExists != hasText.value) {
       hasText.value = textExists;
     }
@@ -38,13 +35,10 @@ class LoginController extends GetxController {
     }
   }
 
-  void setFocus(bool focused) {
-    isFocused.value = focused;
-  }
-
-  Future<void> submitLogin() async {
+  Future<void> submitRegister() async {
     if (!hasText.value || isLoading.value) return;
 
+    final name = nameController.text.trim();
     final email = emailController.text.trim().toLowerCase();
     final password = passwordController.text.trim();
 
@@ -54,32 +48,32 @@ class LoginController extends GetxController {
     try {
       // TODO: Replace with real endpoint
       /*
-      final response = await _apiClient.dio.post('/auth/login', data: {
+      final response = await _apiClient.dio.post('/auth/register', data: {
+        'name': name,
         'email': email,
         'password': password,
       });
       final token = response.data['token'];
       await _apiClient.saveToken(token);
       */
-      
-      await Future.delayed(Duration(seconds: 1)); // Mock network delay
-      
-      // Keeping mock logic for now so UI remains testable
-      if (email == welcomeEmail && password == welcomePassword) {
-        Get.offAll(
-          () => StoresScreen(),
-          transition: Transition.fadeIn,
-          duration: Duration(milliseconds: 350),
-        );
-      } else if (email == homeEmail && password == homePassword) {
-        Get.offAll(
-          () => HomeScreen(),
-          transition: Transition.fadeIn,
-          duration: Duration(milliseconds: 350),
-        );
-      } else {
-        errorMessage.value = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      if (!GetUtils.isEmail(email)) {
+        errorMessage.value = 'الرجاء إدخال بريد إلكتروني صحيح';
+        return;
       }
+      if (password.length < 6) {
+        errorMessage.value = 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل';
+        return;
+      }
+
+      debugPrint('Registered: $name <$email>');
+      Get.offAll(
+        () => const LoginScreen(),
+        transition: Transition.fadeIn,
+        duration: const Duration(milliseconds: 350),
+      );
     } catch (e) {
       errorMessage.value = 'حدث خطأ في الاتصال بالخادم';
     } finally {
@@ -87,9 +81,9 @@ class LoginController extends GetxController {
     }
   }
 
-  void goToRegister() {
+  void goToLogin() {
     Get.off(
-      () => const RegisterScreen(),
+      () => const LoginScreen(),
       transition: Transition.fadeIn,
       duration: const Duration(milliseconds: 350),
     );
@@ -97,8 +91,10 @@ class LoginController extends GetxController {
 
   @override
   void onClose() {
+    nameController.removeListener(_onTextChanged);
     emailController.removeListener(_onTextChanged);
     passwordController.removeListener(_onTextChanged);
+    nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     super.onClose();
