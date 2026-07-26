@@ -157,7 +157,7 @@
     </div>
 
     <div class="segments__grid">
-      @for (segment of segments; track segment.title) {
+      @for (segment of segments; track segment.title; let idx = $index) {
         <div class="segment-card" appReveal [style.transition-delay.ms]="$index * 100" [style.borderColor]="segment.borderColor">
           <div class="segment-card__head">
             <div class="segment-card__heading">
@@ -176,10 +176,17 @@
             }
           </ul>
 
-          <button type="button" class="btn btn--full" [style.backgroundColor]="segment.buttonColor">
-            {{ segment.buttonLabel }}
-            <img src="assets/icons/arrow-right-2.svg" alt="" class="btn__icon" />
-          </button>
+          @if (idx === 1) {
+            <a routerLink="/supplier-registration" class="btn btn--full" [style.backgroundColor]="segment.buttonColor">
+              {{ segment.buttonLabel }}
+              <img src="assets/icons/arrow-right-2.svg" alt="" class="btn__icon" />
+            </a>
+          } @else {
+            <a routerLink="/supplier-login" class="btn btn--full" [style.backgroundColor]="segment.buttonColor">
+              {{ segment.buttonLabel }}
+              <img src="assets/icons/arrow-right-2.svg" alt="" class="btn__icon" />
+            </a>
+          }
         </div>
       }
     </div>
@@ -226,11 +233,11 @@
     <p class="cta__paragraph">انضم لأكثر من ٢٨٠٠ تاجر و١٨٣ مورد يستخدمون ساليسل يومياً في مصر ومنطقة MENA.</p>
 
     <div class="cta__actions">
-      <button type="button" class="btn btn--white">
+      <a routerLink="/supplier-login" class="btn btn--white">
         احجز عرضاً تجريبياً
         <img src="assets/icons/arrow-right-3.svg" alt="" class="btn__icon" />
-      </button>
-      <button type="button" class="btn btn--outline">انضم كشريك مورد</button>
+      </a>
+      <a routerLink="/supplier-registration" class="btn btn--outline">انضم كشريك مورد</a>
     </div>
   </section>
 

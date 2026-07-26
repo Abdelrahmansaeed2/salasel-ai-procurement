@@ -6,6 +6,7 @@ import { FeaturesAiComponent } from './features/features-ai/features-ai.componen
 import { SupplierLoginComponent } from './features/supplier-auth/supplier-login.component';
 import { SupplierDirectoryComponent } from './features/supplier-directory/supplier-directory.component';
 import { SupplierDetailsComponent } from './features/supplier-details/supplier-details.component';
+import { SupplierRegistration } from './features/supplier-registeration/supplier-registration/supplier-registration';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -13,6 +14,7 @@ export const routes: Routes = [
   { path: 'contact', component: ContactPageComponent },
   { path: 'features-ai', component: FeaturesAiComponent },
   { path: 'supplier-login', component: SupplierLoginComponent },
+  { path: 'supplier-registration', component: SupplierRegistration },
   { path: 'suppliers', component: SupplierDirectoryComponent },
   { path: 'suppliers/:id', component: SupplierDetailsComponent },
 ];

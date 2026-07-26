@@ -456,3 +456,27 @@
     line-height: 40px;
   }
 }
+
+.register-prompt {
+  margin-top: 16px;
+  text-align: center;
+  width: 100%;
+  font-family: Cairo, sans-serif;
+  font-size: 14px;
+  color: #515f74;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-direction: row-reverse;
+}
+
+.register-link {
+  color: #004ac6;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.register-link:hover {
+  text-decoration: underline;
+}
+

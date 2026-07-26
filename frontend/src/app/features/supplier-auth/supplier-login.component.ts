@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { SiteFooterComponent } from '../../shared/site-footer/site-footer.component';
 import { SiteHeaderComponent } from '../../shared/site-header/site-header.component';
@@ -14,7 +15,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 @Component({
   selector: 'app-supplier-login',
   standalone: true,
-  imports: [FormsModule, SiteHeaderComponent, SiteFooterComponent],
+  imports: [FormsModule, RouterLink, SiteHeaderComponent, SiteFooterComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './supplier-login.component.html',
   styleUrl: './supplier-login.component.css',
