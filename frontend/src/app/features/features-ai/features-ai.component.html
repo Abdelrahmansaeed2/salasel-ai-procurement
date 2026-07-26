@@ -1,0 +1,160 @@
+<app-site-header activeLink="المنصة" />
+
+<main>
+  <section class="voice">
+    <div class="voice__container">
+      <img class="voice__image" src="assets/images/voice-recognition.png" alt="التعرف على الصوت العربي" />
+
+      <div class="voice__content">
+        <div class="voice__heading">
+          <div class="voice__eyebrow">
+            <span>معالجة الصوت العصبية</span>
+            <img src="assets/icons/mic-arabic.svg" alt="" />
+          </div>
+
+          <h2 class="voice__title">التعرف على الصوت العربي أولاً</h2>
+          <p class="voice__paragraph">
+            مدعوم بطبقات Amazon Transcribe المخصصة، محركنا مُحسَّن لمختلف اللهجات العربية وبيئات المستودعات الصاخبة.
+          </p>
+        </div>
+
+        <ul class="voice__list">
+          @for (feature of voiceFeatures; track feature.label) {
+            <li class="voice__item">
+              <span class="voice__item-check">
+                <img src="assets/icons/check-circle-blue.svg" alt="" />
+              </span>
+              <p class="voice__item-text">
+                <strong>{{ feature.label }}</strong>
+                {{ feature.description }}
+              </p>
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="reasoning">
+    <div class="reasoning__container">
+      <div class="section-heading" appReveal>
+        <h2 class="section-heading__title">فهم المقاصد باستخدام Claude 3.5</h2>
+        <p class="section-heading__paragraph">
+          يستخدم محرك الاستدلال الأساسي لدينا نموذج Claude LLM لاستخراج الكيانات المتطور ورسم الخرائط الدلالية
+          لطلبات المشتريات.
+        </p>
+      </div>
+
+      <div class="reasoning__grid">
+        @for (card of reasoningCards; track card.id) {
+          <button
+            type="button"
+            class="reasoning-card"
+            [class.reasoning-card--active]="activeReasoningCard() === card.id"
+            appReveal
+            [style.transition-delay.ms]="$index * 100"
+            (click)="toggleReasoningCard(card.id)"
+          >
+            <span class="reasoning-card__icon" [style.backgroundColor]="card.iconBackground">
+              <img [src]="'assets/icons/' + card.icon + '.svg'" alt="" />
+            </span>
+            <h3 class="reasoning-card__title">{{ card.title }}</h3>
+            <p class="reasoning-card__description">{{ card.description }}</p>
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="workflow">
+      <div class="workflow__heading" appReveal>
+        <h2 class="section-heading__title">تنسيق سير العمل الديناميكي</h2>
+        <p class="section-heading__paragraph section-heading__paragraph--wide">
+          نستخدم LangGraph لإدارة مهام الوكلاء المتعددين المعقدة. القرارات ليست خطية؛ بل هي تكيفية.
+        </p>
+      </div>
+
+      <div class="workflow__steps" appReveal>
+        @for (step of workflowSteps; track step.icon) {
+          <div class="workflow-step">
+            <span class="workflow-step__label">{{ step.label }}</span>
+            <img class="workflow-step__icon" [src]="'assets/icons/' + step.icon + '.svg'" alt="" />
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="verification">
+    <div class="verification__container">
+      <h2 class="section-heading__title">مطابقة الموردين والتحقق</h2>
+
+      <div class="verification__grid">
+        @for (card of verificationCards; track card.id) {
+          <button
+            type="button"
+            class="verification-card"
+            [class.verification-card--active]="activeVerificationCard() === card.id"
+            [style.grid-area]="card.gridArea"
+            appReveal
+            (click)="toggleVerificationCard(card.id)"
+          >
+            @switch (card.type) {
+              @case ('confidence') {
+                <div class="verification-card__body">
+                  <h3 class="verification-card__title">{{ card.title }}</h3>
+                  <p class="verification-card__description">{{ card.description }}</p>
+                </div>
+                <div class="confidence-chart">
+                  @for (bar of card.bars; track $index) {
+                    <div
+                      class="confidence-chart__bar"
+                      [style.height.px]="bar.height"
+                      [style.background]="bar.background"
+                      [style.box-shadow]="bar.boxShadow ?? 'none'"
+                    ></div>
+                  }
+                </div>
+              }
+              @case ('compliance') {
+                <div class="compliance-avatars">
+                  @for (avatar of card.avatars; track avatar.label) {
+                    <span class="compliance-avatars__item" [style.background]="avatar.background">{{ avatar.label }}</span>
+                  }
+                </div>
+                <div class="verification-card__body">
+                  <h3 class="verification-card__title">{{ card.title }}</h3>
+                  <p class="verification-card__description">{{ card.description }}</p>
+                </div>
+              }
+              @default {
+                <img class="verification-card__icon" [src]="'assets/icons/' + card.icon + '.svg'" alt="" />
+                <div class="verification-card__body">
+                  <h3 class="verification-card__title">{{ card.title }}</h3>
+                  <p class="verification-card__description">{{ card.description }}</p>
+                </div>
+              }
+            }
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="cta" appReveal>
+    <span class="cta__eyebrow">ابدأ الآن</span>
+    <h2 class="cta__title">هل أنت مستعد لتعمق تقني؟</h2>
+    <p class="cta__paragraph">
+      مهندسو الحلول لدينا مستعدون لإطلاعك على واجهة برمجة تطبيقات "سلاسل"، بروتوكولات التكامل، وشهادات الأمان.
+    </p>
+
+    <div class="cta__actions">
+      <a routerLink="/contact" class="btn btn--white">
+        تواصل مع الفريق
+        <img src="assets/icons/arrow-right-cta.svg" alt="" class="btn__icon" />
+      </a>
+      <button type="button" class="btn btn--outline">احجز عرضاً تقنياً</button>
+    </div>
+  </section>
+
+  <app-site-footer />
+</main>

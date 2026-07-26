@@ -1,0 +1,101 @@
+<div class="placeholder-container">
+  
+  @if (step === 8) {
+    <!-- Success Celebration Step -->
+    <div class="success-card">
+      <div class="success-icon-wrap">
+        <svg class="icon-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      
+      <h2 class="success-title">تم تقديم طلب التسجيل بنجاح!</h2>
+      <p class="success-desc">
+        لقد استلمنا مستنداتك وسيقوم فريق المشتريات بمراجعتها والتحقق منها قريباً.
+        سيتم إرسال بريد إلكتروني للتأكيد فور تفعيل حسابك كشريك معتمد في سلاسل.
+      </p>
+      
+      <button type="button" class="btn-finish" (click)="onFinish()">
+        الذهاب إلى لوحة التحكم
+      </button>
+    </div>
+  } @else {
+    <!-- Normal Step Placeholders -->
+    <div class="step-card">
+      <div class="step-icon-wrap">
+        @switch (step) {
+          @case (2) {
+            <!-- License Icon -->
+            <svg class="step-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          }
+          @case (3) {
+            <!-- Tax Icon -->
+            <svg class="step-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          }
+          @case (4) {
+            <!-- Warehouse Icon -->
+            <svg class="step-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          }
+          @case (5) {
+            <!-- Contact Icon -->
+            <svg class="step-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            </svg>
+          }
+          @case (6) {
+            <!-- Documents Icon -->
+            <svg class="step-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+          }
+          @default {
+            <!-- Review Icon -->
+            <svg class="step-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+          }
+        }
+      </div>
+
+      <h3 class="step-title">{{ stepName }}</h3>
+      
+      <p class="step-desc">
+        هذه الخطوة مخصصة لرفع وتعبئة بيانات <strong>{{ stepName }}</strong>.
+        يرجى إرفاق الملفات المطلوبة أدناه للتحقق من صحتها.
+      </p>
+
+      <!-- Mock File Uploader -->
+      <div class="mock-uploader">
+        <svg class="uploader-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <span class="uploader-text">اسحب وأفلت الملفات هنا، أو اضغط للتصفح</span>
+        <span class="uploader-info">صيغ الملفات المقبولة: PDF, PNG, JPG (الحد الأقصى: 10MB)</span>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="step-actions">
+        <button type="button" class="btn-next" (click)="onNext()">
+          <span>حفظ ومتابعة</span>
+          <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+        </button>
+        
+        <button type="button" class="btn-back" (click)="onBack()">
+          السابق
+        </button>
+      </div>
+    </div>
+  }
+
+</div>

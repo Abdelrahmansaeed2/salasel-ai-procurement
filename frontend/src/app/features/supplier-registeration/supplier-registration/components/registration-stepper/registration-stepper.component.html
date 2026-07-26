@@ -1,0 +1,43 @@
+<div class="stepper-container">
+  <!-- Desktop Stepper -->
+  <div class="stepper-desktop">
+    @for (step of steps; track step; let idx = $index) {
+      <div 
+        class="stepper-item" 
+        [class.stepper-item--completed]="idx + 1 < currentStep"
+        [class.stepper-item--active]="idx + 1 === currentStep"
+        [class.stepper-item--pending]="idx + 1 > currentStep"
+        [class.stepper-item--clickable]="idx + 1 <= currentStep"
+        (click)="onStepClick(idx)"
+      >
+        <!-- Connecting Line -->
+        @if (idx >= 0 && idx < steps.length - 1) {
+          <div class="stepper-connector"></div>
+        }
+        
+        <div class="stepper-circle">
+          @if (idx + 1 < currentStep) {
+            <svg class="stepper-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          } @else {
+            <span>{{ idx + 1 }}</span>
+          }
+        </div>
+        
+        <span class="stepper-label">{{ step }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Mobile Stepper -->
+  <div class="stepper-mobile">
+    <div class="stepper-mobile__info">
+      <span class="stepper-mobile__step-num">الخطوة {{ currentStep }} من {{ steps.length }}</span>
+      <span class="stepper-mobile__step-name">{{ steps[currentStep - 1] }}</span>
+    </div>
+    <div class="stepper-mobile__bar">
+      <div class="stepper-mobile__progress" [style.width.%]="(currentStep / steps.length) * 100"></div>
+    </div>
+  </div>
+</div>
