@@ -10,37 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x' 
-
-      - name: Install EF Core CLI
-        run: dotnet tool install --global dotnet-ef
-
-      - name: Build Project
-        working-directory: ./backend-dotnet
-        run: dotnet build
-
-      - name: Create Migration Bundle
-        working-directory: ./backend-dotnet
-        run: dotnet ef migrations bundle --startup-project Salasel.API/Salasel.API.csproj --project Salasel.Infrastructure/Salasel.Infrastructure.csproj --self-contained -r linux-x64 -o efbundle
-
-      - name: Copy Bundle to VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: toor
-          port: ${{ secrets.SERVER_SSH_PORT }}
-          password: ${{ secrets.SERVER_PASSWORD }}
-          source: "backend-dotnet/efbundle"
-          target: "/tmp/"
-          strip_components: 1
-
-      - name: Deploy and Migrate on VPS
+      - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -49,5 +19,4 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           command_timeout: 30m
           script: |
-            cd /opt/backend-dotnet/backend-dotnet/
-            echo "${{ secrets.SERVER_PASSWORD }}" | sudo -S ./deploy.sh
+            sudo su -c "cd /opt/backend-dotnet/backend-dotnet/ && ./deploy.sh"
