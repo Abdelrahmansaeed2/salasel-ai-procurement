@@ -11,6 +11,7 @@ import { TaxInfoFormComponent } from './components/tax-info-form/tax-info-form.c
 import { WarehouseInfoFormComponent } from './components/warehouse-info-form/warehouse-info-form.component';
 import { ContactInfoFormComponent } from './components/contact-info-form/contact-info-form.component';
 import { AdditionalDocumentsFormComponent } from './components/additional-documents-form/additional-documents-form.component';
+import { ReviewSubmitFormComponent } from './components/review-submit-form/review-submit-form.component';
 import { StepPlaceholderComponent } from './components/step-placeholder/step-placeholder.component';
 import { SiteFooterComponent } from '../../../shared/site-footer/site-footer.component';
 
@@ -27,6 +28,7 @@ import { SiteFooterComponent } from '../../../shared/site-footer/site-footer.com
     WarehouseInfoFormComponent,
     ContactInfoFormComponent,
     AdditionalDocumentsFormComponent,
+    ReviewSubmitFormComponent,
     StepPlaceholderComponent,
     SiteFooterComponent
   ],
@@ -36,7 +38,7 @@ import { SiteFooterComponent } from '../../../shared/site-footer/site-footer.com
 })
 export class SupplierRegistration {
   // Stepper Controller state
-  readonly currentStep = signal<number>(6);
+  readonly currentStep = signal<number>(7);
   
   // List of steps matching the Figma design
   readonly steps = [

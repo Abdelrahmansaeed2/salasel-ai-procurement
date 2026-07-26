@@ -496,7 +496,6 @@
 
 .btn-submit:hover {
   background-color: #003694;
-  transform: translateY(-1px);
 }
 
 .btn-submit:active {

@@ -118,7 +118,6 @@
 
 .btn-locate-me:hover {
   background: var(--color-surface);
-  transform: translateY(-1px);
 }
 
 .icon-location {
@@ -163,7 +162,6 @@
 
 .btn-submit:hover {
   background-color: var(--color-primary-dark);
-  transform: translateY(-1px);
 }
 
 .btn-submit:active {

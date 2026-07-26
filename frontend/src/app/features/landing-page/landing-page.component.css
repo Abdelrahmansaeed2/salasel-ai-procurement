@@ -43,7 +43,6 @@
 }
 
 .scroll-top:hover {
-  transform: translateY(-3px);
 }
 
 @keyframes fadeInUp {
@@ -116,7 +115,6 @@
 }
 
 .btn:hover {
-  transform: translateY(-1px);
   opacity: 0.92;
 }
 
@@ -319,7 +317,6 @@
 }
 
 .tech-badge:hover {
-  transform: translateY(-2px);
 }
 
 .tech-badge__dot {
@@ -652,7 +649,6 @@
 }
 
 .step-card:hover {
-  transform: translateY(-4px);
   box-shadow: 0 12px 24px 0 rgba(15, 23, 43, 0.08);
 }
 
@@ -751,7 +747,6 @@
 }
 
 .feature-card:hover {
-  transform: translateY(-4px);
   box-shadow: 0 10px 20px 0 rgba(15, 23, 43, 0.07);
 }
 
@@ -835,7 +830,6 @@
 }
 
 .segment-card:hover {
-  transform: translateY(-4px);
   box-shadow: 0 16px 32px 0 rgba(15, 23, 43, 0.08);
 }
 
@@ -979,7 +973,6 @@
 }
 
 .testimonial-card:hover {
-  transform: translateY(-4px);
   box-shadow: 0 12px 28px 0 rgba(15, 23, 43, 0.1);
 }
 

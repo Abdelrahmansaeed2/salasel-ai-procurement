@@ -63,7 +63,6 @@
 
 .btn-finish:hover {
   background-color: var(--color-primary-dark);
-  transform: translateY(-1px);
 }
 
 /* Normal Step Card */
@@ -172,7 +171,6 @@
 
 .btn-next:hover {
   background-color: var(--color-primary-dark);
-  transform: translateY(-1px);
 }
 
 .icon-arrow {

@@ -52,7 +52,6 @@
 
 .btn-save-exit:hover {
   background-color: #e0ebff;
-  transform: translateY(-1px);
 }
 
 .btn-save-exit:active {

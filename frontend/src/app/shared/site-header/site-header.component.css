@@ -15,7 +15,6 @@
 }
 
 .btn:hover {
-  transform: translateY(-1px);
   opacity: 0.92;
 }
 

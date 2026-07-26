@@ -21,7 +21,6 @@
 }
 
 .btn:hover {
-  transform: translateY(-1px);
   opacity: 0.92;
 }
 
@@ -268,7 +267,6 @@
 
 .reasoning-card:hover,
 .reasoning-card--active {
-  transform: translateY(-4px);
   box-shadow: 0 12px 24px -8px rgba(37, 99, 235, 0.18);
 }
 
@@ -407,7 +405,6 @@
 
 .verification-card:hover,
 .verification-card--active {
-  transform: translateY(-4px);
   box-shadow: 0 12px 24px -8px rgba(37, 99, 235, 0.18);
 }
 
