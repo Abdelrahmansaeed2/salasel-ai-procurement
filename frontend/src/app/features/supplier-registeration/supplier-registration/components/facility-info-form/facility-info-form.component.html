@@ -1,0 +1,129 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-container">
+  
+  <!-- Legal Business Name -->
+  <div class="form-field">
+    <label class="form-field__label" for="legalName">الاسم التجاري القانوني (بالعربية أو الإنجليزية)</label>
+    <div class="form-field__control">
+      <input
+        id="legalName"
+        type="text"
+        formControlName="legalName"
+        class="form-field__input"
+        placeholder="أدخل اسم الشركة كما هو مسجل"
+        [class.form-field__input--invalid]="form.get('legalName')?.invalid && form.get('legalName')?.touched"
+      />
+    </div>
+    @if (form.get('legalName')?.invalid && form.get('legalName')?.touched) {
+      <span class="form-field__error">
+        الاسم التجاري القانوني مطلوب (3 أحرف على الأقل).
+      </span>
+    }
+  </div>
+
+  <!-- Business Type -->
+  <div class="form-field">
+    <label class="form-field__label" for="businessType">نوع العمل</label>
+    <div class="form-field__control">
+      <select
+        id="businessType"
+        formControlName="businessType"
+        class="form-field__select"
+        [class.form-field__input--invalid]="form.get('businessType')?.invalid && form.get('businessType')?.touched"
+      >
+        <option value="" disabled selected>اختر هيكل العمل</option>
+        @for (type of businessTypes; track type.value) {
+          <option [value]="type.value">{{ type.label }}</option>
+        }
+      </select>
+    </div>
+    @if (form.get('businessType')?.invalid && form.get('businessType')?.touched) {
+      <span class="form-field__error">
+        يرجى اختيار نوع العمل.
+      </span>
+    }
+  </div>
+
+  <!-- Registration Number (CR) -->
+  <div class="form-field">
+    <label class="form-field__label" for="registrationNumber">رقم السجل التجاري (CR)</label>
+    <div class="form-field__control">
+      <input
+        id="registrationNumber"
+        type="text"
+        formControlName="registrationNumber"
+        class="form-field__input"
+        placeholder="مثال: 1010XXXXXX"
+        [class.form-field__input--invalid]="form.get('registrationNumber')?.invalid && form.get('registrationNumber')?.touched"
+      />
+    </div>
+    @if (form.get('registrationNumber')?.invalid && form.get('registrationNumber')?.touched) {
+      <span class="form-field__error">
+        يرجى إدخال رقم سجل تجاري صحيح مكون من 10 أرقام.
+      </span>
+    }
+  </div>
+
+  <!-- Head Office Address -->
+  <div class="form-field">
+    <label class="form-field__label" for="address">عنوان المقر الرئيسي</label>
+    <div class="form-field__control">
+      <textarea
+        id="address"
+        formControlName="address"
+        rows="3"
+        class="form-field__textarea"
+        placeholder="الشارع، رقم المبنى، المدينة، الرمز البريدي"
+        [class.form-field__input--invalid]="form.get('address')?.invalid && form.get('address')?.touched"
+      ></textarea>
+    </div>
+    @if (form.get('address')?.invalid && form.get('address')?.touched) {
+      <span class="form-field__error">
+        عنوان المقر الرئيسي مطلوب.
+      </span>
+    }
+  </div>
+
+  <!-- Map Visual Anchor -->
+  <div class="map-section">
+    <label class="form-field__label">موقع المقر على الخريطة</label>
+    <div class="map-wrapper">
+      <div id="map" class="map-canvas"></div>
+      
+      <!-- Geolocation Overlay Button -->
+      <button type="button" class="btn-locate-me" (click)="locateMe()">
+        <svg class="icon-location" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <circle cx="12" cy="12" r="3"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+        </svg>
+        <span>تحديد الموقع تلقائياً...</span>
+      </button>
+
+      <!-- Coordinates Display -->
+      @if (latitude() && longitude()) {
+        <div class="coordinates-badge">
+          خط العرض: {{ latitude() | number:'1.4-4' }} | خط الطول: {{ longitude() | number:'1.4-4' }}
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="form-actions">
+    <button type="submit" class="btn-submit">
+      <span>حفظ ومتابعة</span>
+      <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+    </button>
+    
+    <button type="button" class="btn-back-dashboard" (click)="onBack()">
+      العودة إلى لوحة التحكم
+    </button>
+  </div>
+
+</form>

@@ -1,0 +1,121 @@
+.supplier-reg-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffffff; /* pure white background matching Figma */
+}
+
+.reg-main {
+  flex-grow: 1;
+  width: 100%;
+}
+
+/* Base container centered and single-column by default */
+.reg-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0 auto;
+  padding: 60px 24px;
+  box-sizing: border-box;
+}
+
+/* Specific Figma-defined widths per step */
+.reg-container--step1 {
+  max-width: 896px; /* Figma Form Section + Guidance width is 896px */
+}
+
+.reg-container--step23 {
+  max-width: 750px; /* Figma Tax Information components width is 750px */
+}
+
+.reg-container--step8 {
+  max-width: 800px;
+}
+
+/* Content Column is flat and borderless matching Figma */
+.reg-content-col {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Welcome Header (Step 1 Title & Subtitle) */
+.welcome-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.welcome-title {
+  color: #191b23;
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-size: clamp(24px, 4.5vw, 32px);
+  font-weight: 700;
+  line-height: clamp(32px, 5.5vw, 40px);
+  margin: 0;
+}
+
+.welcome-subtitle {
+  color: #434655;
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-size: clamp(14px, 2.5vw, 18px);
+  line-height: clamp(21px, 3.5vw, 27px);
+  margin: 0;
+}
+
+/* Flat Guidance Note block placed below the form section in Step 1 */
+.guidance-note-flat {
+  display: flex;
+  flex-direction: row; /* RTL flow: icon is on the left, text on the right */
+  gap: 16px;
+  padding: 16px 0;
+  margin-top: 40px;
+  border-top: 1px solid rgba(115, 118, 134, 0.15); /* Separator line before warning note */
+  align-items: flex-start;
+  width: 100%;
+}
+
+.guidance-note-flat__icon-wrapper {
+  color: #004ac6;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.guidance-note-flat__content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: right;
+  flex-grow: 1;
+}
+
+.guidance-note-flat__title {
+  color: #191b23;
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.guidance-note-flat__text {
+  color: #434655;
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 576px) {
+  .reg-container {
+    padding: 30px 16px;
+  }
+}
