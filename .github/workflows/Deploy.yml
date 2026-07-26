@@ -44,9 +44,4 @@ jobs:
           command_timeout: 30m
           script: |
             cd /opt/backend-dotnet/backend-dotnet/
-            
-            chmod +x ./efbundle
-            
-            ./efbundle
-            
             echo "${{ secrets.SERVER_PASSWORD }}" | sudo -S ./deploy.sh
