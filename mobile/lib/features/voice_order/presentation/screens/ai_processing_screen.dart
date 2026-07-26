@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
@@ -50,28 +51,16 @@ class _AnimatedMascotImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.network(
-      _mascotImageUrl,
+    return CachedNetworkImage(
+      imageUrl: _mascotImageUrl,
       width: 141,
       height: 166.56,
       fit: BoxFit.contain,
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        final progress = loadingProgress.expectedTotalBytes != null
-            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-            : null;
-        return _MascotLoadingPlaceholder(progress: progress);
-      },
-      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-        if (wasSynchronouslyLoaded) return child;
-        return AnimatedOpacity(
-          opacity: frame == null ? 0 : 1,
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeOut,
-          child: child,
-        );
-      },
-      errorBuilder: (_, __, ___) => const SizedBox(width: 141, height: 166.56),
+      fadeInDuration: const Duration(milliseconds: 400),
+      fadeInCurve: Curves.easeOut,
+      progressIndicatorBuilder: (context, url, progress) =>
+          _MascotLoadingPlaceholder(progress: progress.progress),
+      errorWidget: (_, __, ___) => const SizedBox(width: 141, height: 166.56),
     );
   }
 }

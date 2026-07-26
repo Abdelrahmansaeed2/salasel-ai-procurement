@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -116,10 +117,14 @@ class HomeScreen extends StatelessWidget {
                 border: Border.all(color: HomeColors.avatarBorder, width: 2),
               ),
               child: ClipOval(
-                child: Image.network(
-                  _avatarUrl,
+                child: CachedNetworkImage(
+                  imageUrl: _avatarUrl,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const ColoredBox(
+                  fadeInDuration: const Duration(milliseconds: 300),
+                  placeholder: (_, __) => const ColoredBox(
+                    color: HomeColors.avatarBorder,
+                  ),
+                  errorWidget: (_, __, ___) => const ColoredBox(
                     color: HomeColors.avatarBorder,
                     child: Icon(Icons.person, color: Colors.white),
                   ),

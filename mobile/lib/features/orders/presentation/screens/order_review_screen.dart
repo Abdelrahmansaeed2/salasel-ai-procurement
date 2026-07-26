@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -251,10 +252,12 @@ class OrderReviewScreen extends StatelessWidget {
                 border: Border.all(color: const Color(0xFFDBE1FF), width: 2),
               ),
               child: ClipOval(
-                child: Image.network(
-                  _avatarUrl,
+                child: CachedNetworkImage(
+                  imageUrl: _avatarUrl,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const ColoredBox(color: Color(0xFFDBE1FF)),
+                  fadeInDuration: const Duration(milliseconds: 300),
+                  placeholder: (_, __) => const ColoredBox(color: Color(0xFFDBE1FF)),
+                  errorWidget: (_, __, ___) => const ColoredBox(color: Color(0xFFDBE1FF)),
                 ),
               ),
             ),
