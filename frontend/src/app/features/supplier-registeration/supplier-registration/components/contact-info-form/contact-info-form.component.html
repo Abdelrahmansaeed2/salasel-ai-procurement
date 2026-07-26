@@ -1,0 +1,103 @@
+<div class="form-container" [formGroup]="form">
+
+  <!-- Header Info -->
+  <div class="step-header">
+    <h2 class="step-header__title">معلومات الاتصال</h2>
+    <p class="step-header__subtitle">يرجى تقديم تفاصيل الشخص المسؤول عن التواصل وإدارة الحساب للنشاط التجاري.</p>
+  </div>
+
+  <!-- Form Fields Grid -->
+  <div class="form-section">
+    <h3 class="section-title">بيانات الشخص المفوض</h3>
+    
+    <div class="form-grid">
+      <!-- Full Name -->
+      <div class="form-group">
+        <label class="form-label" for="fullName">الاسم الكامل</label>
+        <input 
+          id="fullName" 
+          type="text" 
+          formControlName="fullName" 
+          class="form-control" 
+          placeholder="مثال: أحمد منصور"
+          [class.form-control--invalid]="form.get('fullName')?.invalid && form.get('fullName')?.touched"
+        />
+        @if (form.get('fullName')?.invalid && form.get('fullName')?.touched) {
+          <span class="error-msg">يرجى إدخال الاسم الكامل للشخص المفوض</span>
+        }
+      </div>
+
+      <!-- Job Title -->
+      <div class="form-group">
+        <label class="form-label" for="jobTitle">المسمى الوظيفي</label>
+        <input 
+          id="jobTitle" 
+          type="text" 
+          formControlName="jobTitle" 
+          class="form-control" 
+          placeholder="مثال: مدير المبيعات"
+          [class.form-control--invalid]="form.get('jobTitle')?.invalid && form.get('jobTitle')?.touched"
+        />
+        @if (form.get('jobTitle')?.invalid && form.get('jobTitle')?.touched) {
+          <span class="error-msg">يرجى إدخال المسمى الوظيفي</span>
+        }
+      </div>
+
+      <!-- Email Address -->
+      <div class="form-group">
+        <label class="form-label" for="email">البريد الإلكتروني</label>
+        <div class="input-icon-wrapper">
+          <input 
+            id="email" 
+            type="email" 
+            formControlName="email" 
+            class="form-control form-control--icon" 
+            placeholder="example@domain.com"
+            [class.form-control--invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+          />
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        @if (form.get('email')?.invalid && form.get('email')?.touched) {
+          <span class="error-msg">يرجى إدخال بريد إلكتروني صحيح</span>
+        }
+      </div>
+
+      <!-- Phone Number -->
+      <div class="form-group">
+        <label class="form-label" for="phoneNumber">رقم الهاتف</label>
+        <div class="input-icon-wrapper">
+          <input 
+            id="phoneNumber" 
+            type="tel" 
+            formControlName="phoneNumber" 
+            class="form-control form-control--icon" 
+            placeholder="+966 50 000 0000"
+            [class.form-control--invalid]="form.get('phoneNumber')?.invalid && form.get('phoneNumber')?.touched"
+          />
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+        </div>
+        @if (form.get('phoneNumber')?.invalid && form.get('phoneNumber')?.touched) {
+          <span class="error-msg">يرجى إدخال رقم هاتف صحيح</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="form-actions">
+    <button type="button" class="btn-submit" (click)="onSubmit()">التالي</button>
+    <button type="button" class="btn-back" (click)="onBackClick()">
+      السابق
+      <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </button>
+  </div>
+
+</div>
