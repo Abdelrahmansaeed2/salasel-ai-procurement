@@ -37,7 +37,7 @@ jobs:
           port: ${{ secrets.SERVER_SSH_PORT }}
           password: ${{ secrets.SERVER_PASSWORD }}
           source: "backend-dotnet/efbundle"
-          target: "/opt/backend-dotnet/backend-dotnet/"
+          target: "/tmp/"
           strip_components: 1
 
       - name: Deploy and Migrate on VPS
