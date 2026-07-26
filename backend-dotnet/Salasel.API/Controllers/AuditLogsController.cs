@@ -18,11 +18,11 @@ public class AuditLogsController : ControllerBase
         _repository = repository;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<SystemAuditLog>>> GetAll()
-    {
-      return Ok(await _repository.GetAllAsync());
-    }
+    // [HttpGet]
+    // public async Task<ActionResult<IEnumerable<SystemAuditLog>>> GetAll()
+    // {
+    //   return Ok(await _repository.GetAllAsync());
+    // }
 
 
     [HttpGet("{id:int}")]
