@@ -21,7 +21,7 @@ class VoiceRecordingController extends GetxController {
         final path = '${dir.path}/order_audio.m4a';
 
         await _audioRecorder.start(
-          const RecordConfig(encoder: AudioEncoder.aacLc, bitRate: 128000),
+          RecordConfig(encoder: AudioEncoder.aacLc, bitRate: 128000),
           path: path,
         );
         isRecording.value = true;
@@ -34,7 +34,7 @@ class VoiceRecordingController extends GetxController {
 
   void _startWaveformUpdates() {
     _amplitudeSub?.cancel();
-    _amplitudeSub = _audioRecorder.onAmplitudeChanged(const Duration(milliseconds: 180)).listen((amp) {
+    _amplitudeSub = _audioRecorder.onAmplitudeChanged(Duration(milliseconds: 180)).listen((amp) {
       double normalized = (amp.current + 160) / 160;
       if (normalized < 0.1) normalized = 0.1;
       if (normalized > 1.0) normalized = 1.0;

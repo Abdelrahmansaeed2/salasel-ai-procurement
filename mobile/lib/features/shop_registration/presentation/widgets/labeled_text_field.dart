@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/shop_registration_colors.dart';
 import '../theme/shop_registration_icons.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LabeledTextField extends StatelessWidget {
   const LabeledTextField({
@@ -40,18 +41,18 @@ class LabeledTextField extends StatelessWidget {
             Text(
               label,
               style: GoogleFonts.cairo(
-                fontSize: 14,
+                fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
                 color: ShopRegColors.textBody,
               ),
             ),
             if (showInfoIcon) ...[
-              const SizedBox(width: 6),
-              FigmaIcon(ShopRegIcons.help, size: 16, color: ShopRegColors.textBody.withValues(alpha: 0.4)),
+              SizedBox(width: 6.w),
+              FigmaIcon(ShopRegIcons.help, size: 16.w, color: ShopRegColors.textBody.withValues(alpha: 0.4)),
             ],
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         TextField(
           controller: controller,
           enabled: enabled,
@@ -60,29 +61,29 @@ class LabeledTextField extends StatelessWidget {
           textDirection: TextDirection.rtl,
           keyboardType: keyboardType,
           style: GoogleFonts.cairo(
-            fontSize: 16,
+            fontSize: 16.sp,
             color: enabled ? ShopRegColors.textDark : ShopRegColors.iconMuted.withValues(alpha: 0.5),
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintTextDirection: TextDirection.rtl,
             hintStyle: GoogleFonts.cairo(
-              fontSize: 16,
+              fontSize: 16.sp,
               color: enabled ? ShopRegColors.textHint : ShopRegColors.iconMuted.withValues(alpha: 0.5),
             ),
             prefixIcon: (icon != null || prefixText != null)
                 ? Padding(
-                    padding: const EdgeInsets.only(right: 4, left: 4),
+                    padding: EdgeInsets.only(right: 4.w, left: 4.w),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (icon != null) FigmaIcon(icon!, size: 20, color: ShopRegColors.iconMuted),
+                        if (icon != null) FigmaIcon(icon!, size: 20.w, color: ShopRegColors.iconMuted),
                         if (prefixText != null) ...[
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8.w),
                           Text(
                             prefixText!,
                             style: GoogleFonts.cairo(
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
                               color: ShopRegColors.textBody,
                             ),
@@ -94,22 +95,22 @@ class LabeledTextField extends StatelessWidget {
                 : null,
             filled: true,
             fillColor: ShopRegColors.inputFill,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: ShopRegColors.inputBorder),
+              borderRadius: BorderRadius.circular(8.r),
+              borderSide: BorderSide(color: ShopRegColors.inputBorder),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: ShopRegColors.inputBorder),
+              borderRadius: BorderRadius.circular(8.r),
+              borderSide: BorderSide(color: ShopRegColors.inputBorder),
             ),
             disabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: ShopRegColors.inputBorder),
+              borderRadius: BorderRadius.circular(8.r),
+              borderSide: BorderSide(color: ShopRegColors.inputBorder),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: ShopRegColors.primaryAction, width: 1.5),
+              borderRadius: BorderRadius.circular(8.r),
+              borderSide: BorderSide(color: ShopRegColors.primaryAction, width: 1.5.w),
             ),
           ),
         ),

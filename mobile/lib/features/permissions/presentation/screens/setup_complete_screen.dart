@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../home/presentation/screens/home_screen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SetupCompleteScreen extends StatelessWidget {
   const SetupCompleteScreen({super.key});
@@ -15,13 +16,13 @@ class SetupCompleteScreen extends StatelessWidget {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_forward, color: AppColors.primary),
+          icon: Icon(Icons.arrow_forward, color: AppColors.primary),
           onPressed: () => Get.back(),
         ),
         title: Text(
           'اكتمل الإعداد',
           style: AppTextStyles.welcomeTitle.copyWith(
-            fontSize: 18,
+            fontSize: 18.sp,
             color: AppColors.primary,
           ),
         ),
@@ -29,16 +30,16 @@ class SetupCompleteScreen extends StatelessWidget {
         titleSpacing: 0,
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: EdgeInsets.symmetric(horizontal: 16.0.w),
             child: Row(
               children: [
-                const Icon(Icons.check_circle, color: AppColors.whatsapp, size: 16),
-                const SizedBox(width: 4),
+                Icon(Icons.check_circle, color: AppColors.whatsapp, size: 16.w),
+                SizedBox(width: 4.w),
                 Text(
                   'تم بنجاح',
                   style: AppTextStyles.fieldValue.copyWith(
                     color: AppColors.textSecondary,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                   ),
                 ),
               ],
@@ -48,7 +49,7 @@ class SetupCompleteScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          padding: EdgeInsets.symmetric(horizontal: 24.0.w, vertical: 16.0.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -62,17 +63,17 @@ class SetupCompleteScreen extends StatelessWidget {
                       return Container(
                         decoration: BoxDecoration(
                           color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(16.r),
                         ),
                         alignment: Alignment.center,
-                        child: const Column(
+                        child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.image, size: 64, color: AppColors.disabled),
-                            SizedBox(height: 8),
+                            Icon(Icons.image, size: 64.w, color: AppColors.disabled),
+                            SizedBox(height: 8.h),
                             Text(
                               'أضف صورة\nassets/images/setup_complete_illustration.png', 
-                              style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                              style: TextStyle(color: AppColors.textSecondary, fontSize: 12.sp),
                               textAlign: TextAlign.center,
                             ),
                           ],
@@ -82,23 +83,23 @@ class SetupCompleteScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
               
               // Title
               Text(
                 'أنت جاهز للبدء!',
                 textAlign: TextAlign.center,
-                style: AppTextStyles.welcomeTitle.copyWith(fontSize: 22),
+                style: AppTextStyles.welcomeTitle.copyWith(fontSize: 22.sp),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               
               // Subtitle
               Text(
                 'تم تفعيل جميع الصلاحيات اللازمة لتجربة توريد ذكية وسلسة. يمكنك الآن البدء في إدارة متجرك بكل سهولة.',
                 textAlign: TextAlign.center,
-                style: AppTextStyles.welcomeSubtitle.copyWith(height: 1.6),
+                style: AppTextStyles.welcomeSubtitle.copyWith(height: 1.6.h),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
               
               // Status Cards
               Row(
@@ -109,7 +110,7 @@ class SetupCompleteScreen extends StatelessWidget {
                       title: 'التنبيهات مفعلة',
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16.w),
                   Expanded(
                     child: _buildStatusCard(
                       icon: Icons.location_on_outlined,
@@ -119,30 +120,30 @@ class SetupCompleteScreen extends StatelessWidget {
                 ],
               ),
               
-              const Spacer(flex: 1),
+              Spacer(flex: 1),
               
               // Enter Store Button
               ElevatedButton(
                 onPressed: () {
                   Get.offAll(
-                    () => const HomeScreen(),
+                    () => HomeScreen(),
                     transition: Transition.fadeIn,
                   );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
                   elevation: 0,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.storefront, size: 20),
-                    const SizedBox(width: 8),
+                    Icon(Icons.storefront, size: 20.w),
+                    SizedBox(width: 8.w),
                     Text(
                       'الدخول للمتجر',
                       style: AppTextStyles.primaryButton,
@@ -150,13 +151,13 @@ class SetupCompleteScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               
               // Footer Text
               Text(
                 'سلاسل © 2024 - منصة التوريد الذكية',
                 textAlign: TextAlign.center,
-                style: AppTextStyles.footerBody.copyWith(fontSize: 11),
+                style: AppTextStyles.footerBody.copyWith(fontSize: 11.sp),
               ),
             ],
           ),
@@ -167,20 +168,20 @@ class SetupCompleteScreen extends StatelessWidget {
 
   Widget _buildStatusCard({required IconData icon, required String title}) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 8.w),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
         children: [
-          Icon(icon, color: AppColors.primary, size: 24),
-          const SizedBox(height: 8),
+          Icon(icon, color: AppColors.primary, size: 24.w),
+          SizedBox(height: 8.h),
           Text(
             title,
             style: AppTextStyles.fieldValue.copyWith(
-              fontSize: 12,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w600,
             ),
           ),

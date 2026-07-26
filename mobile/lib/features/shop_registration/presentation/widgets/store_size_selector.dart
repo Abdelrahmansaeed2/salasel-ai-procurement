@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/shop_registration_colors.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class StoreSizeSelector extends StatelessWidget {
   const StoreSizeSelector({
@@ -18,10 +19,10 @@ class StoreSizeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
         color: ShopRegColors.segmentedBg,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
         textDirection: TextDirection.rtl,
@@ -31,17 +32,17 @@ class StoreSizeSelector extends StatelessWidget {
             child: GestureDetector(
               onTap: () => onSelected(option),
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(vertical: 10),
+                duration: Duration(milliseconds: 200),
+                padding: EdgeInsets.symmetric(vertical: 10.h),
                 decoration: BoxDecoration(
                   color: isSelected ? Colors.white : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.r),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.06),
                             blurRadius: 4,
-                            offset: const Offset(0, 1),
+                            offset: Offset(0, 1),
                           ),
                         ]
                       : null,
@@ -50,8 +51,8 @@ class StoreSizeSelector extends StatelessWidget {
                   option,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.cairo(
-                    fontSize: 16,
-                    color: isSelected ? ShopRegColors.primary : const Color(0xFF505F76),
+                    fontSize: 16.sp,
+                    color: isSelected ? ShopRegColors.primary : Color(0xFF505F76),
                   ),
                 ),
               ),

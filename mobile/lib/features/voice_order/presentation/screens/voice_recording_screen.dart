@@ -6,6 +6,7 @@ import '../../../../core/widgets/animated_entrance.dart';
 import '../../../../core/widgets/animated_pressable.dart';
 import '../controllers/voice_recording_controller.dart';
 import 'ai_processing_screen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class VoiceRecordingScreen extends StatelessWidget {
   const VoiceRecordingScreen({super.key});
@@ -20,11 +21,11 @@ class VoiceRecordingScreen extends StatelessWidget {
         backgroundColor: Colors.black,
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Column(
               children: [
                 AnimatedEntrance(
-                  beginOffset: const Offset(0, -0.2),
+                  beginOffset: Offset(0, -0.2),
                   child: _buildTopBar(),
                 ),
                 Expanded(
@@ -33,17 +34,17 @@ class VoiceRecordingScreen extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         AnimatedEntrance(
-                          delay: const Duration(milliseconds: 80),
+                          delay: Duration(milliseconds: 80),
                           child: SizedBox(
-                            height: 244,
+                            height: 244.h,
                             child: Obx(
                               () => _Waveform(bars: controller.waveform.toList()),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        SizedBox(height: 32.h),
                         AnimatedEntrance(
-                          delay: const Duration(milliseconds: 160),
+                          delay: Duration(milliseconds: 160),
                           child: _MicCore(controller: controller),
                         ),
                       ],
@@ -51,10 +52,10 @@ class VoiceRecordingScreen extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 56),
+                  padding: EdgeInsets.only(bottom: 56.h),
                   child: Obx(
                     () => AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
+                      duration: Duration(milliseconds: 300),
                       switchInCurve: Curves.easeOutBack,
                       switchOutCurve: Curves.easeIn,
                       transitionBuilder: (child, animation) => FadeTransition(
@@ -63,11 +64,11 @@ class VoiceRecordingScreen extends StatelessWidget {
                       ),
                       child: controller.isRecording.value
                           ? _RecordingActions(
-                              key: const ValueKey('recording'),
+                              key: ValueKey('recording'),
                               controller: controller,
                             )
                           : _StartButton(
-                              key: const ValueKey('idle'),
+                              key: ValueKey('idle'),
                               controller: controller,
                             ),
                     ),
@@ -83,15 +84,15 @@ class VoiceRecordingScreen extends StatelessWidget {
 
   Widget _buildTopBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: EdgeInsets.symmetric(vertical: 16.h),
       child: Align(
         alignment: Alignment.centerLeft,
         child: AnimatedPressable(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           onTap: () => Get.back(),
           child: Container(
-            width: 36,
-            height: 36,
+            width: 36.w,
+            height: 36.h,
             alignment: Alignment.center,
             child: SvgPicture.string(
               '<svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">'
@@ -116,48 +117,48 @@ class _Waveform extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         Container(
-          width: 202,
-          height: 202,
+          width: 202.w,
+          height: 202.h,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: RadialGradient(
               colors: [
-                const Color(0xFF6366F1).withValues(alpha: 0.06),
-                const Color(0xFF6366F1).withValues(alpha: 0),
+                Color(0xFF6366F1).withValues(alpha: 0.06),
+                Color(0xFF6366F1).withValues(alpha: 0),
               ],
             ),
           ),
         ),
         Container(
-          width: 160,
-          height: 160,
+          width: 160.w,
+          height: 160.h,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: RadialGradient(
               colors: [
-                const Color(0xFF6366F1).withValues(alpha: 0.11),
-                const Color(0xFF6366F1).withValues(alpha: 0),
+                Color(0xFF6366F1).withValues(alpha: 0.11),
+                Color(0xFF6366F1).withValues(alpha: 0),
               ],
             ),
           ),
         ),
         SizedBox(
-          width: 256,
-          height: 160,
+          width: 256.w,
+          height: 160.h,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               for (final h in bars)
                 AnimatedContainer(
-                  duration: const Duration(milliseconds: 160),
+                  duration: Duration(milliseconds: 160),
                   curve: Curves.easeOut,
-                  margin: const EdgeInsets.symmetric(horizontal: 2),
-                  width: 4,
-                  height: 12 + h * 130,
+                  margin: EdgeInsets.symmetric(horizontal: 2.w),
+                  width: 4.w,
+                  height: 12.h + h * 130,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF6366F1),
-                    borderRadius: BorderRadius.circular(999),
+                    color: Color(0xFF6366F1),
+                    borderRadius: BorderRadius.circular(999.r),
                   ),
                 ),
             ],
@@ -185,7 +186,7 @@ class _MicCoreState extends State<_MicCore> with SingleTickerProviderStateMixin 
     super.initState();
     _pulse = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1400),
+      duration: Duration(milliseconds: 1400),
     );
     widget.controller.isRecording.listen((recording) {
       if (recording) {
@@ -209,8 +210,8 @@ class _MicCoreState extends State<_MicCore> with SingleTickerProviderStateMixin 
       () => Column(
         children: [
           SizedBox(
-            width: 140,
-            height: 140,
+            width: 140.w,
+            height: 140.h,
             child: Stack(
               alignment: Alignment.center,
               children: [
@@ -220,13 +221,13 @@ class _MicCoreState extends State<_MicCore> with SingleTickerProviderStateMixin 
                     builder: (context, child) {
                       final t = _pulse.value;
                       return Container(
-                        width: 72 + t * 60,
-                        height: 72 + t * 60,
+                        width: 72.w + t * 60,
+                        height: 72.h + t * 60,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFF235EE7).withValues(alpha: (1 - t) * 0.5),
-                            width: 1.5,
+                            color: Color(0xFF235EE7).withValues(alpha: (1 - t) * 0.5),
+                            width: 1.5.w,
                           ),
                         ),
                       );
@@ -238,13 +239,13 @@ class _MicCoreState extends State<_MicCore> with SingleTickerProviderStateMixin 
                     builder: (context, child) {
                       final t = (_pulse.value + 0.5) % 1.0;
                       return Container(
-                        width: 72 + t * 60,
-                        height: 72 + t * 60,
+                        width: 72.w + t * 60,
+                        height: 72.h + t * 60,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFF235EE7).withValues(alpha: (1 - t) * 0.5),
-                            width: 1.5,
+                            color: Color(0xFF235EE7).withValues(alpha: (1 - t) * 0.5),
+                            width: 1.5.w,
                           ),
                         ),
                       );
@@ -256,21 +257,21 @@ class _MicCoreState extends State<_MicCore> with SingleTickerProviderStateMixin 
                   onTapCancel: () => setState(() => _pressed = false),
                   child: AnimatedScale(
                     scale: _pressed ? 0.94 : 1,
-                    duration: const Duration(milliseconds: 120),
+                    duration: Duration(milliseconds: 120),
                     curve: Curves.easeOut,
                     child: Container(
-                      width: 72,
-                      height: 72,
+                      width: 72.w,
+                      height: 72.h,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0x4D818CF8)),
-                        color: const Color(0xFF235EE7),
+                        border: Border.all(color: Color(0x4D818CF8)),
+                        color: Color(0xFF235EE7),
                       ),
                       child: Center(
                         child: SvgPicture.asset(
                           'assets/icons/mic_icon.svg',
-                          width: 28,
-                          height: 32,
+                          width: 28.w,
+                          height: 32.h,
                           colorFilter: ColorFilter.mode(
                             Colors.white.withValues(alpha: 0.5),
                             BlendMode.srcIn,
@@ -283,18 +284,18 @@ class _MicCoreState extends State<_MicCore> with SingleTickerProviderStateMixin 
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 250),
+            duration: Duration(milliseconds: 250),
             child: Text(
               widget.controller.isRecording.value ? 'جاري الاستماع...' : 'اضغط للبدء',
               key: ValueKey(widget.controller.isRecording.value),
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontFamily: 'Cairo',
-                fontSize: 13,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w400,
-                height: 1.5,
+                height: 1.5.h,
               ),
             ),
           ),
@@ -311,14 +312,14 @@ class _StartButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedPressable(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(8.r),
       onTap: controller.startRecording,
       child: Container(
         width: double.infinity,
-        height: 56,
+        height: 56.h,
         decoration: BoxDecoration(
-          color: const Color(0xFF235EE7),
-          borderRadius: BorderRadius.circular(8),
+          color: Color(0xFF235EE7),
+          borderRadius: BorderRadius.circular(8.r),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -330,15 +331,15 @@ class _StartButton extends StatelessWidget {
               '<path d="M11.5 17.25V21.0833" stroke="white" stroke-width="1.5" stroke-linecap="round"/>'
               '<path d="M8.625 21.0835H14.375" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>',
             ),
-            const SizedBox(width: 10),
-            const Text(
+            SizedBox(width: 10.w),
+            Text(
               'ابدأ التسجيل الصوتي',
               style: TextStyle(
                 color: Colors.white,
                 fontFamily: 'Cairo',
-                fontSize: 16,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
-                height: 1.5,
+                height: 1.5.h,
               ),
             ),
           ],
@@ -359,24 +360,24 @@ class _RecordingActions extends StatelessWidget {
       children: [
         _ActionButton(
           label: 'تأكيد',
-          color: const Color(0xFF22C55E),
-          textColor: const Color(0xFF22C55E),
+          color: Color(0xFF22C55E),
+          textColor: Color(0xFF22C55E),
           iconPath:
               'M8.08073 13.7538L14.8038 7.03073L13.75 5.97691L8.08073 11.6461L5.23073 8.79614L4.17691 9.84996L8.08073 13.7538Z',
           onTap: () {
             controller.stopRecording();
             Get.off(
-              () => const AiProcessingScreen(),
+              () => AiProcessingScreen(),
               transition: Transition.rightToLeftWithFade,
-              duration: const Duration(milliseconds: 350),
+              duration: Duration(milliseconds: 350),
             );
           },
         ),
         _StopButton(controller: controller),
         _ActionButton(
           label: 'إلغاء الأمر',
-          color: const Color(0xFFBA1A1A),
-          textColor: const Color(0xFFBA1A1A),
+          color: Color(0xFFBA1A1A),
+          textColor: Color(0xFFBA1A1A),
           iconPath:
               'M5.89996 14.1538L9.49996 10.5538L13.1 14.1538L14.1538 13.1L10.5538 9.49996L14.1538 5.89996L13.1 4.84614L9.49996 8.44614L5.89996 4.84614L4.84614 5.89996L8.44614 9.49996L4.84614 13.1L5.89996 14.1538Z',
           onTap: controller.stopRecording,
@@ -407,14 +408,14 @@ class _ActionButton extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         AnimatedPressable(
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(999.r),
           onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: color,
-              border: Border.all(color: const Color(0x33737686)),
+              border: Border.all(color: Color(0x33737686)),
             ),
             child: SvgPicture.string(
               '<svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">'
@@ -423,16 +424,16 @@ class _ActionButton extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Text(
           label,
           style: TextStyle(
             color: textColor,
             fontFamily: 'Cairo',
-            fontSize: 12,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.6,
-            height: 1,
+            height: 1.h,
           ),
         ),
       ],
@@ -450,11 +451,11 @@ class _StopButton extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         AnimatedPressable(
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(999.r),
           onTap: controller.stopRecording,
           child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Color(0xFFFFDAD6),
             ),
@@ -464,16 +465,16 @@ class _StopButton extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 8),
-        const Text(
+        SizedBox(height: 8.h),
+        Text(
           'إيقاف',
           style: TextStyle(
             color: Color(0xFF434655),
             fontFamily: 'Cairo',
-            fontSize: 12,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.6,
-            height: 1,
+            height: 1.h,
           ),
         ),
       ],

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../controllers/otp_controller.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class OtpScreen extends StatelessWidget {
   const OtpScreen({super.key, this.phoneNumber = ''});
@@ -22,36 +23,36 @@ class OtpScreen extends StatelessWidget {
         child: Directionality(
           textDirection: TextDirection.rtl,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
                 const _ShieldIllustration(),
-                const SizedBox(height: 36),
+                SizedBox(height: 36.h),
                 Text(
                   'أدخل رمز التحقق',
-                  style: AppTextStyles.welcomeTitle.copyWith(fontSize: 22),
+                  style: AppTextStyles.welcomeTitle.copyWith(fontSize: 22.sp),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Text(
                   'تم إرسال رمز مكون من 6 أرقام إلى هاتفك',
-                  style: AppTextStyles.welcomeSubtitle.copyWith(fontSize: 13),
+                  style: AppTextStyles.welcomeSubtitle.copyWith(fontSize: 13.sp),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
                 const _OtpBoxesRow(),
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
                 const _TimerResendRow(),
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
                 Obx(() => _VerifyButton(
                       enabled: controller.isComplete.value,
                       onPressed: controller.isComplete.value ? controller.submitOtp : null,
                     )),
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
                 const _E2EFooter(),
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
               ],
             ),
           ),
@@ -67,17 +68,17 @@ class _ShieldIllustration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 220,
-      height: 220,
-      decoration: const BoxDecoration(
+      width: 220.w,
+      height: 220.h,
+      decoration: BoxDecoration(
         color: Color(0xFFEEF2FF),
         shape: BoxShape.circle,
       ),
       child: Center(
         child: Image.asset(
           'assets/images/otp_shield.png',
-          width: 180,
-          height: 180,
+          width: 180.w,
+          height: 180.h,
           fit: BoxFit.contain,
         ),
       ),
@@ -96,7 +97,7 @@ class _OtpBoxesRow extends StatelessWidget {
       children: List.generate(OtpController.otpLength, (i) {
         final index = OtpController.otpLength - 1 - i;
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+          padding: EdgeInsets.symmetric(horizontal: 4.w),
           child: _OtpBox(index: index),
         );
       }),
@@ -121,12 +122,12 @@ class _OtpBox extends StatelessWidget {
         final bool filled = textController.text.isNotEmpty;
 
         return AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: 46,
-          height: 54,
+          duration: Duration(milliseconds: 150),
+          width: 46.w,
+          height: 54.h,
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
               color: isFocused
                   ? AppColors.primary
@@ -140,7 +141,7 @@ class _OtpBox extends StatelessWidget {
                     BoxShadow(
                       color: AppColors.primary.withValues(alpha: 0.15),
                       blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      offset: Offset(0, 2),
                     )
                   ]
                 : null,
@@ -156,11 +157,11 @@ class _OtpBox extends StatelessWidget {
               LengthLimitingTextInputFormatter(1),
             ],
             style: AppTextStyles.fieldValue.copyWith(
-              fontSize: 20,
+              fontSize: 20.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.primary,
             ),
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               border: InputBorder.none,
               counterText: '',
               isDense: true,
@@ -191,19 +192,19 @@ class _TimerResendRow extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.access_time_rounded, size: 16, color: Color(0xFF475569)),
-              const SizedBox(width: 6),
+              Icon(Icons.access_time_rounded, size: 16.w, color: Color(0xFF475569)),
+              SizedBox(width: 6.w),
               Text(
                 timerText,
                 style: AppTextStyles.fieldValue.copyWith(
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF475569),
+                  color: Color(0xFF475569),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -212,28 +213,28 @@ class _TimerResendRow extends StatelessWidget {
                 child: Text(
                   'إعادة إرسال الرمز',
                   style: AppTextStyles.fieldValue.copyWith(
-                    fontSize: 13,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
-                    color: canResend ? AppColors.primary : const Color(0xFFCBD5E1),
+                    color: canResend ? AppColors.primary : Color(0xFFCBD5E1),
                     decoration: canResend ? TextDecoration.underline : null,
                     decorationColor: AppColors.primary,
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Container(width: 1, height: 14, color: const Color(0xFFCBD5E1)),
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                child: Container(width: 1.w, height: 14.h, color: Color(0xFFCBD5E1)),
               ),
               GestureDetector(
                 onTap: controller.changeNumber,
                 child: Text(
                   'تغيير الرقم',
                   style: AppTextStyles.fieldValue.copyWith(
-                    fontSize: 13,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF64748B),
+                    color: Color(0xFF64748B),
                     decoration: TextDecoration.underline,
-                    decorationColor: const Color(0xFF64748B),
+                    decorationColor: Color(0xFF64748B),
                   ),
                 ),
               ),
@@ -254,18 +255,18 @@ class _VerifyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: Duration(milliseconds: 200),
       width: double.infinity,
-      height: 54,
+      height: 54.h,
       decoration: BoxDecoration(
         color: enabled ? AppColors.primary : AppColors.disabled,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         boxShadow: enabled
             ? [
                 BoxShadow(
                   color: AppColors.primary.withValues(alpha: 0.30),
                   blurRadius: 12,
-                  offset: const Offset(0, 4),
+                  offset: Offset(0, 4),
                 )
               ]
             : null,
@@ -273,7 +274,7 @@ class _VerifyButton extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           onTap: onPressed,
           child: Center(
             child: Text(
@@ -295,11 +296,11 @@ class _E2EFooter extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(Icons.verified_user_outlined, size: 14, color: Color(0xFF94A3B8)),
-        const SizedBox(width: 6),
+        Icon(Icons.verified_user_outlined, size: 14.w, color: Color(0xFF94A3B8)),
+        SizedBox(width: 6.w),
         Text(
           'تشفير نهاية إلى نهاية (End-to-End)',
-          style: AppTextStyles.footerBody.copyWith(color: const Color(0xFF94A3B8)),
+          style: AppTextStyles.footerBody.copyWith(color: Color(0xFF94A3B8)),
         ),
       ],
     );

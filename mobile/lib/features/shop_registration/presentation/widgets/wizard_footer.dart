@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/shop_registration_colors.dart';
 import '../theme/shop_registration_icons.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class WizardFooter extends StatelessWidget {
   const WizardFooter({
@@ -25,8 +26,8 @@ class WizardFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(top: 24),
-      decoration: const BoxDecoration(
+      padding: EdgeInsets.only(top: 24.h),
+      decoration: BoxDecoration(
         border: Border(top: BorderSide(color: ShopRegColors.inputBorderLight)),
       ),
       child: Row(
@@ -41,7 +42,7 @@ class WizardFooter extends StatelessWidget {
             ),
           ),
           if (showBack) ...[
-            const SizedBox(width: 8),
+            SizedBox(width: 8.w),
             _BackButton(onPressed: onBack),
           ],
         ],
@@ -67,12 +68,12 @@ class _ContinueButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: enabled ? ShopRegColors.primaryAction : ShopRegColors.primaryAction.withValues(alpha: 0.5),
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(8.r),
       child: InkWell(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         onTap: onPressed,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+          padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 32.w),
           child: Row(
             textDirection: TextDirection.rtl,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -80,13 +81,13 @@ class _ContinueButton extends StatelessWidget {
               Text(
                 label,
                 style: GoogleFonts.cairo(
-                  fontSize: 18,
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
                   color: ShopRegColors.primaryActionText,
                 ),
               ),
-              const SizedBox(width: 12),
-              FigmaIcon(icon, size: 16, color: ShopRegColors.primaryActionText),
+              SizedBox(width: 12.w),
+              FigmaIcon(icon, size: 16.w, color: ShopRegColors.primaryActionText),
             ],
           ),
         ),
@@ -104,15 +105,15 @@ class _BackButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(5),
+      borderRadius: BorderRadius.circular(5.r),
       child: InkWell(
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(5.r),
         onTap: onPressed ?? () => Navigator.of(context).maybePop(),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+          padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 24.w),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(5),
-            border: Border.all(color: ShopRegColors.backButtonBorder, width: 0.8),
+            borderRadius: BorderRadius.circular(5.r),
+            border: Border.all(color: ShopRegColors.backButtonBorder, width: 0.8.w),
           ),
           child: Row(
             textDirection: TextDirection.rtl,
@@ -121,13 +122,13 @@ class _BackButton extends StatelessWidget {
               Text(
                 'رجوع',
                 style: GoogleFonts.cairo(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                   color: ShopRegColors.textMuted,
                 ),
               ),
-              const SizedBox(width: 8),
-              const FigmaIcon(ShopRegIcons.backChevronSmall, size: 14, color: ShopRegColors.textMuted),
+              SizedBox(width: 8.w),
+              FigmaIcon(ShopRegIcons.backChevronSmall, size: 14.w, color: ShopRegColors.textMuted),
             ],
           ),
         ),

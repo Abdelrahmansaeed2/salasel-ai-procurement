@@ -10,6 +10,7 @@ import '../../domain/order_review_models.dart';
 import '../controllers/order_review_controller.dart';
 import '../theme/order_colors.dart';
 import 'order_success_screen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 const String _avatarUrl =
     'https://api.builder.io/api/v1/image/assets/TEMP/c7070914a8d0a025b8aab03d2f42684260d4b530?width=72';
@@ -110,26 +111,26 @@ class OrderReviewScreen extends StatelessWidget {
               _buildHeader(),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const SizedBox(height: 24),
-                      const AnimatedEntrance(
+                      SizedBox(height: 24.h),
+                      AnimatedEntrance(
                         child: _SectionHeader(
                           iconSvg: _Icons.transcript,
                           iconSize: 12,
                           label: 'النص الصوتي الأصلي',
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      const AnimatedEntrance(
+                      SizedBox(height: 12.h),
+                      AnimatedEntrance(
                         delay: Duration(milliseconds: 60),
                         child: _TranscriptCard(),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24.h),
                       AnimatedEntrance(
-                        delay: const Duration(milliseconds: 120),
+                        delay: Duration(milliseconds: 120),
                         child: _SectionHeader(
                           iconSvg: _Icons.pencil('#2563EB'),
                           iconSize: 12,
@@ -137,27 +138,27 @@ class OrderReviewScreen extends StatelessWidget {
                           color: OrderColors.primary,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12.h),
                       Obx(
                         () => Column(
                           children: [
                             for (int i = 0; i < controller.products.length; i++) ...[
                               AnimatedEntrance(
                                 delay: Duration(milliseconds: 150 + i * 80),
-                                beginOffset: const Offset(0.05, 0),
+                                beginOffset: Offset(0.05, 0),
                                 child: _ProductLineCard(index: i, controller: controller),
                               ),
-                              const SizedBox(height: 10),
+                              SizedBox(height: 10.h),
                             ],
                           ],
                         ),
                       ),
-                      const AnimatedEntrance(
+                      AnimatedEntrance(
                         delay: Duration(milliseconds: 260),
                         child: _AddProductButton(),
                       ),
-                      const SizedBox(height: 24),
-                      const AnimatedEntrance(
+                      SizedBox(height: 24.h),
+                      AnimatedEntrance(
                         delay: Duration(milliseconds: 300),
                         child: _SectionHeader(
                           iconSvg: _Icons.sparkle,
@@ -166,14 +167,14 @@ class OrderReviewScreen extends StatelessWidget {
                           color: OrderColors.primary,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      const AnimatedEntrance(
+                      SizedBox(height: 12.h),
+                      AnimatedEntrance(
                         delay: Duration(milliseconds: 350),
                         beginOffset: Offset(0, 0.12),
                         child: _SupplierRecommendationCard(),
                       ),
-                      const SizedBox(height: 24),
-                      const AnimatedEntrance(
+                      SizedBox(height: 24.h),
+                      AnimatedEntrance(
                         delay: Duration(milliseconds: 420),
                         child: _SectionHeader(
                           iconSvg: _Icons.infoCircle,
@@ -181,13 +182,13 @@ class OrderReviewScreen extends StatelessWidget {
                           label: 'مستوى الثقة',
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      const AnimatedEntrance(
+                      SizedBox(height: 12.h),
+                      AnimatedEntrance(
                         delay: Duration(milliseconds: 460),
                         child: _ConfidenceScoreCard(),
                       ),
-                      const SizedBox(height: 24),
-                      const AnimatedEntrance(
+                      SizedBox(height: 24.h),
+                      AnimatedEntrance(
                         delay: Duration(milliseconds: 520),
                         child: _SectionHeader(
                           iconSvg: _Icons.shieldOutline,
@@ -195,30 +196,30 @@ class OrderReviewScreen extends StatelessWidget {
                           label: 'تحليل المخاطر',
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12.h),
                       Column(
                         children: [
                           for (int i = 0; i < controller.riskAlerts.length; i++) ...[
                             AnimatedEntrance(
                               delay: Duration(milliseconds: 560 + i * 70),
-                              beginOffset: const Offset(0.05, 0),
+                              beginOffset: Offset(0.05, 0),
                               child: _RiskAlertTile(alert: controller.riskAlerts[i]),
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: 8.h),
                           ],
                         ],
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24.h),
                       AnimatedEntrance(
-                        delay: const Duration(milliseconds: 720),
+                        delay: Duration(milliseconds: 720),
                         child: _ConfirmButton(controller: controller),
                       ),
-                      const SizedBox(height: 10),
-                      const AnimatedEntrance(
+                      SizedBox(height: 10.h),
+                      AnimatedEntrance(
                         delay: Duration(milliseconds: 760),
                         child: _SecondaryActionsRow(),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24.h),
                     ],
                   ),
                 ),
@@ -232,9 +233,9 @@ class OrderReviewScreen extends StatelessWidget {
 
   Widget _buildHeader() {
     return Container(
-      height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: const BoxDecoration(
+      height: 64.h,
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      decoration: BoxDecoration(
         color: Color(0xCCFAF8FF),
         boxShadow: [
           BoxShadow(color: Color(0x0D000000), blurRadius: 2, offset: Offset(0, 1)),
@@ -245,48 +246,48 @@ class OrderReviewScreen extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 40.w,
+              height: 40.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFDBE1FF), width: 2),
+                border: Border.all(color: Color(0xFFDBE1FF), width: 2.w),
               ),
               child: ClipOval(
                 child: CachedNetworkImage(
                   imageUrl: _avatarUrl,
                   fit: BoxFit.cover,
-                  fadeInDuration: const Duration(milliseconds: 300),
-                  placeholder: (_, __) => const ColoredBox(color: Color(0xFFDBE1FF)),
-                  errorWidget: (_, __, ___) => const ColoredBox(color: Color(0xFFDBE1FF)),
+                  fadeInDuration: Duration(milliseconds: 300),
+                  placeholder: (_, __) => ColoredBox(color: Color(0xFFDBE1FF)),
+                  errorWidget: (_, __, ___) => ColoredBox(color: Color(0xFFDBE1FF)),
                 ),
               ),
             ),
             AnimatedPressable(
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(999.r),
               onTap: () => Get.snackbar('مساعدة', 'راجع تفاصيل الطلب قبل التأكيد'),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 8, 6),
-                child: SvgPicture.string(_Icons.helpBadge, width: 20, height: 20),
+                padding: EdgeInsets.fromLTRB(8, 8, 8, 6),
+                child: SvgPicture.string(_Icons.helpBadge, width: 20.w, height: 20.h),
               ),
             ),
-            const Spacer(),
-            const Text(
+            Spacer(),
+            Text(
               'مراجعة الطلب',
               style: TextStyle(
                 color: Color(0xFF333333),
                 fontFamily: 'Cairo',
-                fontSize: 20,
+                fontSize: 20.sp,
                 fontWeight: FontWeight.w700,
-                height: 1.25,
+                height: 1.25.h,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             AnimatedPressable(
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(999.r),
               onTap: () => Get.back(),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 8, 6),
-                child: SvgPicture.string(_Icons.backArrow, width: 16, height: 16),
+                padding: EdgeInsets.fromLTRB(8, 8, 8, 6),
+                child: SvgPicture.string(_Icons.backArrow, width: 16.w, height: 16.h),
               ),
             ),
           ],
@@ -315,19 +316,19 @@ class _SectionHeader extends StatelessWidget {
     return Row(
       children: [
         SvgPicture.string(iconSvg, width: iconSize, height: iconSize),
-        const SizedBox(width: 8),
+        SizedBox(width: 8.w),
         Text(
           label,
           style: TextStyle(
             color: c,
             fontFamily: 'Inter',
-            fontSize: 12,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.96,
           ),
         ),
-        const SizedBox(width: 8),
-        const Expanded(child: Divider(color: OrderColors.divider, height: 1)),
+        SizedBox(width: 8.w),
+        Expanded(child: Divider(color: OrderColors.divider, height: 1.h)),
       ],
     );
   }
@@ -339,10 +340,10 @@ class _TranscriptCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: OrderColors.transcriptBg,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: OrderColors.transcriptBorder),
       ),
       child: Column(
@@ -352,12 +353,12 @@ class _TranscriptCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 32,
-                height: 32,
+                width: 32.w,
+                height: 32.h,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
@@ -369,55 +370,55 @@ class _TranscriptCard extends StatelessWidget {
                   '<path d="M1 7C1 8.5913 1.63214 10.1174 2.75736 11.2426C3.88258 12.3679 5.4087 13 7 13C8.5913 13 10.1174 12.3679 11.2426 11.2426C12.3679 10.1174 13 8.5913 13 7" stroke="white" stroke-width="1.5" stroke-linecap="round"/>'
                   '<path d="M7 13V15.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>'
                   '<path d="M4.5 15.5H9.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>',
-                  width: 14,
-                  height: 16,
+                  width: 14.w,
+                  height: 16.h,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const Text(
+                    Text(
                       'أطلب عشرين كرتون مياه معدنية... واثنا عشر كرتون عصير...',
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         color: OrderColors.textBody,
                         fontFamily: 'Cairo',
-                        fontSize: 13,
+                        fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
-                        height: 1.6,
+                        height: 1.6.h,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6.h),
                     TextButton(
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
-                        minimumSize: const Size(0, 0),
+                        minimumSize: Size(0, 0),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       onPressed: () {
                         Get.dialog(
                           AlertDialog(
-                            title: const Text('النص الكامل'),
-                            content: const Text(
+                            title: Text('النص الكامل'),
+                            content: Text(
                               'أطلب عشرين كرتون مياه معدنية سعة نصف لتر، واثنا عشر كرتون عصير برتقال طبيعي بنكهة طبيعية.',
                             ),
                             actions: [
                               TextButton(
                                 onPressed: () => Get.back(),
-                                child: const Text('إغلاق'),
+                                child: Text('إغلاق'),
                               ),
                             ],
                           ),
                         );
                       },
-                      child: const Text(
+                      child: Text(
                         'عرض النص الكامل',
                         style: TextStyle(
                           color: OrderColors.primary,
                           fontFamily: 'Cairo',
-                          fontSize: 11,
+                          fontSize: 11.sp,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -428,22 +429,22 @@ class _TranscriptCard extends StatelessWidget {
               const _StaticWaveform(),
             ],
           ),
-          const SizedBox(height: 12),
-          const Divider(color: OrderColors.transcriptBorder, height: 1),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
+          Divider(color: OrderColors.transcriptBorder, height: 1.h),
+          SizedBox(height: 12.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            children: const [
+            children: [
               Text('٢ منتج مُستخرَج',
-                  style: TextStyle(color: OrderColors.textFaint, fontFamily: 'Cairo', fontSize: 10)),
-              SizedBox(width: 6),
-              Text('•', style: TextStyle(color: OrderColors.textFaint, fontSize: 10)),
-              SizedBox(width: 6),
+                  style: TextStyle(color: OrderColors.textFaint, fontFamily: 'Cairo', fontSize: 10.sp)),
+              SizedBox(width: 6.w),
+              Text('•', style: TextStyle(color: OrderColors.textFaint, fontSize: 10.sp)),
+              SizedBox(width: 6.w),
               Text('مدة: ١٢ ث',
-                  style: TextStyle(color: OrderColors.textFaint, fontFamily: 'Cairo', fontSize: 10)),
-              SizedBox(width: 6),
-              Text('•', style: TextStyle(color: OrderColors.textFaint, fontSize: 10)),
-              SizedBox(width: 6),
+                  style: TextStyle(color: OrderColors.textFaint, fontFamily: 'Cairo', fontSize: 10.sp)),
+              SizedBox(width: 6.w),
+              Text('•', style: TextStyle(color: OrderColors.textFaint, fontSize: 10.sp)),
+              SizedBox(width: 6.w),
               _RecognitionBadge(),
             ],
           ),
@@ -460,14 +461,14 @@ class _RecognitionBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: const [
+      children: [
         Text('تم التعرف ٩٨٪',
             style: TextStyle(
                 color: OrderColors.success,
                 fontFamily: 'Cairo',
-                fontSize: 10,
+                fontSize: 10.sp,
                 fontWeight: FontWeight.w600)),
-        SizedBox(width: 6),
+        SizedBox(width: 6.w),
         _Dot(color: OrderColors.success),
       ],
     );
@@ -481,8 +482,8 @@ class _Dot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 6,
-      height: 6,
+      width: 6.w,
+      height: 6.h,
       decoration: BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
@@ -496,20 +497,20 @@ class _StaticWaveform extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 32,
-      height: 28,
+      width: 32.w,
+      height: 28.h,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           for (final h in _heights)
             Container(
-              width: 2,
+              width: 2.w,
               height: h,
-              margin: const EdgeInsets.symmetric(horizontal: 1),
+              margin: EdgeInsets.symmetric(horizontal: 1.w),
               decoration: BoxDecoration(
                 color: OrderColors.primaryDark.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(999.r),
               ),
             ),
         ],
@@ -537,126 +538,126 @@ class _ProductLineCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: OrderColors.cardBorder),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(color: Color(0x0A0F172A), blurRadius: 4, offset: Offset(0, 1)),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               children: [
                 AnimatedPressable(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(10.r),
                   onTap: () => controller.toggleEdit(index),
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    width: 28,
-                    height: 28,
+                    duration: Duration(milliseconds: 250),
+                    width: 28.w,
+                    height: 28.h,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: isEditing ? OrderColors.primarySoft : OrderColors.chipBg,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
                     child: AnimatedRotation(
                       turns: isEditing ? 0.5 : 0,
-                      duration: const Duration(milliseconds: 250),
+                      duration: Duration(milliseconds: 250),
                       child: SvgPicture.string(
                         _Icons.pencil(isEditing ? '#2563EB' : '#62748E'),
-                        width: 12,
-                        height: 12,
+                        width: 12.w,
+                        height: 12.h,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 Text(
                   '${product.total.toStringAsFixed(2)} ج',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: OrderColors.textBody,
                     fontFamily: 'Inter',
-                    fontSize: 13,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const Spacer(),
+                Spacer(),
                 Expanded(
                   flex: 2,
                   child: Text(
                     product.name,
                     textAlign: TextAlign.right,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Color(0xFF1D293D),
                       fontFamily: 'Cairo',
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: 10.w),
                 Container(
-                  width: 24,
-                  height: 24,
+                  width: 24.w,
+                  height: 24.h,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: OrderColors.primarySoft,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10.r),
                   ),
                   child: Text(
                     '${index + 1}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: OrderColors.primary,
                       fontFamily: 'Inter',
-                      fontSize: 10,
+                      fontSize: 10.sp,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   '${product.unitPrice.toStringAsFixed(2)} جنيه / ${product.unitLabel}'
                   '${product.note != null ? ' · ${product.note}' : ''}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: OrderColors.textFaint,
                     fontFamily: 'Cairo',
-                    fontSize: 11,
+                    fontSize: 11.sp,
                   ),
                 ),
                 AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 250),
+                  duration: Duration(milliseconds: 250),
                   transitionBuilder: (child, animation) => FadeTransition(
                     opacity: animation,
                     child: ScaleTransition(scale: animation, child: child),
                   ),
                   child: isEditing
                       ? _QuantityStepper(
-                          key: const ValueKey('stepper'),
+                          key: ValueKey('stepper'),
                           quantity: product.quantity,
                           onIncrement: () => controller.increment(index),
                           onDecrement: () => controller.decrement(index),
                         )
                       : Container(
-                          key: const ValueKey('chip'),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          key: ValueKey('chip'),
+                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                           decoration: BoxDecoration(
                             color: OrderColors.primarySoft,
-                            borderRadius: BorderRadius.circular(999),
+                            borderRadius: BorderRadius.circular(999.r),
                           ),
                           child: Text(
                             '${product.quantity} ${product.unitLabel}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: OrderColors.primary,
                               fontFamily: 'Cairo',
-                              fontSize: 11,
+                              fontSize: 11.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -690,19 +691,19 @@ class _QuantityStepper extends StatelessWidget {
       children: [
         _stepBtn(Icons.remove, onDecrement),
         SizedBox(
-          width: 32,
+          width: 32.w,
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
+            duration: Duration(milliseconds: 200),
             transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
             child: Text(
               '$quantity',
               key: ValueKey(quantity),
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 color: OrderColors.primary,
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w700,
-                fontSize: 13,
+                fontSize: 13.sp,
               ),
             ),
           ),
@@ -714,17 +715,17 @@ class _QuantityStepper extends StatelessWidget {
 
   Widget _stepBtn(IconData icon, VoidCallback onTap) {
     return AnimatedPressable(
-      borderRadius: BorderRadius.circular(999),
+      borderRadius: BorderRadius.circular(999.r),
       onTap: onTap,
       child: Container(
-        width: 24,
-        height: 24,
+        width: 24.w,
+        height: 24.h,
         alignment: Alignment.center,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: OrderColors.primarySoft,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, size: 14, color: OrderColors.primary),
+        child: Icon(icon, size: 14.w, color: OrderColors.primary),
       ),
     );
   }
@@ -736,7 +737,7 @@ class _AddProductButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 10),
+      padding: EdgeInsets.only(top: 10.h),
       child: DottedBorderButton(
         onTap: () => Get.snackbar('إضافة منتج', 'اختر منتجاً لإضافته إلى الطلب'),
       ),
@@ -751,26 +752,26 @@ class DottedBorderButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedPressable(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(16.r),
       onTap: onTap,
       child: Container(
-        height: 44,
+        height: 44.h,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFBAC0C8), width: 2),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: Color(0xFFBAC0C8), width: 2.w),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SvgPicture.string(_Icons.plus, width: 14, height: 14),
-            const SizedBox(width: 8),
-            const Text(
+            SvgPicture.string(_Icons.plus, width: 14.w, height: 14.h),
+            SizedBox(width: 8.w),
+            Text(
               'إضافة منتج',
               style: TextStyle(
                 color: Color(0xFF686C71),
                 fontFamily: 'Cairo',
-                fontSize: 13,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -789,9 +790,9 @@ class _SupplierRecommendationCard extends StatelessWidget {
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFBFDBFE)),
-        gradient: const LinearGradient(
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: Color(0xFFBFDBFE)),
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Color(0xFFF0F6FF), Color(0xFFF8FAFC)],
@@ -802,30 +803,30 @@ class _SupplierRecommendationCard extends StatelessWidget {
         children: [
           Container(
             color: OrderColors.primaryDark,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Text(
+                Text(
                   'اختيار الذكاء الاصطناعي',
                   style: TextStyle(
                     color: Color(0xE6FFFFFF),
                     fontFamily: 'Cairo',
-                    fontSize: 11,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(width: 8),
-                SvgPicture.string(_Icons.starFilled, width: 11, height: 11),
-                SvgPicture.string(_Icons.starFilled, width: 11, height: 11),
-                SvgPicture.string(_Icons.starFilled, width: 11, height: 11),
-                SvgPicture.string(_Icons.starFilled, width: 11, height: 11),
-                SvgPicture.string(_Icons.starOutline, width: 11, height: 11),
+                SizedBox(width: 8.w),
+                SvgPicture.string(_Icons.starFilled, width: 11.w, height: 11.h),
+                SvgPicture.string(_Icons.starFilled, width: 11.w, height: 11.h),
+                SvgPicture.string(_Icons.starFilled, width: 11.w, height: 11.h),
+                SvgPicture.string(_Icons.starFilled, width: 11.w, height: 11.h),
+                SvgPicture.string(_Icons.starOutline, width: 11.w, height: 11.h),
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -833,36 +834,36 @@ class _SupplierRecommendationCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      width: 48,
-                      height: 48,
+                      width: 48.w,
+                      height: 48.h,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: OrderColors.primarySoft,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(16.r),
                       ),
-                      child: const Text('🏭', style: TextStyle(fontSize: 20)),
+                      child: Text('🏭', style: TextStyle(fontSize: 20.sp)),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12.w),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
-                        children: const [
+                        children: [
                           Text(
                             'الجوهرة للتوزيع',
                             style: TextStyle(
                               color: Color(0xFF0F172B),
                               fontFamily: 'Cairo',
-                              fontSize: 17,
+                              fontSize: 17.sp,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          SizedBox(height: 2),
+                          SizedBox(height: 2.h),
                           Text(
                             '٤٢ طلب سابق • موثوق ٩٧٪',
                             style: TextStyle(
                               color: OrderColors.textMuted,
                               fontFamily: 'Cairo',
-                              fontSize: 12,
+                              fontSize: 12.sp,
                             ),
                           ),
                         ],
@@ -870,9 +871,9 @@ class _SupplierRecommendationCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 Row(
-                  children: const [
+                  children: [
                     Expanded(
                       child: _StatChip(
                         value: '٧٢٪',
@@ -880,7 +881,7 @@ class _SupplierRecommendationCard extends StatelessWidget {
                         color: OrderColors.primary,
                       ),
                     ),
-                    SizedBox(width: 8),
+                    SizedBox(width: 8.w),
                     Expanded(
                       child: _StatChip(
                         value: 'غداً',
@@ -888,7 +889,7 @@ class _SupplierRecommendationCard extends StatelessWidget {
                         color: OrderColors.textTitle,
                       ),
                     ),
-                    SizedBox(width: 8),
+                    SizedBox(width: 8.w),
                     Expanded(
                       child: _StatChip(
                         value: '٤٦١ ر.س',
@@ -899,34 +900,34 @@ class _SupplierRecommendationCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12.h),
                 TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0, end: 0.72),
-                  duration: const Duration(milliseconds: 1100),
+                  duration: Duration(milliseconds: 1100),
                   curve: Curves.easeOutCubic,
                   builder: (context, value, child) {
                     return Row(
                       children: [
-                        SvgPicture.string(_Icons.shippingBox, width: 13, height: 12),
-                        const SizedBox(width: 6),
+                        SvgPicture.string(_Icons.shippingBox, width: 13.w, height: 12.h),
+                        SizedBox(width: 6.w),
                         Expanded(
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(999),
+                            borderRadius: BorderRadius.circular(999.r),
                             child: LinearProgressIndicator(
                               value: value,
                               minHeight: 6,
-                              backgroundColor: const Color(0xFFF1F5F9),
-                              valueColor: const AlwaysStoppedAnimation(OrderColors.primary),
+                              backgroundColor: Color(0xFFF1F5F9),
+                              valueColor: AlwaysStoppedAnimation(OrderColors.primary),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8.w),
                         Text(
                           '${_toArabicNumerals((value * 100).round())}٪ في الوقت',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: OrderColors.primary,
                             fontFamily: 'Cairo',
-                            fontSize: 10,
+                            fontSize: 10.sp,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -959,11 +960,11 @@ class _StatChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(10.w),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xCCE2E8F0)),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: Color(0xCCE2E8F0)),
       ),
       child: Column(
         children: [
@@ -973,29 +974,29 @@ class _StatChip extends StatelessWidget {
             style: TextStyle(
               color: color,
               fontFamily: 'Cairo',
-              fontSize: 15,
+              fontSize: 15.sp,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 2),
+          SizedBox(height: 2.h),
           Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: OrderColors.textMuted,
               fontFamily: 'Cairo',
-              fontSize: 9,
+              fontSize: 9.sp,
             ),
           ),
           if (footnote != null) ...[
-            const SizedBox(height: 2),
+            SizedBox(height: 2.h),
             Text(
               footnote!,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 color: OrderColors.textFaint,
                 fontFamily: 'Cairo',
-                fontSize: 9,
+                fontSize: 9.sp,
               ),
             ),
           ],
@@ -1011,29 +1012,29 @@ class _ConfidenceScoreCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: OrderColors.cardBorder),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 70,
-            height: 70,
+            width: 70.w,
+            height: 70.h,
             child: TweenAnimationBuilder<double>(
               tween: Tween(begin: 0, end: 0.94),
-              duration: const Duration(milliseconds: 1200),
+              duration: Duration(milliseconds: 1200),
               curve: Curves.easeOutCubic,
               builder: (context, value, child) {
                 return Stack(
                   alignment: Alignment.center,
                   children: [
-                    const SizedBox(
-                      width: 70,
-                      height: 70,
+                    SizedBox(
+                      width: 70.w,
+                      height: 70.h,
                       child: CircularProgressIndicator(
                         value: 1,
                         strokeWidth: 5,
@@ -1041,22 +1042,22 @@ class _ConfidenceScoreCard extends StatelessWidget {
                       ),
                     ),
                     SizedBox(
-                      width: 70,
-                      height: 70,
+                      width: 70.w,
+                      height: 70.h,
                       child: CircularProgressIndicator(
                         value: value,
                         strokeWidth: 5,
                         strokeCap: StrokeCap.round,
-                        valueColor: const AlwaysStoppedAnimation(OrderColors.success),
+                        valueColor: AlwaysStoppedAnimation(OrderColors.success),
                         backgroundColor: Colors.transparent,
                       ),
                     ),
                     Text(
                       '${(value * 100).round()}%',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Color(0xFF0F172B),
                         fontFamily: 'Inter',
-                        fontSize: 14,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -1065,46 +1066,46 @@ class _ConfidenceScoreCard extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const Text(
+                Text(
                   'ثقة الذكاء الاصطناعي',
                   style: TextStyle(
                     color: Color(0xFF1D293D),
                     fontFamily: 'Cairo',
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 2),
-                const Text(
+                SizedBox(height: 2.h),
+                Text(
                   'التطابق دقيق جداً مع قواعد بيانات المنتجات والأسعار الحالية',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     color: OrderColors.textMuted,
                     fontFamily: 'Cairo',
-                    fontSize: 12,
-                    height: 1.375,
+                    fontSize: 12.sp,
+                    height: 1.375.h,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    const Text(
+                    Text(
                       'ممتاز — آمن للإرسال',
                       style: TextStyle(
                         color: OrderColors.success,
                         fontFamily: 'Cairo',
-                        fontSize: 11,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    SvgPicture.string(_Icons.checkCircle, width: 12, height: 12),
+                    SizedBox(width: 6.w),
+                    SvgPicture.string(_Icons.checkCircle, width: 12.w, height: 12.h),
                   ],
                 ),
               ],
@@ -1128,24 +1129,24 @@ class _RiskAlertTile extends StatelessWidget {
     final accent = isSafe ? OrderColors.success : OrderColors.warning;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: borderColor),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 2),
+            padding: EdgeInsets.only(top: 2.h),
             child: SvgPicture.string(
               isSafe ? _Icons.shieldCheckSafe : _Icons.warningTriangle,
-              width: 15,
-              height: 15,
+              width: 15.w,
+              height: 15.h,
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -1156,18 +1157,18 @@ class _RiskAlertTile extends StatelessWidget {
                   style: TextStyle(
                     color: accent,
                     fontFamily: 'Cairo',
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2.h),
                 Text(
                   alert.subtitle,
                   textAlign: TextAlign.right,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: OrderColors.textMuted,
                     fontFamily: 'Cairo',
-                    fontSize: 11,
+                    fontSize: 11.sp,
                   ),
                 ),
               ],
@@ -1186,7 +1187,7 @@ class _ConfirmButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedPressable(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         onTap: () {
           Get.off(
             () => OrderSuccessScreen(
@@ -1194,22 +1195,22 @@ class _ConfirmButton extends StatelessWidget {
               itemCount: controller.products.length,
             ),
             transition: Transition.rightToLeftWithFade,
-            duration: const Duration(milliseconds: 350),
+            duration: Duration(milliseconds: 350),
           );
         },
         child: Container(
-          height: 56,
+          height: 56.h,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: OrderColors.primary,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
           ),
-          child: const Text(
+          child: Text(
             'تأكيد الطلب ✓',
             style: TextStyle(
               color: Colors.white,
               fontFamily: 'Cairo',
-              fontSize: 15,
+              fontSize: 15.sp,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -1226,19 +1227,19 @@ class _SecondaryActionsRow extends StatelessWidget {
     return Row(
       children: [
         AnimatedPressable(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           onTap: () => Get.offAll(
-            () => const HomeScreen(),
+            () => HomeScreen(),
             transition: Transition.fadeIn,
           ),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
             child: Text(
               'إلغاء',
               style: TextStyle(
                 color: OrderColors.danger,
                 fontFamily: 'Cairo',
-                fontSize: 16,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1246,26 +1247,26 @@ class _SecondaryActionsRow extends StatelessWidget {
         ),
         Expanded(
           child: AnimatedPressable(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
             onTap: () => Get.snackbar('تعديل', 'عدّل الكميات في قسم المنتجات أعلاه'),
             child: Container(
-              height: 56,
+              height: 56.h,
               decoration: BoxDecoration(
                 color: OrderColors.chipBg,
                 border: Border.all(color: OrderColors.cardBorder),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SvgPicture.string(_Icons.pencil('#45556C'), width: 14, height: 14),
-                  const SizedBox(width: 6),
-                  const Text(
+                  SvgPicture.string(_Icons.pencil('#45556C'), width: 14.w, height: 14.h),
+                  SizedBox(width: 6.w),
+                  Text(
                     'تعديل',
                     style: TextStyle(
                       color: Color(0xFF45556C),
                       fontFamily: 'Cairo',
-                      fontSize: 13,
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

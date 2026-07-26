@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:get/get.dart' as getx;
 
 class ApiClient {
   static const String baseUrl = 'https://api.salasel.com/v1'; // TODO: Update to real backend URL
@@ -10,11 +9,11 @@ class ApiClient {
   final FlutterSecureStorage _storage;
 
   ApiClient({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage(),
+      : _storage = storage ?? FlutterSecureStorage(),
         _dio = Dio(BaseOptions(
           baseUrl: baseUrl,
-          connectTimeout: const Duration(seconds: 30),
-          receiveTimeout: const Duration(seconds: 30),
+          connectTimeout: Duration(seconds: 30),
+          receiveTimeout: Duration(seconds: 30),
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',

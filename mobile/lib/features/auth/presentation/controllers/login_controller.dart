@@ -61,20 +61,20 @@ class LoginController extends GetxController {
       await _apiClient.saveToken(token);
       */
       
-      await Future.delayed(const Duration(seconds: 1)); // Mock network delay
+      await Future.delayed(Duration(seconds: 1)); // Mock network delay
       
       // Keeping mock logic for now so UI remains testable
       if (email == welcomeEmail && password == welcomePassword) {
         Get.offAll(
-          () => const StoresScreen(),
+          () => StoresScreen(),
           transition: Transition.fadeIn,
-          duration: const Duration(milliseconds: 350),
+          duration: Duration(milliseconds: 350),
         );
       } else if (email == homeEmail && password == homePassword) {
         Get.offAll(
-          () => const HomeScreen(),
+          () => HomeScreen(),
           transition: Transition.fadeIn,
-          duration: const Duration(milliseconds: 350),
+          duration: Duration(milliseconds: 350),
         );
       } else {
         errorMessage.value = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';

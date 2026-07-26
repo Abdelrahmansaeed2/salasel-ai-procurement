@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../permissions/presentation/screens/setup_complete_screen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class NotificationsPermissionScreen extends StatelessWidget {
   const NotificationsPermissionScreen({super.key});
@@ -18,13 +19,13 @@ class NotificationsPermissionScreen extends StatelessWidget {
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_forward, color: AppColors.primary),
+          icon: Icon(Icons.arrow_forward, color: AppColors.primary),
           onPressed: () => Get.back(),
         ),
         title: Text(
           'تنبيهات',
           style: AppTextStyles.welcomeTitle.copyWith(
-            fontSize: 18,
+            fontSize: 18.sp,
             color: AppColors.primary,
           ),
         ),
@@ -33,46 +34,46 @@ class NotificationsPermissionScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+          padding: EdgeInsets.symmetric(horizontal: 24.0.w, vertical: 20.0.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Spacer(flex: 1),
+              Spacer(flex: 1),
               
               // Icon Circle
               Center(
                 child: Container(
-                  width: 80,
-                  height: 80,
+                  width: 80.w,
+                  height: 80.h,
                   decoration: BoxDecoration(
                     color: AppColors.surface,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.notifications,
                     color: AppColors.primary,
-                    size: 40,
+                    size: 40.w,
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
               
               // Title
               Text(
                 'تحديثات الطلبات الفورية',
                 textAlign: TextAlign.center,
-                style: AppTextStyles.welcomeTitle.copyWith(fontSize: 22),
+                style: AppTextStyles.welcomeTitle.copyWith(fontSize: 22.sp),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               
               // Subtitle
               Text(
                 'ابق على اطلاع دائم بحالة طلباتك، من قبول المورد وحتى وصول الشحنة إلى باب متجرك.',
                 textAlign: TextAlign.center,
-                style: AppTextStyles.welcomeSubtitle.copyWith(height: 1.6),
+                style: AppTextStyles.welcomeSubtitle.copyWith(height: 1.6.h),
               ),
               
-              const Spacer(flex: 2),
+              Spacer(flex: 2),
               
               // Enable Button
               ElevatedButton(
@@ -81,7 +82,7 @@ class NotificationsPermissionScreen extends StatelessWidget {
                   var status = await Permission.notification.request();
                   if (status.isGranted) {
                     
-                    Get.to(() => const SetupCompleteScreen());
+                    Get.to(() => SetupCompleteScreen());
                   } else {
                     
                   }
@@ -89,9 +90,9 @@ class NotificationsPermissionScreen extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
                   elevation: 0,
                 ),
@@ -102,12 +103,12 @@ class NotificationsPermissionScreen extends StatelessWidget {
                       'تفعيل التنبيهات',
                       style: AppTextStyles.primaryButton,
                     ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.arrow_back_ios, size: 16), // Points left (Forward in RTL)
+                    SizedBox(width: 8.w),
+                    Icon(Icons.arrow_back_ios, size: 16.w), // Points left (Forward in RTL)
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               
               // Later Button
               OutlinedButton(
@@ -116,10 +117,10 @@ class NotificationsPermissionScreen extends StatelessWidget {
                 },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.textSecondary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  side: const BorderSide(color: AppColors.textSecondary),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                  side: BorderSide(color: AppColors.textSecondary),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
                 ),
                 child: Row(
@@ -132,12 +133,12 @@ class NotificationsPermissionScreen extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.arrow_back_ios, size: 16, color: AppColors.textSecondary),
+                    SizedBox(width: 8.w),
+                    Icon(Icons.arrow_back_ios, size: 16.w, color: AppColors.textSecondary),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
             ],
           ),
         ),

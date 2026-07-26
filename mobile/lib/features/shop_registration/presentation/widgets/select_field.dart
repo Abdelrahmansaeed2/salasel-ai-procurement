@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../theme/shop_registration_colors.dart';
 import '../theme/shop_registration_icons.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SelectField extends StatelessWidget {
   const SelectField({
@@ -26,8 +27,8 @@ class SelectField extends StatelessWidget {
     final selected = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
       ),
       builder: (context) {
         return Directionality(
@@ -36,25 +37,25 @@ class SelectField extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: 12),
-                Container(width: 40, height: 4, decoration: BoxDecoration(
+                SizedBox(height: 12.h),
+                Container(width: 40.w, height: 4.h, decoration: BoxDecoration(
                   color: ShopRegColors.trackInactive,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(4.r),
                 )),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 for (final option in options)
                   ListTile(
                     title: Text(
                       option,
                       textAlign: TextAlign.right,
-                      style: GoogleFonts.cairo(fontSize: 16, color: ShopRegColors.textDark),
+                      style: GoogleFonts.cairo(fontSize: 16.sp, color: ShopRegColors.textDark),
                     ),
                     trailing: option == value
-                        ? const Icon(Icons.check_rounded, color: ShopRegColors.primary)
+                        ? Icon(Icons.check_rounded, color: ShopRegColors.primary)
                         : null,
                     onTap: () => Navigator.of(context).pop(option),
                   ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
               ],
             ),
           ),
@@ -67,33 +68,33 @@ class SelectField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final field = InkWell(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(8.r),
       onTap: () => _openPicker(context),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         decoration: BoxDecoration(
           color: ShopRegColors.inputFill,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
           border: Border.all(color: ShopRegColors.inputBorderLight),
         ),
         child: Row(
           textDirection: TextDirection.rtl,
           children: [
             if (icon != null) ...[
-              FigmaIcon(icon!, color: ShopRegColors.iconMuted, size: 18),
-              const SizedBox(width: 8),
+              FigmaIcon(icon!, color: ShopRegColors.iconMuted, size: 18.w),
+              SizedBox(width: 8.w),
             ],
             Expanded(
               child: Text(
                 value ?? placeholder,
                 textAlign: TextAlign.right,
                 style: GoogleFonts.cairo(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   color: ShopRegColors.textDark,
                 ),
               ),
             ),
-            const FigmaIcon(ShopRegIcons.chevronDown, color: ShopRegColors.iconMuted, size: 12),
+            FigmaIcon(ShopRegIcons.chevronDown, color: ShopRegColors.iconMuted, size: 12.w),
           ],
         ),
       ),
@@ -107,12 +108,12 @@ class SelectField extends StatelessWidget {
         Text(
           label!,
           style: GoogleFonts.cairo(
-            fontSize: 14,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w700,
             color: ShopRegColors.textBody,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         field,
       ],
     );

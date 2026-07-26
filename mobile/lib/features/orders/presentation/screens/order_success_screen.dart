@@ -7,6 +7,7 @@ import '../../../../core/widgets/animated_entrance.dart';
 import '../../../../core/widgets/animated_pressable.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../theme/order_colors.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class _Icons {
   static const checkmark =
@@ -67,7 +68,7 @@ class TimelineEvent {
   final bool isActive;
   final bool isDone;
 
-  const TimelineEvent({
+  TimelineEvent({
     required this.time,
     required this.title,
     required this.subtitle,
@@ -87,7 +88,7 @@ class OrderSuccessScreen extends StatelessWidget {
     this.itemCount = 2,
   });
 
-  static const List<TimelineEvent> _events = [
+  static final List<TimelineEvent> _events = [
     TimelineEvent(
       time: '٦:٠٠ص',
       title: 'قيد التجهيز',
@@ -117,69 +118,69 @@ class OrderSuccessScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 48),
+                SizedBox(height: 48.h),
                 _buildSuccessOrb(),
-                const SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 AnimatedEntrance(
-                  delay: const Duration(milliseconds: 250),
-                  child: const Text(
+                  delay: Duration(milliseconds: 250),
+                  child: Text(
                     'تم إرسال الطلب! 🎉',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFF0F172B),
                       fontFamily: 'Cairo',
-                      fontSize: 26,
+                      fontSize: 26.sp,
                       fontWeight: FontWeight.w700,
-                      height: 1.25,
+                      height: 1.25.h,
                     ),
                   ),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: 6.h),
                 AnimatedEntrance(
-                  delay: const Duration(milliseconds: 300),
-                  child: const Text(
+                  delay: Duration(milliseconds: 300),
+                  child: Text(
                     'طلبك وصل إلى المورد وسيتم تأكيده خلال دقائق',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: OrderColors.textMuted,
                       fontFamily: 'Cairo',
-                      fontSize: 14,
-                      height: 1.625,
+                      fontSize: 14.sp,
+                      height: 1.625.h,
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12.h),
                 AnimatedEntrance(
-                  delay: const Duration(milliseconds: 350),
+                  delay: Duration(milliseconds: 350),
                   child: Center(child: _buildOrderIdChip()),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 AnimatedEntrance(
-                  delay: const Duration(milliseconds: 400),
-                  beginOffset: const Offset(0, 0.15),
+                  delay: Duration(milliseconds: 400),
+                  beginOffset: Offset(0, 0.15),
                   child: _buildSummaryBar(),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
                 AnimatedEntrance(
-                  delay: const Duration(milliseconds: 460),
-                  beginOffset: const Offset(0, 0.15),
+                  delay: Duration(milliseconds: 460),
+                  beginOffset: Offset(0, 0.15),
                   child: _buildSupplierTimelineCard(),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
                 AnimatedEntrance(
-                  delay: const Duration(milliseconds: 520),
+                  delay: Duration(milliseconds: 520),
                   child: _buildTipBanner(),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 AnimatedEntrance(
-                  delay: const Duration(milliseconds: 580),
+                  delay: Duration(milliseconds: 580),
                   child: _buildActions(),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
               ],
             ),
           ),
@@ -192,14 +193,14 @@ class OrderSuccessScreen extends StatelessWidget {
     return Center(
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: 1),
-        duration: const Duration(milliseconds: 700),
+        duration: Duration(milliseconds: 700),
         curve: Curves.elasticOut,
         builder: (context, scale, child) => Transform.scale(scale: scale, child: child),
         child: Container(
-          width: 112,
-          height: 112,
+          width: 112.w,
+          height: 112.h,
           alignment: Alignment.center,
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -209,10 +210,10 @@ class OrderSuccessScreen extends StatelessWidget {
           ),
           child: TweenAnimationBuilder<double>(
             tween: Tween(begin: 0, end: 1),
-            duration: const Duration(milliseconds: 500),
+            duration: Duration(milliseconds: 500),
             curve: Curves.easeOut,
             builder: (context, value, child) => Opacity(opacity: value, child: child),
-            child: SvgPicture.string(_Icons.checkmark, width: 48, height: 48),
+            child: SvgPicture.string(_Icons.checkmark, width: 48.w, height: 48.h),
           ),
         ),
       ),
@@ -227,7 +228,7 @@ class OrderSuccessScreen extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       child: IntrinsicHeight(
         child: Row(
@@ -235,11 +236,11 @@ class OrderSuccessScreen extends StatelessWidget {
             Expanded(
               child: _summaryItem('${totalAmount.toStringAsFixed(0)} جنيه', 'المبلغ'),
             ),
-            const VerticalDivider(color: OrderColors.divider, width: 1),
+            VerticalDivider(color: OrderColors.divider, width: 1.w),
             Expanded(
               child: _summaryItem('غداً ٩:٣٠', 'التوصيل', color: OrderColors.primary),
             ),
-            const VerticalDivider(color: OrderColors.divider, width: 1),
+            VerticalDivider(color: OrderColors.divider, width: 1.w),
             Expanded(
               child: _summaryItem('$itemCount صنف', 'المنتجات', color: OrderColors.success),
             ),
@@ -251,12 +252,12 @@ class OrderSuccessScreen extends StatelessWidget {
 
   Widget _summaryItem(String value, String label, {Color color = const Color(0xFF0F172A)}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: EdgeInsets.symmetric(vertical: 12.h),
       child: Column(
         children: [
           TweenAnimationBuilder<double>(
             tween: Tween(begin: 0, end: 1),
-            duration: const Duration(milliseconds: 500),
+            duration: Duration(milliseconds: 500),
             curve: Curves.easeOutBack,
             builder: (context, scale, child) => Transform.scale(scale: scale, child: child),
             child: Text(
@@ -264,18 +265,18 @@ class OrderSuccessScreen extends StatelessWidget {
               style: TextStyle(
                 color: color,
                 fontFamily: 'Cairo',
-                fontSize: 15,
+                fontSize: 15.sp,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
-          const SizedBox(height: 2),
+          SizedBox(height: 2.h),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               color: OrderColors.textFaint,
               fontFamily: 'Cairo',
-              fontSize: 10,
+              fontSize: 10.sp,
             ),
           ),
         ],
@@ -287,15 +288,15 @@ class OrderSuccessScreen extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: OrderColors.cardBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: const BoxDecoration(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [Color(0xFFF8FAFF), Color(0xFFEFF6FF)],
               ),
@@ -304,65 +305,65 @@ class OrderSuccessScreen extends StatelessWidget {
             child: Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 40.w,
+                  height: 40.h,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(14.r),
                   ),
-                  child: const Text('🏭', style: TextStyle(fontSize: 20)),
+                  child: Text('🏭', style: TextStyle(fontSize: 20.sp)),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: 10.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      const Text(
+                      Text(
                         'الجوهرة للتوزيع',
                         style: TextStyle(
                           color: Color(0xFF0F172B),
                           fontFamily: 'Cairo',
-                          fontSize: 15,
+                          fontSize: 15.sp,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: 2.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          SvgPicture.string(_Icons.starFilled, width: 10, height: 10),
-                          SvgPicture.string(_Icons.starFilled, width: 10, height: 10),
-                          SvgPicture.string(_Icons.starFilled, width: 10, height: 10),
-                          SvgPicture.string(_Icons.starFilled, width: 10, height: 10),
-                          SvgPicture.string(_Icons.starOutline, width: 10, height: 10),
-                          const SizedBox(width: 4),
-                          const Text('٤.٨',
-                              style: TextStyle(color: OrderColors.textFaint, fontSize: 10)),
+                          SvgPicture.string(_Icons.starFilled, width: 10.w, height: 10.h),
+                          SvgPicture.string(_Icons.starFilled, width: 10.w, height: 10.h),
+                          SvgPicture.string(_Icons.starFilled, width: 10.w, height: 10.h),
+                          SvgPicture.string(_Icons.starFilled, width: 10.w, height: 10.h),
+                          SvgPicture.string(_Icons.starOutline, width: 10.w, height: 10.h),
+                          SizedBox(width: 4.w),
+                          Text('٤.٨',
+                              style: TextStyle(color: OrderColors.textFaint, fontSize: 10.sp)),
                         ],
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(999.r),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
+                      Text(
                         'مؤكد',
                         style: TextStyle(
                           color: OrderColors.success,
                           fontFamily: 'Cairo',
-                          fontSize: 10,
+                          fontSize: 10.sp,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      SvgPicture.string(_Icons.checkCircle, width: 11, height: 11),
+                      SizedBox(width: 4.w),
+                      SvgPicture.string(_Icons.checkCircle, width: 11.w, height: 11.h),
                     ],
                   ),
                 ),
@@ -370,7 +371,7 @@ class OrderSuccessScreen extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             child: Column(
               children: [
                 Row(
@@ -382,7 +383,7 @@ class OrderSuccessScreen extends StatelessWidget {
                     Expanded(child: _gridItem('$itemCount منتج', 'عدد المنتجات')),
                   ],
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12.h),
                 Row(
                   children: [
                     Expanded(
@@ -394,9 +395,9 @@ class OrderSuccessScreen extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(color: OrderColors.divider, height: 1),
+          Divider(color: OrderColors.divider, height: 1.h),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
             child: Column(
               children: List.generate(_events.length, (i) {
                 final event = _events[i];
@@ -416,15 +417,15 @@ class OrderSuccessScreen extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(color: OrderColors.textFaint, fontFamily: 'Cairo', fontSize: 10),
+          style: TextStyle(color: OrderColors.textFaint, fontFamily: 'Cairo', fontSize: 10.sp),
         ),
-        const SizedBox(height: 2),
+        SizedBox(height: 2.h),
         Text(
           value,
           style: TextStyle(
             color: color,
             fontFamily: 'Cairo',
-            fontSize: 14,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -434,38 +435,38 @@ class OrderSuccessScreen extends StatelessWidget {
 
   Widget _buildTipBanner() {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFBEB),
-        borderRadius: BorderRadius.circular(16),
+        color: Color(0xFFFFFBEB),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('💡', style: TextStyle(fontSize: 20)),
-          const SizedBox(width: 12),
+          Text('💡', style: TextStyle(fontSize: 20.sp)),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: const [
+              children: [
                 Text(
                   'نصيحة سلاسل',
                   style: TextStyle(
                     color: Color(0xFF973C00),
                     fontFamily: 'Cairo',
-                    fontSize: 13,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                SizedBox(height: 2),
+                SizedBox(height: 2.h),
                 Text(
                   'ستصلك رسالة واتساب من المورد عند خروج الشحنة. يمكنك تتبع موقع السائق مباشرة.',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     color: Color(0xFFBB4D00),
                     fontFamily: 'Cairo',
-                    fontSize: 12,
-                    height: 1.625,
+                    fontSize: 12.sp,
+                    height: 1.625.h,
                   ),
                 ),
               ],
@@ -480,25 +481,25 @@ class OrderSuccessScreen extends StatelessWidget {
     return Column(
       children: [
         AnimatedPressable(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
           onTap: () => Get.snackbar('تتبع الطلب', 'جاري فتح خريطة التتبع المباشر'),
           child: Container(
-            height: 56,
+            height: 56.h,
             decoration: BoxDecoration(
               color: OrderColors.primary,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.string(_Icons.track, width: 20, height: 20),
-                const SizedBox(width: 8),
-                const Text(
+                SvgPicture.string(_Icons.track, width: 20.w, height: 20.h),
+                SizedBox(width: 8.w),
+                Text(
                   'تتبع الطلب',
                   style: TextStyle(
                     color: Color(0xFFEEEFFF),
                     fontFamily: 'Cairo',
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -506,27 +507,27 @@ class OrderSuccessScreen extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         AnimatedPressable(
-          borderRadius: BorderRadius.circular(8),
-          onTap: () => Get.offAll(() => const HomeScreen(), transition: Transition.fadeIn),
+          borderRadius: BorderRadius.circular(8.r),
+          onTap: () => Get.offAll(() => HomeScreen(), transition: Transition.fadeIn),
           child: Container(
-            height: 56,
+            height: 56.h,
             decoration: BoxDecoration(
-              color: const Color(0xFFE7E7F3),
-              borderRadius: BorderRadius.circular(8),
+              color: Color(0xFFE7E7F3),
+              borderRadius: BorderRadius.circular(8.r),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.string(_Icons.home, width: 16, height: 18),
-                const SizedBox(width: 8),
-                const Text(
+                SvgPicture.string(_Icons.home, width: 16.w, height: 18.h),
+                SizedBox(width: 8.w),
+                Text(
                   'العودة للرئيسية',
                   style: TextStyle(
                     color: Color(0xFF191B23),
                     fontFamily: 'Cairo',
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -550,10 +551,10 @@ class _CopyableOrderIdState extends State<_CopyableOrderId> {
   bool _copied = false;
 
   void _copy() {
-    Clipboard.setData(const ClipboardData(text: 'ORD-2024-48291'));
+    Clipboard.setData(ClipboardData(text: 'ORD-2024-48291'));
     setState(() => _copied = true);
     Get.snackbar('تم النسخ', 'تم نسخ رقم الطلب');
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(Duration(seconds: 2), () {
       if (mounted) setState(() => _copied = false);
     });
   }
@@ -561,32 +562,32 @@ class _CopyableOrderIdState extends State<_CopyableOrderId> {
   @override
   Widget build(BuildContext context) {
     return AnimatedPressable(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(14.r),
       onTap: _copy,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
         decoration: BoxDecoration(
           color: OrderColors.chipBg,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(14.r),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
+              duration: Duration(milliseconds: 250),
               transitionBuilder: (child, animation) =>
                   ScaleTransition(scale: animation, child: child),
               child: _copied
-                  ? const Icon(Icons.check, key: ValueKey('done'), size: 13, color: OrderColors.success)
-                  : SvgPicture.string(_Icons.copy, key: const ValueKey('copy'), width: 13, height: 13),
+                  ? Icon(Icons.check, key: ValueKey('done'), size: 13.w, color: OrderColors.success)
+                  : SvgPicture.string(_Icons.copy, key: ValueKey('copy'), width: 13.w, height: 13.h),
             ),
-            const SizedBox(width: 8),
-            const Text(
+            SizedBox(width: 8.w),
+            Text(
               'ORD-2024-48291',
               style: TextStyle(
                 color: OrderColors.textMuted,
                 fontFamily: 'Inter',
-                fontSize: 13,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.65,
               ),
@@ -607,18 +608,18 @@ class _TimelineStepRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = event.isActive ? OrderColors.primary : const Color(0xFF94A3B8);
-    final bg = event.isActive ? const Color(0xFFEFF6FF) : const Color(0xFFF1F5F9);
-    final border = event.isActive ? const Color(0xFFBFDBFE) : const Color(0xFFE2E8F0);
+    final color = event.isActive ? OrderColors.primary : Color(0xFF94A3B8);
+    final bg = event.isActive ? Color(0xFFEFF6FF) : Color(0xFFF1F5F9);
+    final border = event.isActive ? Color(0xFFBFDBFE) : Color(0xFFE2E8F0);
     final iconMarkup = event.iconSvgTemplate
         .replaceAll('{{c}}', '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}');
 
     return AnimatedEntrance(
       delay: Duration(milliseconds: 650 + index * 120),
-      beginOffset: const Offset(0.05, 0),
+      beginOffset: Offset(0.05, 0),
       child: IntrinsicHeight(
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: EdgeInsets.only(bottom: 16.h),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -626,28 +627,28 @@ class _TimelineStepRow extends StatelessWidget {
                 children: [
                   TweenAnimationBuilder<double>(
                     tween: Tween(begin: 0, end: 1),
-                    duration: const Duration(milliseconds: 400),
+                    duration: Duration(milliseconds: 400),
                     curve: Curves.easeOutBack,
                     builder: (context, scale, child) => Transform.scale(scale: scale, child: child),
                     child: Container(
-                      width: 36,
-                      height: 36,
+                      width: 36.w,
+                      height: 36.h,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: bg,
                         shape: BoxShape.circle,
                         border: Border.all(color: border),
                       ),
-                      child: SvgPicture.string(iconMarkup, width: 16, height: 16),
+                      child: SvgPicture.string(iconMarkup, width: 16.w, height: 16.h),
                     ),
                   ),
                   if (!isLast)
                     Expanded(
-                      child: Container(width: 1, color: const Color(0xFFE2E8F0)),
+                      child: Container(width: 1.w, color: Color(0xFFE2E8F0)),
                     ),
                 ],
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -658,31 +659,31 @@ class _TimelineStepRow extends StatelessWidget {
                         Text(
                           event.title,
                           style: TextStyle(
-                            color: event.isActive ? const Color(0xFF1D4ED8) : const Color(0xFF94A3B8),
+                            color: event.isActive ? Color(0xFF1D4ED8) : Color(0xFF94A3B8),
                             fontFamily: 'Cairo',
-                            fontSize: 14,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         Text(
                           event.time,
                           style: TextStyle(
-                            color: event.isActive ? OrderColors.primary : const Color(0xFFCBD5E1),
+                            color: event.isActive ? OrderColors.primary : Color(0xFFCBD5E1),
                             fontFamily: 'Cairo',
-                            fontSize: 11,
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: 2.h),
                     Text(
                       event.subtitle,
                       textAlign: TextAlign.right,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: OrderColors.textFaint,
                         fontFamily: 'Cairo',
-                        fontSize: 12,
+                        fontSize: 12.sp,
                       ),
                     ),
                   ],

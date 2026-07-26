@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/settings_controller.dart';
 import '../theme/app_colors.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LanguageSwitcher extends StatelessWidget {
   const LanguageSwitcher({super.key});
@@ -17,7 +18,7 @@ class LanguageSwitcher extends StatelessWidget {
         icon: Icon(
           Icons.language,
           color: AppColors.primary,
-          size: 20,
+          size: 20.w,
         ),
         label: Text(
           isAr ? 'English' : 'عربي',
