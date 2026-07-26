@@ -14,7 +14,7 @@
   <main class="reg-main">
     <div class="reg-container" 
          [class.reg-container--step1]="currentStep() === 1"
-         [class.reg-container--step23]="currentStep() === 2 || currentStep() === 3"
+         [class.reg-container--step23]="currentStep() === 2 || currentStep() === 3 || currentStep() === 4"
          [class.reg-container--step8]="currentStep() === 8">
       
       <!-- Form Content Column -->
@@ -46,7 +46,12 @@
             (next)="nextStep($event)"
             (back)="prevStep()"
           ></app-tax-info-form>
-        } @else if (currentStep() >= 4 && currentStep() <= 7) {
+        } @else if (currentStep() === 4) {
+          <app-warehouse-info-form
+            (next)="nextStep($event)"
+            (back)="prevStep()"
+          ></app-warehouse-info-form>
+        } @else if (currentStep() >= 5 && currentStep() <= 7) {
           <app-step-placeholder 
             [step]="currentStep()" 
             [stepName]="steps[currentStep() - 1]"
