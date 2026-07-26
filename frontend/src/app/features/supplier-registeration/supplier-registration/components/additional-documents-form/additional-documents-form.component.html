@@ -1,0 +1,281 @@
+<div class="form-container">
+
+  <!-- Header Info (Figma ID: 41:764) -->
+  <div class="step-header">
+    <h2 class="step-header__title">تحميل الوثائق الإضافية</h2>
+    <p class="step-header__subtitle">يرجى تقديم الوثائق التالية لإكمال عملية التحقق من الهوية والحساب البنكي.</p>
+  </div>
+
+  <!-- Guidance Note Banner (Figma ID: 41:769) -->
+  <div class="guidance-banner">
+    <div class="guidance-banner__icon-wrapper">
+      <svg class="guidance-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="16" x2="12" y2="12"/>
+        <line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+    </div>
+    <div class="guidance-banner__content">
+      <h4 class="guidance-banner__title">تعليمات هامة</h4>
+      <ul class="guidance-list">
+        <li class="guidance-list__item">
+          <span class="guidance-list__bullet"></span>
+          <span class="guidance-list__text">تأكد من أن جميع الوثائق سارية المفعول وغير منتهية الصلاحية.</span>
+        </li>
+        <li class="guidance-list__item">
+          <span class="guidance-list__bullet"></span>
+          <span class="guidance-list__text">يجب أن تكون الصور واضحة وجميع البيانات مقروءة بالكامل.</span>
+        </li>
+        <li class="guidance-list__item">
+          <span class="guidance-list__bullet"></span>
+          <span class="guidance-list__text">نحن نحافظ على سرية بياناتكم وتستخدم لأغراض التحقق فقط.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Document Rows (Figma ID: 41:788) -->
+  <div class="documents-section">
+    
+    <!-- Row 1: Bank Statement -->
+    <div class="doc-row">
+      <!-- Label Details (Right) -->
+      <div class="doc-row__labels">
+        <div class="doc-row__title-group">
+          <div class="doc-row__icon-wrapper">
+            <svg class="doc-row__label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/>
+              <line x1="2" y1="10" x2="22" y2="10"/>
+            </svg>
+          </div>
+          <h3 class="doc-row__title">كشف حساب بنكي</h3>
+        </div>
+        <p class="doc-row__description">كشف حساب لآخر 3 أشهر يوضح اسم الشركة ورقم الحساب الدولي (IBAN).</p>
+      </div>
+
+      <!-- Drop Upload Zone (Left) -->
+      <div class="upload-zone-wrapper">
+        @let bankDoc = documentFiles().bankStatement;
+        @if (!bankDoc) {
+          <div 
+            class="drop-zone"
+            [class.drop-zone--drag-over]="dragOverStates().bankStatement"
+            (dragover)="onDragOver($event, 'bankStatement')"
+            (dragleave)="onDragLeave($event, 'bankStatement')"
+            (drop)="onDrop($event, 'bankStatement')"
+            (click)="bankInput.click()"
+          >
+            <input #bankInput type="file" class="drop-zone__input" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileSelected($event, 'bankStatement')" />
+            <div class="drop-zone__content">
+              <svg class="drop-zone__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span class="drop-zone__text">اسحب الملف هنا أو اضغط للتحميل</span>
+              <span class="drop-zone__formats">PDF, JPG, PNG (MAX 10MB)</span>
+            </div>
+          </div>
+        } @else {
+          <!-- Uploading state card -->
+          @if (bankDoc.status === 'uploading') {
+            <div class="upload-card">
+              <div class="upload-card__header">
+                <span class="upload-card__name">{{ bankDoc.name }}</span>
+                <span class="upload-card__percent">{{ bankDoc.progress }}%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar__fill" [style.width.%]="bankDoc.progress"></div>
+              </div>
+              <button type="button" class="upload-card__delete" (click)="deleteFile('bankStatement'); $event.stopPropagation()">إلغاء</button>
+            </div>
+          }
+          <!-- Completed state card -->
+          @if (bankDoc.status === 'completed') {
+            <div class="upload-card upload-card--success">
+              <div class="upload-card__details">
+                <span class="upload-card__name">{{ bankDoc.name }}</span>
+                <span class="upload-card__size">{{ bankDoc.size }}</span>
+              </div>
+              <div class="upload-card__status">
+                <span class="badge-success">مكتمل</span>
+                <button type="button" class="btn-delete" (click)="deleteFile('bankStatement'); $event.stopPropagation()">
+                  <svg class="btn-delete__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- Row 2: Article of Association -->
+    <div class="doc-row">
+      <!-- Label Details (Right) -->
+      <div class="doc-row__labels">
+        <div class="doc-row__title-group">
+          <div class="doc-row__icon-wrapper">
+            <svg class="doc-row__label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <h3 class="doc-row__title">عقد التأسيس</h3>
+        </div>
+        <p class="doc-row__description">النسخة الرسمية والموثقة من عقد تأسيس الشركة أو النظام الأساسي.</p>
+      </div>
+
+      <!-- Drop Upload Zone (Left) -->
+      <div class="upload-zone-wrapper">
+        @let assocDoc = documentFiles().articleOfAssociation;
+        @if (!assocDoc) {
+          <div 
+            class="drop-zone"
+            [class.drop-zone--drag-over]="dragOverStates().articleOfAssociation"
+            (dragover)="onDragOver($event, 'articleOfAssociation')"
+            (dragleave)="onDragLeave($event, 'articleOfAssociation')"
+            (drop)="onDrop($event, 'articleOfAssociation')"
+            (click)="assocInput.click()"
+          >
+            <input #assocInput type="file" class="drop-zone__input" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileSelected($event, 'articleOfAssociation')" />
+            <div class="drop-zone__content">
+              <svg class="drop-zone__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span class="drop-zone__text">اسحب الملف هنا أو اضغط للتحميل</span>
+              <span class="drop-zone__formats">PDF, JPG, PNG (MAX 10MB)</span>
+            </div>
+          </div>
+        } @else {
+          <!-- Uploading state card -->
+          @if (assocDoc.status === 'uploading') {
+            <div class="upload-card">
+              <div class="upload-card__header">
+                <span class="upload-card__name">{{ assocDoc.name }}</span>
+                <span class="upload-card__percent">{{ assocDoc.progress }}%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar__fill" [style.width.%]="assocDoc.progress"></div>
+              </div>
+              <button type="button" class="upload-card__delete" (click)="deleteFile('articleOfAssociation'); $event.stopPropagation()">إلغاء</button>
+            </div>
+          }
+          <!-- Completed state card -->
+          @if (assocDoc.status === 'completed') {
+            <div class="upload-card upload-card--success">
+              <div class="upload-card__details">
+                <span class="upload-card__name">{{ assocDoc.name }}</span>
+                <span class="upload-card__size">{{ assocDoc.size }}</span>
+              </div>
+              <div class="upload-card__status">
+                <span class="badge-success">مكتمل</span>
+                <button type="button" class="btn-delete" (click)="deleteFile('articleOfAssociation'); $event.stopPropagation()">
+                  <svg class="btn-delete__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- Row 3: ID of Manager -->
+    <div class="doc-row">
+      <!-- Label Details (Right) -->
+      <div class="doc-row__labels">
+        <div class="doc-row__title-group">
+          <div class="doc-row__icon-wrapper">
+            <svg class="doc-row__label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <h3 class="doc-row__title">هوية المدير المسؤول</h3>
+        </div>
+        <p class="doc-row__description">نسخة ملونة واضحة من بطاقة الهوية الوطنية أو جواز السفر للمدير المفوض.</p>
+      </div>
+
+      <!-- Drop Upload Zone (Left) -->
+      <div class="upload-zone-wrapper">
+        @let managerDoc = documentFiles().managerId;
+        @if (!managerDoc) {
+          <div 
+            class="drop-zone"
+            [class.drop-zone--drag-over]="dragOverStates().managerId"
+            (dragover)="onDragOver($event, 'managerId')"
+            (dragleave)="onDragLeave($event, 'managerId')"
+            (drop)="onDrop($event, 'managerId')"
+            (click)="managerInput.click()"
+          >
+            <input #managerInput type="file" class="drop-zone__input" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileSelected($event, 'managerId')" />
+            <div class="drop-zone__content">
+              <svg class="drop-zone__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span class="drop-zone__text">اسحب الملف هنا أو اضغط للتحميل</span>
+              <span class="drop-zone__formats">PDF, JPG, PNG (MAX 10MB)</span>
+            </div>
+          </div>
+        } @else {
+          <!-- Uploading state card -->
+          @if (managerDoc.status === 'uploading') {
+            <div class="upload-card">
+              <div class="upload-card__header">
+                <span class="upload-card__name">{{ managerDoc.name }}</span>
+                <span class="upload-card__percent">{{ managerDoc.progress }}%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar__fill" [style.width.%]="managerDoc.progress"></div>
+              </div>
+              <button type="button" class="upload-card__delete" (click)="deleteFile('managerId'); $event.stopPropagation()">إلغاء</button>
+            </div>
+          }
+          <!-- Completed state card -->
+          @if (managerDoc.status === 'completed') {
+            <div class="upload-card upload-card--success">
+              <div class="upload-card__details">
+                <span class="upload-card__name">{{ managerDoc.name }}</span>
+                <span class="upload-card__size">{{ managerDoc.size }}</span>
+              </div>
+              <div class="upload-card__status">
+                <span class="badge-success">مكتمل</span>
+                <button type="button" class="btn-delete" (click)="deleteFile('managerId'); $event.stopPropagation()">
+                  <svg class="btn-delete__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="form-actions">
+    <button type="button" class="btn-submit" (click)="onSubmit()">التالي</button>
+    <button type="button" class="btn-back" (click)="onBackClick()">
+      السابق
+      <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="12 5 19 12 12 19"/>
+      </svg>
+    </button>
+  </div>
+
+</div>
