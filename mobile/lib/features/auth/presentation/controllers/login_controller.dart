@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../features/stores/presentation/screens/welcomepage_screen.dart';
 import '../../../../features/home/presentation/screens/home_screen.dart';
+import '../../../../core/network/api_client.dart';
 
 class LoginController extends GetxController {
   static const String welcomeEmail = 'welcome@salasel.com';
@@ -11,9 +12,12 @@ class LoginController extends GetxController {
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  
+  final ApiClient _apiClient = ApiClient();
 
   RxBool hasText = false.obs;
   RxBool isFocused = false.obs;
+  RxBool isLoading = false.obs;
   RxString errorMessage = ''.obs;
 
   @override
@@ -37,26 +41,48 @@ class LoginController extends GetxController {
     isFocused.value = focused;
   }
 
-  void submitLogin() {
-    if (!hasText.value) return;
+  Future<void> submitLogin() async {
+    if (!hasText.value || isLoading.value) return;
 
     final email = emailController.text.trim().toLowerCase();
     final password = passwordController.text.trim();
 
-    if (email == welcomeEmail && password == welcomePassword) {
-      Get.offAll(
-        () => const StoresScreen(),
-        transition: Transition.fadeIn,
-        duration: const Duration(milliseconds: 350),
-      );
-    } else if (email == homeEmail && password == homePassword) {
-      Get.offAll(
-        () => const HomeScreen(),
-        transition: Transition.fadeIn,
-        duration: const Duration(milliseconds: 350),
-      );
-    } else {
-      errorMessage.value = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+    isLoading.value = true;
+    errorMessage.value = '';
+
+    try {
+      // TODO: Replace with real endpoint
+      /*
+      final response = await _apiClient.dio.post('/auth/login', data: {
+        'email': email,
+        'password': password,
+      });
+      final token = response.data['token'];
+      await _apiClient.saveToken(token);
+      */
+      
+      await Future.delayed(const Duration(seconds: 1)); // Mock network delay
+      
+      // Keeping mock logic for now so UI remains testable
+      if (email == welcomeEmail && password == welcomePassword) {
+        Get.offAll(
+          () => const StoresScreen(),
+          transition: Transition.fadeIn,
+          duration: const Duration(milliseconds: 350),
+        );
+      } else if (email == homeEmail && password == homePassword) {
+        Get.offAll(
+          () => const HomeScreen(),
+          transition: Transition.fadeIn,
+          duration: const Duration(milliseconds: 350),
+        );
+      } else {
+        errorMessage.value = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+      }
+    } catch (e) {
+      errorMessage.value = 'حدث خطأ في الاتصال بالخادم';
+    } finally {
+      isLoading.value = false;
     }
   }
 

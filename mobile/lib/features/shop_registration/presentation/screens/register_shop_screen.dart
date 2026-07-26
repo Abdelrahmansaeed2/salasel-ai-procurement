@@ -3,6 +3,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../controllers/register_shop_controller.dart';
 import '../theme/shop_registration_colors.dart';
@@ -375,11 +378,41 @@ class _MapPickerSection extends StatefulWidget {
 
 class _MapPickerSectionState extends State<_MapPickerSection> {
   bool _locating = false;
+  final MapController _mapController = MapController();
+  LatLng _center = const LatLng(24.7136, 46.6753); // Riyadh default
 
   Future<void> _autoLocate() async {
     setState(() => _locating = true);
-    await Future.delayed(const Duration(milliseconds: 900));
-    if (mounted) setState(() => _locating = false);
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) throw Exception('Location services are disabled.');
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          throw Exception('Location permissions are denied');
+        }
+      }
+      
+      if (permission == LocationPermission.deniedForever) {
+        throw Exception('Location permissions are permanently denied.');
+      } 
+
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+      );
+      
+      final newLoc = LatLng(position.latitude, position.longitude);
+      _mapController.move(newLoc, 15.0);
+      setState(() {
+        _center = newLoc;
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      if (mounted) setState(() => _locating = false);
+    }
   }
 
   @override
@@ -396,9 +429,28 @@ class _MapPickerSectionState extends State<_MapPickerSection> {
           alignment: Alignment.center,
           children: [
             Positioned.fill(
-              child: Image.asset('assets/images/map_bg.png', fit: BoxFit.cover),
+              child: FlutterMap(
+                mapController: _mapController,
+                options: MapOptions(
+                  initialCenter: _center,
+                  initialZoom: 13.0,
+                  onPositionChanged: (position, hasGesture) {
+                    if (hasGesture) {
+                      _center = position.center;
+                    }
+                  },
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.salasel.mobile',
+                  ),
+                ],
+              ),
             ),
-            const FigmaIcon(ShopRegIcons.mapPinLarge, size: 40),
+            const IgnorePointer(
+              child: FigmaIcon(ShopRegIcons.mapPinLarge, size: 40),
+            ),
             Positioned(
               bottom: 16,
               child: ClipRRect(
