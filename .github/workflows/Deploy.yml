@@ -20,11 +20,13 @@ jobs:
 
       - name: Install EF Core CLI
         run: dotnet tool install --global dotnet-ef
-        
+
       - name: Build Project
+        working-directory: ./backend-dotnet
         run: dotnet build
-        
+
       - name: Create Migration Bundle
+        working-directory: ./backend-dotnet
         run: dotnet ef migrations bundle --startup-project Salasel.API/Salasel.API.csproj --project Salasel.Infrastructure/Salasel.Infrastructure.csproj --self-contained -r linux-x64 -o efbundle
 
       - name: Copy Bundle to VPS
@@ -34,8 +36,9 @@ jobs:
           username: toor
           port: ${{ secrets.SERVER_SSH_PORT }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          source: "efbundle"
+          source: "backend-dotnet/efbundle"
           target: "/opt/backend-dotnet/backend-dotnet/"
+          strip_components: 1
 
       - name: Deploy and Migrate on VPS
         uses: appleboy/ssh-action@v1.0.3
