@@ -36,12 +36,17 @@
             (next)="nextStep($event)" 
             (back)="onSaveAndExit()"
           ></app-facility-info-form>
+        } @else if (currentStep() === 2) {
+          <app-license-info-form
+            (next)="nextStep($event)"
+            (back)="prevStep()"
+          ></app-license-info-form>
         } @else if (currentStep() === 3) {
           <app-tax-info-form
             (next)="nextStep($event)"
             (back)="prevStep()"
           ></app-tax-info-form>
-        } @else if (currentStep() >= 2 && currentStep() <= 7) {
+        } @else if (currentStep() >= 4 && currentStep() <= 7) {
           <app-step-placeholder 
             [step]="currentStep()" 
             [stepName]="steps[currentStep() - 1]"
