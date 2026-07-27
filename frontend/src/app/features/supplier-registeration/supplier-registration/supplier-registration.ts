@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
-// Imports sub-components
+// Sub-component imports
 import { RegistrationHeaderComponent } from './components/registration-header/registration-header.component';
 import { RegistrationStepperComponent } from './components/registration-stepper/registration-stepper.component';
 import { FacilityInfoFormComponent } from './components/facility-info-form/facility-info-form.component';
@@ -38,7 +38,7 @@ import { SiteFooterComponent } from '../../../shared/site-footer/site-footer.com
 })
 export class SupplierRegistration {
   // Stepper Controller state
-  readonly currentStep = signal<number>(7);
+  readonly currentStep = signal<number>(8);
   
   // List of steps matching the Figma design
   readonly steps = [

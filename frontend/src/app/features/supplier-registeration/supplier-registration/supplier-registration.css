@@ -22,15 +22,19 @@
 
 /* Specific Figma-defined widths per step */
 .reg-container--step1 {
-  max-width: 896px; /* Figma Form Section + Guidance width is 896px */
+  max-width: 1024px;
 }
 
 .reg-container--step23 {
-  max-width: 750px; /* Figma Tax Information components width is 750px */
+  max-width: 900px;
+}
+
+.reg-container--step7 {
+  max-width: 1140px;
 }
 
 .reg-container--step8 {
-  max-width: 800px;
+  max-width: 900px;
 }
 
 /* Content Column is flat and borderless matching Figma */
