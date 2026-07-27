@@ -1,15 +1,14 @@
 <div class="form-container">
 
-  <!-- Header -->
-  <div class="step-header">
-    <h2 class="step-header__title">مراجعة وتقديم البيانات</h2>
-    <p class="step-header__subtitle">يرجى مراجعة كافة المعلومات المدخلة بعناية قبل التقديم النهائي لعملية التحقق.</p>
-  </div>
+  <app-step-header 
+    [title]="'مراجعة وتقديم البيانات'" 
+    [subtitle]="'يرجى مراجعة كافة المعلومات المدخلة بعناية قبل التقديم النهائي لعملية التحقق.'">
+  </app-step-header>
 
   <!-- Review Sections Grid -->
   <div class="review-sections">
 
-    <!-- Card 1 (Top Left in Figma screenshot): Business Info معلومات المنشأة -->
+    <!-- Business Info -->
     <div class="review-card">
       <div class="review-card__header">
         <div class="review-card__title-group">
@@ -38,7 +37,7 @@
       </div>
     </div>
 
-    <!-- Card 2 (Top Right in Figma screenshot): Contact Person جهة الاتصال -->
+    <!-- Contact Person -->
     <div class="review-card">
       <div class="review-card__header">
         <div class="review-card__title-group">
@@ -83,7 +82,7 @@
       </div>
     </div>
 
-    <!-- Card 3 (Bottom Left in Figma screenshot): Attached Documents المستندات المرفقة -->
+    <!-- Attached Documents -->
     <div class="review-card">
       <div class="review-card__header">
         <div class="review-card__title-group">
@@ -125,7 +124,7 @@
       </div>
     </div>
 
-    <!-- Card 4 (Bottom Right in Figma screenshot): Licenses & Tax السجل والتراخيص -->
+    <!-- Licenses & Registration -->
     <div class="review-card">
       <div class="review-card__header">
         <div class="review-card__title-group">

@@ -5,31 +5,7 @@
   width: 100%;
 }
 
-/* Header */
-.step-header {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  text-align: center;
-}
 
-.step-header__title {
-  color: #1e293b;
-  font-family: 'Noto Sans Arabic', 'Cairo', sans-serif;
-  font-size: clamp(24px, 4vw, 32px);
-  font-weight: 700;
-  line-height: 1.25;
-  margin: 0;
-}
-
-.step-header__subtitle {
-  color: #64748b;
-  font-family: 'Noto Sans Arabic', 'Cairo', sans-serif;
-  font-size: clamp(14px, 2vw, 16px);
-  font-weight: 400;
-  line-height: 1.5;
-  margin: 0;
-}
 
 /* Review Sections Grid */
 .review-sections {
@@ -61,7 +37,6 @@
 
 .review-card:hover {
   border-color: #cbd5e1;
-  /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); */
 }
 
 .review-card__header {

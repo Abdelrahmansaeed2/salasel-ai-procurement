@@ -2,7 +2,6 @@ import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
-// Sub-component imports
 import { RegistrationHeaderComponent } from './components/registration-header/registration-header.component';
 import { RegistrationStepperComponent } from './components/registration-stepper/registration-stepper.component';
 import { FacilityInfoFormComponent } from './components/facility-info-form/facility-info-form.component';
@@ -39,10 +38,8 @@ import { SiteFooterComponent } from '../../../shared/site-footer/site-footer.com
   styleUrl: './supplier-registration.css',
 })
 export class SupplierRegistration {
-  // Stepper Controller state
   readonly currentStep = signal<number>(1);
   
-  // List of steps matching the Figma design
   readonly steps = [
     'معلومات المنشأة',
     'رخصة تجارية',
@@ -54,14 +51,12 @@ export class SupplierRegistration {
     'نجاح'
   ];
 
-  // Dynamic advice notes based on the active step
   readonly stepGuidanceTitle = signal<string>('نصيحة: دقة البيانات تهمنا');
   readonly stepGuidanceText = signal<string>(
     'سيتم مطابقة المعلومات المقدمة هنا مع السجلات التجارية المحلية. تأكد من أن الاسم يطابق رخصتك التجارية تماماً لتجنب التأخير في التحقق.'
   );
 
-  // Form Data Store
-  private registrationData: any = {};
+  private registrationData: Record<string, any> = {};
 
   constructor(private router: Router) {}
 

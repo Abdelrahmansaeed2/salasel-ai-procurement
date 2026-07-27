@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { StepHeaderComponent } from '../shared/step-header/step-header.component';
 
 @Component({
   selector: 'app-review-submit-form',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, StepHeaderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './review-submit-form.component.html',
   styleUrl: './review-submit-form.component.css',
@@ -16,7 +17,6 @@ export class ReviewSubmitFormComponent {
 
   declarationChecked = signal(false);
 
-  // Section: Business Info
   businessInfo = [
     { label: 'اسم المنشأة', value: 'شركة سلاسل للخدمات اللوجستية' },
     { label: 'نوع الكيان', value: 'شركة ذات مسؤولية محدودة' },
@@ -24,14 +24,12 @@ export class ReviewSubmitFormComponent {
     { label: 'تاريخ التأسيس', value: '14 يناير 2018' },
   ];
 
-  // Section: Legal & Tax
   legalTaxInfo = [
     { label: 'رقم السجل التجاري', value: '1010XXXX92', highlighted: true },
     { label: 'تاريخ انتهاء السجل', value: '22 مايو 2026', highlighted: false },
     { label: 'الرقم الضريبي (VAT)', value: '3000XXXXXXXX003', highlighted: true },
   ];
 
-  // Section: Document files
   attachedDocuments = [
     { name: 'شهادة السجل التجاري.pdf', size: '2.4 MB', type: 'pdf' },
     { name: 'شهادة الزكاة والدخل.png', size: '1.1 MB', type: 'image' },

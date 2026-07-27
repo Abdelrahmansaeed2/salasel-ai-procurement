@@ -1,17 +1,13 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, Output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export interface DocFile {
-  name: string;
-  size: string;
-  progress: number;
-  status: 'uploading' | 'completed' | 'failed';
-}
+import { StepHeaderComponent } from '../shared/step-header/step-header.component';
+import { FormActionsComponent } from '../shared/form-actions/form-actions.component';
+import { FileUploadService, UploadFileItem } from '../../services/file-upload.service';
 
 interface DocumentFilesState {
-  bankStatement: DocFile | null;
-  articleOfAssociation: DocFile | null;
-  managerId: DocFile | null;
+  bankStatement: UploadFileItem | null;
+  articleOfAssociation: UploadFileItem | null;
+  managerId: UploadFileItem | null;
 }
 
 interface DragOverState {
@@ -25,12 +21,12 @@ type DocSlotKey = keyof DocumentFilesState;
 @Component({
   selector: 'app-additional-documents-form',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, StepHeaderComponent, FormActionsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './additional-documents-form.component.html',
   styleUrl: './additional-documents-form.component.css',
 })
-export class AdditionalDocumentsFormComponent implements OnDestroy {
+export class AdditionalDocumentsFormComponent {
   @Output() next = new EventEmitter<any>();
   @Output() back = new EventEmitter<void>();
 
@@ -46,11 +42,7 @@ export class AdditionalDocumentsFormComponent implements OnDestroy {
     managerId: false
   });
 
-  private uploadIntervals: Record<string, any> = {};
-
-  ngOnDestroy(): void {
-    Object.values(this.uploadIntervals).forEach(interval => clearInterval(interval));
-  }
+  constructor(private uploadService: FileUploadService) {}
 
   onDragOver(event: DragEvent, key: DocSlotKey): void {
     event.preventDefault();
@@ -82,12 +74,32 @@ export class AdditionalDocumentsFormComponent implements OnDestroy {
   }
 
   deleteFile(key: DocSlotKey): void {
-    if (this.uploadIntervals[key]) {
-      clearInterval(this.uploadIntervals[key]);
-      delete this.uploadIntervals[key];
+    this.documentFiles.update(current => ({ ...current, [key]: null }));
+  }
+
+  private uploadFile(file: File, key: DocSlotKey): void {
+    if (file.size > 10 * 1024 * 1024) {
+      alert('حجم الملف كبير جداً. الحد الأقصى هو 10 ميجابايت.');
+      return;
     }
 
-    this.documentFiles.update(current => ({ ...current, [key]: null }));
+    const items = this.uploadService.processFiles(
+      [file],
+      (updated) => {
+        this.documentFiles.update(current => ({ ...current, [key]: { ...updated } }));
+      },
+      (completed) => {
+        this.documentFiles.update(current => ({ ...current, [key]: { ...completed } }));
+      }
+    );
+
+    if (items.length > 0) {
+      this.documentFiles.update(current => ({ ...current, [key]: items[0] }));
+    }
+  }
+
+  private updateDragState(key: DocSlotKey, state: boolean): void {
+    this.dragOverStates.update(current => ({ ...current, [key]: state }));
   }
 
   onSubmit(): void {
@@ -105,57 +117,5 @@ export class AdditionalDocumentsFormComponent implements OnDestroy {
 
   onBackClick(): void {
     this.back.emit();
-  }
-
-  private updateDragState(key: DocSlotKey, isOver: boolean): void {
-    this.dragOverStates.update(current => ({ ...current, [key]: isOver }));
-  }
-
-  private uploadFile(file: File, key: DocSlotKey): void {
-    if (this.uploadIntervals[key]) {
-      clearInterval(this.uploadIntervals[key]);
-    }
-
-    const formattedSize = this.formatBytes(file.size);
-    const newDoc: DocFile = {
-      name: file.name,
-      size: formattedSize,
-      progress: 0,
-      status: 'uploading'
-    };
-
-    this.documentFiles.update(current => ({ ...current, [key]: newDoc }));
-    this.simulateUpload(key);
-  }
-
-  private simulateUpload(key: DocSlotKey): void {
-    this.uploadIntervals[key] = setInterval(() => {
-      this.documentFiles.update(current => {
-        const doc = current[key];
-        if (!doc) return current;
-
-        const nextProgress = doc.progress + Math.floor(Math.random() * 20) + 10;
-
-        if (nextProgress >= 100) {
-          clearInterval(this.uploadIntervals[key]);
-          delete this.uploadIntervals[key];
-          return { ...current, [key]: { ...doc, progress: 100, status: 'completed' as const } };
-        }
-
-        return { ...current, [key]: { ...doc, progress: nextProgress } };
-      });
-    }, 600);
-  }
-
-  private formatBytes(bytes: number, decimals = 1): string {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const sizeVal = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
-
-    const sizeName = sizes[i] === 'MB' ? 'ميجابايت' : (sizes[i] === 'KB' ? 'كيلوبايت' : sizes[i]);
-    return `${sizeVal} ${sizeName}`;
   }
 }

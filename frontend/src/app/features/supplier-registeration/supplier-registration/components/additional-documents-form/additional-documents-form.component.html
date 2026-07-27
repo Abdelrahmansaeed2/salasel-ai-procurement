@@ -1,12 +1,11 @@
 <div class="form-container">
 
-  <!-- Header Info (Figma ID: 41:764) -->
-  <div class="step-header">
-    <h2 class="step-header__title">تحميل الوثائق الإضافية</h2>
-    <p class="step-header__subtitle">يرجى تقديم الوثائق التالية لإكمال عملية التحقق من الهوية والحساب البنكي.</p>
-  </div>
+  <app-step-header 
+    [title]="'تحميل الوثائق الإضافية'" 
+    [subtitle]="'يرجى تقديم الوثائق التالية لإكمال عملية التحقق من الهوية والحساب البنكي.'">
+  </app-step-header>
 
-  <!-- Guidance Note Banner (Figma ID: 41:769) -->
+  <!-- Guidance Note Banner -->
   <div class="guidance-banner">
     <div class="guidance-banner__icon-wrapper">
       <svg class="guidance-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -34,7 +33,7 @@
     </div>
   </div>
 
-  <!-- Document Rows (Figma ID: 41:788) -->
+  <!-- Document Rows -->
   <div class="documents-section">
     
     <!-- Row 1: Bank Statement -->
@@ -267,15 +266,11 @@
   </div>
 
   <!-- Footer Actions -->
-  <div class="form-actions">
-    <button type="button" class="btn-submit" (click)="onSubmit()">التالي</button>
-    <button type="button" class="btn-back" (click)="onBackClick()">
-      السابق
-      <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <line x1="5" y1="12" x2="19" y2="12"/>
-        <polyline points="12 5 19 12 12 19"/>
-      </svg>
-    </button>
-  </div>
+  <app-form-actions 
+    [submitText]="'التالي'" 
+    [backText]="'السابق'" 
+    (submit)="onSubmit()" 
+    (back)="onBackClick()">
+  </app-form-actions>
 
 </div>

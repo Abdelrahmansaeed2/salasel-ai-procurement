@@ -1,15 +1,14 @@
 <div class="form-container">
   
-  <!-- Header Info (Figma ID: 41:527) -->
-  <div class="step-header">
-    <h2 class="step-header__title">رفع السجل التجاري</h2>
-    <p class="step-header__subtitle">يرجى تقديم نسخة صالحة من السجل التجاري (CR) لتوثيق المنشأة.</p>
-  </div>
+  <app-step-header 
+    [title]="'رفع السجل التجاري'" 
+    [subtitle]="'يرجى تقديم نسخة صالحة من السجل التجاري (CR) لتوثيق المنشأة.'">
+  </app-step-header>
 
-  <!-- Information Panels (Figma ID: 41:531) -->
+  <!-- Information Panels -->
   <div class="info-row">
     
-    <!-- Instant Verification (Figma ID: 41:532) -->
+    <!-- Instant Verification -->
     <div class="info-card info-card--blue">
       <div class="info-card__icon-wrapper">
         <svg class="info-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -23,7 +22,7 @@
       </div>
     </div>
 
-    <!-- Document Requirements (Figma ID: 41:542) -->
+    <!-- Document Requirements -->
     <div class="info-card info-card--requirements">
       <div class="info-card__header">
         <svg class="info-card__header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -53,7 +52,7 @@
 
   </div>
 
-  <!-- Drag and Drop Zone (Figma ID: 41:557) -->
+  <!-- Drag and Drop Zone -->
   <div 
     class="upload-area"
     [class.upload-area--drag-over]="isDragOver()"
@@ -103,7 +102,7 @@
     </div>
   </div>
 
-  <!-- File List & Progress (Figma ID: 41:579) -->
+  <!-- File List & Progress -->
   @if (uploadedFiles().length > 0) {
     <div class="file-list-section">
       <h4 class="file-list-title">الملفات المرفوعة</h4>
@@ -189,16 +188,12 @@
     </div>
   }
 
-  <!-- Footer Actions (Figma ID: 41:614) -->
-  <div class="form-actions">
-    <button type="button" class="btn-submit" (click)="onSubmit()">المتابعة</button>
-    <button type="button" class="btn-back" (click)="onBackClick()">
-      السابق
-      <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <line x1="5" y1="12" x2="19" y2="12"/>
-        <polyline points="12 5 19 12 12 19"/>
-      </svg>
-    </button>
-  </div>
+  <!-- Footer Actions -->
+  <app-form-actions 
+    [submitText]="'المتابعة'" 
+    [backText]="'السابق'" 
+    (submit)="onSubmit()" 
+    (back)="onBackClick()">
+  </app-form-actions>
 
 </div>

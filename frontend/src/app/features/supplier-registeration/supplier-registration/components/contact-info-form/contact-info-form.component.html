@@ -1,10 +1,9 @@
 <div class="form-container" [formGroup]="form">
 
-  <!-- Header Info -->
-  <div class="step-header">
-    <h2 class="step-header__title">معلومات الاتصال</h2>
-    <p class="step-header__subtitle">يرجى تقديم تفاصيل الشخص المسؤول عن التواصل وإدارة الحساب للنشاط التجاري.</p>
-  </div>
+  <app-step-header 
+    [title]="'معلومات الاتصال'" 
+    [subtitle]="'يرجى تقديم تفاصيل الشخص المسؤول عن التواصل وإدارة الحساب للنشاط التجاري.'">
+  </app-step-header>
 
   <!-- Form Fields Grid -->
   <div class="form-section">
@@ -89,15 +88,11 @@
   </div>
 
   <!-- Footer Actions -->
-  <div class="form-actions">
-    <button type="button" class="btn-submit" (click)="onSubmit()">التالي</button>
-    <button type="button" class="btn-back" (click)="onBackClick()">
-      السابق
-      <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <line x1="5" y1="12" x2="19" y2="12"/>
-        <polyline points="12 5 19 12 12 19"/>
-      </svg>
-    </button>
-  </div>
+  <app-form-actions 
+    [submitText]="'التالي'" 
+    [backText]="'السابق'" 
+    (submit)="onSubmit()" 
+    (back)="onBackClick()">
+  </app-form-actions>
 
 </div>

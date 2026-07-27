@@ -1,5 +1,10 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-container">
   
+  <app-step-header 
+    [title]="'معلومات المنشأة'" 
+    [subtitle]="'يرجى إدخال التفاصيل الأساسية ومقر الشركة لبدء عملية التسجيل'">
+  </app-step-header>
+
   <!-- Legal Business Name -->
   <div class="form-field">
     <label class="form-field__label" for="legalName">الاسم التجاري القانوني (بالعربية أو الإنجليزية)</label>
@@ -112,18 +117,11 @@
   </div>
 
   <!-- Actions -->
-  <div class="form-actions">
-    <button type="submit" class="btn-submit">
-      <span>حفظ ومتابعة</span>
-      <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="19" y1="12" x2="5" y2="12"></line>
-        <polyline points="12 19 5 12 12 5"></polyline>
-      </svg>
-    </button>
-    
-    <button type="button" class="btn-back-dashboard" (click)="onBack()">
-      العودة إلى لوحة التحكم
-    </button>
-  </div>
+  <app-form-actions 
+    [submitText]="'حفظ ومتابعة'" 
+    [backText]="'العودة لـ لوحة التحكم'" 
+    (submit)="onSubmit()" 
+    (back)="onBack()">
+  </app-form-actions>
 
 </form>
