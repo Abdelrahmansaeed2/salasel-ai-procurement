@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../../../core/navigation/app_navigator.dart';
 
 class QuickStat {
   final String label;
@@ -52,6 +53,6 @@ class HomeController extends GetxController {
   ];
 
   void changeTab(int index) {
-    bottomNavIndex.value = index;
+    AppNavigator.changeTab(index, currentTabIndex: 0);
   }
 }
