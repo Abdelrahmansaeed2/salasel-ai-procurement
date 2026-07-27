@@ -438,6 +438,31 @@
   transform: translateY(-1px);
 }
 
+.review-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-back-review {
+  color: #434655;
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  background: transparent;
+  padding: 10px 20px;
+  border: 1px solid rgba(115, 118, 134, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-back-review:hover {
+  color: #191b23;
+  background: #faf8ff;
+  border-color: #004ac6;
+}
+
 .btn-submit-review__icon {
   width: 18px;
   height: 18px;

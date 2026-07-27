@@ -159,20 +159,26 @@
   <!-- Declaration & Submit Bar -->
   <div class="declaration-section">
     <div class="declaration-row">
-      <!-- Submit Button (Far Left in RTL) -->
-      <button 
-        type="button" 
-        class="btn-submit-review"
-        [class.btn-submit-review--active]="declarationChecked()"
-        [disabled]="!declarationChecked()"
-        (click)="onSubmit()"
-      >
-        <span>تقديم للتحقق</span>
-        <svg class="btn-submit-review__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
-      </button>
+      <!-- Action Buttons (Left in RTL) -->
+      <div class="review-actions">
+        <button 
+          type="button" 
+          class="btn-submit-review"
+          [class.btn-submit-review--active]="declarationChecked()"
+          [disabled]="!declarationChecked()"
+          (click)="onSubmit()"
+        >
+          <span>تقديم للتحقق</span>
+          <svg class="btn-submit-review__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+
+        <button type="button" class="btn-back-review" (click)="onBackClick()">
+          السابق
+        </button>
+      </div>
 
       <!-- Declaration Checkbox & Text (Far Right in RTL) -->
       <div class="declaration-label" (click)="toggleDeclaration()">
