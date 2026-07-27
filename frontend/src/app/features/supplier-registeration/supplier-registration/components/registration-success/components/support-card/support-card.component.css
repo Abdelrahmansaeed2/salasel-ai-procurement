@@ -1,0 +1,74 @@
+.support-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: right;
+  transition: border-color 0.2s ease;
+}
+
+.support-card:hover {
+  border-color: #cbd5e1;
+}
+
+.support-card__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.support-card__icon {
+  width: 20px;
+  height: 20px;
+  color: #004ac6;
+  flex-shrink: 0;
+}
+
+.support-card__title {
+  color: #004ac6;
+  font-family: 'Cairo', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  margin: 0;
+}
+
+.support-card__body {
+  color: #475569;
+  font-family: 'Cairo', sans-serif;
+  font-size: 14px;
+  line-height: 22px;
+  margin: 0;
+}
+
+.support-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-direction: row-reverse;
+  background: transparent;
+  border: none;
+  color: #004ac6;
+  font-family: 'Cairo', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 4px;
+  transition: color 0.2s ease;
+}
+
+.support-card__link:hover {
+  color: #003694;
+  text-decoration: underline;
+}
+
+.external-icon {
+  width: 14px;
+  height: 14px;
+}

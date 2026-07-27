@@ -69,10 +69,9 @@
             (editStep)="goToStep($event)"
           ></app-review-submit-form>
         } @else if (currentStep() === 8) {
-          <app-step-placeholder 
-            [step]="8" 
+          <app-registration-success
             (finish)="onFinish()"
-          ></app-step-placeholder>
+          ></app-registration-success>
         }
 
         <!-- Guidance Note (Stacked Vertically below Form, only for Step 1 as in Figma) -->
