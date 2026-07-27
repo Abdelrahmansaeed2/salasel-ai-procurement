@@ -148,3 +148,15 @@ yarn.lock
 *~
 .antigravity/mcp.json
 frontend/src/environments/environment.ts
+
+# Python AI Service
+.venv/
+*.egg-info/
+.pytest_cache/
+.Python
+*.pyo
+*.cover
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
