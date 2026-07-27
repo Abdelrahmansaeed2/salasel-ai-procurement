@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../shop_registration/presentation/screens/register_shop_screen.dart';
 import '../controllers/welcomepage_controller.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class StoresScreen extends StatelessWidget {
   const StoresScreen({super.key});
@@ -21,48 +22,48 @@ class StoresScreen extends StatelessWidget {
         child: Directionality(
           textDirection: TextDirection.rtl,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'مرحبًا أحمد',
-                  style: AppTextStyles.welcomeTitle.copyWith(fontSize: 24),
+                  style: AppTextStyles.welcomeTitle.copyWith(fontSize: 24.sp),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Text(
                   'اختر متجرك للمتابعة أو قم بإنشاء متجر جديد.',
-                  style: AppTextStyles.welcomeSubtitle.copyWith(fontSize: 14),
+                  style: AppTextStyles.welcomeSubtitle.copyWith(fontSize: 14.sp),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
                 Row(
                   children: [
                     Text(
                       'متاجرك المسجلة',
                       style: AppTextStyles.fieldValue.copyWith(
-                        fontSize: 16,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const Spacer(),
+                    Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEFF6FF),
-                        borderRadius: BorderRadius.circular(20),
+                        color: Color(0xFFEFF6FF),
+                        borderRadius: BorderRadius.circular(20.r),
                       ),
                       child: Text(
                         '2 متاجر',
                         style: AppTextStyles.fieldValue.copyWith(
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF2563EB),
+                          color: Color(0xFF2563EB),
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 const _StoreCard(
                   title: 'بقالة أحمد',
                   category: 'مواد غذائية',
@@ -71,7 +72,7 @@ class StoresScreen extends StatelessWidget {
                   isActive: true,
                   icon: Icons.storefront_outlined,
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 const _StoreCard(
                   title: 'مخبوزات الصباح',
                   category: 'مطاعم ومقاهي',
@@ -80,9 +81,9 @@ class StoresScreen extends StatelessWidget {
                   isActive: true,
                   icon: Icons.restaurant_menu_outlined,
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 const _AddStoreCard(),
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
               ],
             ),
           ),
@@ -100,7 +101,7 @@ class StoresScreen extends StatelessWidget {
       centerTitle: false,
       leadingWidth: 80,
       leading: Padding(
-        padding: const EdgeInsets.only(right: 20),
+        padding: EdgeInsets.only(right: 20.w),
         child: Image.asset(
           'assets/images/salasel_logo.png',
           fit: BoxFit.contain,
@@ -108,16 +109,16 @@ class StoresScreen extends StatelessWidget {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.notifications_none_rounded),
+          icon: Icon(Icons.notifications_none_rounded),
           color: AppColors.textPrimary,
           onPressed: () {},
         ),
         IconButton(
-          icon: const Icon(Icons.menu_rounded),
+          icon: Icon(Icons.menu_rounded),
           color: AppColors.textPrimary,
           onPressed: () {},
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8.w),
       ],
     );
   }
@@ -133,7 +134,7 @@ class StoresScreen extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.05),
-              offset: const Offset(0, -4),
+              offset: Offset(0, -4),
               blurRadius: 16,
             ),
           ],
@@ -196,32 +197,32 @@ class _StoreCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border, width: 1),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: AppColors.border, width: 1.w),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 8,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.w),
             child: Row(
               children: [
                 Container(
-                  width: 48,
-                  height: 48,
+                  width: 48.w,
+                  height: 48.h,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEEF2FF),
-                    borderRadius: BorderRadius.circular(12),
+                    color: Color(0xFFEEF2FF),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
-                  child: Icon(icon, color: const Color(0xFF2563EB), size: 24),
+                  child: Icon(icon, color: Color(0xFF2563EB), size: 24.w),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,14 +230,14 @@ class _StoreCard extends StatelessWidget {
                       Text(
                         title,
                         style: AppTextStyles.fieldValue.copyWith(
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       Text(
                         category,
                         style: AppTextStyles.fieldValue.copyWith(
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w500,
                           color: AppColors.textSecondary,
                         ),
@@ -246,10 +247,10 @@ class _StoreCard extends StatelessWidget {
                 ),
                 if (isActive)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD1FAE5),
-                      borderRadius: BorderRadius.circular(20),
+                      color: Color(0xFFD1FAE5),
+                      borderRadius: BorderRadius.circular(20.r),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -257,16 +258,16 @@ class _StoreCard extends StatelessWidget {
                         Text(
                           'نشط',
                           style: AppTextStyles.fieldValue.copyWith(
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF059669),
+                            color: Color(0xFF059669),
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        SizedBox(width: 6.w),
                         Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(
+                          width: 6.w,
+                          height: 6.h,
+                          decoration: BoxDecoration(
                             color: Color(0xFF059669),
                             shape: BoxShape.circle,
                           ),
@@ -277,34 +278,34 @@ class _StoreCard extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1, color: AppColors.border),
+          Divider(height: 1.h, color: AppColors.border),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             child: Row(
               children: [
-                const Icon(Icons.location_on_outlined, size: 16, color: AppColors.textSecondary),
-                const SizedBox(width: 4),
+                Icon(Icons.location_on_outlined, size: 16.w, color: AppColors.textSecondary),
+                SizedBox(width: 4.w),
                 Text(
                   location,
                   style: AppTextStyles.fieldValue.copyWith(
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
                     color: AppColors.textSecondary,
                   ),
                 ),
-                const Spacer(),
+                Spacer(),
                 Text.rich(
                   TextSpan(
                     children: [
-                      const TextSpan(text: 'آخر نشاط: '),
+                      TextSpan(text: 'آخر نشاط: '),
                       TextSpan(
                         text: lastActive,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                        style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
                   style: AppTextStyles.fieldValue.copyWith(
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     color: AppColors.textSecondary,
                   ),
                 ),
@@ -323,45 +324,45 @@ class _AddStoreCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _DashedRectPainter(color: const Color(0xFFCBD5E1)),
+      painter: _DashedRectPainter(color: Color(0xFFCBD5E1)),
       child: InkWell(
         onTap: () => Get.to(
-          () => const RegisterShopScreen(),
+          () => RegisterShopScreen(),
           transition: Transition.cupertino,
-          duration: const Duration(milliseconds: 350),
+          duration: Duration(milliseconds: 350),
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24.w),
           child: Column(
             children: [
               Container(
-                width: 56,
-                height: 56,
-                decoration: const BoxDecoration(
+                width: 56.w,
+                height: 56.h,
+                decoration: BoxDecoration(
                   color: Color(0xFFF1F5F9),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.add, size: 28, color: AppColors.textPrimary),
+                child: Icon(Icons.add, size: 28.w, color: AppColors.textPrimary),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               Text(
                 'تسجيل متجر جديد',
                 style: AppTextStyles.fieldValue.copyWith(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Text(
                 'ابدأ بإنشاء عمل جديد وابدأ الطلب عبر الذكاء\nالاصطناعي.',
                 textAlign: TextAlign.center,
                 style: AppTextStyles.fieldValue.copyWith(
-                  fontSize: 13,
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w500,
                   color: AppColors.textSecondary,
-                  height: 1.5,
+                  height: 1.5.h,
                 ),
               ),
             ],
@@ -389,59 +390,59 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isSelected ? const Color(0xFF2563EB) : const Color(0xFF94A3B8);
+    final color = isSelected ? Color(0xFF2563EB) : Color(0xFF94A3B8);
 
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (isSelected)
               Container(
-                width: 32,
-                height: 3,
-                margin: const EdgeInsets.only(bottom: 6),
+                width: 32.w,
+                height: 3.h,
+                margin: EdgeInsets.only(bottom: 6.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
-                  borderRadius: BorderRadius.circular(2),
+                  color: Color(0xFF2563EB),
+                  borderRadius: BorderRadius.circular(2.r),
                 ),
               )
             else
-              const SizedBox(height: 9),
+              SizedBox(height: 9.h),
             Stack(
               clipBehavior: Clip.none,
               children: [
-                Icon(icon, color: color, size: 24),
+                Icon(icon, color: color, size: 24.w),
                 if (badgeCount > 0)
                   Positioned(
                     right: -6,
                     top: -4,
                     child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
+                      padding: EdgeInsets.all(4.w),
+                      decoration: BoxDecoration(
                         color: Color(0xFFEF4444),
                         shape: BoxShape.circle,
                       ),
                       child: Text(
                         badgeCount.toString(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 10,
+                          fontSize: 10.sp,
                           fontWeight: FontWeight.bold,
-                          height: 1,
+                          height: 1.h,
                         ),
                       ),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
             Text(
               label,
               style: AppTextStyles.fieldValue.copyWith(
-                fontSize: 12,
+                fontSize: 12.sp,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                 color: color,
               ),
@@ -467,7 +468,7 @@ class _DashedRectPainter extends CustomPainter {
     final path = Path();
     final rrect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0, 0, size.width, size.height),
-      const Radius.circular(16),
+      Radius.circular(16.r),
     );
     path.addRRect(rrect);
 

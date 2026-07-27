@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/home_colors.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 enum QuickStatVariant { pending, delivery, lowStock }
 
@@ -87,60 +88,60 @@ class _QuickStatCardState extends State<QuickStatCard> {
       onTapCancel: () => _setPressed(false),
       child: AnimatedScale(
         scale: _pressed ? 0.96 : 1,
-        duration: const Duration(milliseconds: 120),
+        duration: Duration(milliseconds: 120),
         curve: Curves.easeOut,
         child: Material(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
           child: InkWell(
             onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
             splashColor: _border.withValues(alpha: 0.08),
             highlightColor: _border.withValues(alpha: 0.05),
             child: Container(
-              width: 160,
-              padding: const EdgeInsets.all(16),
+              width: 160.w,
+              padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.8),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: _border, width: 1),
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(color: _border, width: 1.w),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: 40.w,
+                    height: 40.h,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: _iconBg,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: SvgPicture.string(
                       '<svg width="${vb[0]}" height="${vb[1]}" viewBox="0 0 ${vb[0]} ${vb[1]}" fill="none" xmlns="http://www.w3.org/2000/svg">'
                       '<path d="${QuickStatCard._icons[widget.variant]}" fill="${_hex(_iconColor)}"/></svg>',
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6.h),
                   Text(
                     widget.label,
                     textAlign: TextAlign.right,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: HomeColors.cardLabel,
                       fontFamily: 'Cairo',
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.6,
-                      height: 1.2,
+                      height: 1.2.h,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6.h),
                   TweenAnimationBuilder<int>(
                     tween: IntTween(begin: 0, end: int.tryParse(widget.value) ?? 0),
-                    duration: const Duration(milliseconds: 700),
+                    duration: Duration(milliseconds: 700),
                     curve: Curves.easeOutCubic,
                     builder: (context, animatedValue, _) {
                       final display = int.tryParse(widget.value) == null
@@ -149,12 +150,12 @@ class _QuickStatCardState extends State<QuickStatCard> {
                       return Text(
                         display,
                         textAlign: TextAlign.right,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: HomeColors.cardValue,
                           fontFamily: 'Cairo',
-                          fontSize: 24,
+                          fontSize: 24.sp,
                           fontWeight: FontWeight.w800,
-                          height: 1.2,
+                          height: 1.2.h,
                         ),
                       );
                     },

@@ -4,13 +4,13 @@ import '../../domain/order_review_models.dart';
 
 class OrderReviewController extends GetxController {
   final RxList<ExtractedProduct> products = <ExtractedProduct>[
-    const ExtractedProduct(
+    ExtractedProduct(
       name: 'مياه معدنية ٥٠٠ مل',
       quantity: 20,
       unitLabel: 'كرتون',
       unitPrice: 12.50,
     ),
-    const ExtractedProduct(
+    ExtractedProduct(
       name: 'عصير برتقال طبيعي',
       quantity: 12,
       unitLabel: 'كرتون',
@@ -21,7 +21,7 @@ class OrderReviewController extends GetxController {
 
   final RxInt editingIndex = (-1).obs;
 
-  final List<RiskAlert> riskAlerts = const [
+  final List<RiskAlert> riskAlerts = [
     RiskAlert(
       title: 'لا تهديدات موجودة',
       subtitle: 'مورد موثوق ومُعتمد',

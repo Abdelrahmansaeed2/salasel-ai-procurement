@@ -10,7 +10,7 @@ class AnimatedEntrance extends StatefulWidget {
   const AnimatedEntrance({
     super.key,
     required this.child,
-    this.delay = Duration.zero,
+    this.delay = const Duration(milliseconds: 0),
     this.duration = const Duration(milliseconds: 450),
     this.beginOffset = const Offset(0, 0.08),
   });

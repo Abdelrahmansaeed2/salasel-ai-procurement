@@ -11,6 +11,7 @@ import '../controllers/home_controller.dart';
 import '../theme/home_colors.dart';
 import '../widgets/quick_stat_card.dart';
 import '../widgets/recent_order_tile.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 const String _avatarUrl =
     'https://api.builder.io/api/v1/image/assets/TEMP/c7070914a8d0a025b8aab03d2f42684260d4b530?width=72';
@@ -31,29 +32,29 @@ class HomeScreen extends StatelessWidget {
             children: [
               AnimatedEntrance(
                 beginOffset: Offset.zero,
-                duration: const Duration(milliseconds: 350),
+                duration: Duration(milliseconds: 350),
                 child: _buildHeader(),
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
+                  physics: BouncingScrollPhysics(),
                   child: Column(
                     children: [
-                      const AnimatedEntrance(
+                      AnimatedEntrance(
                         delay: Duration(milliseconds: 60),
                         child: _MicSection(),
                       ),
-                      const SizedBox(height: 34),
+                      SizedBox(height: 34.h),
                       AnimatedEntrance(
-                        delay: const Duration(milliseconds: 160),
+                        delay: Duration(milliseconds: 160),
                         child: _buildQuickStats(controller),
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       AnimatedEntrance(
-                        delay: const Duration(milliseconds: 260),
+                        delay: Duration(milliseconds: 260),
                         child: _buildRecentOrders(controller),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: 24.h),
                     ],
                   ),
                 ),
@@ -73,19 +74,19 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildHeader() {
     return Container(
-      height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: 64.h,
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       color: HomeColors.headerBg,
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Row(
         children: [
           AnimatedPressable(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20.r),
             onTap: () => Get.snackbar('الإشعارات', 'لا توجد إشعارات جديدة حالياً'),
             child: SizedBox(
-              width: 40,
-              height: 40,
+              width: 40.w,
+              height: 40.h,
               child: Center(
                 child: SvgPicture.string(
                   '<svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">'
@@ -94,37 +95,37 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          const Spacer(),
-          const Text(
+          Spacer(),
+          Text(
             'متجر سارة',
             style: TextStyle(
               color: Color(0xFF333333),
               fontFamily: 'Cairo',
-              fontSize: 18,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w700,
-              height: 1.73,
+              height: 1.73.h,
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           AnimatedPressable(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20.r),
             onTap: () => Get.snackbar('حسابي', 'إدارة حساب المتجر قريباً'),
             child: Container(
-              width: 40,
-              height: 40,
+              width: 40.w,
+              height: 40.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: HomeColors.avatarBorder, width: 2),
+                border: Border.all(color: HomeColors.avatarBorder, width: 2.w),
               ),
               child: ClipOval(
                 child: CachedNetworkImage(
                   imageUrl: _avatarUrl,
                   fit: BoxFit.cover,
-                  fadeInDuration: const Duration(milliseconds: 300),
-                  placeholder: (_, __) => const ColoredBox(
+                  fadeInDuration: Duration(milliseconds: 300),
+                  placeholder: (_, __) => ColoredBox(
                     color: HomeColors.avatarBorder,
                   ),
-                  errorWidget: (_, __, ___) => const ColoredBox(
+                  errorWidget: (_, __, ___) => ColoredBox(
                     color: HomeColors.avatarBorder,
                     child: Icon(Icons.person, color: Colors.white),
                   ),
@@ -143,30 +144,30 @@ class HomeScreen extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: Row(
             children: [
-              const Text(
+              Text(
                 'لمحة سريعة',
                 style: TextStyle(
                   color: HomeColors.sectionTitle,
                   fontFamily: 'Cairo',
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
-                  height: 1.5,
+                  height: 1.5.h,
                 ),
               ),
-              const Spacer(),
+              Spacer(),
               TextButton(
                 onPressed: () {},
-                child: const Text(
+                child: Text(
                   'عرض الكل',
                   style: TextStyle(
                     color: HomeColors.viewAll,
                     fontFamily: 'Cairo',
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
-                    height: 1.5,
+                    height: 1.5.h,
                   ),
                 ),
               ),
@@ -174,12 +175,12 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 160,
+          height: 160.h,
           child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
             scrollDirection: Axis.horizontal,
             itemCount: controller.quickStats.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            separatorBuilder: (_, __) => SizedBox(width: 12.w),
             itemBuilder: (context, index) {
               const variants = [
                 QuickStatVariant.lowStock,
@@ -190,7 +191,7 @@ class HomeScreen extends StatelessWidget {
               final variant = variants[index];
               return AnimatedEntrance(
                 delay: Duration(milliseconds: 80 * index),
-                beginOffset: const Offset(0.12, 0),
+                beginOffset: Offset(0.12, 0),
                 child: QuickStatCard(
                   variant: variant,
                   label: stat.label,
@@ -206,39 +207,39 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildRecentOrders(HomeController controller) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Row(
             children: [
-              const Text(
+              Text(
                 'آخر الطلبات',
                 style: TextStyle(
                   color: HomeColors.sectionTitle,
                   fontFamily: 'Cairo',
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
-                  height: 1.5,
+                  height: 1.5.h,
                 ),
               ),
-              const Spacer(),
+              Spacer(),
               TextButton(
                 onPressed: () {},
-                child: const Text(
+                child: Text(
                   'عرض الكل',
                   style: TextStyle(
                     color: HomeColors.viewAll,
                     fontFamily: 'Cairo',
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
-                    height: 1.5,
+                    height: 1.5.h,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           ...List.generate(controller.recentOrders.length, (index) {
             final order = controller.recentOrders[index];
             return AnimatedEntrance(
@@ -272,7 +273,7 @@ class _MicSectionState extends State<_MicSection>
     super.initState();
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: Duration(milliseconds: 1800),
     )..repeat(reverse: true);
   }
 
@@ -284,7 +285,7 @@ class _MicSectionState extends State<_MicSection>
 
   void _openVoiceRecording() {
     Get.to(
-      () => const VoiceRecordingScreen(),
+      () => VoiceRecordingScreen(),
       transition: Transition.fadeIn,
     );
   }
@@ -292,12 +293,12 @@ class _MicSectionState extends State<_MicSection>
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
+      padding: EdgeInsets.only(top: 16.h),
       child: Column(
         children: [
           SizedBox(
-            width: 220,
-            height: 209,
+            width: 220.w,
+            height: 209.h,
             child: Stack(
               alignment: Alignment.center,
               children: [
@@ -314,11 +315,11 @@ class _MicSectionState extends State<_MicSection>
                     );
                   },
                   child: Container(
-                    width: 216,
-                    height: 216,
+                    width: 216.w,
+                    height: 216.h,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0x052563EB)),
+                      border: Border.all(color: Color(0x052563EB)),
                     ),
                   ),
                 ),
@@ -335,11 +336,11 @@ class _MicSectionState extends State<_MicSection>
                     );
                   },
                   child: Container(
-                    width: 188,
-                    height: 188,
+                    width: 188.w,
+                    height: 188.h,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0x0D2563EB)),
+                      border: Border.all(color: Color(0x0D2563EB)),
                     ),
                   ),
                 ),
@@ -353,12 +354,12 @@ class _MicSectionState extends State<_MicSection>
                     );
                   },
                   child: Container(
-                    width: 160,
-                    height: 160,
+                    width: 160.w,
+                    height: 160.h,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0x1A2563EB)),
-                      color: const Color(0x1A2563EB),
+                      border: Border.all(color: Color(0x1A2563EB)),
+                      color: Color(0x1A2563EB),
                     ),
                   ),
                 ),
@@ -367,13 +368,13 @@ class _MicSectionState extends State<_MicSection>
                   builder: (context, child) {
                     final t = _pulseController.value;
                     return Container(
-                      width: 140,
-                      height: 140,
+                      width: 140.w,
+                      height: 140.h,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0x1A2563EB),
+                            color: Color(0x1A2563EB),
                             blurRadius: 35 + (t * 15),
                             spreadRadius: 15 + (t * 6),
                           ),
@@ -388,21 +389,21 @@ class _MicSectionState extends State<_MicSection>
                   onTapCancel: () => setState(() => _pressed = false),
                   child: AnimatedScale(
                     scale: _pressed ? 0.94 : 1,
-                    duration: const Duration(milliseconds: 120),
+                    duration: Duration(milliseconds: 120),
                     curve: Curves.easeOut,
                     child: Material(
                       color: Colors.transparent,
-                      shape: const CircleBorder(),
+                      shape: CircleBorder(),
                       child: InkWell(
-                        customBorder: const CircleBorder(),
+                        customBorder: CircleBorder(),
                         onTap: _openVoiceRecording,
                         child: Container(
-                          width: 136,
-                          height: 136,
+                          width: 136.w,
+                          height: 136.h,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: const LinearGradient(
+                            gradient: LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
@@ -425,19 +426,19 @@ class _MicSectionState extends State<_MicSection>
                             children: [
                               SvgPicture.asset(
                                 'assets/icons/mic_icon.svg',
-                                width: 34,
-                                height: 37,
+                                width: 34.w,
+                                height: 37.h,
                               ),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4.h),
                               Text(
                                 'اضغط للطلب',
                                 style: TextStyle(
                                   color: Colors.white.withValues(alpha: 0.8),
                                   fontFamily: 'Cairo',
-                                  fontSize: 10,
+                                  fontSize: 10.sp,
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: 0.25,
-                                  height: 1.5,
+                                  height: 1.5.h,
                                 ),
                               ),
                             ],
@@ -450,31 +451,31 @@ class _MicSectionState extends State<_MicSection>
               ],
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.only(top: 4),
+          Padding(
+            padding: EdgeInsets.only(top: 4.h),
             child: Text(
               'اضغط واطلب بضاعتك',
               style: TextStyle(
                 color: HomeColors.ctaText,
                 fontFamily: 'Cairo',
-                fontSize: 18,
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w800,
-                height: 1.5,
+                height: 1.5.h,
               ),
             ),
           ),
-          const SizedBox(height: 4),
-          const SizedBox(
-            width: 250,
+          SizedBox(height: 4.h),
+          SizedBox(
+            width: 250.w,
             child: Text(
               'الذكاء الاصطناعي جاهز لتلقي طلبك الصوتي',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: HomeColors.subtitle,
                 fontFamily: 'Cairo',
-                fontSize: 14,
+                fontSize: 14.sp,
                 fontWeight: FontWeight.w400,
-                height: 1.5,
+                height: 1.5.h,
               ),
             ),
           ),

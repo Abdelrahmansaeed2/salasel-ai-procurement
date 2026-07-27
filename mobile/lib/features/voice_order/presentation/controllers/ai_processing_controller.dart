@@ -8,11 +8,11 @@ enum ProcessingStepState { completed, active, pending }
 class ProcessingStep {
   final String title;
   final String subtitle;
-  const ProcessingStep({required this.title, required this.subtitle});
+  ProcessingStep({required this.title, required this.subtitle});
 }
 
 class AiProcessingController extends GetxController {
-  final List<ProcessingStep> steps = const [
+  final List<ProcessingStep> steps = [
     ProcessingStep(title: 'تم استلام الصوت', subtitle: 'تم تسجيل الطلب بنجاح'),
     ProcessingStep(title: 'فهم الطلب...', subtitle: 'تحليل المكونات والكميات'),
     ProcessingStep(title: 'مطابقة المنتجات', subtitle: 'البحث في الكتالوج المتاح'),
@@ -25,12 +25,12 @@ class AiProcessingController extends GetxController {
 
   void start(VoidCallback onFinishedCallback) {
     onFinished = onFinishedCallback;
-    _timer = Timer.periodic(const Duration(milliseconds: 900), (timer) {
+    _timer = Timer.periodic(Duration(milliseconds: 900), (timer) {
       if (activeStep.value < steps.length - 1) {
         activeStep.value++;
       } else {
         timer.cancel();
-        Future.delayed(const Duration(milliseconds: 500), () {
+        Future.delayed(Duration(milliseconds: 500), () {
           onFinished?.call();
         });
       }

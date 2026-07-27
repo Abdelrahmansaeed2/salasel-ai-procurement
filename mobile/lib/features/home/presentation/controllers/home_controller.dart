@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 class QuickStat {
   final String label;
   final String value;
-  const QuickStat({required this.label, required this.value});
+  QuickStat({required this.label, required this.value});
 }
 
 class RecentOrder {
@@ -13,7 +13,7 @@ class RecentOrder {
   final String status;
   final bool isDelivered;
   final String time;
-  const RecentOrder({
+  RecentOrder({
     required this.emoji,
     required this.supplier,
     required this.items,
@@ -26,13 +26,13 @@ class RecentOrder {
 class HomeController extends GetxController {
   final RxInt bottomNavIndex = 0.obs;
 
-  final List<QuickStat> quickStats = const [
+  final List<QuickStat> quickStats = [
     QuickStat(label: 'تنبيه نقص المخزون', value: '12'),
     QuickStat(label: 'طلبات قيد التوصيل', value: '5'),
     QuickStat(label: 'بانتظار الاعتماد', value: '8'),
   ];
 
-  final List<RecentOrder> recentOrders = const [
+  final List<RecentOrder> recentOrders = [
     RecentOrder(
       emoji: '🧺',
       supplier: 'الجوهرة للتوزيع',

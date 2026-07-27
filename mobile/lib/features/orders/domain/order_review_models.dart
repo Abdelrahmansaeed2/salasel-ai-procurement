@@ -5,7 +5,7 @@ class ExtractedProduct {
   final double unitPrice;
   final String? note;
 
-  const ExtractedProduct({
+  ExtractedProduct({
     required this.name,
     required this.quantity,
     required this.unitLabel,
@@ -29,7 +29,7 @@ class RiskAlert {
   final String subtitle;
   final RiskAlertLevel level;
 
-  const RiskAlert({
+  RiskAlert({
     required this.title,
     required this.subtitle,
     required this.level,

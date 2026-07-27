@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class _NavItemData {
   final String svgPath;
@@ -55,9 +56,9 @@ class AppBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFF1F5F9), width: 1)),
+        border: Border(top: BorderSide(color: Color(0xFFF1F5F9), width: 1.w)),
       ),
       child: SafeArea(
         top: false,
@@ -70,17 +71,17 @@ class AppBottomNavBar extends StatelessWidget {
               child: InkWell(
                 onTap: () => onTap?.call(index),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: EdgeInsets.symmetric(vertical: 8.h),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       AnimatedScale(
                         scale: isActive ? 1.1 : 1,
-                        duration: const Duration(milliseconds: 200),
+                        duration: Duration(milliseconds: 200),
                         curve: Curves.easeOut,
                         child: SizedBox(
-                          width: 22,
-                          height: 22,
+                          width: 22.w,
+                          height: 22.h,
                           child: Stack(
                             clipBehavior: Clip.none,
                             children: [
@@ -91,23 +92,23 @@ class AppBottomNavBar extends StatelessWidget {
                               ),
                               if (item.badgeCount != null)
                                 Positioned(
-                                  left: 12,
+                                  left: 12.w,
                                   top: -6,
                                   child: Container(
-                                    width: 16,
-                                    height: 16,
+                                    width: 16.w,
+                                    height: 16.h,
                                     alignment: Alignment.center,
-                                    decoration: const BoxDecoration(
+                                    decoration: BoxDecoration(
                                       color: Color(0xFFEF4444),
                                       shape: BoxShape.circle,
                                     ),
                                     child: Text(
                                       '${item.badgeCount}',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 9,
+                                        fontSize: 9.sp,
                                         fontWeight: FontWeight.w700,
-                                        height: 1.5,
+                                        height: 1.5.h,
                                       ),
                                     ),
                                   ),
@@ -116,27 +117,27 @@ class AppBottomNavBar extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4.h),
                       AnimatedDefaultTextStyle(
-                        duration: const Duration(milliseconds: 200),
+                        duration: Duration(milliseconds: 200),
                         style: TextStyle(
                           color: color,
                           fontFamily: 'Cairo',
-                          fontSize: 10,
+                          fontSize: 10.sp,
                           fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
-                          height: 1.5,
+                          height: 1.5.h,
                         ),
                         child: Text(item.label),
                       ),
                       AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
+                        duration: Duration(milliseconds: 200),
                         curve: Curves.easeOut,
-                        margin: const EdgeInsets.only(top: 4),
+                        margin: EdgeInsets.only(top: 4.h),
                         width: isActive ? 24 : 0,
-                        height: 2,
+                        height: 2.h,
                         decoration: BoxDecoration(
                           color: _activeColor,
-                          borderRadius: BorderRadius.circular(999),
+                          borderRadius: BorderRadius.circular(999.r),
                         ),
                       ),
                     ],

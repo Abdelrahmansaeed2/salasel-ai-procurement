@@ -35,7 +35,7 @@ class _AnimatedPressableState extends State<AnimatedPressable> {
       onTapCancel: () => _setPressed(false),
       child: AnimatedScale(
         scale: _pressed ? widget.pressedScale : 1,
-        duration: const Duration(milliseconds: 120),
+        duration: Duration(milliseconds: 120),
         curve: Curves.easeOut,
         child: Material(
           color: Colors.transparent,

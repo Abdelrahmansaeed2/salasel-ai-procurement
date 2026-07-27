@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({
@@ -56,58 +57,58 @@ class _SplashScreenState extends State<SplashScreen>
 
     _entranceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1600),
+      duration: Duration(milliseconds: 1600),
     );
 
     _breatheController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1400),
+      duration: Duration(milliseconds: 1400),
     )..repeat(reverse: true);
 
     _rippleController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2200),
+      duration: Duration(milliseconds: 2200),
     )..repeat();
 
     _swayController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 4200),
+      duration: Duration(milliseconds: 4200),
     )..repeat(reverse: true);
 
     _floatController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2600),
+      duration: Duration(milliseconds: 2600),
     )..repeat(reverse: true);
 
     _glowController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3200),
+      duration: Duration(milliseconds: 3200),
     )..repeat(reverse: true);
 
     _shimmerController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2400),
+      duration: Duration(milliseconds: 2400),
     )..repeat();
 
     _dotsController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1100),
+      duration: Duration(milliseconds: 1100),
     )..repeat();
 
     _logoFade = CurvedAnimation(
       parent: _entranceController,
-      curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
+      curve: Interval(0.0, 0.4, curve: Curves.easeOut),
     );
     _logoScale = Tween(begin: 0.6, end: 1.0).animate(
       CurvedAnimation(
         parent: _entranceController,
-        curve: const Interval(0.0, 0.55, curve: Curves.easeOutBack),
+        curve: Interval(0.0, 0.55, curve: Curves.easeOutBack),
       ),
     );
     _logoRotation = Tween(begin: -0.08, end: 0.0).animate(
       CurvedAnimation(
         parent: _entranceController,
-        curve: const Interval(0.0, 0.55, curve: Curves.easeOutCubic),
+        curve: Interval(0.0, 0.55, curve: Curves.easeOutCubic),
       ),
     );
     _logoFloat = Tween(begin: -6.0, end: 6.0).animate(
@@ -116,52 +117,52 @@ class _SplashScreenState extends State<SplashScreen>
 
     _networkFade = CurvedAnimation(
       parent: _entranceController,
-      curve: const Interval(0.25, 0.65, curve: Curves.easeOut),
+      curve: Interval(0.25, 0.65, curve: Curves.easeOut),
     );
     _networkScale = Tween(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(
         parent: _entranceController,
-        curve: const Interval(0.25, 0.7, curve: Curves.easeOutBack),
+        curve: Interval(0.25, 0.7, curve: Curves.easeOutBack),
       ),
     );
 
     _micFade = CurvedAnimation(
       parent: _entranceController,
-      curve: const Interval(0.5, 0.8, curve: Curves.easeOut),
+      curve: Interval(0.5, 0.8, curve: Curves.easeOut),
     );
     _micScale = Tween(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _entranceController,
-        curve: const Interval(0.5, 0.9, curve: Curves.elasticOut),
+        curve: Interval(0.5, 0.9, curve: Curves.elasticOut),
       ),
     );
 
     _titleFade = CurvedAnimation(
       parent: _entranceController,
-      curve: const Interval(0.65, 1.0, curve: Curves.easeOut),
+      curve: Interval(0.65, 1.0, curve: Curves.easeOut),
     );
-    _titleSlide = Tween(begin: const Offset(0, 0.4), end: Offset.zero).animate(
+    _titleSlide = Tween(begin: Offset(0, 0.4), end: Offset.zero).animate(
       CurvedAnimation(
         parent: _entranceController,
-        curve: const Interval(0.65, 1.0, curve: Curves.easeOutCubic),
+        curve: Interval(0.65, 1.0, curve: Curves.easeOutCubic),
       ),
     );
 
     _subtitleFade = CurvedAnimation(
       parent: _entranceController,
-      curve: const Interval(0.78, 1.0, curve: Curves.easeOut),
+      curve: Interval(0.78, 1.0, curve: Curves.easeOut),
     );
     _subtitleSlide =
-        Tween(begin: const Offset(0, 0.4), end: Offset.zero).animate(
+        Tween(begin: Offset(0, 0.4), end: Offset.zero).animate(
       CurvedAnimation(
         parent: _entranceController,
-        curve: const Interval(0.78, 1.0, curve: Curves.easeOutCubic),
+        curve: Interval(0.78, 1.0, curve: Curves.easeOutCubic),
       ),
     );
 
     _dotsFade = CurvedAnimation(
       parent: _entranceController,
-      curve: const Interval(0.9, 1.0, curve: Curves.easeOut),
+      curve: Interval(0.9, 1.0, curve: Curves.easeOut),
     );
 
     _entranceController.forward();
@@ -188,7 +189,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Color(0xFFFFFFFF),
       body: Stack(
         children: [
           Positioned.fill(
@@ -200,7 +201,7 @@ class _SplashScreenState extends State<SplashScreen>
                   return DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: RadialGradient(
-                        center: const Alignment(0, -0.3),
+                        center: Alignment(0, -0.3),
                         radius: 0.9,
                         colors: [
                           Color(0xFF2563EB).withValues(alpha: opacity),
@@ -215,7 +216,7 @@ class _SplashScreenState extends State<SplashScreen>
           ),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
               child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -237,15 +238,15 @@ class _SplashScreenState extends State<SplashScreen>
                             turns: _logoRotation,
                             child: Image.asset(
                               'assets/images/salasel_logo.png',
-                              width: 251.2,
-                              height: 168.3,
+                              width: 251.2.w,
+                              height: 168.3.h,
                               fit: BoxFit.contain,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 65),
+                    SizedBox(height: 65.h),
                     FadeTransition(
                       opacity: _networkFade,
                       child: ScaleTransition(
@@ -264,17 +265,17 @@ class _SplashScreenState extends State<SplashScreen>
                             );
                           },
                           child: SizedBox(
-                            width: 320,
+                            width: 320.w,
                             child: SvgPicture.asset(
                               'assets/icons/ai_network_illustration.svg',
-                              width: 320,
-                              height: 176,
+                              width: 320.w,
+                              height: 176.h,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 50),
+                    SizedBox(height: 50.h),
                     FadeTransition(
                       opacity: _micFade,
                       child: ScaleTransition(
@@ -285,7 +286,7 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ),
                     ),
-                    const SizedBox(height: 28),
+                    SizedBox(height: 28.h),
                     SlideTransition(
                       position: _titleSlide,
                       child: FadeTransition(
@@ -295,7 +296,7 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8.h),
                     SlideTransition(
                       position: _subtitleSlide,
                       child: FadeTransition(
@@ -303,7 +304,7 @@ class _SplashScreenState extends State<SplashScreen>
                         child: const _SplashSubtitleText(),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
                     FadeTransition(
                       opacity: _dotsFade,
                       child: _LoadingDots(controller: _dotsController),
@@ -349,15 +350,15 @@ class _MicrophoneButton extends StatelessWidget {
             child: Container(
               width: _size,
               height: _size,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Color(0xFF2563EB),
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
               child: SvgPicture.asset(
                 'assets/icons/mic_icon.svg',
-                width: 24,
-                height: 24,
+                width: 24.w,
+                height: 24.h,
               ),
             ),
           ),
@@ -389,8 +390,8 @@ class _RippleRing extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: const Color(0xFF2563EB).withValues(alpha: opacity),
-              width: 1.5,
+              color: Color(0xFF2563EB).withValues(alpha: opacity),
+              width: 1.5.w,
             ),
           ),
         );
@@ -416,12 +417,12 @@ class _ShimmeringTitleText extends StatelessWidget {
             return LinearGradient(
               begin: Alignment(sweep - 0.3, 0),
               end: Alignment(sweep + 0.3, 0),
-              colors: const [
+              colors: [
                 Color(0xFF0F172A),
                 Color(0xFF60A5FA),
                 Color(0xFF0F172A),
               ],
-              stops: const [0.35, 0.5, 0.65],
+              stops: [0.35, 0.5, 0.65],
             ).createShader(bounds);
           },
           child: child,
@@ -442,7 +443,7 @@ class _LoadingDots extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 10,
+      height: 10.h,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: List.generate(_dotCount, (index) {
@@ -462,9 +463,9 @@ class _LoadingDots extends StatelessWidget {
                 );
               },
               child: Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
+                width: 8.w,
+                height: 8.h,
+                decoration: BoxDecoration(
                   color: Color(0xFF2563EB),
                   shape: BoxShape.circle,
                 ),
@@ -486,10 +487,10 @@ class _SplashTitleText extends StatelessWidget {
       'اطلب بضاعتك بصوتك',
       textAlign: TextAlign.center,
       style: GoogleFonts.cairo(
-        fontSize: 22,
+        fontSize: 22.sp,
         fontWeight: FontWeight.w600,
-        height: 30.25 / 22,
-        color: const Color(0xFF0F172A),
+        height: 30.25.h / 22,
+        color: Color(0xFF0F172A),
       ),
     );
   }
@@ -504,10 +505,10 @@ class _SplashSubtitleText extends StatelessWidget {
       'منصة المشتريات الذكية للتجار والموردين',
       textAlign: TextAlign.center,
       style: GoogleFonts.cairo(
-        fontSize: 13,
+        fontSize: 13.sp,
         fontWeight: FontWeight.w400,
-        height: 19.5 / 13,
-        color: const Color(0xFF64748B),
+        height: 19.5.h / 13,
+        color: Color(0xFF64748B),
       ),
     );
   }

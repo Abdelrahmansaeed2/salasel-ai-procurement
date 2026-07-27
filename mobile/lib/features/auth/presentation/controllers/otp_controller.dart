@@ -44,7 +44,7 @@ class OtpController extends GetxController {
     secondsLeft.value = countdownSeconds;
     _timer?.cancel();
     
-    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+    _timer = Timer.periodic(Duration(seconds: 1), (t) {
       if (secondsLeft.value > 0) {
         secondsLeft.value--;
       } else {
@@ -92,9 +92,9 @@ class OtpController extends GetxController {
     if (isComplete.value) {
       debugPrint('OTP: $otpValue');
       Get.offAll(
-        () => const StoresScreen(),
+        () => StoresScreen(),
         transition: Transition.fadeIn,
-        duration: const Duration(milliseconds: 350),
+        duration: Duration(milliseconds: 350),
       );
     }
   }
