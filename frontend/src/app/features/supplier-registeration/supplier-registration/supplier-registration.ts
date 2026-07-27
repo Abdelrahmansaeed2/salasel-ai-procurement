@@ -89,12 +89,12 @@ export class SupplierRegistration {
   onSaveAndExit(): void {
     console.log('Save and Exit clicked. Current data:', this.registrationData);
     alert('تم حفظ تقدمك بنجاح. سنقوم بإعادتك إلى لوحة التحكم.');
-    this.router.navigate(['/']);
+    this.router.navigate(['/dashboard']);
   }
 
   onFinish(): void {
     console.log('Final registration submission:', this.registrationData);
-    this.router.navigate(['/']);
+    this.router.navigate(['/dashboard']);
   }
 
   private updateGuidanceNote(): void {
