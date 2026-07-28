@@ -1,27 +1,18 @@
-#!/bin/bash
+
 set -e
 
-APP_DIR="/opt/backend-dotnet/backend-dotnet"
-SERVICE_NAME="salasel-api"
 
-echo "=== Salasel API Deploy Script ==="
-echo "Stopping service..."
-systemctl stop $SERVICE_NAME || true
+APP_DIR="/opt/backend-dotnet"
+
+echo "=== Salasel API Deploy Script (Docker Compose) ==="
 
 echo "Pulling latest code..."
 cd $APP_DIR
-git pull origin main
+git fetch origin
+git reset --hard origin/main
 
-echo "Restoring and building..."
-dotnet restore Salasel.API/Salasel.sln
-dotnet publish Salasel.API/Salasel.API/Salasel.API.csproj -c Release -o /opt/backend-dotnet/publish --no-restore
+echo "Rebuilding and starting services..."
 
-echo "Running database migrations..."
-export ASPNETCORE_ENVIRONMENT=Production
-./efbundle --connection "$ConnectionStrings__DefaultConnection"
-
-echo "Starting service..."
-systemctl start $SERVICE_NAME
+docker-compose up -d --build api
 
 echo "=== Deploy complete! ==="
-systemctl status $SERVICE_NAME --no-pager
