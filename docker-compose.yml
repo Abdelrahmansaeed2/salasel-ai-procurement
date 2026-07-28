@@ -34,7 +34,7 @@ services:
       ACCEPT_EULA: "Y"
     ports:
       - "5341:5341"   # ingestion
-      - "8080:80"     # UI
+      - "5342:80"     # UI
     volumes:
       - seq_data:/data
 
