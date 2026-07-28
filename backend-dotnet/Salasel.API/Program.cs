@@ -65,13 +65,12 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMerchantProfileRepository, MerchantProfileRepository>();
 builder.Services.AddScoped<ISupplierProfileRepository, SupplierProfileRepository>();
-builder.Services.AddScoped<IOrderTransactionRepository, OrderTransactionRepository>();
-builder.Services.AddScoped<IOrderSplitRepository, OrderSplitRepository>();
-builder.Services.AddScoped<ISupplierCatalogRepository, SupplierCatalogRepository>();
+builder.Services.AddScoped<IMasterOrderRepository, MasterOrderRepository>();
+builder.Services.AddScoped<ISubOrderRepository, SubOrderRepository>();
+builder.Services.AddScoped<ISupplierProductRepository, SupplierProductRepository>();
 builder.Services.AddScoped<IMerchantInventoryRepository, MerchantInventoryRepository>();
 builder.Services.AddScoped<IVoiceProcurementLogRepository, VoiceProcurementLogRepository>();
-builder.Services.AddScoped<IFraudPreventionLimitRepository, FraudPreventionLimitRepository>();
-builder.Services.AddScoped<ISystemAuditLogRepository, SystemAuditLogRepository>();
+
 
 // Add Services
 builder.Services.AddScoped<IProcurementService, ProcurementService>();

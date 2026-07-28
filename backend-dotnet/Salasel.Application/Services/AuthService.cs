@@ -54,7 +54,7 @@ public class AuthService : IAuthService
         {
             await _merchantRepository.AddAsync(new MerchantsProfile
             {
-                MerchantID = user.UserID,
+                OwnerUserId = user.UserID,
                 ShopName = $"{user.FullName}'s Store",
                 LocationLat = 0m,
                 LocationLng = 0m,
@@ -66,7 +66,7 @@ public class AuthService : IAuthService
         {
             await _supplierRepository.AddAsync(new SupplierProfile
             {
-                SupplierID = user.UserID,
+                OwnerUserId = user.UserID,
                 CompanyName = $"{user.FullName}'s Company",
                 ReliabilityScore = 100m,
                 PaymentTerms = "Net 30",
