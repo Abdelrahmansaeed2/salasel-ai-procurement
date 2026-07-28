@@ -10,6 +10,11 @@ services:
       REDIS_URL: redis://redis:6379/0
     ports:
       - "8000:8000"
+    volumes:
+      - ../../app:/app/app
+      - ../../main.py:/app/main.py
+      - ../../alembic.ini:/app/alembic.ini
+      - ../../pyproject.toml:/app/pyproject.toml
     depends_on:
       sqlserver-init:
         condition: service_completed_successfully
@@ -47,7 +52,7 @@ services:
       -i /work/init-db.sql"
 
   redis:
-    image: redis:7-alpine
+    image: redis/redis-stack-server:latest
     ports:
       - "6379:6379"
     healthcheck:

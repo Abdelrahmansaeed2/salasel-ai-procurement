@@ -27,7 +27,7 @@ async def check_redis_connection(settings: Settings) -> bool:
         socket_timeout=settings.health_timeout_seconds,
     )
     try:
-        return bool(await client.ping())
+        return bool( client.ping())
     finally:
         await client.aclose()
 

@@ -18,8 +18,10 @@ COPY app ./app
 COPY main.py alembic.ini ./
 COPY infra/docker/entrypoint.sh /entrypoint.sh
 
-RUN pip install --no-cache-dir ".[dev]" \
-    && chmod +x /entrypoint.sh
+# RUN pip install --no-cache-dir ".[dev]" \
+#     && chmod +x /entrypoint.sh
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install ".[dev]"
 
 EXPOSE 8000
 

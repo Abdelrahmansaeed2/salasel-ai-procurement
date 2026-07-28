@@ -28,6 +28,18 @@ class Settings(BaseSettings):
     redis_url: AnyUrl = Field(default="redis://localhost:6379/0")
     health_timeout_seconds: int = 3
 
+    llm_provider: str = "groq"
+    llm_model: str = "llama-3.3-70b-versatile"
+    llm_groq_api_key: str = ""
+    llm_anthropic_api_key: str = ""
+    llm_temperature: float = 0.0
+
+    default_radius_km: int = 50
+    default_quality_threshold: float = 0.0
+    rank_weight_similarity: float = 1.0
+    rank_weight_quality: float = 0.7
+    rank_weight_distance: float = 0.5
+
 
 @lru_cache
 def get_settings() -> Settings:
