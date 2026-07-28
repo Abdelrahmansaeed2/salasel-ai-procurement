@@ -63,7 +63,7 @@ services:
       Jwt__Issuer: "Salasel.API"
       Jwt__Audience: "Salasel.App"
 
-      Seq__Url: "http://seq:80"
+      Seq__Url: "http://seq:5341"
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:80/health || exit 1"]
       interval: 30s
