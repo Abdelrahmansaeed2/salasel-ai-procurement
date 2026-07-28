@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../shop_registration/presentation/screens/register_shop_screen.dart';
 import '../controllers/welcomepage_controller.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -13,7 +14,7 @@ class StoresScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(WelcomePageController());
+    final controller = Get.put(WelcomePageController());
     
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -89,7 +90,12 @@ class StoresScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(),
+      bottomNavigationBar: Obx(
+        () => AppBottomNavBar(
+          currentIndex: controller.currentIndex.value,
+          onTap: controller.setIndex,
+        ),
+      ),
     );
   }
 

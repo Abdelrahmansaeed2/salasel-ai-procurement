@@ -39,7 +39,6 @@ const List<_NavItemData> _navItems = [
   ),
 ];
 
-/// Bottom navigation bar shared across the dashboard-style screens.
 class AppBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int>? onTap;
@@ -55,97 +54,100 @@ class AppBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFF1F5F9), width: 1.w)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          children: List.generate(_navItems.length, (index) {
-            final item = _navItems[index];
-            final isActive = index == currentIndex;
-            final color = isActive ? _activeColor : _inactiveColor;
-            return Expanded(
-              child: InkWell(
-                onTap: () => onTap?.call(index),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.h),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AnimatedScale(
-                        scale: isActive ? 1.1 : 1,
-                        duration: Duration(milliseconds: 200),
-                        curve: Curves.easeOut,
-                        child: SizedBox(
-                          width: 22.w,
-                          height: 22.h,
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              SvgPicture.string(
-                                '<svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">'
-                                '<path d="${item.svgPath}" stroke="${_hex(color)}" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round"/>'
-                                '</svg>',
-                              ),
-                              if (item.badgeCount != null)
-                                Positioned(
-                                  left: 12.w,
-                                  top: -6,
-                                  child: Container(
-                                    width: 16.w,
-                                    height: 16.h,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFFEF4444),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Text(
-                                      '${item.badgeCount}',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 9.sp,
-                                        fontWeight: FontWeight.w700,
-                                        height: 1.5.h,
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(top: BorderSide(color: Color(0xFFF1F5F9), width: 1.w)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Row(
+            children: List.generate(_navItems.length, (index) {
+              final item = _navItems[index];
+              final isActive = index == currentIndex;
+              final color = isActive ? _activeColor : _inactiveColor;
+              return Expanded(
+                child: InkWell(
+                  onTap: () => onTap?.call(index),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.h),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AnimatedScale(
+                          scale: isActive ? 1.1 : 1,
+                          duration: Duration(milliseconds: 200),
+                          curve: Curves.easeOut,
+                          child: SizedBox(
+                            width: 22.w,
+                            height: 22.h,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                SvgPicture.string(
+                                  '<svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">'
+                                  '<path d="${item.svgPath}" stroke="${_hex(color)}" stroke-width="1.83333" stroke-linecap="round" stroke-linejoin="round"/>'
+                                  '</svg>',
+                                ),
+                                if (item.badgeCount != null)
+                                  Positioned(
+                                    left: 12.w,
+                                    top: -6,
+                                    child: Container(
+                                      width: 16.w,
+                                      height: 16.h,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFFEF4444),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Text(
+                                        '${item.badgeCount}',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 9.sp,
+                                          fontWeight: FontWeight.w700,
+                                          height: 1.5.h,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 4.h),
-                      AnimatedDefaultTextStyle(
-                        duration: Duration(milliseconds: 200),
-                        style: TextStyle(
-                          color: color,
-                          fontFamily: 'Cairo',
-                          fontSize: 10.sp,
-                          fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
-                          height: 1.5.h,
+                        SizedBox(height: 4.h),
+                        AnimatedDefaultTextStyle(
+                          duration: Duration(milliseconds: 200),
+                          style: TextStyle(
+                            color: color,
+                            fontFamily: 'Cairo',
+                            fontSize: 10.sp,
+                            fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+                            height: 1.5.h,
+                          ),
+                          child: Text(item.label),
                         ),
-                        child: Text(item.label),
-                      ),
-                      AnimatedContainer(
-                        duration: Duration(milliseconds: 200),
-                        curve: Curves.easeOut,
-                        margin: EdgeInsets.only(top: 4.h),
-                        width: isActive ? 24 : 0,
-                        height: 2.h,
-                        decoration: BoxDecoration(
-                          color: _activeColor,
-                          borderRadius: BorderRadius.circular(999.r),
+                        AnimatedContainer(
+                          duration: Duration(milliseconds: 200),
+                          curve: Curves.easeOut,
+                          margin: EdgeInsets.only(top: 4.h),
+                          width: isActive ? 72.w : 0,
+                          height: 2.h,
+                          decoration: BoxDecoration(
+                            color: _activeColor,
+                            borderRadius: BorderRadius.circular(999.r),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          }),
+              );
+            }),
+          ),
         ),
       ),
     );
