@@ -93,6 +93,18 @@ jobs:
           script: |
             cd /opt/salasel
 
+            # Auto-create .env with defaults if it doesn't exist
+            if [ ! -f .env ]; then
+              sudo bash -c 'cat << EOF > .env
+            DB_NAME=SalaselDb
+            DB_PASSWORD=Sls3l_DB#2026!Secure@Vault91
+            JWT_KEY=SalaselSuperSecretKeyThatIsAtLeast32BytesLong!!!123
+            EOF'
+            fi
+            
+            # Ensure permissions are correct
+            sudo chown toor:toor .env
+
             # Update or append IMAGE_TAG in .env securely
             IMAGE_TAG=sha-$(echo ${{ github.sha }} | cut -c1-7)
             if grep -q "^IMAGE_TAG=" .env; then
@@ -101,12 +113,12 @@ jobs:
               echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
             fi
 
-            docker compose pull api
-            docker compose up -d --remove-orphans
+            sudo docker compose pull api
+            sudo docker compose up -d --remove-orphans
 
             # Wait for API to be healthy
             echo "Waiting for API to be healthy..."
-            timeout 60 bash -c 'until docker inspect salasel-api --format "{{.State.Health.Status}}" | grep -q "healthy"; do sleep 5; done'
+            timeout 60 bash -c 'until sudo docker inspect salasel-api --format "{{.State.Health.Status}}" | grep -q "healthy"; do sleep 5; done'
 
             echo "✅ Deployed successfully!"
-            docker compose ps
+            sudo docker compose ps
