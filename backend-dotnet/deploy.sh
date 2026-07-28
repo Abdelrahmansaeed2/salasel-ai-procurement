@@ -2,7 +2,7 @@
 set -e
 
 
-APP_DIR="/opt/backend-dotnet"
+APP_DIR="/opt/backend-dotnet/backend-dotnet"
 
 echo "=== Salasel API Deploy Script (Docker Compose) ==="
 
