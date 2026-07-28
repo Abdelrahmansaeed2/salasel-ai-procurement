@@ -93,17 +93,20 @@ jobs:
           script: |
             cd /opt/salasel
 
-            # Auto-create .env with defaults if it doesn't exist
-            if [ ! -f .env ]; then
-              sudo bash -c 'cat << EOF > .env
-            DB_NAME=SalaselDb
-            DB_PASSWORD=Sls3l_DB#2026!Secure@Vault91
-            JWT_KEY=SalaselSuperSecretKeyThatIsAtLeast32BytesLong!!!123
-            EOF'
-            fi
-            
-            # Ensure permissions are correct
+            # Ensure .env exists
+            sudo touch .env
             sudo chown toor:toor .env
+
+            # Inject missing secrets
+            if ! grep -q "^DB_PASSWORD=" .env; then
+              echo "DB_PASSWORD='Sls3l_DB#2026!Secure@Vault91'" | sudo tee -a .env
+            fi
+            if ! grep -q "^DB_NAME=" .env; then
+              echo "DB_NAME=SalaselDb" | sudo tee -a .env
+            fi
+            if ! grep -q "^JWT_KEY=" .env; then
+              echo "JWT_KEY='SalaselSuperSecretKeyThatIsAtLeast32BytesLong!!!123'" | sudo tee -a .env
+            fi
 
             # Update or append IMAGE_TAG in .env securely
             IMAGE_TAG=sha-$(echo ${{ github.sha }} | cut -c1-7)
@@ -118,7 +121,7 @@ jobs:
 
             # Wait for API to be healthy
             echo "Waiting for API to be healthy..."
-            timeout 60 bash -c 'until sudo docker inspect salasel-api --format "{{.State.Health.Status}}" | grep -q "healthy"; do sleep 5; done'
+            timeout 60 bash -c 'until sudo docker inspect salasel-api --format "{{.State.Health.Status}}" | grep -q "healthy"; do sleep 5; done' || { echo "Health check timed out! Container logs:"; sudo docker compose logs api; exit 1; }
 
             echo "✅ Deployed successfully!"
             sudo docker compose ps
