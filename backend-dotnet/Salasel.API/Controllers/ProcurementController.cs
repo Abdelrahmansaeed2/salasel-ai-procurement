@@ -18,11 +18,11 @@ public class ProcurementController : ControllerBase
     }
 
     [HttpPost("voice")]
-    public async Task<IActionResult> ProcessVoice([FromBody] VoiceProcurementRequestDto request)
+    public async Task<IActionResult> ProcessVoice([FromForm] IFormFile audioFile)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var logId = await _procurementService.LogVoiceProcurementAsync(request);
-        return Ok(new { Message = "Voice processed successfully", LogID = logId });
+        // Future AI integration: Transcribe and parse with LangGraph
+        return Accepted(new { Message = "Voice processed successfully", LogID = Guid.NewGuid().ToString() });
     }
 }

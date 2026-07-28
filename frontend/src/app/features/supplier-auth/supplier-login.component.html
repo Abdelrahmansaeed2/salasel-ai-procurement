@@ -1,0 +1,143 @@
+<app-site-header activeLink="المنصة" />
+
+<main class="login-page">
+  <section class="login-panel">
+    <div class="login-panel__inner">
+      <div class="login-panel__header">
+        <h1 class="login-panel__title">تسجيل الدخول</h1>
+        <p class="login-panel__subtitle">أهلاً بك مجدداً في منصة سلاسل الذكية</p>
+      </div>
+
+      <form class="login-form" (ngSubmit)="onSubmit()">
+        <div class="form-field">
+          <label class="form-field__label" for="supplier-email">البريد الإلكتروني</label>
+          <div class="form-field__control">
+            <input
+              id="supplier-email"
+              name="email"
+              type="email"
+              class="form-field__input"
+              placeholder="name&#64;company.com"
+              autocomplete="email"
+              [ngModel]="email()"
+              (ngModelChange)="email.set($event)"
+            />
+            <img src="assets/icons/icon-mail.svg" alt="" class="form-field__icon" />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-field__label" for="supplier-password">كلمة المرور</label>
+          <div class="form-field__control">
+            <input
+              id="supplier-password"
+              name="password"
+              [type]="passwordInputType()"
+              class="form-field__input"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              [ngModel]="password()"
+              (ngModelChange)="password.set($event)"
+            />
+            <button
+              type="button"
+              class="form-field__icon-btn"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword() ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'"
+            >
+              <img src="assets/icons/icon-lock.svg" alt="" class="form-field__icon" />
+            </button>
+          </div>
+        </div>
+
+        @if (errorMessage(); as error) {
+          <p class="login-form__error">{{ error }}</p>
+        }
+
+        <div class="login-form__row">
+          <button type="button" class="login-form__link">نسيت كلمة المرور؟</button>
+          <label class="checkbox">
+            <span class="checkbox__label">تذكرني</span>
+            <input
+              type="checkbox"
+              class="checkbox__input"
+              [checked]="rememberMe()"
+              (change)="toggleRememberMe()"
+            />
+          </label>
+        </div>
+
+        <button type="submit" class="login-form__submit" [disabled]="isSubmitting()">
+          @if (isSubmitting()) {
+            <span>جاري الدخول...</span>
+          } @else {
+            <span>دخول</span>
+          }
+        </button>
+
+        <div class="login-form__sso">
+          <div class="divider">
+            <span class="divider__line"></span>
+            <span class="divider__label">أو الدخول بواسطة</span>
+          </div>
+
+          <div class="sso-buttons">
+            <button type="button" class="sso-button" (click)="loginWithProvider('microsoft')">
+              <span>Microsoft</span>
+              <img src="assets/icons/icon-microsoft.svg" alt="Microsoft" />
+            </button>
+            <button type="button" class="sso-button" (click)="loginWithProvider('google')">
+              <span>Google</span>
+              <img src="assets/icons/icon-google.svg" alt="Google" />
+            </button>
+          </div>
+
+          <div class="otp-link-wrap">
+            <button type="button" class="otp-link">
+              <span>الدخول عبر رمز التحقق (OTP)</span>
+              <img src="assets/icons/icon-shield-check.svg" alt="" />
+            </button>
+          </div>
+
+          <div class="register-prompt">
+            <span>ليس لديك حساب شريك؟</span>
+            <a routerLink="/supplier-registration" class="register-link">سجل معنا الآن</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="hero-panel">
+    <div class="hero-panel__intro">
+      <h2 class="hero-panel__title">تحويل المشتريات باستخدام الذكاء الاصطناعي</h2>
+      <p class="hero-panel__text">
+        نعمل على تبسيط سلاسل التوريد المعقدة من خلال تقنيات التنبؤ الذكي، مما يوفر لك دقة لا مثيل لها في إدارة العمليات.
+      </p>
+    </div>
+
+    <img
+      src="assets/images/supplier-login-illustration.png"
+      alt="تحويل المشتريات باستخدام الذكاء الاصطناعي"
+      class="hero-panel__illustration"
+    />
+
+    <div class="hero-panel__stats">
+      @for (stat of statistics; track stat.label) {
+        <div class="stat-card">
+          <span class="stat-card__value">{{ stat.value }}</span>
+          <span class="stat-card__label">{{ stat.label }}</span>
+        </div>
+      }
+    </div>
+
+    <blockquote class="hero-panel__quote">
+      <p class="hero-panel__quote-text">
+        "لقد ساهمت سلاسل في تغيير جذري لطريقة إدارتنا للوجستيات الدولية. الدقة في التوقعات مذهلة حقاً."
+      </p>
+      <footer class="hero-panel__quote-footer">— مدير العمليات اللوجستية، شركة الشرق للصناعات</footer>
+    </blockquote>
+  </section>
+</main>
+
+<app-site-footer />

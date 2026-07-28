@@ -17,12 +17,13 @@ public class CatalogsController : ControllerBase
         _catalogService = catalogService;
     }
 
+
     [HttpPost("upload")]
-    public async Task<IActionResult> UploadCatalog([FromBody] CatalogUploadRequestDto request)
+    public async Task<IActionResult> UploadCatalog([FromForm] IFormFile pdfCatalog)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var catalogId = await _catalogService.UploadCatalogAsync(request);
-        return Ok(new { Message = "Catalog uploaded successfully", CatalogID = catalogId });
+        // Future AI integration: RAG Ingestion
+        return Accepted(new { Message = "Catalog uploaded successfully", Id = Guid.NewGuid().ToString() });
     }
 }

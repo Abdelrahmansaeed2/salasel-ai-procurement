@@ -1,0 +1,349 @@
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: 100%;
+}
+
+
+.inputs-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+}
+
+.form-field__label {
+  color: #434655;
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-size: clamp(12px, 1.5vw, 13px);
+  font-weight: 400;
+  line-height: 18px;
+  text-align: right;
+}
+
+.form-field__control {
+  position: relative;
+  width: 100%;
+}
+
+.form-field__input {
+  width: 100%;
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(115, 118, 134, 0.3);
+  background: #faf8ff;
+  color: #191b23;
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-size: 14px;
+  line-height: 29.5px;
+  text-align: right;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-field__input::placeholder {
+  color: #6b6e80;
+  opacity: 0.7;
+}
+
+.form-field__input:focus {
+  outline: none;
+  border-color: #004ac6;
+  box-shadow: 0 0 0 3px rgba(0, 74, 198, 0.1);
+}
+
+.form-field__input--disabled {
+  background-color: #f1f0f5;
+  border-color: rgba(115, 118, 134, 0.15);
+  color: #8b8d99;
+  cursor: not-allowed;
+}
+
+.form-field__input--invalid {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.form-field__error {
+  color: #ef4444;
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: right;
+  margin-top: 2px;
+}
+
+.form-field__hint {
+  color: #434655;
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 16.5px;
+  text-align: right;
+  margin-top: 2px;
+}
+
+.input-badge {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  pointer-events: none;
+  flex-direction: row-reverse;
+}
+
+.input-badge__text {
+  color: #007d57;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Noto Sans Arabic', sans-serif;
+  line-height: 16.5px;
+}
+
+.input-badge__icon {
+  width: 14px;
+  height: 14px;
+  color: #007d57;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-right: 28px;
+  cursor: pointer;
+  user-select: none;
+  font-size: clamp(13px, 1.8vw, 15px);
+  color: #191b23;
+  font-weight: 400;
+  line-height: 21px;
+  text-align: right;
+  font-family: 'Noto Sans Arabic', sans-serif;
+}
+
+.checkbox-container__input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkbox-container__checkmark {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  height: 18px;
+  width: 18px;
+  background-color: #ffffff;
+  border: 1.5px solid #737686;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.checkbox-container:hover input ~ .checkbox-container__checkmark {
+  border-color: #004ac6;
+}
+
+.checkbox-container input:checked ~ .checkbox-container__checkmark {
+  background-color: #004ac6;
+  border-color: #004ac6;
+}
+
+.checkbox-container__checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.checkbox-container input:checked ~ .checkbox-container__checkmark:after {
+  display: block;
+}
+
+.checkbox-container .checkbox-container__checkmark:after {
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkbox-container__label {
+  line-height: 21px;
+}
+
+.upload-section {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.upload-section .form-field__label {
+  padding-bottom: 16px;
+}
+
+.upload-area {
+  border: 2px dashed #c3c6d7;
+  border-radius: 12px;
+  padding: 55px 66px;
+  text-align: center;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-area:hover,
+.upload-area--drag-over {
+  border-color: #004ac6;
+  background-color: #faf8ff;
+}
+
+.upload-area__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.upload-area__icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  background: #edeef9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #004ac6;
+  margin-bottom: 4px;
+}
+
+.upload-area__icon {
+  width: 20px;
+  height: 20px;
+}
+
+.upload-area__title {
+  color: #191b23;
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-size: clamp(12px, 1.5vw, 13px);
+  font-weight: 700;
+  line-height: 18px;
+  margin: 0;
+}
+
+.upload-area__subtitle {
+  color: #434655;
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-size: clamp(11px, 1.3vw, 12px);
+  font-weight: 400;
+  line-height: 16.5px;
+  margin: 0;
+}
+
+.file-list {
+  margin-top: 16px;
+  width: 100%;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  background: #faf8ff;
+  border: 1px solid rgba(195, 198, 215, 0.3);
+  border-radius: 4px;
+  padding: 8px;
+  gap: 12px;
+  direction: ltr;
+}
+
+.file-item__icon-wrapper {
+  color: #006243;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-item__icon {
+  width: 20px;
+  height: 20px;
+}
+
+.file-item__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-grow: 1;
+  text-align: left;
+}
+
+.file-item__name {
+  color: #191b23;
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-size: clamp(12px, 1.5vw, 13px);
+  font-weight: 700;
+  line-height: 18px;
+  word-break: break-all;
+}
+
+.file-item__size {
+  color: #434655;
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-size: clamp(10px, 1.2vw, 11px);
+  font-weight: 400;
+  line-height: 15px;
+}
+
+.file-item__delete-btn {
+  background: transparent;
+  border: none;
+  color: #ba1a1a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+
+.file-item__delete-btn:hover {
+  background: #fef2f2;
+}
+
+.file-item__delete-icon {
+  width: 16px;
+  height: 16px;
+}
+
+
+
+@media (max-width: 480px) {
+  .upload-area {
+    padding: 35px 20px !important;
+  }
+}

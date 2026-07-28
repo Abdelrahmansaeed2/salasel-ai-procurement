@@ -1,0 +1,177 @@
+<div class="form-container" [formGroup]="form">
+
+  <app-step-header 
+    [title]="'تفاصيل المستودع'" 
+    [subtitle]="'يرجى تقديم معلومات دقيقة حول مرافق التخزين الخاصة بك لضمان كفاءة عمليات التوريد والخدمات اللوجستية.'">
+  </app-step-header>
+
+  <!-- Form Fields -->
+  <div class="form-section">
+    <h3 class="section-title">المعلومات الأساسية</h3>
+    
+    <div class="form-grid">
+      <!-- Warehouse Name -->
+      <div class="form-group">
+        <label class="form-label" for="warehouseName">اسم المستودع</label>
+        <input 
+          id="warehouseName" 
+          type="text" 
+          formControlName="warehouseName" 
+          class="form-control" 
+          placeholder="مثال: مستودع جدة المركزي"
+          [class.form-control--invalid]="form.get('warehouseName')?.invalid && form.get('warehouseName')?.touched"
+        />
+        @if (form.get('warehouseName')?.invalid && form.get('warehouseName')?.touched) {
+          <span class="error-msg">يرجى إدخال اسم المستودع (3 أحرف على الأقل)</span>
+        }
+      </div>
+
+      <!-- Total Capacity -->
+      <div class="form-group">
+        <label class="form-label" for="capacity">السعة الإجمالية (متر مكعب)</label>
+        <div class="input-suffix-wrapper">
+          <input 
+            id="capacity" 
+            type="number" 
+            formControlName="capacity" 
+            class="form-control form-control--suffix" 
+            placeholder="0.00"
+            [class.form-control--invalid]="form.get('capacity')?.invalid && form.get('capacity')?.touched"
+          />
+          <span class="suffix-badge">m³</span>
+        </div>
+        @if (form.get('capacity')?.invalid && form.get('capacity')?.touched) {
+          <span class="error-msg">يرجى إدخال السعة الإجمالية بالملء الرقمي</span>
+        }
+      </div>
+
+      <!-- Dock Availability (Segmented Selector) -->
+      <div class="form-group">
+        <label class="form-label">توفر أرصفة الشحن</label>
+        <div class="segmented-control">
+          <button 
+            type="button" 
+            class="segment-btn" 
+            [class.segment-btn--active]="hasCargoDocks()"
+            (click)="toggleCargoDocks(true)"
+          >
+            <svg class="segment-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>متاح</span>
+          </button>
+          <button 
+            type="button" 
+            class="segment-btn" 
+            [class.segment-btn--active]="!hasCargoDocks()"
+            (click)="toggleCargoDocks(false)"
+          >
+            <svg class="segment-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            <span>غير متاح</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map Selection Section -->
+  <div class="map-section">
+    
+    <div class="map-header">
+      <div class="map-header__title-group">
+        <h3 class="section-title">موقع المستودع</h3>
+        <p class="map-header__subtitle">قم بتحديد الموقع الدقيق على الخريطة</p>
+      </div>
+      
+      <!-- Current Address Badge -->
+      <div class="address-badge">
+        <span class="address-badge__text">{{ selectedAddress() }}</span>
+        <svg class="address-badge__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Map Canvas wrapper -->
+    <div class="map-wrapper">
+      
+      <!-- Leaflet Map Container -->
+      <div id="warehouse-map" class="map-canvas"></div>
+
+      <!-- Floating Search Bar Overlay -->
+      <div class="map-search-overlay">
+        <input 
+          type="text" 
+          formControlName="searchQuery" 
+          class="map-search-input" 
+          placeholder="ابحث عن العنوان أو الإحداثيات..."
+          (keydown.enter)="onSearch(); $event.preventDefault()"
+        />
+        <button type="button" class="map-search-btn" (click)="onSearch()">
+          <svg class="map-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Locate Me Floating Button -->
+      <button type="button" class="map-locate-btn" (click)="locateMe()" title="تحديد موقعي">
+        <svg class="map-locate-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <circle cx="12" cy="12" r="3"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+        </svg>
+      </button>
+
+    </div>
+
+    <!-- Warehouse Meta Cards -->
+    <div class="meta-row">
+      <!-- Card 1: Range Coverage -->
+      <div class="meta-card meta-card--green">
+        <div class="meta-card__icon-wrapper">
+          <svg class="meta-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div class="meta-card__content">
+          <h4 class="meta-card__title">تغطية النطاق</h4>
+          <p class="meta-card__description">الموقع يقع ضمن نطاق التسليم اللوجستي المعتمد.</p>
+        </div>
+      </div>
+
+      <!-- Card 2: Tech Note -->
+      <div class="meta-card meta-card--blue">
+        <div class="meta-card__icon-wrapper">
+          <svg class="meta-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+        </div>
+        <div class="meta-card__content">
+          <h4 class="meta-card__title">ملاحظة تقنية</h4>
+          <p class="meta-card__description">سيتم استخدام الإحداثيات الجغرافية لجدولة الرحلات.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer Actions -->
+  <app-form-actions 
+    [submitText]="'التالي'" 
+    [backText]="'السابق'" 
+    (submit)="onSubmit()" 
+    (back)="onBackClick()">
+  </app-form-actions>
+
+</div>

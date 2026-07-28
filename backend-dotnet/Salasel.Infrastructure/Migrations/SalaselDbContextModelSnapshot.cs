@@ -22,27 +22,107 @@ namespace Salasel.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Salasel.Domain.Entities.FraudPreventionLimit", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.AIProcessing", b =>
                 {
-                    b.Property<int>("RuleID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RuleID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("HardLimitValue")
+                    b.Property<decimal>("Confidence")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("decimal(5,4)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModelUsed")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<string>("ParsedJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Prompt")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VoiceLogId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VoiceLogId")
+                        .IsUnique();
+
+                    b.ToTable("AIProcessings");
+                });
+
+            modelBuilder.Entity("Salasel.Domain.Entities.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("Salasel.Domain.Entities.MasterOrder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MerchantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<decimal>("TotalAmount")
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
-                    b.Property<byte>("RuleType")
-                        .HasColumnType("tinyint");
+                    b.Property<int?>("VoiceLogID")
+                        .HasColumnType("int");
 
-                    b.HasKey("RuleID");
+                    b.HasKey("Id");
 
-                    b.ToTable("FraudPreventionLimits");
+                    b.HasIndex("MerchantId");
+
+                    b.HasIndex("VoiceLogID");
+
+                    b.ToTable("MasterOrders");
                 });
 
             modelBuilder.Entity("Salasel.Domain.Entities.MerchantInventory", b =>
@@ -53,7 +133,7 @@ namespace Salasel.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InventoryID"));
 
-                    b.Property<int>("CurrentQuantity")
+                    b.Property<int>("CurrentQty")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("LastUpdated")
@@ -62,16 +142,17 @@ namespace Salasel.Infrastructure.Migrations
                     b.Property<int>("MerchantID")
                         .HasColumnType("int");
 
-                    b.Property<int>("ReorderThreshold")
+                    b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<string>("SKU")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("ReorderThreshold")
+                        .HasColumnType("int");
 
                     b.HasKey("InventoryID");
 
                     b.HasIndex("MerchantID");
+
+                    b.HasIndex("ProductId");
 
                     b.ToTable("MerchantInventories");
                 });
@@ -79,11 +160,18 @@ namespace Salasel.Infrastructure.Migrations
             modelBuilder.Entity("Salasel.Domain.Entities.MerchantsProfile", b =>
                 {
                     b.Property<int>("MerchantID")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MerchantID"));
 
                     b.Property<string>("ContactPhone")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
@@ -96,143 +184,189 @@ namespace Salasel.Infrastructure.Migrations
                         .HasPrecision(10, 6)
                         .HasColumnType("decimal(10,6)");
 
+                    b.Property<int>("OwnerUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ShopName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("MerchantID");
+
+                    b.HasIndex("OwnerUserId");
 
                     b.ToTable("MerchantsProfiles");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.OrderSplit", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.Product", b =>
                 {
-                    b.Property<int>("SplitID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SplitID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<byte>("FulfillmentStatus")
-                        .HasColumnType("tinyint");
-
-                    b.Property<int>("ParentOrderID")
+                    b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<int>("QuantityOrdered")
-                        .HasColumnType("int");
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("SKU")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<decimal>("SubTotalCost")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
-                    b.Property<int>("SupplierID")
-                        .HasColumnType("int");
+                    b.HasKey("Id");
 
-                    b.HasKey("SplitID");
+                    b.HasIndex("CategoryId");
 
-                    b.HasIndex("ParentOrderID");
+                    b.HasIndex("SKU")
+                        .IsUnique();
 
-                    b.HasIndex("SupplierID");
-
-                    b.ToTable("OrderSplits");
+                    b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.OrderTransaction", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.SubOrder", b =>
                 {
-                    b.Property<int>("OrderID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderID"));
-
-                    b.Property<byte>("ApprovalStatus")
-                        .HasColumnType("tinyint");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("MerchantID")
+                    b.Property<int>("MasterId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("TotalOrderCost")
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<decimal>("SubTotalAmount")
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
 
-                    b.Property<int?>("VoiceLogID")
+                    b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
-                    b.HasKey("OrderID");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
-                    b.HasIndex("MerchantID");
+                    b.HasKey("Id");
 
-                    b.HasIndex("VoiceLogID");
+                    b.HasIndex("MasterId");
 
-                    b.ToTable("OrderTransactions");
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("SubOrders");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.SupplierCatalog", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.SupplierProduct", b =>
                 {
-                    b.Property<int>("CatalogID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CatalogID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("DeliveryLeadTime_Days")
+                    b.Property<int>("AvailableQty")
                         .HasColumnType("int");
 
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("SKU")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("StockAvailable")
+                    b.Property<int>("LeadTimeDays")
                         .HasColumnType("int");
 
-                    b.Property<int>("SupplierID")
+                    b.Property<int>("MinOrderQty")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("UnitPrice")
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+                    b.HasKey("Id");
 
-                    b.Property<string>("VectorEmbedding")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("ProductId");
 
-                    b.HasKey("CatalogID");
+                    b.HasIndex("SupplierId");
 
-                    b.HasIndex("SupplierID");
-
-                    b.ToTable("SupplierCatalogs");
+                    b.ToTable("SupplierProducts");
                 });
 
             modelBuilder.Entity("Salasel.Domain.Entities.SupplierProfile", b =>
                 {
                     b.Property<int>("SupplierID")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SupplierID"));
 
                     b.Property<string>("CompanyName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ContactPhone")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<decimal>("CoverageRadiusKm")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActiveForRouting")
                         .HasColumnType("bit");
 
+                    b.Property<decimal>("LocationLat")
+                        .HasPrecision(10, 6)
+                        .HasColumnType("decimal(10,6)");
+
+                    b.Property<decimal>("LocationLng")
+                        .HasPrecision(10, 6)
+                        .HasColumnType("decimal(10,6)");
+
+                    b.Property<int>("OwnerUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("PaymentTerms")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("ReliabilityScore")
                         .HasPrecision(5, 2)
@@ -240,36 +374,9 @@ namespace Salasel.Infrastructure.Migrations
 
                     b.HasKey("SupplierID");
 
+                    b.HasIndex("OwnerUserId");
+
                     b.ToTable("SupplierProfiles");
-                });
-
-            modelBuilder.Entity("Salasel.Domain.Entities.SystemAuditLog", b =>
-                {
-                    b.Property<int>("AuditID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AuditID"));
-
-                    b.Property<string>("ActionPerformed")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("AdminUserID")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TargetTable")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("AuditID");
-
-                    b.HasIndex("AdminUserID");
-
-                    b.ToTable("SystemAuditLogs");
                 });
 
             modelBuilder.Entity("Salasel.Domain.Entities.User", b =>
@@ -285,11 +392,13 @@ namespace Salasel.Infrastructure.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -313,39 +422,61 @@ namespace Salasel.Infrastructure.Migrations
 
             modelBuilder.Entity("Salasel.Domain.Entities.VoiceProcurementLog", b =>
                 {
-                    b.Property<int>("LogID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LogID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("LLMParsedJSON")
-                        .IsRequired()
+                    b.Property<string>("AudioUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("MerchantID")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("NLPConfidenceScore")
-                        .HasPrecision(5, 4)
-                        .HasColumnType("decimal(5,4)");
-
-                    b.Property<DateTime>("ProcessedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("RawAudioURL")
-                        .IsRequired()
+                    b.Property<int>("MerchantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RawTextInput")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TranscribedAmiyaText")
-                        .IsRequired()
+                    b.Property<string>("Transcript")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("LogID");
+                    b.HasKey("Id");
 
-                    b.HasIndex("MerchantID");
+                    b.HasIndex("MerchantId");
 
                     b.ToTable("VoiceProcurementLogs");
+                });
+
+            modelBuilder.Entity("Salasel.Domain.Entities.AIProcessing", b =>
+                {
+                    b.HasOne("Salasel.Domain.Entities.VoiceProcurementLog", "VoiceLog")
+                        .WithOne("AIProcessing")
+                        .HasForeignKey("Salasel.Domain.Entities.AIProcessing", "VoiceLogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("VoiceLog");
+                });
+
+            modelBuilder.Entity("Salasel.Domain.Entities.MasterOrder", b =>
+                {
+                    b.HasOne("Salasel.Domain.Entities.MerchantsProfile", "Merchant")
+                        .WithMany("MasterOrders")
+                        .HasForeignKey("MerchantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Salasel.Domain.Entities.VoiceProcurementLog", "VoiceLog")
+                        .WithMany("MasterOrders")
+                        .HasForeignKey("VoiceLogID")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Merchant");
+
+                    b.Navigation("VoiceLog");
                 });
 
             modelBuilder.Entity("Salasel.Domain.Entities.MerchantInventory", b =>
@@ -356,134 +487,144 @@ namespace Salasel.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Salasel.Domain.Entities.Product", "Product")
+                        .WithMany("MerchantInventories")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Merchant");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Salasel.Domain.Entities.MerchantsProfile", b =>
                 {
-                    b.HasOne("Salasel.Domain.Entities.User", "User")
-                        .WithOne("MerchantsProfile")
-                        .HasForeignKey("Salasel.Domain.Entities.MerchantsProfile", "MerchantID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("Salasel.Domain.Entities.User", "Owner")
+                        .WithMany("MerchantsProfiles")
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.OrderSplit", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.Product", b =>
                 {
-                    b.HasOne("Salasel.Domain.Entities.OrderTransaction", "ParentOrder")
-                        .WithMany("OrderSplits")
-                        .HasForeignKey("ParentOrderID")
+                    b.HasOne("Salasel.Domain.Entities.Category", "Category")
+                        .WithMany("Products")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("Salasel.Domain.Entities.SubOrder", b =>
+                {
+                    b.HasOne("Salasel.Domain.Entities.MasterOrder", "MasterOrder")
+                        .WithMany("SubOrders")
+                        .HasForeignKey("MasterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Salasel.Domain.Entities.SupplierProfile", "Supplier")
-                        .WithMany("OrderSplits")
-                        .HasForeignKey("SupplierID")
+                        .WithMany("SubOrders")
+                        .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("ParentOrder");
+                    b.Navigation("MasterOrder");
 
                     b.Navigation("Supplier");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.OrderTransaction", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.SupplierProduct", b =>
                 {
-                    b.HasOne("Salasel.Domain.Entities.MerchantsProfile", "Merchant")
-                        .WithMany("OrderTransactions")
-                        .HasForeignKey("MerchantID")
+                    b.HasOne("Salasel.Domain.Entities.Product", "Product")
+                        .WithMany("SupplierProducts")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Salasel.Domain.Entities.VoiceProcurementLog", "VoiceLog")
-                        .WithMany("OrderTransactions")
-                        .HasForeignKey("VoiceLogID")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Merchant");
-
-                    b.Navigation("VoiceLog");
-                });
-
-            modelBuilder.Entity("Salasel.Domain.Entities.SupplierCatalog", b =>
-                {
                     b.HasOne("Salasel.Domain.Entities.SupplierProfile", "Supplier")
-                        .WithMany("SupplierCatalogs")
-                        .HasForeignKey("SupplierID")
+                        .WithMany("SupplierProducts")
+                        .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Product");
 
                     b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("Salasel.Domain.Entities.SupplierProfile", b =>
                 {
-                    b.HasOne("Salasel.Domain.Entities.User", "User")
-                        .WithOne("SupplierProfile")
-                        .HasForeignKey("Salasel.Domain.Entities.SupplierProfile", "SupplierID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("Salasel.Domain.Entities.User", "Owner")
+                        .WithMany("SupplierProfiles")
+                        .HasForeignKey("OwnerUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Salasel.Domain.Entities.SystemAuditLog", b =>
-                {
-                    b.HasOne("Salasel.Domain.Entities.User", "AdminUser")
-                        .WithMany("SystemAuditLogs")
-                        .HasForeignKey("AdminUserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AdminUser");
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("Salasel.Domain.Entities.VoiceProcurementLog", b =>
                 {
                     b.HasOne("Salasel.Domain.Entities.MerchantsProfile", "Merchant")
                         .WithMany("VoiceProcurementLogs")
-                        .HasForeignKey("MerchantID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("MerchantId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Merchant");
+                });
+
+            modelBuilder.Entity("Salasel.Domain.Entities.Category", b =>
+                {
+                    b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("Salasel.Domain.Entities.MasterOrder", b =>
+                {
+                    b.Navigation("SubOrders");
                 });
 
             modelBuilder.Entity("Salasel.Domain.Entities.MerchantsProfile", b =>
                 {
                     b.Navigation("Inventories");
 
-                    b.Navigation("OrderTransactions");
+                    b.Navigation("MasterOrders");
 
                     b.Navigation("VoiceProcurementLogs");
                 });
 
-            modelBuilder.Entity("Salasel.Domain.Entities.OrderTransaction", b =>
+            modelBuilder.Entity("Salasel.Domain.Entities.Product", b =>
                 {
-                    b.Navigation("OrderSplits");
+                    b.Navigation("MerchantInventories");
+
+                    b.Navigation("SupplierProducts");
                 });
 
             modelBuilder.Entity("Salasel.Domain.Entities.SupplierProfile", b =>
                 {
-                    b.Navigation("OrderSplits");
+                    b.Navigation("SubOrders");
 
-                    b.Navigation("SupplierCatalogs");
+                    b.Navigation("SupplierProducts");
                 });
 
             modelBuilder.Entity("Salasel.Domain.Entities.User", b =>
                 {
-                    b.Navigation("MerchantsProfile");
+                    b.Navigation("MerchantsProfiles");
 
-                    b.Navigation("SupplierProfile");
-
-                    b.Navigation("SystemAuditLogs");
+                    b.Navigation("SupplierProfiles");
                 });
 
             modelBuilder.Entity("Salasel.Domain.Entities.VoiceProcurementLog", b =>
                 {
-                    b.Navigation("OrderTransactions");
+                    b.Navigation("AIProcessing");
+
+                    b.Navigation("MasterOrders");
                 });
 #pragma warning restore 612, 618
         }

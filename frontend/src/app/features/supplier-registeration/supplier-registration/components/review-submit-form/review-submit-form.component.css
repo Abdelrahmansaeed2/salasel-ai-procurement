@@ -1,0 +1,497 @@
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+}
+
+
+
+/* Review Sections Grid */
+.review-sections {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  width: 100%;
+  margin-top: 40px;
+}
+
+@media (max-width: 768px) {
+  .review-sections {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Review Card */
+.review-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.review-card:hover {
+  border-color: #cbd5e1;
+}
+
+.review-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.review-card__title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.review-card__icon {
+  width: 22px;
+  height: 22px;
+  color: #004ac6;
+  flex-shrink: 0;
+}
+
+.review-card__title {
+  color: #1e293b;
+  font-family: 'Cairo', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+  margin: 0;
+}
+
+/* Edit Button */
+.btn-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #004ac6;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-edit:hover {
+  background: rgba(0, 74, 198, 0.08);
+}
+
+.btn-edit__icon {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-edit--with-text {
+  padding: 6px 12px;
+  background: transparent;
+}
+
+.btn-edit--with-text:hover {
+  background: rgba(0, 74, 198, 0.08);
+}
+
+/* Key-Value Grid (Business Info Card) */
+.kv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 24px;
+}
+
+.kv-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+}
+
+.kv-item__label {
+  color: #94a3b8;
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.kv-item__value {
+  color: #1e293b;
+  font-family: 'Cairo', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+/* Contact Details Card */
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.contact-details__person {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.contact-details__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid #f1f5f9;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.contact-details__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: right;
+}
+
+.contact-details__name {
+  color: #1e293b;
+  font-family: 'Cairo', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.contact-details__role {
+  color: #94a3b8;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.contact-details__channels {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.contact-channel {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.contact-channel__icon {
+  width: 16px;
+  height: 16px;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.contact-channel__text {
+  color: #475569;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+/* Legal List Card */
+.legal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.legal-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-direction: row-reverse;
+}
+
+.legal-item__label {
+  color: #94a3b8;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+}
+
+.legal-item__value {
+  color: #1e293b;
+  font-family: 'Cairo', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.legal-item__badge {
+  background: #eef2f6;
+  color: #2b3674;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-family: 'Cairo', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Document Chips Card */
+.doc-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.doc-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  flex-direction: row-reverse;
+}
+
+.doc-chip__info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.doc-type-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.doc-type-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.doc-type-icon--pdf {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fee2e2;
+}
+
+.doc-type-icon--img {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #dbeafe;
+}
+
+.doc-chip__name {
+  color: #1e293b;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.doc-chip__size {
+  color: #94a3b8;
+  font-family: 'Cairo', sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  flex-shrink: 0;
+}
+
+/* Declaration Section */
+.declaration-section {
+  padding-top: 24px;
+}
+
+.declaration-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .declaration-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.declaration-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  flex-grow: 1;
+  flex-direction: row-reverse;
+}
+
+.declaration-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+  flex-grow: 1;
+}
+
+.declaration-text__title {
+  color: #1e293b;
+  font-family: 'Cairo', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 22px;
+  margin: 0;
+}
+
+.declaration-text__body {
+  color: #64748b;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  line-height: 20px;
+  margin: 0;
+}
+
+.declaration-checkbox {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: all 0.2s ease;
+}
+
+.declaration-label:hover .declaration-checkbox {
+  border-color: #004ac6;
+}
+
+.declaration-checkbox--checked {
+  background: #004ac6 !important;
+  border-color: #004ac6 !important;
+}
+
+.declaration-checkbox--checked svg {
+  width: 14px;
+  height: 14px;
+  color: #ffffff;
+}
+
+/* Submit Button */
+.btn-submit-review {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: #e2e8f0;
+  border: none;
+  border-radius: 8px;
+  color: #94a3b8;
+  font-family: 'Cairo', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 24px;
+  cursor: not-allowed;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-submit-review--active {
+  background: #004ac6;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 74, 198, 0.2);
+}
+
+.btn-submit-review--active:hover {
+  background: #003694;
+  transform: translateY(-1px);
+}
+
+.review-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-back-review {
+  color: #434655;
+  font-family: 'Noto Sans Arabic', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  background: transparent;
+  padding: 10px 20px;
+  border: 1px solid rgba(115, 118, 134, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-back-review:hover {
+  color: #191b23;
+  background: #faf8ff;
+  border-color: #004ac6;
+}
+
+.btn-submit-review__icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Trust Badges */
+.trust-badges {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 12px 0 24px;
+}
+
+.trust-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trust-badge__icon {
+  width: 18px;
+  height: 18px;
+  color: #004ac6;
+}
+
+.trust-badge__text {
+  color: #64748b;
+  font-family: 'Cairo', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+}

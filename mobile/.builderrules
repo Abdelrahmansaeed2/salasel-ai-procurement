@@ -1,0 +1,4 @@
+This is a Flutter project using Dart.
+You MUST generate Flutter (Dart) code for all components and screens.
+Do NOT generate SwiftUI or native Swift code. Ignore the presence of `ios/` and `macos/` directories.
+Generate custom widgets and Flutter layout structures natively in Dart.

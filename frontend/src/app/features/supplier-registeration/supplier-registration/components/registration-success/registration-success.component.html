@@ -1,0 +1,67 @@
+<div class="success-page-container">
+
+  <!-- Two Column Layout (Main content & Support Card) -->
+  <div class="success-grid">
+
+    <!-- Column 1: Main Status Card -->
+    <div class="success-main">
+      <!-- Large Check Circle -->
+      <div class="success-icon-wrapper">
+        <svg class="success-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+
+      <!-- Title & Subtitle -->
+      <h1 class="success-title">تم تقديم طلبك بنجاح!</h1>
+      <p class="success-subtitle">
+        طلبك قيد المراجعة حالياً من قبل فريقنا المختص. سنقوم بإبلاغك بالنتيجة فور الانتهاء.
+      </p>
+
+      <!-- Review Estimated Time Box -->
+      <div class="estimated-time-box">
+        <div class="time-text-col">
+          <span class="time-label">الوقت المتوقع للمراجعة</span>
+          <span class="time-value">24 - 48 ساعة</span>
+        </div>
+        <div class="time-icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="clock-icon">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="action-buttons-row">
+        <button type="button" class="btn-primary-dashboard" (click)="goToDashboard()">
+          <span>الانتقال إلى لوحة التحكم</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="arrow-left-icon">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </button>
+
+        <button type="button" class="btn-secondary-pdf" (click)="downloadPDF()">
+          <span>تحميل نسخة PDF</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Column 2: Side Support Card -->
+    <div class="success-sidebar">
+      <app-support-card></app-support-card>
+    </div>
+
+  </div>
+
+  <!-- Sub-Footer Legal Links -->
+  <div class="sub-footer-links">
+    <a routerLink="/terms" class="sub-footer-link">الشروط والأحكام</a>
+    <span class="sub-footer-divider"></span>
+    <a routerLink="/privacy" class="sub-footer-link">سياسة الخصوصية</a>
+    <span class="sub-footer-divider"></span>
+    <a routerLink="/help-center" class="sub-footer-link">مركز المساعدة</a>
+  </div>
+
+</div>

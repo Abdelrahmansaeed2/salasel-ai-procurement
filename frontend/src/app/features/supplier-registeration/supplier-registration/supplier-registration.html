@@ -1,0 +1,100 @@
+<div class="supplier-reg-page" dir="rtl">
+  
+  <!-- Header -->
+  <app-registration-header (saveAndExit)="onSaveAndExit()"></app-registration-header>
+
+  <!-- Stepper -->
+  <app-registration-stepper 
+    [currentStep]="currentStep()" 
+    [steps]="steps" 
+    (stepClick)="goToStep($event)"
+  ></app-registration-stepper>
+
+  <!-- Main Body Layout -->
+  <main class="reg-main">
+    <div class="reg-container" 
+         [class.reg-container--step1]="currentStep() === 1"
+         [class.reg-container--step23]="currentStep() >= 2 && currentStep() <= 6"
+         [class.reg-container--step7]="currentStep() === 7"
+         [class.reg-container--step8]="currentStep() === 8">
+      
+      <!-- Form Content Column -->
+      <div class="reg-content-col">
+        
+        <!-- Welcome Header (only for Step 1) -->
+        @if (currentStep() === 1) {
+          <div class="welcome-header">
+            <h1 class="welcome-title">مرحباً بك في سلاسل للمؤسسات</h1>
+            <p class="welcome-subtitle">
+              لنقم بإعداد هويتك الشرائية العالمية. يرجى تقديم معلومات دقيقة عن عملك كما هو موضح في وثائقك الرسمية.
+            </p>
+          </div>
+        }
+
+        <!-- Active Step Components -->
+        @if (currentStep() === 1) {
+          <app-facility-info-form 
+            (next)="nextStep($event)" 
+            (back)="onSaveAndExit()"
+          ></app-facility-info-form>
+        } @else if (currentStep() === 2) {
+          <app-license-info-form
+            (next)="nextStep($event)"
+            (back)="prevStep()"
+          ></app-license-info-form>
+        } @else if (currentStep() === 3) {
+          <app-tax-info-form
+            (next)="nextStep($event)"
+            (back)="prevStep()"
+          ></app-tax-info-form>
+        } @else if (currentStep() === 4) {
+          <app-warehouse-info-form
+            (next)="nextStep($event)"
+            (back)="prevStep()"
+          ></app-warehouse-info-form>
+        } @else if (currentStep() === 5) {
+          <app-contact-info-form
+            (next)="nextStep($event)"
+            (back)="prevStep()"
+          ></app-contact-info-form>
+        } @else if (currentStep() === 6) {
+          <app-additional-documents-form
+            (next)="nextStep($event)"
+            (back)="prevStep()"
+          ></app-additional-documents-form>
+        } @else if (currentStep() === 7) {
+          <app-review-submit-form
+            (next)="nextStep()"
+            (back)="prevStep()"
+            (editStep)="goToStep($event)"
+          ></app-review-submit-form>
+        } @else if (currentStep() === 8) {
+          <app-registration-success
+            (finish)="onFinish()"
+          ></app-registration-success>
+        }
+
+        <!-- Guidance Note -->
+        @if (currentStep() === 1) {
+          <div class="guidance-note-flat">
+            <div class="guidance-note-flat__icon-wrapper">
+              <svg class="icon-guidance" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="guidance-note-flat__content">
+              <h4 class="guidance-note-flat__title">{{ stepGuidanceTitle() }}</h4>
+              <p class="guidance-note-flat__text">{{ stepGuidanceText() }}</p>
+            </div>
+          </div>
+        }
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <app-site-footer></app-site-footer>
+
+</div>

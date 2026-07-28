@@ -1,0 +1,137 @@
+<app-site-header activeLink="الموردين" />
+
+<main class="directory-page">
+  <section class="hero">
+    <div class="hero__overlay">
+      <div class="hero__content">
+        <span class="hero__badge">
+          <img src="assets/icons/icon-check-circle.svg" alt="" />
+          <span>أكثر من 500 مورد موثق في مصر</span>
+        </span>
+
+        <h1 class="hero__title">اكتشف الموردين المعتمدين في جميع أنحاء مصر</h1>
+        <p class="hero__subtitle">
+          سوق B2B الرائد للشركات والمصانع للوصول إلى أفضل سلاسل التوريد بكل شفافية وأمان.
+        </p>
+
+        <form class="hero__search" (ngSubmit)="onSearch()">
+          <button type="submit" class="hero__search-btn">
+            <span>بحث</span>
+            <img src="assets/icons/icon-search.svg" alt="" />
+          </button>
+
+          <div class="hero__search-field">
+            <input
+              type="text"
+              name="city"
+              placeholder="المدينة"
+              [ngModel]="cityQuery()"
+              (ngModelChange)="cityQuery.set($event)"
+            />
+            <img src="assets/icons/icon-pin.svg" alt="" />
+          </div>
+
+          <span class="hero__search-divider"></span>
+
+          <div class="hero__search-field">
+            <input
+              type="text"
+              name="product"
+              placeholder="المنتجات"
+              [ngModel]="productQuery()"
+              (ngModelChange)="productQuery.set($event)"
+            />
+            <img src="assets/icons/icon-bag.svg" alt="" />
+          </div>
+
+          <span class="hero__search-divider"></span>
+
+          <div class="hero__search-field">
+            <input
+              type="text"
+              name="supplierName"
+              placeholder="اسم المورد"
+              [ngModel]="supplierNameQuery()"
+              (ngModelChange)="supplierNameQuery.set($event)"
+            />
+            <img src="assets/icons/icon-building.svg" alt="" />
+          </div>
+        </form>
+
+        <div class="hero__filters">
+          <button
+            type="button"
+            class="filter-chip filter-chip--verified"
+            [class.filter-chip--active]="verifiedOnly()"
+            (click)="toggleVerifiedOnly()"
+          >
+            <img src="assets/icons/icon-badge-check.svg" alt="" />
+            <span>موثق فقط</span>
+          </button>
+
+          @for (filter of dropdownFilters; track filter.id) {
+            <button type="button" class="filter-chip filter-chip--dropdown">
+              <img src="assets/icons/icon-chevron-down.svg" alt="" />
+              <span>{{ filter.label }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="supplier-grid">
+    @for (supplier of filteredSuppliers(); track supplier.id) {
+      <article class="supplier-card">
+        <div class="supplier-card__top">
+          <div class="supplier-card__badges">
+            @if (supplier.isVerified) {
+              <span class="supplier-card__verified">
+                <span>موثق</span>
+                <img src="assets/icons/icon-verified.svg" alt="" />
+              </span>
+            }
+            <span class="supplier-card__available">
+              <span>متاح الآن</span>
+              <span class="supplier-card__dot" [class.supplier-card__dot--offline]="!supplier.isAvailableNow"></span>
+            </span>
+          </div>
+          <img [src]="supplier.logo" [alt]="supplier.name" class="supplier-card__logo" />
+        </div>
+
+        <h3 class="supplier-card__name">{{ supplier.name }}</h3>
+
+        <div class="supplier-card__meta">
+          <span class="supplier-card__city">{{ supplier.city }}</span>
+          <span class="supplier-card__dot-sep">•</span>
+          <span class="supplier-card__reviews">({{ supplier.reviewsCount }} تقييم)</span>
+          <span class="supplier-card__rating">{{ supplier.rating }}</span>
+          <img src="assets/icons/icon-star-filled.svg" alt="" />
+        </div>
+
+        <div class="supplier-card__products">
+          <span class="supplier-card__products-label">أهم المنتجات:</span>
+          <div class="supplier-card__tags">
+            @for (product of supplier.topProducts; track product) {
+              <span class="supplier-card__tag">{{ product }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="supplier-card__delivery">
+          <span>{{ supplier.deliveryArea }}</span>
+          <img src="assets/icons/icon-truck.svg" alt="" />
+        </div>
+
+        <div class="supplier-card__actions">
+          <a [routerLink]="['/suppliers', supplier.id]" class="supplier-card__btn supplier-card__btn--outline">ملف الشركة</a>
+          <button type="button" class="supplier-card__btn supplier-card__btn--primary">طلب شراكة</button>
+        </div>
+      </article>
+    } @empty {
+      <p class="supplier-grid__empty">لا يوجد موردون مطابقون لبحثك حالياً.</p>
+    }
+  </section>
+</main>
+
+<app-site-footer />

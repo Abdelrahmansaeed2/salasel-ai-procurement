@@ -43,7 +43,6 @@
 }
 
 .scroll-top:hover {
-  transform: translateY(-3px);
 }
 
 @keyframes fadeInUp {
@@ -116,7 +115,6 @@
 }
 
 .btn:hover {
-  transform: translateY(-1px);
   opacity: 0.92;
 }
 
@@ -319,7 +317,6 @@
 }
 
 .tech-badge:hover {
-  transform: translateY(-2px);
 }
 
 .tech-badge__dot {
@@ -400,10 +397,31 @@
 
 .metrics__grid {
   display: grid;
-  grid-template-columns: repeat(6, 184px);
+  grid-template-columns: repeat(6, 1fr);
   column-gap: 36px;
   max-width: 100%;
-  overflow-x: auto;
+}
+
+@media (max-width: 1200px) {
+  .metrics__grid {
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 24px;
+    column-gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .metrics__grid {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 16px;
+    column-gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .metrics__grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .metric-item {
@@ -471,7 +489,9 @@
 }
 
 .problem__card {
-  width: 481px;
+  flex: 1;
+  max-width: 481px;
+  width: 100%;
   padding: 28px;
   border-radius: 12px;
   display: flex;
@@ -614,7 +634,7 @@
   max-width: 1152px;
   margin: 64px auto 0;
   display: grid;
-  grid-template-columns: repeat(3, 357.33px);
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   justify-content: center;
 }
@@ -629,7 +649,6 @@
 }
 
 .step-card:hover {
-  transform: translateY(-4px);
   box-shadow: 0 12px 24px 0 rgba(15, 23, 43, 0.08);
 }
 
@@ -713,7 +732,7 @@
   max-width: 1152px;
   margin: 64px auto 0;
   display: grid;
-  grid-template-columns: repeat(4, 264px);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   justify-content: center;
 }
@@ -728,7 +747,6 @@
 }
 
 .feature-card:hover {
-  transform: translateY(-4px);
   box-shadow: 0 10px 20px 0 rgba(15, 23, 43, 0.07);
 }
 
@@ -797,7 +815,9 @@
 }
 
 .segment-card {
-  width: 400px;
+  flex: 1;
+  max-width: 400px;
+  width: 100%;
   padding: 32px;
   display: flex;
   flex-direction: column;
@@ -810,7 +830,6 @@
 }
 
 .segment-card:hover {
-  transform: translateY(-4px);
   box-shadow: 0 16px 32px 0 rgba(15, 23, 43, 0.08);
 }
 
@@ -932,12 +951,16 @@
   display: flex;
   justify-content: center;
   gap: 42px;
-  padding: 0 80px;
+  padding: 0 var(--spacing-8, 80px);
+  width: 100%;
+  max-width: 1280px;
 }
 
 .testimonial-card {
   position: relative;
-  width: 619px;
+  flex: 1;
+  max-width: 619px;
+  width: 100%;
   background: #ffffff;
   border-radius: 8px;
   padding: 32px;
@@ -950,7 +973,6 @@
 }
 
 .testimonial-card:hover {
-  transform: translateY(-4px);
   box-shadow: 0 12px 28px 0 rgba(15, 23, 43, 0.1);
 }
 
@@ -1102,10 +1124,6 @@
 }
 
 @media (max-width: 1024px) {
-  .metrics__grid {
-    grid-template-columns: repeat(3, 184px);
-    row-gap: 12px;
-  }
 
   .steps-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -1149,11 +1167,14 @@
 }
 
 @media (max-width: 640px) {
-  .metrics__grid,
   .steps-grid,
   .features-grid {
     grid-template-columns: 1fr;
   }
+
+}
+
+@media (max-width: 480px) {
 
   .cta__title {
     font-size: 30px;

@@ -16,13 +16,13 @@ public class OrderExecutionRequestDtoValidator : AbstractValidator<OrderExecutio
         RuleFor(x => x.Splits)
             .NotEmpty().WithMessage("Order must contain at least one split.");
 
-        RuleForEach(x => x.Splits).SetValidator(new OrderSplitDtoValidator());
+        RuleForEach(x => x.Splits).SetValidator(new SubOrderDtoValidator());
     }
 }
 
-public class OrderSplitDtoValidator : AbstractValidator<OrderSplitDto>
+public class SubOrderDtoValidator : AbstractValidator<SubOrderDto>
 {
-    public OrderSplitDtoValidator()
+    public SubOrderDtoValidator()
     {
         RuleFor(x => x.SupplierID)
             .GreaterThan(0).WithMessage("SupplierID must be a valid positive integer.");

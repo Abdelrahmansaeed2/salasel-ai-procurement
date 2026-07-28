@@ -1,0 +1,199 @@
+<div class="form-container">
+  
+  <app-step-header 
+    [title]="'رفع السجل التجاري'" 
+    [subtitle]="'يرجى تقديم نسخة صالحة من السجل التجاري (CR) لتوثيق المنشأة.'">
+  </app-step-header>
+
+  <!-- Information Panels -->
+  <div class="info-row">
+    
+    <!-- Instant Verification -->
+    <div class="info-card info-card--blue">
+      <div class="info-card__icon-wrapper">
+        <svg class="info-card__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <polyline points="9 11 11 13 15 9"/>
+        </svg>
+      </div>
+      <div class="info-card__content">
+        <h4 class="info-card__title">توثيق فوري</h4>
+        <p class="info-card__description">تتم معالجة الوثائق آلياً لسرعة التفعيل</p>
+      </div>
+    </div>
+
+    <!-- Document Requirements -->
+    <div class="info-card info-card--requirements">
+      <div class="info-card__header">
+        <svg class="info-card__header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        <h4 class="info-card__title">متطلبات المستند</h4>
+      </div>
+      <ul class="requirements-list">
+        <li class="requirements-list__item">
+          <span class="requirements-list__text">يجب أن يكون السجل ساري المفعول لمدة لا تقل عن ٣ أشهر.</span>
+          <span class="requirements-list__bullet"></span>
+        </li>
+        <li class="requirements-list__item">
+          <span class="requirements-list__text">يجب أن تكون جميع البيانات واضحة ومقروءة (الاسم التجاري، الرقم الموحد، الأنشطة).</span>
+          <span class="requirements-list__bullet"></span>
+        </li>
+        <li class="requirements-list__item">
+          <span class="requirements-list__text">الصيغ المقبولة: PDF, JPG, PNG بحد أقصى ١٠ ميجابايت للملف.</span>
+          <span class="requirements-list__bullet"></span>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Drag and Drop Zone -->
+  <div 
+    class="upload-area"
+    [class.upload-area--drag-over]="isDragOver()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+    (click)="fileInput.click()"
+  >
+    <input 
+      #fileInput
+      type="file"
+      multiple
+      accept=".pdf,.jpg,.jpeg,.png"
+      class="upload-area__input"
+      (change)="onFileSelected($event)"
+    />
+    
+    <div class="upload-area__content">
+      <div class="upload-area__icon-wrapper">
+        <svg class="upload-area__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <h3 class="upload-area__title">اسحب وأفلت الملفات هنا</h3>
+      <p class="upload-area__subtitle">أو انقر لاختيار ملفات من جهازك</p>
+      
+      <!-- Allowed File Formats Badges -->
+      <div class="format-badges">
+        <div class="format-badge">
+          <span class="format-badge__text">JPG / PNG</span>
+          <svg class="format-badge__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </div>
+        <div class="format-badge">
+          <span class="format-badge__text">PDF</span>
+          <svg class="format-badge__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- File List & Progress -->
+  @if (uploadedFiles().length > 0) {
+    <div class="file-list-section">
+      <h4 class="file-list-title">الملفات المرفوعة</h4>
+      
+      <div class="file-list">
+        @for (file of uploadedFiles(); track file.id) {
+          
+          <!-- Uploading State File Item -->
+          @if (file.status === 'uploading') {
+            <div class="file-item file-item--uploading">
+              
+              <!-- File Icon -->
+              <div class="file-item__icon-wrapper">
+                <svg class="file-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+
+              <!-- Main Progress Container -->
+              <div class="file-item__progress-container">
+                <div class="file-item__header-row">
+                  <span class="file-item__name">{{ file.name }}</span>
+                  <span class="file-item__progress-percent">{{ file.progress }}٪</span>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="progress-bar">
+                  <div class="progress-bar__fill" [style.width.%]="file.progress"></div>
+                </div>
+              </div>
+
+              <!-- Delete Button -->
+              <button type="button" class="file-item__delete-btn" (click)="deleteFile(file.id); $event.stopPropagation()">
+                <svg class="file-item__delete-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+              </button>
+
+            </div>
+          }
+
+          <!-- Completed State File Item -->
+          @if (file.status === 'completed') {
+            <div class="file-item file-item--success">
+              
+              <!-- File Icon -->
+              <div class="file-item__icon-wrapper file-item__icon-wrapper--success">
+                <svg class="file-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+
+              <!-- Info details -->
+              <div class="file-item__info">
+                <div class="file-item__header-row">
+                  <span class="file-item__name">{{ file.name }}</span>
+                  <div class="status-badge">
+                    <span class="status-badge__text">مكتمل</span>
+                    <svg class="status-badge__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                </div>
+                <span class="file-item__size">{{ file.size }}</span>
+              </div>
+
+              <!-- Delete Button -->
+              <button type="button" class="file-item__delete-btn" (click)="deleteFile(file.id); $event.stopPropagation()">
+                <svg class="file-item__delete-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+              </button>
+
+            </div>
+          }
+
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Footer Actions -->
+  <app-form-actions 
+    [submitText]="'المتابعة'" 
+    [backText]="'السابق'" 
+    (submit)="onSubmit()" 
+    (back)="onBackClick()">
+  </app-form-actions>
+
+</div>

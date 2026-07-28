@@ -12,6 +12,7 @@ import {
 import { RevealDirective } from '../../shared/animations/reveal.directive';
 import { SiteHeaderComponent } from '../../shared/site-header/site-header.component';
 import { SiteFooterComponent } from '../../shared/site-footer/site-footer.component';
+import { RouterLink } from '@angular/router';
 
 interface TechBadge {
   label: string;
@@ -65,7 +66,7 @@ interface Testimonial {
 @Component({
   selector: 'app-landing-page',
   standalone: true,
-  imports: [RevealDirective, SiteHeaderComponent, SiteFooterComponent],
+  imports: [RevealDirective, SiteHeaderComponent, SiteFooterComponent, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './landing-page.component.html',
   styleUrl: './landing-page.component.css',

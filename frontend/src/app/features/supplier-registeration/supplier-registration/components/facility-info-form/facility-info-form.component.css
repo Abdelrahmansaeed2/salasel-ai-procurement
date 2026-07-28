@@ -1,0 +1,199 @@
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  width: 100%;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  width: 100%;
+}
+
+.form-field__label {
+  color: var(--color-text-main);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.form-field__control {
+  position: relative;
+  width: 100%;
+}
+
+.form-field__input,
+.form-field__select,
+.form-field__textarea {
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: 15px;
+  text-align: right;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-field__select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2362748e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 12px center;
+  background-size: 16px;
+  padding-left: 40px;
+}
+
+.form-field__input::placeholder,
+.form-field__textarea::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.7;
+}
+
+.form-field__input:focus,
+.form-field__select:focus,
+.form-field__textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(21, 93, 252, 0.1);
+}
+
+.form-field__input--invalid {
+  border-color: #ef4444 !important;
+}
+
+.form-field__error {
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: right;
+}
+
+/* Map Section */
+.map-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  width: 100%;
+}
+
+.map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.map-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Locate Me Button Overlay */
+.btn-locate-me {
+  position: absolute;
+  bottom: var(--spacing-4);
+  left: var(--spacing-4);
+  z-index: 1000;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-2) var(--spacing-4);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-main);
+  box-shadow: var(--shadow-md);
+  transition: all 0.2s ease;
+}
+
+.btn-locate-me:hover {
+  background: var(--color-surface);
+}
+
+.icon-location {
+  width: 16px;
+  height: 16px;
+  color: var(--color-primary);
+}
+
+.coordinates-badge {
+  position: absolute;
+  top: var(--spacing-4);
+  left: var(--spacing-4);
+  z-index: 1000;
+  background: rgba(15, 23, 42, 0.85);
+  color: #ffffff;
+  font-size: 11px;
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-sm);
+  direction: ltr;
+}
+
+/* Custom CSS Leaflet Pin Marker Styles */
+::ng-deep .custom-div-icon {
+  background: transparent;
+  border: none;
+}
+
+::ng-deep .marker-pin {
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--color-primary);
+  position: absolute;
+  transform: rotate(45deg);
+  left: 50%;
+  top: 50%;
+  margin: -30px 0 0 -15px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+  border: 2px solid #ffffff;
+  transition: background-color 0.2s ease;
+}
+
+::ng-deep .marker-pin::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  margin: 8px 0 0 8px;
+  background: #ffffff;
+  position: absolute;
+  border-radius: 50%;
+}
+
+::ng-deep .marker-dot {
+  width: 12px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+  position: absolute;
+  bottom: -4px;
+  left: -6px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 576px) {
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-3);
+  }
+  
+  .btn-submit {
+    justify-content: center;
+  }
+  
+  .btn-back-dashboard {
+    text-align: center;
+    padding: var(--spacing-2);
+  }
+}

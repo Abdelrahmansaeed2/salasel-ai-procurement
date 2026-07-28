@@ -5,7 +5,6 @@ dist/
 # .NET
 bin/
 obj/
-appsettings.Development.json
 
 # Python
 venv/
@@ -13,6 +12,7 @@ venv/
 __pycache__/
 *.pyc
 .env
+!.env.example
 
 # Flutter
 .dart_tool/

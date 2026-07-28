@@ -1,0 +1,259 @@
+<div class="page">
+  <header class="topbar">
+    <div class="topbar__actions">
+      <button type="button" class="topbar__icon-btn" aria-label="الإشعارات">
+        <img src="assets/icons/icon-bell.svg" alt="" />
+        <span class="topbar__badge"></span>
+      </button>
+      <button type="button" class="topbar__icon-btn" aria-label="المساعدة">
+        <img src="assets/icons/icon-help.svg" alt="" />
+      </button>
+      <span class="topbar__divider"></span>
+      <div class="topbar__user">
+        <div class="topbar__user-info">
+          <span class="topbar__user-name">مورد سلاسل</span>
+          <span class="topbar__user-role">صلاحيات المسؤول</span>
+        </div>
+        <img src="assets/images/avatar-supplier-admin.png" alt="" class="topbar__avatar" />
+      </div>
+    </div>
+
+    <div class="topbar__search">
+      <input type="text" placeholder="ابحث عن الموارد والطلبات والموردين..." />
+      <img src="assets/icons/icon-search-gray.svg" alt="" />
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="content__row">
+      <aside class="summary-col">
+        <div class="summary-card">
+          <h2 class="summary-card__title">ملخص الأعمال</h2>
+
+          <div class="summary-card__rows">
+            @for (stat of summaryStats; track stat.label) {
+              <div class="summary-row">
+                <span class="summary-row__value" [style.color]="stat.valueColor">{{ stat.value }}</span>
+                <div class="summary-row__label-group">
+                  <span class="summary-row__label">{{ stat.label }}</span>
+                  <img [src]="stat.icon" alt="" />
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="summary-card__actions">
+            <button type="button" class="cta-btn cta-btn--primary">
+              <img src="assets/icons/icon-handshake.svg" alt="" />
+              <span>طلب شراكة عمل</span>
+            </button>
+            <button type="button" class="cta-btn cta-btn--secondary">
+              <img src="assets/icons/icon-message.svg" alt="" />
+              <span>تواصل مع المورد</span>
+            </button>
+            <button type="button" class="cta-btn cta-btn--outline">
+              <span>طلب صوتي سريع</span>
+              <img src="assets/icons/icon-mic.svg" alt="" />
+            </button>
+          </div>
+        </div>
+
+        <div class="about-card">
+          <div class="about-card__header">
+            <h3>حول الشركة</h3>
+            <img src="assets/icons/icon-info-circle.svg" alt="" />
+          </div>
+          <p class="about-card__text">{{ aboutCompanyText }}</p>
+        </div>
+      </aside>
+
+      <section class="main-col">
+        <nav class="breadcrumb" aria-label="مسار التنقل">
+          <span class="breadcrumb__current">شركة البركة لتجارة الجملة</span>
+          <img src="assets/icons/icon-chevron-breadcrumb.svg" alt="" />
+          <span class="breadcrumb__link">الموردين</span>
+          <img src="assets/icons/icon-chevron-breadcrumb.svg" alt="" />
+          <span class="breadcrumb__link">الرئيسية</span>
+        </nav>
+
+        <div class="hero">
+          <div class="hero__image-wrap">
+            <img src="assets/images/supplier-details-hero.jpg" alt="شركة البركة لتجارة الجملة" class="hero__image" />
+            <div class="hero__gradient"></div>
+            <div class="hero__actions">
+              <button type="button" class="hero__icon-btn" aria-label="مشاركة">
+                <img src="assets/icons/icon-share.svg" alt="" />
+              </button>
+              <button
+                type="button"
+                class="hero__icon-btn"
+                [class.hero__icon-btn--active]="isFavorite()"
+                (click)="toggleFavorite()"
+                aria-label="إضافة للمفضلة"
+              >
+                <img src="assets/icons/icon-heart.svg" alt="" />
+              </button>
+            </div>
+          </div>
+
+          <div class="hero__info">
+            <div class="hero__meta-col">
+              <h1 class="hero__title">شركة البركة لتجارة الجملة</h1>
+              <div class="hero__meta-row">
+                <span class="hero__meta-item">
+                  <span>15 عاماً في السوق</span>
+                  <img src="assets/icons/icon-years.svg" alt="" />
+                </span>
+                <span class="hero__meta-item">
+                  <span>المقر الرئيسي: القاهرة</span>
+                  <img src="assets/icons/icon-pin-gray.svg" alt="" />
+                </span>
+                <span class="hero__meta-item">
+                  <span>(1.2k تقييم)</span>
+                  <span class="hero__rating-value">4.9</span>
+                  <img src="assets/icons/icon-star-orange.svg" alt="" />
+                </span>
+              </div>
+            </div>
+
+            <div class="hero__logo-frame">
+              <img src="assets/images/al-barakah-logo.png" alt="شعار شركة البركة" class="hero__logo" />
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-row">
+          @for (kpi of kpiCards; track kpi.label) {
+            <div class="kpi-card">
+              <span class="kpi-card__value">{{ kpi.value }}</span>
+              <span class="kpi-card__label">{{ kpi.label }}</span>
+            </div>
+          }
+        </div>
+
+        <section class="products-section">
+          <div class="products-section__header">
+            <h2>قائمة المنتجات المختارة</h2>
+            <div class="products-section__tabs">
+              @for (category of categories; track category) {
+                <button
+                  type="button"
+                  class="tab"
+                  [class.tab--active]="activeCategory() === category"
+                  (click)="selectCategory(category)"
+                >
+                  {{ category }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="products-section__search">
+            <input
+              type="text"
+              placeholder="ابحث في منتجات المورد..."
+              [ngModel]="productSearch()"
+              (ngModelChange)="productSearch.set($event)"
+            />
+            <img src="assets/icons/icon-search-gray.svg" alt="" />
+          </div>
+
+          <div class="products-grid">
+            @for (product of filteredProducts(); track product.id) {
+              <article class="product-card">
+                <div class="product-card__image-wrap">
+                  <img [src]="product.image" [alt]="product.name" />
+                  @if (product.discountBadge) {
+                    <span class="product-card__badge">{{ product.discountBadge }}</span>
+                  }
+                </div>
+                <div class="product-card__body">
+                  <h4 class="product-card__name">{{ product.name }}</h4>
+                  <span class="product-card__brand">{{ product.brand }}</span>
+                  <div class="product-card__footer">
+                    <button type="button" class="product-card__add" (click)="addToCart(product)" aria-label="أضف إلى السلة">
+                      <img src="assets/icons/icon-cart-add.svg" alt="" />
+                    </button>
+                    <div class="product-card__price-col">
+                      <span class="product-card__price">{{ product.price }}</span>
+                      <span class="product-card__min-qty">{{ product.minQtyLabel }}</span>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            } @empty {
+              <p class="products-grid__empty">لا توجد منتجات مطابقة لبحثك.</p>
+            }
+          </div>
+        </section>
+
+        <section class="map-section">
+          <h2>تغطية التوصيل</h2>
+          <div class="map-section__frame">
+            <img src="assets/images/coverage-map.jpg" alt="خريطة التغطية" />
+            <div class="map-section__overlay">
+              <span class="map-section__overlay-title">12 محافظة مدعومة</span>
+              <span class="map-section__overlay-text">تغطية كاملة للقاهرة الكبرى والوجه البحري</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="performance-section">
+          <h2>مؤشرات الأداء</h2>
+          <div class="performance-chart">
+            @for (bar of performanceBars; track bar.label) {
+              <div class="performance-chart__col">
+                <div class="performance-chart__bar-wrap">
+                  <div class="performance-chart__bar" [style.height.%]="bar.heightPercent"></div>
+                </div>
+                <span class="performance-chart__label">{{ bar.label }}</span>
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="certifications-section">
+          <h2>الاعتمادات والشهادات</h2>
+          <div class="certifications-grid">
+            @for (cert of certifications; track cert.title) {
+              <div class="certification-card">
+                <div class="certification-card__text">
+                  <span class="certification-card__title">{{ cert.title }}</span>
+                  <span class="certification-card__subtitle">{{ cert.subtitle }}</span>
+                </div>
+                <img [src]="cert.icon" alt="" />
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="reviews-section">
+          <h2>ماذا يقول التجار؟</h2>
+          <div class="reviews-list">
+            @for (review of reviews; track review.name) {
+              <article class="review-card">
+                <div class="review-card__top">
+                  <div class="review-card__stars">
+                    @for (i of starIndexes; track i) {
+                      <img [src]="i < review.rating ? 'assets/icons/icon-star-review.svg' : 'assets/icons/icon-star-outline.svg'" alt="" />
+                    }
+                  </div>
+                  <div class="review-card__author">
+                    <div class="review-card__author-text">
+                      <span class="review-card__name">{{ review.name }}</span>
+                      <span class="review-card__time">{{ review.time }}</span>
+                    </div>
+                    <div class="review-card__avatar" [style.background]="review.avatarColor">
+                      <span>{{ review.initials }}</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="review-card__text">{{ review.text }}</p>
+              </article>
+            }
+          </div>
+        </section>
+      </section>
+    </div>
+  </main>
+</div>

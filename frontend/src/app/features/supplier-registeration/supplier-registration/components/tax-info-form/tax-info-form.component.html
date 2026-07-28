@@ -1,0 +1,145 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-container">
+
+  <app-step-header 
+    [title]="'المعلومات الضريبية'" 
+    [subtitle]="'يرجى تقديم تفاصيل ضريبة القيمة المضافة وشهادة التسجيل الضريبي الخاصة بشركتكم.'">
+  </app-step-header>
+
+  <!-- Inputs Column Wrapper -->
+  <div class="inputs-column">
+    <!-- VAT Registration Number -->
+    <div class="form-field">
+      <label class="form-field__label" for="vatNumber">رقم التسجيل في ضريبة القيمة المضافة (VAT)</label>
+      <div class="form-field__control">
+        <input
+          id="vatNumber"
+          type="text"
+          formControlName="vatNumber"
+          class="form-field__input"
+          placeholder="100349283400003"
+          [class.form-field__input--invalid]="form.get('vatNumber')?.invalid && form.get('vatNumber')?.touched"
+          [class.form-field__input--disabled]="form.get('vatNumber')?.disabled"
+        />
+        
+        @if (form.get('vatNumber')?.valid && !form.get('vatNumber')?.disabled) {
+          <div class="input-badge">
+            <span class="input-badge__text">صحيح</span>
+            <svg class="input-badge__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+        }
+      </div>
+      @if (form.get('vatNumber')?.invalid && form.get('vatNumber')?.touched && !form.get('vatNumber')?.disabled) {
+        <span class="form-field__error">
+          يرجى إدخال رقم تسجيل ضريبي صحيح مكون من 15 رقمًا.
+        </span>
+      } @else {
+        <span class="form-field__hint">يجب أن يتطابق هذا الرقم مع الشهادة المرفقة.</span>
+      }
+    </div>
+
+    <!-- Tax ID Input -->
+    <div class="form-field">
+      <label class="form-field__label" for="taxId">الرقم الضريبي (Tax ID)</label>
+      <div class="form-field__control">
+        <input
+          id="taxId"
+          type="text"
+          formControlName="taxId"
+          class="form-field__input"
+          placeholder="أدخل الرقم الضريبي الموحد"
+          [class.form-field__input--invalid]="form.get('taxId')?.invalid && form.get('taxId')?.touched"
+        />
+      </div>
+      @if (form.get('taxId')?.invalid && form.get('taxId')?.touched) {
+        <span class="form-field__error">
+          يرجى إدخال رقم ضريبي صحيح مكون من 9 أرقام (مثال: 123456789 أو 123-456-789).
+        </span>
+      }
+    </div>
+
+    <!-- Checkbox Logic (Vat Exempt) -->
+    <div class="checkbox-field">
+      <label class="checkbox-container">
+        <input
+          type="checkbox"
+          formControlName="isVatExempt"
+          class="checkbox-container__input"
+        />
+        <span class="checkbox-container__checkmark"></span>
+        <span class="checkbox-container__label">شركتي معفاة من ضريبة القيمة المضافة في الوقت الحالي.</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Tax Certificate File Upload -->
+  @if (!form.get('isVatExempt')?.value) {
+    <div class="upload-section">
+      <label class="form-field__label">شهادة التسجيل الضريبي</label>
+      
+      <!-- Upload Drop Area -->
+      <div 
+        class="upload-area" 
+        [class.upload-area--drag-over]="isDragOver()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        (click)="fileInput.click()"
+      >
+        <input 
+          #fileInput 
+          type="file" 
+          (change)="onFileSelected($event)" 
+          accept=".pdf,.jpg,.jpeg,.png"
+          style="display: none;" 
+        />
+        
+        <div class="upload-area__content">
+          <div class="upload-area__icon-wrapper">
+            <svg class="upload-area__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <span class="upload-area__title">انقر للتحميل أو اسحب الملف هنا</span>
+          <span class="upload-area__subtitle">PDF, JPG (الحد الأقصى 5MB)</span>
+        </div>
+      </div>
+
+      <!-- File List -->
+      @if (uploadedFile()) {
+        <div class="file-list">
+          <div class="file-item">
+            <div class="file-item__icon-wrapper">
+              <svg class="file-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            </div>
+            <div class="file-item__info">
+              <span class="file-item__name">{{ uploadedFile()?.name }}</span>
+              <span class="file-item__size">{{ uploadedFile()?.size }}</span>
+            </div>
+            <button type="button" class="file-item__delete-btn" (click)="removeFile()" aria-label="حذف الملف">
+              <svg class="file-item__delete-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Actions -->
+  <app-form-actions 
+    [submitText]="'حفظ ومتابعة'" 
+    [backText]="'السابق'" 
+    (submit)="onSubmit()" 
+    (back)="onBackClick()">
+  </app-form-actions>
+
+</form>

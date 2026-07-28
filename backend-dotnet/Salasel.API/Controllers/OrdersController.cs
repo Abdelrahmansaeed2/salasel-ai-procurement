@@ -24,7 +24,7 @@ public class OrdersController : ControllerBase
         if (request.Splits == null || request.Splits.Count == 0)
             return BadRequest("An order must contain at least one supplier split.");
 
-        var orderId = await _orderExecutionService.ExecuteOrderAsync(request);
-        return Ok(new { Message = "Order executed successfully", OrderID = orderId });
+        var Id = await _orderExecutionService.ExecuteOrderAsync(request);
+        return Ok(new { Message = "Order executed successfully", Id = Id });
     }
 }

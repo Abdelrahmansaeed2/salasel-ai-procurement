@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+
 using Salasel.Application.Interfaces;
 using Salasel.Application.Services;
 using Salasel.Infrastructure.Data;
@@ -14,6 +16,18 @@ using Salasel.API.Middlewares;
 using Salasel.Domain.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .WriteTo.Seq(builder.Configuration["Seq:Url"] ?? "https://seq.otlob-egy.online")
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 // Add DbContext
 builder.Services.AddDbContext<SalaselDbContext>(options =>
@@ -51,13 +65,12 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMerchantProfileRepository, MerchantProfileRepository>();
 builder.Services.AddScoped<ISupplierProfileRepository, SupplierProfileRepository>();
-builder.Services.AddScoped<IOrderTransactionRepository, OrderTransactionRepository>();
-builder.Services.AddScoped<IOrderSplitRepository, OrderSplitRepository>();
-builder.Services.AddScoped<ISupplierCatalogRepository, SupplierCatalogRepository>();
+builder.Services.AddScoped<IMasterOrderRepository, MasterOrderRepository>();
+builder.Services.AddScoped<ISubOrderRepository, SubOrderRepository>();
+builder.Services.AddScoped<ISupplierProductRepository, SupplierProductRepository>();
 builder.Services.AddScoped<IMerchantInventoryRepository, MerchantInventoryRepository>();
 builder.Services.AddScoped<IVoiceProcurementLogRepository, VoiceProcurementLogRepository>();
-builder.Services.AddScoped<IFraudPreventionLimitRepository, FraudPreventionLimitRepository>();
-builder.Services.AddScoped<ISystemAuditLogRepository, SystemAuditLogRepository>();
+
 
 // Add Services
 builder.Services.AddScoped<IProcurementService, ProcurementService>();
@@ -81,6 +94,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestDtoValidator>();
+builder.Services.AddHealthChecks();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -114,17 +128,40 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+// ── Auto-apply EF Core migrations on startup ────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<SalaselDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        logger.LogInformation("Applying database migrations...");
+        db.Database.Migrate();
+        logger.LogInformation("Database migrations applied successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Failed to apply database migrations.");
+        throw;
+    }
+}
+
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseMiddleware<LangfuseMiddleware>();
 
 app.UseHttpsRedirection();
+
+app.UseSerilogRequestLogging(); // <-- Records HTTP request times extremely fast
+
 
 app.UseCors("AllowAll");
 
@@ -132,5 +169,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
