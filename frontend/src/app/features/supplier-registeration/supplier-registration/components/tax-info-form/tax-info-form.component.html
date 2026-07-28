@@ -1,12 +1,11 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-container">
 
-  <!-- Header Info -->
-  <div class="step-header">
-    <h2 class="step-header__title">المعلومات الضريبية</h2>
-    <p class="step-header__subtitle">يرجى تقديم تفاصيل ضريبة القيمة المضافة وشهادة التسجيل الضريبي الخاصة بشركتكم.</p>
-  </div>
+  <app-step-header 
+    [title]="'المعلومات الضريبية'" 
+    [subtitle]="'يرجى تقديم تفاصيل ضريبة القيمة المضافة وشهادة التسجيل الضريبي الخاصة بشركتكم.'">
+  </app-step-header>
 
-  <!-- Inputs Column Wrapper (Figma itemSpacing: 24) -->
+  <!-- Inputs Column Wrapper -->
   <div class="inputs-column">
     <!-- VAT Registration Number -->
     <div class="form-field">
@@ -22,7 +21,6 @@
           [class.form-field__input--disabled]="form.get('vatNumber')?.disabled"
         />
         
-        <!-- Valid check badge if the pattern matches exactly and is not disabled -->
         @if (form.get('vatNumber')?.valid && !form.get('vatNumber')?.disabled) {
           <div class="input-badge">
             <span class="input-badge__text">صحيح</span>
@@ -110,7 +108,7 @@
         </div>
       </div>
 
-      <!-- File List (Simulated) -->
+      <!-- File List -->
       @if (uploadedFile()) {
         <div class="file-list">
           <div class="file-item">
@@ -137,18 +135,11 @@
   }
 
   <!-- Actions -->
-  <div class="form-actions">
-    <button type="submit" class="btn-submit">
-      <span>حفظ ومتابعة</span>
-      <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="19" y1="12" x2="5" y2="12"></line>
-        <polyline points="12 19 5 12 12 5"></polyline>
-      </svg>
-    </button>
-    
-    <button type="button" class="btn-back" (click)="onBack()">
-      السابق
-    </button>
-  </div>
+  <app-form-actions 
+    [submitText]="'حفظ ومتابعة'" 
+    [backText]="'السابق'" 
+    (submit)="onSubmit()" 
+    (back)="onBackClick()">
+  </app-form-actions>
 
 </form>

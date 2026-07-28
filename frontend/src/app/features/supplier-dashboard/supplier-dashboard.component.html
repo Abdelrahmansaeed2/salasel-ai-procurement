@@ -1,0 +1,240 @@
+<div class="dashboard-page" dir="rtl">
+  
+  <app-site-header></app-site-header>
+
+  <main class="dashboard-main">
+    <div class="dashboard-container">
+      
+      <!-- Welcome Hero Banner -->
+      <section class="welcome-banner">
+        <div class="welcome-banner__content">
+          <div class="status-badge">
+            <span class="status-badge__dot"></span>
+            <span class="status-badge__text">حساب قيد المراجعة والاعتماد</span>
+          </div>
+          <h1 class="welcome-banner__title">لوحة تحكم المورد - شركة سلاسل اللوجستية</h1>
+          <p class="welcome-banner__subtitle">
+            مرحباً بك مجدداً. يمكنك متابعة حالة طلب الانضمام، استكشاف منافسات عروض الأسعار، وإدارة المستندات الرسمية للشركة.
+          </p>
+        </div>
+
+        <div class="welcome-banner__action">
+          <a routerLink="/supplier-registration" class="btn-hero-primary">
+            <span>إكمال بيانات التوثيق</span>
+            <svg class="hero-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"/>
+              <polyline points="12 19 5 12 12 5"/>
+            </svg>
+          </a>
+        </div>
+      </section>
+
+      <!-- Stat Cards Grid -->
+      <section class="stats-grid">
+        @for (stat of stats(); track stat.title) {
+          <div class="stat-card">
+            <div class="stat-card__header">
+              <span class="stat-card__title">{{ stat.title }}</span>
+              <div class="stat-card__icon-wrapper">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat-icon">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+              </div>
+            </div>
+            <div class="stat-card__value">{{ stat.value }}</div>
+            <div class="stat-card__meta" [class.stat-card__meta--positive]="stat.isPositive">
+              {{ stat.change }}
+            </div>
+          </div>
+        }
+      </section>
+
+      <!-- Navigation Tabs -->
+      <nav class="dash-tabs" aria-label="أقسام لوحة التحكم">
+        <button 
+          type="button" 
+          class="dash-tab-btn" 
+          [class.dash-tab-btn--active]="activeTab() === 'overview'"
+          (click)="setTab('overview')">
+          نظرة عامة والأنشطة
+        </button>
+        <button 
+          type="button" 
+          class="dash-tab-btn" 
+          [class.dash-tab-btn--active]="activeTab() === 'documents'"
+          (click)="setTab('documents')">
+          المستندات والرخص (3)
+        </button>
+        <button 
+          type="button" 
+          class="dash-tab-btn" 
+          [class.dash-tab-btn--active]="activeTab() === 'rfqs'"
+          (click)="setTab('rfqs')">
+          منافسات المشتريات (12)
+        </button>
+      </nav>
+
+      <!-- Main Section Content Grid -->
+      <div class="dash-content-grid">
+        
+        <!-- Left / Primary Column -->
+        <div class="dash-primary-col">
+          
+          <!-- Overview Tab Content -->
+          @if (activeTab() === 'overview') {
+            
+            <!-- Quick Actions Section -->
+            <div class="section-card">
+              <h2 class="section-title">إجراءات سريعة</h2>
+              <div class="actions-grid">
+                @for (action of quickActions(); track action.title) {
+                  <a [routerLink]="action.route" class="action-tile">
+                    <div class="action-tile__header">
+                      <h3 class="action-tile__title">{{ action.title }}</h3>
+                      @if (action.badge) {
+                        <span class="action-tile__badge">{{ action.badge }}</span>
+                      }
+                    </div>
+                    <p class="action-tile__description">{{ action.description }}</p>
+                    <div class="action-tile__link">
+                      <span>الانتقال</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="link-arrow">
+                        <line x1="19" y1="12" x2="5" y2="12"/>
+                        <polyline points="12 19 5 12 12 5"/>
+                      </svg>
+                    </div>
+                  </a>
+                }
+              </div>
+            </div>
+
+            <!-- Verification Checklist -->
+            <div class="section-card">
+              <div class="section-card__header">
+                <h2 class="section-title">خطوات اعتماد الحساب (7 من 8)</h2>
+                <span class="progress-percent">87% مكتمل</span>
+              </div>
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill" style="width: 87%;"></div>
+              </div>
+              
+              <ul class="checklist-items">
+                <li class="checklist-item checklist-item--done">
+                  <span class="checklist-item__icon">✓</span>
+                  <span class="checklist-item__label">معلومات المنشأة والكيان التجاري</span>
+                </li>
+                <li class="checklist-item checklist-item--done">
+                  <span class="checklist-item__icon">✓</span>
+                  <span class="checklist-item__label">توثيق السجل التجاري والنشاط</span>
+                </li>
+                <li class="checklist-item checklist-item--done">
+                  <span class="checklist-item__icon">✓</span>
+                  <span class="checklist-item__label">شهادة التسجيل الضريبي (VAT)</span>
+                </li>
+                <li class="checklist-item checklist-item--pending">
+                  <span class="checklist-item__icon">⏳</span>
+                  <span class="checklist-item__label">المراجعة النهائية من فريق المطابقة</span>
+                </li>
+              </ul>
+            </div>
+
+          } @else if (activeTab() === 'documents') {
+
+            <div class="section-card">
+              <h2 class="section-title">المستندات المرفوعة والوثائق الرسمية</h2>
+              <table class="docs-table">
+                <thead>
+                  <tr>
+                    <th>اسم المستند</th>
+                    <th>تاريخ الرفع</th>
+                    <th>الحالة</th>
+                    <th>الإجراء</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Commercial_License_2024.pdf</td>
+                    <td>27 يوليو 2026</td>
+                    <td><span class="badge-status badge-status--valid">ساري المفعول</span></td>
+                    <td><a href="#" (click)="$event.preventDefault()" class="table-link">معاينة</a></td>
+                  </tr>
+                  <tr>
+                    <td>Tax_Certificate_VAT.pdf</td>
+                    <td>27 يوليو 2026</td>
+                    <td><span class="badge-status badge-status--valid">مكتمل</span></td>
+                    <td><a href="#" (click)="$event.preventDefault()" class="table-link">معاينة</a></td>
+                  </tr>
+                  <tr>
+                    <td>Bank_Statement_Official.pdf</td>
+                    <td>27 يوليو 2026</td>
+                    <td><span class="badge-status badge-status--review">قيد التدقيق</span></td>
+                    <td><a href="#" (click)="$event.preventDefault()" class="table-link">معاينة</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          } @else if (activeTab() === 'rfqs') {
+
+            <div class="section-card">
+              <h2 class="section-title">منافسات المشتريات المتاحة لنشاطك</h2>
+              <div class="rfq-list">
+                <div class="rfq-item">
+                  <div class="rfq-item__main">
+                    <h3 class="rfq-item__title">منافسة توريد أنظمة تكييف ومعدات تبريد سحابية</h3>
+                    <p class="rfq-item__meta">الجهة: شركة سلاسل العقارية | النطاق: الرياض | الموعد النهائي: 10 أغسطس 2026</p>
+                  </div>
+                  <a routerLink="/suppliers" class="btn-rfq">تقديم عرض</a>
+                </div>
+                <div class="rfq-item">
+                  <div class="rfq-item__main">
+                    <h3 class="rfq-item__title">مناقصة عقد خدمات صيانة الدعم اللوجستي</h3>
+                    <p class="rfq-item__meta">الجهة: مجموعات التوزيع الذكي | النطاق: جدة | الموعد النهائي: 18 أغسطس 2026</p>
+                  </div>
+                  <a routerLink="/suppliers" class="btn-rfq">تقديم عرض</a>
+                </div>
+              </div>
+            </div>
+
+          }
+
+        </div>
+
+        <!-- Right / Sidebar Column -->
+        <aside class="dash-sidebar-col">
+          
+          <!-- Recent Activity Log -->
+          <div class="section-card">
+            <h2 class="section-title">آخر التحديثات والأنشطة</h2>
+            <div class="activity-feed">
+              @for (act of recentActivities(); track act.id) {
+                <div class="activity-item">
+                  <div class="activity-item__dot"></div>
+                  <div class="activity-item__body">
+                    <p class="activity-item__text">{{ act.title }}</p>
+                    <span class="activity-item__time">{{ act.timestamp }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Help & Support Widget -->
+          <div class="support-widget">
+            <div class="support-widget__icon">💬</div>
+            <h3 class="support-widget__title">هل تحتاج إلى استفسار؟</h3>
+            <p class="support-widget__text">فريق الدعم الفني متواجد لمساعدتك في إنهاء إجراءات الانضمام.</p>
+            <a routerLink="/help-center" class="btn-support-link">زيارة مركز المساعدة</a>
+          </div>
+
+        </aside>
+
+      </div>
+
+    </div>
+  </main>
+
+  <app-site-footer></app-site-footer>
+
+</div>

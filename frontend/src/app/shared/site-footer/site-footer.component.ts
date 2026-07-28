@@ -24,34 +24,32 @@ export class SiteFooterComponent {
     {
       title: 'المنتج',
       links: [
-        { label: 'المميزات', route: null },
-        { label: 'الأسعار', route: null },
-        { label: 'الأمان', route: null },
+        { label: 'المميزات', route: '/features-ai' },
+        { label: 'لوحة التحكم', route: '/dashboard' },
+        { label: 'دليل الموردين', route: '/suppliers' },
       ],
     },
     {
       title: 'الموارد',
       links: [
-        { label: 'وثائق API', route: null },
-        { label: 'مركز المساعدة', route: null },
-        { label: 'حالة الخدمة', route: null },
-        { label: 'التحديثات', route: null },
+        { label: 'مركز المساعدة', route: '/help-center' },
+        { label: 'وثائق التوثيق', route: '/help-center' },
+        { label: 'الاستفسارات الشائعة', route: '/help-center' },
       ],
     },
     {
       title: 'الشركة',
       links: [
         { label: 'من نحن', route: '/about' },
-        { label: 'المدونة', route: null },
-        { label: 'شركاء', route: null },
         { label: 'تواصل معنا', route: '/contact' },
+        { label: 'تسجيل الموردين', route: '/supplier-registration' },
       ],
     },
     {
       title: 'القانوني',
       links: [
-        { label: 'سياسة الخصوصية', route: null },
-        { label: 'شروط الاستخدام', route: null },
+        { label: 'سياسة الخصوصية', route: '/privacy' },
+        { label: 'شروط الاستخدام', route: '/terms' },
       ],
     },
   ];

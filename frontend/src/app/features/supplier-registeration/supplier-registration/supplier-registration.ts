@@ -2,7 +2,6 @@ import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
-// Imports sub-components
 import { RegistrationHeaderComponent } from './components/registration-header/registration-header.component';
 import { RegistrationStepperComponent } from './components/registration-stepper/registration-stepper.component';
 import { FacilityInfoFormComponent } from './components/facility-info-form/facility-info-form.component';
@@ -12,6 +11,7 @@ import { WarehouseInfoFormComponent } from './components/warehouse-info-form/war
 import { ContactInfoFormComponent } from './components/contact-info-form/contact-info-form.component';
 import { AdditionalDocumentsFormComponent } from './components/additional-documents-form/additional-documents-form.component';
 import { ReviewSubmitFormComponent } from './components/review-submit-form/review-submit-form.component';
+import { RegistrationSuccessComponent } from './components/registration-success/registration-success.component';
 import { StepPlaceholderComponent } from './components/step-placeholder/step-placeholder.component';
 import { SiteFooterComponent } from '../../../shared/site-footer/site-footer.component';
 
@@ -29,6 +29,7 @@ import { SiteFooterComponent } from '../../../shared/site-footer/site-footer.com
     ContactInfoFormComponent,
     AdditionalDocumentsFormComponent,
     ReviewSubmitFormComponent,
+    RegistrationSuccessComponent,
     StepPlaceholderComponent,
     SiteFooterComponent
   ],
@@ -37,10 +38,8 @@ import { SiteFooterComponent } from '../../../shared/site-footer/site-footer.com
   styleUrl: './supplier-registration.css',
 })
 export class SupplierRegistration {
-  // Stepper Controller state
-  readonly currentStep = signal<number>(7);
+  readonly currentStep = signal<number>(1);
   
-  // List of steps matching the Figma design
   readonly steps = [
     'معلومات المنشأة',
     'رخصة تجارية',
@@ -52,14 +51,12 @@ export class SupplierRegistration {
     'نجاح'
   ];
 
-  // Dynamic advice notes based on the active step
   readonly stepGuidanceTitle = signal<string>('نصيحة: دقة البيانات تهمنا');
   readonly stepGuidanceText = signal<string>(
     'سيتم مطابقة المعلومات المقدمة هنا مع السجلات التجارية المحلية. تأكد من أن الاسم يطابق رخصتك التجارية تماماً لتجنب التأخير في التحقق.'
   );
 
-  // Form Data Store
-  private registrationData: any = {};
+  private registrationData: Record<string, any> = {};
 
   constructor(private router: Router) {}
 
@@ -92,12 +89,12 @@ export class SupplierRegistration {
   onSaveAndExit(): void {
     console.log('Save and Exit clicked. Current data:', this.registrationData);
     alert('تم حفظ تقدمك بنجاح. سنقوم بإعادتك إلى لوحة التحكم.');
-    this.router.navigate(['/']);
+    this.router.navigate(['/dashboard']);
   }
 
   onFinish(): void {
     console.log('Final registration submission:', this.registrationData);
-    this.router.navigate(['/']);
+    this.router.navigate(['/dashboard']);
   }
 
   private updateGuidanceNote(): void {

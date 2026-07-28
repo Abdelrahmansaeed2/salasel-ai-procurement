@@ -180,7 +180,7 @@
 }
 
 .btn-next:hover .icon-arrow {
-  transform: translateX(-4px); /* Moves left in RTL */
+  transform: translateX(-4px);
 }
 
 .btn-back {

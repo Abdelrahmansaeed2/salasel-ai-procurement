@@ -14,7 +14,8 @@
   <main class="reg-main">
     <div class="reg-container" 
          [class.reg-container--step1]="currentStep() === 1"
-         [class.reg-container--step23]="currentStep() === 2 || currentStep() === 3 || currentStep() === 4 || currentStep() === 5 || currentStep() === 6 || currentStep() === 7"
+         [class.reg-container--step23]="currentStep() >= 2 && currentStep() <= 6"
+         [class.reg-container--step7]="currentStep() === 7"
          [class.reg-container--step8]="currentStep() === 8">
       
       <!-- Form Content Column -->
@@ -65,15 +66,15 @@
           <app-review-submit-form
             (next)="nextStep()"
             (back)="prevStep()"
+            (editStep)="goToStep($event)"
           ></app-review-submit-form>
         } @else if (currentStep() === 8) {
-          <app-step-placeholder 
-            [step]="8" 
+          <app-registration-success
             (finish)="onFinish()"
-          ></app-step-placeholder>
+          ></app-registration-success>
         }
 
-        <!-- Guidance Note (Stacked Vertically below Form, only for Step 1 as in Figma) -->
+        <!-- Guidance Note -->
         @if (currentStep() === 1) {
           <div class="guidance-note-flat">
             <div class="guidance-note-flat__icon-wrapper">

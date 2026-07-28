@@ -1,11 +1,14 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, OnInit, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { StepHeaderComponent } from '../shared/step-header/step-header.component';
+import { FormActionsComponent } from '../shared/form-actions/form-actions.component';
+import { FileUploadService } from '../../services/file-upload.service';
 
 @Component({
   selector: 'app-tax-info-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, StepHeaderComponent, FormActionsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './tax-info-form.component.html',
   styleUrl: './tax-info-form.component.css',
@@ -18,11 +21,14 @@ export class TaxInfoFormComponent implements OnInit {
   uploadedFile = signal<{ name: string; size: string } | null>({
     name: 'Tax_Certificate_2024.pdf',
     size: '1.2 MB',
-  }); // Seeded with the Figma mock value
+  });
 
   isDragOver = signal<boolean>(false);
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private uploadService: FileUploadService
+  ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -31,7 +37,6 @@ export class TaxInfoFormComponent implements OnInit {
       isVatExempt: [false],
     });
 
-    // Listen to changes in exemption checkbox
     this.form.get('isVatExempt')?.valueChanges.subscribe((exempt) => {
       const vatControl = this.form.get('vatNumber');
       if (exempt) {
@@ -75,16 +80,14 @@ export class TaxInfoFormComponent implements OnInit {
   }
 
   private handleFile(file: File): void {
-    // 5MB limit
     if (file.size > 5 * 1024 * 1024) {
       alert('الحد الأقصى لحجم الملف هو 5 ميجابايت.');
       return;
     }
 
-    const sizeInMB = (file.size / (1024 * 1024)).toFixed(1);
     this.uploadedFile.set({
       name: file.name,
-      size: `${sizeInMB} MB`,
+      size: this.uploadService.formatBytes(file.size),
     });
   }
 
@@ -98,20 +101,13 @@ export class TaxInfoFormComponent implements OnInit {
       return;
     }
 
-    // Tax certificate is required unless exempt
-    if (!this.form.get('isVatExempt')?.value && !this.uploadedFile()) {
-      alert('يرجى تحميل شهادة التسجيل الضريبي.');
-      return;
-    }
-
-    const formData = {
-      ...this.form.getRawValue(),
+    this.next.emit({
+      ...this.form.value,
       taxCertificate: this.uploadedFile(),
-    };
-    this.next.emit(formData);
+    });
   }
 
-  onBack(): void {
+  onBackClick(): void {
     this.back.emit();
   }
 }

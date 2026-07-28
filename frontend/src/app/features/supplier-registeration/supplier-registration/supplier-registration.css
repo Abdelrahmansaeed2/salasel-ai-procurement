@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #ffffff; /* pure white background matching Figma */
+  background-color: #ffffff;
 }
 
 .reg-main {
@@ -10,7 +10,6 @@
   width: 100%;
 }
 
-/* Base container centered and single-column by default */
 .reg-container {
   display: flex;
   flex-direction: column;
@@ -20,20 +19,22 @@
   box-sizing: border-box;
 }
 
-/* Specific Figma-defined widths per step */
 .reg-container--step1 {
-  max-width: 896px; /* Figma Form Section + Guidance width is 896px */
+  max-width: 1024px;
 }
 
 .reg-container--step23 {
-  max-width: 750px; /* Figma Tax Information components width is 750px */
+  max-width: 900px;
+}
+
+.reg-container--step7 {
+  max-width: 1140px;
 }
 
 .reg-container--step8 {
-  max-width: 800px;
+  max-width: 900px;
 }
 
-/* Content Column is flat and borderless matching Figma */
 .reg-content-col {
   background: transparent;
   border: none;
@@ -71,14 +72,13 @@
   margin: 0;
 }
 
-/* Flat Guidance Note block placed below the form section in Step 1 */
 .guidance-note-flat {
   display: flex;
-  flex-direction: row; /* RTL flow: icon is on the left, text on the right */
+  flex-direction: row;
   gap: 16px;
   padding: 16px 0;
   margin-top: 40px;
-  border-top: 1px solid rgba(115, 118, 134, 0.15); /* Separator line before warning note */
+  border-top: 1px solid rgba(115, 118, 134, 0.15);
   align-items: flex-start;
   width: 100%;
 }

@@ -1,59 +1,31 @@
 .form-container {
   display: flex;
   flex-direction: column;
-  gap: 40px; /* Item spacing between inputs column and upload section */
+  gap: 40px;
   width: 100%;
 }
 
-.step-header {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 24px;
-  text-align: center;
-}
 
-.step-header__title {
-  color: #191b23; /* fills r:0.098 g:0.105 b:0.137 */
-  font-family: 'Noto Sans Arabic', sans-serif;
-  font-size: clamp(24px, 4.5vw, 32px); /* fontSize: 32 */
-  font-weight: 700; /* fontWeight: 700 */
-  line-height: clamp(32px, 5.5vw, 40px); /* lineHeightPx: 40 */
-  margin: 0;
-  text-align: center;
-}
-
-.step-header__subtitle {
-  color: #434655; /* fills r:0.262 g:0.274 b:0.333 */
-  font-family: 'Noto Sans Arabic', sans-serif;
-  font-size: clamp(15px, 2.5vw, 18px); /* fontSize: 18 */
-  font-weight: 400; /* fontWeight: 400 */
-  line-height: clamp(22px, 3.5vw, 27px); /* lineHeightPx: 27 */
-  margin: 0;
-  text-align: center; /* Centered with the title */
-}
-
-/* Inputs Column wrapper */
 .inputs-column {
   display: flex;
   flex-direction: column;
-  gap: 24px; /* itemSpacing: 24 */
+  gap: 24px;
   width: 100%;
 }
 
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 7px; /* itemSpacing: 7 for VAT input, 8 for Tax ID */
+  gap: 7px;
   width: 100%;
 }
 
 .form-field__label {
-  color: #434655; /* fills r:0.262 g:0.274 b:0.333 */
+  color: #434655;
   font-family: 'Noto Sans Arabic', sans-serif;
-  font-size: clamp(12px, 1.5vw, 13px); /* fontSize: 12 */
-  font-weight: 400; /* fontWeight: 400 */
-  line-height: 18px; /* lineHeightPx: 18 */
+  font-size: clamp(12px, 1.5vw, 13px);
+  font-weight: 400;
+  line-height: 18px;
   text-align: right;
 }
 
@@ -64,26 +36,26 @@
 
 .form-field__input {
   width: 100%;
-  padding: 6px 16px; /* paddingTop/Bottom: 5/6, paddingRight/Left: 16 */
-  border-radius: 8px; /* cornerRadius: 8 */
-  border: 1px solid rgba(115, 118, 134, 0.3); /* strokes r:0.450 g:0.462 b:0.525 with opacity */
-  background: #faf8ff; /* fills r:0.980 g:0.972 b:1 */
-  color: #191b23; /* fills r:0.098 g:0.105 b:0.137 */
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(115, 118, 134, 0.3);
+  background: #faf8ff;
+  color: #191b23;
   font-family: 'Noto Sans Arabic', sans-serif;
-  font-size: 14px; /* fontSize: 14 */
-  line-height: 29.5px; /* lineHeightPx: 29.56 */
+  font-size: 14px;
+  line-height: 29.5px;
   text-align: right;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form-field__input::placeholder {
-  color: #6b6e80; /* fills r:0.419 g:0.447 b:0.501 */
+  color: #6b6e80;
   opacity: 0.7;
 }
 
 .form-field__input:focus {
   outline: none;
-  border-color: #004ac6; /* strokes r:0 g:0.290 b:0.776 */
+  border-color: #004ac6;
   box-shadow: 0 0 0 3px rgba(0, 74, 198, 0.1);
 }
 
@@ -109,16 +81,15 @@
 }
 
 .form-field__hint {
-  color: #434655; /* fills r:0.262 g:0.274 b:0.333 */
+  color: #434655;
   font-family: 'Noto Sans Arabic', sans-serif;
-  font-size: 11px; /* fontSize: 11 */
+  font-size: 11px;
   font-weight: 400;
-  line-height: 16.5px; /* lineHeightPx: 16.5 */
+  line-height: 16.5px;
   text-align: right;
   margin-top: 2px;
 }
 
-/* Correct Badge Overlay on Input */
 .input-badge {
   position: absolute;
   top: 50%;
@@ -126,16 +97,16 @@
   transform: translateY(-50%);
   display: flex;
   align-items: center;
-  gap: 4px; /* itemSpacing: 4 */
+  gap: 4px;
   background: transparent;
   pointer-events: none;
-  flex-direction: row-reverse; /* Aligns correct text to right of check icon inside badge */
+  flex-direction: row-reverse;
 }
 
 .input-badge__text {
-  color: #007d57; /* fills r:0 g:0.490 b:0.341 */
-  font-size: 11px; /* fontSize: 11 */
-  font-weight: 700; /* fontWeight: 700 */
+  color: #007d57;
+  font-size: 11px;
+  font-weight: 700;
   font-family: 'Noto Sans Arabic', sans-serif;
   line-height: 16.5px;
 }
@@ -146,7 +117,6 @@
   color: #007d57;
 }
 
-/* Checkbox Styling */
 .checkbox-field {
   display: flex;
   align-items: center;
@@ -161,10 +131,10 @@
   padding-right: 28px;
   cursor: pointer;
   user-select: none;
-  font-size: clamp(13px, 1.8vw, 15px); /* fontSize: 14 */
-  color: #191b23; /* fills r:0.098 g:0.105 b:0.137 */
-  font-weight: 400; /* fontWeight: 400 */
-  line-height: 21px; /* lineHeightPx: 21 */
+  font-size: clamp(13px, 1.8vw, 15px);
+  color: #191b23;
+  font-weight: 400;
+  line-height: 21px;
   text-align: right;
   font-family: 'Noto Sans Arabic', sans-serif;
 }
@@ -184,9 +154,9 @@
   transform: translateY(-50%);
   height: 18px;
   width: 18px;
-  background-color: #ffffff; /* fills r:1 g:1 b:1 */
-  border: 1.5px solid #737686; /* strokes r:0.45 g:0.462 b:0.525 */
-  border-radius: 4px; /* cornerRadius: 4 */
+  background-color: #ffffff;
+  border: 1.5px solid #737686;
+  border-radius: 4px;
   transition: all 0.2s ease;
 }
 
@@ -223,7 +193,6 @@
   line-height: 21px;
 }
 
-/* Upload Section */
 .upload-section {
   display: flex;
   flex-direction: column;
@@ -231,13 +200,13 @@
 }
 
 .upload-section .form-field__label {
-  padding-bottom: 16px; /* paddingBottom: 16 on Label:margin */
+  padding-bottom: 16px;
 }
 
 .upload-area {
-  border: 2px dashed #c3c6d7; /* strokes r:0.764 g:0.776 b:0.843 */
-  border-radius: 12px; /* cornerRadius: 12 */
-  padding: 55px 66px; /* paddingTop/Bottom: 55, paddingRight/Left: 66 */
+  border: 2px dashed #c3c6d7;
+  border-radius: 12px;
+  padding: 55px 66px;
   text-align: center;
   background: transparent;
   cursor: pointer;
@@ -258,18 +227,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px; /* itemSpacing: 12 */
+  gap: 12px;
 }
 
 .upload-area__icon-wrapper {
   width: 40px;
   height: 40px;
-  border-radius: 9999px; /* cornerRadius: 9999 */
-  background: #edeef9; /* fills r:0.929 g:0.929 b:0.976 */
+  border-radius: 9999px;
+  background: #edeef9;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #004ac6; /* fills r:0 g:0.290 b:0.776 */
+  color: #004ac6;
   margin-bottom: 4px;
 }
 
@@ -279,42 +248,41 @@
 }
 
 .upload-area__title {
-  color: #191b23; /* fills r:0.098 g:0.105 b:0.137 */
+  color: #191b23;
   font-family: 'Noto Sans Arabic', sans-serif;
-  font-size: clamp(12px, 1.5vw, 13px); /* fontSize: 12 */
-  font-weight: 700; /* fontWeight: 700 */
-  line-height: 18px; /* lineHeightPx: 18 */
+  font-size: clamp(12px, 1.5vw, 13px);
+  font-weight: 700;
+  line-height: 18px;
   margin: 0;
 }
 
 .upload-area__subtitle {
-  color: #434655; /* fills r:0.262 g:0.274 b:0.333 */
+  color: #434655;
   font-family: 'Noto Sans Arabic', sans-serif;
-  font-size: clamp(11px, 1.3vw, 12px); /* fontSize: 11 */
+  font-size: clamp(11px, 1.3vw, 12px);
   font-weight: 400;
-  line-height: 16.5px; /* lineHeightPx: 16.5 */
+  line-height: 16.5px;
   margin: 0;
 }
 
-/* File List (Simulated Uploaded Files) */
 .file-list {
-  margin-top: 16px; /* paddingTop: 16 on File List (Simulated):margin */
+  margin-top: 16px;
   width: 100%;
 }
 
 .file-item {
   display: flex;
   align-items: center;
-  background: #faf8ff; /* fills r:0.980 g:0.972 b:1 */
-  border: 1px solid rgba(195, 198, 215, 0.3); /* strokes r:0.764 g:0.776 b:0.843 */
-  border-radius: 4px; /* cornerRadius: 4 */
-  padding: 8px; /* paddingTop/Bottom/Left/Right: 8 */
+  background: #faf8ff;
+  border: 1px solid rgba(195, 198, 215, 0.3);
+  border-radius: 4px;
+  padding: 8px;
   gap: 12px;
-  direction: ltr; /* Keeps files formatted LTR (Standard) */
+  direction: ltr;
 }
 
 .file-item__icon-wrapper {
-  color: #006243; /* fills r:0 g:0.384 b:0.262 */
+  color: #006243;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -334,32 +302,32 @@
 }
 
 .file-item__name {
-  color: #191b23; /* fills r:0.098 g:0.105 b:0.137 */
+  color: #191b23;
   font-family: 'Noto Sans Arabic', sans-serif;
-  font-size: clamp(12px, 1.5vw, 13px); /* fontSize: 12 */
-  font-weight: 700; /* fontWeight: 700 */
-  line-height: 18px; /* lineHeightPx: 18 */
+  font-size: clamp(12px, 1.5vw, 13px);
+  font-weight: 700;
+  line-height: 18px;
   word-break: break-all;
 }
 
 .file-item__size {
-  color: #434655; /* fills r:0.262 g:0.274 b:0.333 */
+  color: #434655;
   font-family: 'Noto Sans Arabic', sans-serif;
-  font-size: clamp(10px, 1.2vw, 11px); /* fontSize: 10 */
+  font-size: clamp(10px, 1.2vw, 11px);
   font-weight: 400;
-  line-height: 15px; /* lineHeightPx: 15 */
+  line-height: 15px;
 }
 
 .file-item__delete-btn {
   background: transparent;
   border: none;
-  color: #ba1a1a; /* fills r:0.729 g:0.101 b:0.101 */
+  color: #ba1a1a;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 4px;
-  border-radius: 9999px; /* cornerRadius: 9999 for button */
+  border-radius: 9999px;
   transition: all 0.2s ease;
 }
 
@@ -372,77 +340,7 @@
   height: 16px;
 }
 
-/* Action Buttons */
-.form-actions {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-top: 16px;
-}
 
-.btn-submit {
-  background: #004ac6; /* strokes/fills r:0 g:0.290 b:0.776 */
-  color: #ffffff;
-  border-radius: 8px; /* cornerRadius: 8 */
-  padding: 10px 24px;
-  font-family: 'Noto Sans Arabic', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-}
-
-.btn-submit:hover {
-  background-color: #003694;
-}
-
-.btn-submit:active {
-  transform: translateY(0);
-}
-
-.icon-arrow {
-  width: 16px;
-  height: 16px;
-  transition: transform 0.2s ease;
-}
-
-.btn-submit:hover .icon-arrow {
-  transform: translateX(-4px); /* RTL direction, moves left */
-}
-
-.btn-back {
-  color: #434655; /* fills r:0.262 g:0.274 b:0.333 */
-  font-family: 'Noto Sans Arabic', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
-  background: transparent;
-  padding: 10px 24px;
-  border: 1px solid rgba(115, 118, 134, 0.3);
-  border-radius: 8px;
-}
-
-.btn-back:hover {
-  color: #191b23;
-  background: #faf8ff;
-  border-color: #004ac6;
-}
-
-@media (max-width: 576px) {
-  .form-actions {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-  
-  .btn-submit,
-  .btn-back {
-    justify-content: center;
-    width: 100%;
-  }
-}
 
 @media (max-width: 480px) {
   .upload-area {

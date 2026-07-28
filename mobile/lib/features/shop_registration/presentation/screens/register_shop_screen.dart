@@ -17,6 +17,7 @@ import '../widgets/select_field.dart';
 import '../widgets/store_size_selector.dart';
 import '../theme/shop_registration_icons.dart';
 import '../widgets/wizard_footer.dart';
+import 'registration_submitted_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class RegisterShopScreen extends StatelessWidget {
@@ -508,35 +509,8 @@ class _StepThreeReview extends StatelessWidget {
 
   final RegisterShopController controller;
 
-  void _showSubmittedDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-          title: Text(
-            'تم إرسال الطلب بنجاح',
-            textAlign: TextAlign.right,
-            style: GoogleFonts.cairo(fontWeight: FontWeight.w700),
-          ),
-          content: Text(
-            'سنقوم بمراجعة بياناتك والتواصل معك قريباً.',
-            textAlign: TextAlign.right,
-            style: GoogleFonts.cairo(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).maybePop();
-              },
-              child: Text('تم', style: GoogleFonts.cairo(color: ShopRegColors.primary)),
-            ),
-          ],
-        ),
-      ),
-    );
+  void _submitRegistration() {
+    Get.off(() => const RegistrationSubmittedScreen(), transition: Transition.fadeIn);
   }
 
   @override
@@ -694,7 +668,7 @@ class _StepThreeReview extends StatelessWidget {
                 continueEnabled: controller.agreedToTerms.value,
                 showBack: true,
                 onBack: controller.previousStep,
-                onContinue: () => _showSubmittedDialog(context),
+                onContinue: _submitRegistration,
               )),
           SizedBox(height: 16.h),
         ],

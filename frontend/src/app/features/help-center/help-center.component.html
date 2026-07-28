@@ -1,0 +1,117 @@
+<div class="help-page" dir="rtl">
+  
+  <app-site-header></app-site-header>
+
+  <main class="help-main">
+    
+    <!-- Hero Search Section -->
+    <section class="help-hero">
+      <div class="help-hero__container">
+        <span class="help-hero__badge">مركز المساعدة والدعم الفني</span>
+        <h1 class="help-hero__title">كيف يمكننا مساعدتك اليوم؟</h1>
+        <p class="help-hero__subtitle">
+          ابحث عن إجابات سريعة للاستفسارات الشائعة حول توثيق الحسابات، المنافسات، وسياسات المنصة.
+        </p>
+
+        <!-- Search Bar Input -->
+        <div class="help-search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+
+          <input 
+            type="text" 
+            class="help-search-input" 
+            placeholder="ابحث عن سؤال، مثل: التوثيق، السجل التجاري، الضريبة..."
+            (input)="onSearch($event)"
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Categories Grid Section -->
+    <section class="categories-section">
+      <div class="help-container">
+        <h2 class="section-title">التصنيفات الرئيسية</h2>
+        
+        <div class="categories-grid">
+          <button 
+            type="button"
+            class="category-card"
+            [class.category-card--active]="activeCategory() === 'all'"
+            (click)="setCategory('all')">
+            <div class="category-card__icon-box">🌐</div>
+            <h3 class="category-card__title">جميع الأسئلة</h3>
+            <p class="category-card__desc">استكشاف كافة استفسارات المنصة</p>
+          </button>
+
+          @for (cat of categories(); track cat.id) {
+            <button 
+              type="button"
+              class="category-card"
+              [class.category-card--active]="activeCategory() === cat.id"
+              (click)="setCategory(cat.id)">
+              <div class="category-card__icon-box">📌</div>
+              <h3 class="category-card__title">{{ cat.title }}</h3>
+              <p class="category-card__desc">{{ cat.description }}</p>
+            </button>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Accordion Section -->
+    <section class="faq-section">
+      <div class="help-container">
+        <h2 class="section-title">الأسئلة الشائعة والإجابات</h2>
+        
+        @if (filteredFaqs.length === 0) {
+          <div class="no-results">
+            <p>لم نجد نتائج مطابقة لبحثك. يرجى تجربة كلمات بحث أخرى أو التواصل معنا مباشرة.</p>
+          </div>
+        } @else {
+          <div class="faq-list">
+            @for (faq of filteredFaqs; track faq.id) {
+              <div class="faq-item" [class.faq-item--open]="faq.isOpen">
+                <button type="button" class="faq-question-btn" (click)="toggleFaq(faq.id)">
+                  <span class="faq-question-text">{{ faq.question }}</span>
+                  <span class="faq-icon-toggle">{{ faq.isOpen ? '−' : '+' }}</span>
+                </button>
+                
+                @if (faq.isOpen) {
+                  <div class="faq-answer-body">
+                    <p class="faq-answer-text">{{ faq.answer }}</p>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Direct Support Contact Card -->
+    <section class="contact-support-section">
+      <div class="help-container">
+        <div class="support-card-banner">
+          <div class="support-card-banner__content">
+            <h3 class="support-card-banner__title">لم تجد إجابة لسؤالك؟</h3>
+            <p class="support-card-banner__desc">
+              فريق الدعم الفني والمطابقة متاح على مدار الساعة لمساعدتك في إنهاء طلب التوثيق والإجابة على أي استفسارات.
+            </p>
+          </div>
+
+          <div class="support-card-banner__actions">
+            <a routerLink="/contact" class="btn-support-primary">تواصل معنا الآن</a>
+            <a routerLink="/supplier-registration" class="btn-support-secondary">العودة للتسجيل</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <app-site-footer></app-site-footer>
+
+</div>
