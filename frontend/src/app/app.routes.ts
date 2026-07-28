@@ -10,6 +10,10 @@ import { SupplierRegistration } from './features/supplier-registeration/supplier
 import { SupplierDashboardComponent } from './features/supplier-dashboard/supplier-dashboard.component';
 import { HelpCenterComponent } from './features/help-center/help-center.component';
 import { TermsPrivacyComponent } from './features/terms-privacy/terms-privacy.component';
+import { ForgotPasswordEmailComponent } from './features/forgot-password/forgot-password-email/forgot-password-email.component';
+import { ForgotPasswordSentComponent } from './features/forgot-password/forgot-password-sent/forgot-password-sent.component';
+import { ForgotPasswordResetComponent } from './features/forgot-password/forgot-password-reset/forgot-password-reset.component';
+import { ForgotPasswordSuccessComponent } from './features/forgot-password/forgot-password-success/forgot-password-success.component';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -17,6 +21,10 @@ export const routes: Routes = [
   { path: 'contact', component: ContactPageComponent },
   { path: 'features-ai', component: FeaturesAiComponent },
   { path: 'supplier-login', component: SupplierLoginComponent },
+  { path: 'forgot-password', component: ForgotPasswordEmailComponent },
+  { path: 'forgot-password/sent', component: ForgotPasswordSentComponent },
+  { path: 'forgot-password/reset', component: ForgotPasswordResetComponent },
+  { path: 'forgot-password/success', component: ForgotPasswordSuccessComponent },
   { path: 'supplier-registration', component: SupplierRegistration },
   { path: 'suppliers', component: SupplierDirectoryComponent },
   { path: 'suppliers/:id', component: SupplierDetailsComponent },
