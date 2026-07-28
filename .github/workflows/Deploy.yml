@@ -121,7 +121,7 @@ jobs:
 
             # Wait for API to be healthy
             echo "Waiting for API to be healthy..."
-            timeout 60 bash -c 'until sudo docker inspect salasel-api --format "{{.State.Health.Status}}" | grep -q "healthy"; do sleep 5; done' || { echo "Health check timed out! Container logs:"; sudo docker compose logs api; exit 1; }
+            timeout 180 bash -c 'until sudo docker inspect salasel-api --format "{{.State.Health.Status}}" | grep -q "healthy"; do sleep 5; done' || { echo "Health check timed out! Container logs:"; sudo docker compose logs api; exit 1; }
 
             echo "✅ Deployed successfully!"
             sudo docker compose ps
