@@ -12,6 +12,7 @@ venv/
 __pycache__/
 *.pyc
 .env
+!.env.example
 
 # Flutter
 .dart_tool/
