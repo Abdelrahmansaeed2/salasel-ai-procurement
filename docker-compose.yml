@@ -1,7 +1,7 @@
 services:
 
   # ─────────────────────────────────────────────────────────────────
-  #  SQL Server
+  #  SQL Server 2022
   # ─────────────────────────────────────────────────────────────────
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -9,23 +9,22 @@ services:
     restart: unless-stopped
     environment:
       ACCEPT_EULA: "Y"
-      SA_PASSWORD: "${DB_PASSWORD:-Sls3l_DB#2026!Secure@Vault91}"
-      MSSQL_PID: "Express"          # free tier; change to Developer or Standard if needed
+      SA_PASSWORD: "${DB_PASSWORD}"
+      MSSQL_PID: "Express"
     ports:
       - "1433:1433"
     volumes:
       - sqlserver_data:/var/opt/mssql
     healthcheck:
-      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost",
-             "-U", "sa", "-P", "${DB_PASSWORD:-Sls3l_DB#2026!Secure@Vault91}",
-             "-Q", "SELECT 1", "-C", "-No"]
+      test: ["CMD-SHELL",
+        "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$SA_PASSWORD\" -Q 'SELECT 1' -C -No || exit 1"]
       interval: 15s
       timeout: 10s
       retries: 10
-      start_period: 30s
+      start_period: 45s
 
   # ─────────────────────────────────────────────────────────────────
-  #  Seq  (structured log viewer)
+  #  Seq  (structured log viewer — UI at :8080)
   # ─────────────────────────────────────────────────────────────────
   seq:
     image: datalust/seq:latest
@@ -35,18 +34,15 @@ services:
       ACCEPT_EULA: "Y"
     ports:
       - "5341:5341"   # ingestion
-      - "8080:80"     # UI  →  http://localhost:8080
+      - "8080:80"     # UI
     volumes:
       - seq_data:/data
 
   # ─────────────────────────────────────────────────────────────────
-  #  Salasel API
+  #  Salasel API  (image pulled from Docker Hub by CI/CD)
   # ─────────────────────────────────────────────────────────────────
   api:
-    build:
-      context: ./backend-dotnet
-      dockerfile: Dockerfile
-    image: salasel-api:local
+    image: ${DOCKER_IMAGE:-abdelrahmansaeed369/salasel-api}:${IMAGE_TAG:-latest}
     container_name: salasel-api
     restart: unless-stopped
     depends_on:
@@ -55,30 +51,22 @@ services:
       seq:
         condition: service_started
     ports:
-      - "5000:80"     # API  →  http://localhost:5000
+      - "5000:80"
     environment:
-      ASPNETCORE_ENVIRONMENT: "${ASPNETCORE_ENVIRONMENT:-Production}"
+      ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: "http://+:80"
 
-      # Database
       ConnectionStrings__DefaultConnection: >-
-        Server=sqlserver,1433;
-        Database=${DB_NAME:-SalaselDb};
-        User Id=sa;
-        Password=${DB_PASSWORD:-Sls3l_DB#2026!Secure@Vault91};
-        MultipleActiveResultSets=true;
-        TrustServerCertificate=True;
+        Server=sqlserver,1433;Database=${DB_NAME:-SalaselDb};User Id=sa;
+        Password=${DB_PASSWORD};MultipleActiveResultSets=true;TrustServerCertificate=True;
 
-      # JWT
-      Jwt__Key: "${JWT_KEY:-SalaselSuperSecretKeyThatIsAtLeast32BytesLong!!!123}"
+      Jwt__Key: "${JWT_KEY}"
       Jwt__Issuer: "Salasel.API"
       Jwt__Audience: "Salasel.App"
 
-      # Seq  (internal docker network)
       Seq__Url: "http://seq:5341"
-
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:80/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5

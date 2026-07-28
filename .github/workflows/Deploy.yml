@@ -5,9 +5,17 @@ on:
     branches:
       - main
 
+env:
+  DOCKER_IMAGE: abdelrahmansaeed369/salasel-api
+
 jobs:
-  deploy:
+  # ── Build & Push Docker Image ───────────────────────────────────────
+  build-and-push:
+    name: Build & Push Image
     runs-on: ubuntu-latest
+
+    outputs:
+      image_tag: ${{ steps.meta.outputs.version }}
 
     steps:
       - name: Deploy to VPS
@@ -17,7 +25,7 @@ jobs:
           username: toor
           port: 6967
           password: ${{ secrets.SERVER_PASSWORD }}
-          command_timeout: 30m
+          command_timeout: 10m
           script: |
             sudo chmod +x /opt/backend-dotnet/backend-dotnet/deploy.sh
             sudo bash /opt/backend-dotnet/backend-dotnet/deploy.sh
