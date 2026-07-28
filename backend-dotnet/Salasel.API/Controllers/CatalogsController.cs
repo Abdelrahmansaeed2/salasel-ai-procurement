@@ -24,6 +24,6 @@ public class CatalogsController : ControllerBase
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         // Future AI integration: RAG Ingestion
-        return Accepted(new { Message = "Catalog uploaded successfully", CatalogID = Guid.NewGuid().ToString() });
+        return Accepted(new { Message = "Catalog uploaded successfully", Id = Guid.NewGuid().ToString() });
     }
 }

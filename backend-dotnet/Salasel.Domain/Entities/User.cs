@@ -12,7 +12,6 @@ public class User
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public MerchantsProfile? MerchantsProfile { get; set; }
-    public SupplierProfile? SupplierProfile { get; set; }
-    public ICollection<SystemAuditLog> SystemAuditLogs { get; set; } = new List<SystemAuditLog>();
+    public ICollection<MerchantsProfile> MerchantsProfiles { get; set; } = new List<MerchantsProfile>();
+    public ICollection<SupplierProfile> SupplierProfiles { get; set; } = new List<SupplierProfile>();
 }

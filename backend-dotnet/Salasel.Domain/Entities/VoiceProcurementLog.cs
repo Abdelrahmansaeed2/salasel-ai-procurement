@@ -2,15 +2,15 @@ namespace Salasel.Domain.Entities;
 
 public class VoiceProcurementLog
 {
-    public int LogID { get; set; }
-    public int MerchantID { get; set; }
+    public int Id { get; set; }
+    public int MerchantId { get; set; }
     public MerchantsProfile Merchant { get; set; } = null!;
 
-    public string RawAudioURL { get; set; } = string.Empty;
-    public string TranscribedAmiyaText { get; set; } = string.Empty;
-    public string LLMParsedJSON { get; set; } = string.Empty;
-    public decimal NLPConfidenceScore { get; set; }
-    public DateTime ProcessedAt { get; set; } = DateTime.UtcNow;
+    public string? AudioUrl { get; set; }        // nullable: text commands have no audio
+    public string? Transcript { get; set; }       // nullable: may not always be transcribed
+    public string? RawTextInput { get; set; }     // if merchant typed instead of spoke
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public ICollection<OrderTransaction> OrderTransactions { get; set; } = new List<OrderTransaction>();
+    public AIProcessing? AIProcessing { get; set; }
+    public ICollection<MasterOrder> MasterOrders { get; set; } = new List<MasterOrder>();
 }
