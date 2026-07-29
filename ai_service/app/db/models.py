@@ -71,6 +71,7 @@ class SupplierCatalog(Base):
     )
     sku: Mapped[str] = mapped_column("SKU", String(80), nullable=False)
     product_name: Mapped[str] = mapped_column("ProductName", String(250), nullable=False)
+    category: Mapped[str | None] = mapped_column("Category", String(100), nullable=True)
     unit_price: Mapped[Decimal] = mapped_column("UnitPrice", Numeric(18, 4), nullable=False)
     stock_available: Mapped[int] = mapped_column("StockAvailable", Integer, nullable=False, default=0)
     delivery_lead_time_days: Mapped[int] = mapped_column(

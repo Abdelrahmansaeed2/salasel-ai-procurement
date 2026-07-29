@@ -21,6 +21,10 @@ class Settings(BaseSettings):
             "SalaselAiService?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
         )
     )
+
+    @property
+    def sync_database_url(self) -> str:
+        return self.database_url.replace("+aioodbc", "+pyodbc")
     db_pool_size: int = 5
     db_max_overflow: int = 10
     db_command_timeout_seconds: int = 10
@@ -33,6 +37,10 @@ class Settings(BaseSettings):
     llm_groq_api_key: str = ""
     llm_anthropic_api_key: str = ""
     llm_temperature: float = 0.0
+    llm_timeout: int = 30
+
+    qdrant_url: AnyUrl = Field(default="http://localhost:6333")
+    embedding_model: str = "BAAI/bge-small-en-v1.5"
 
     default_radius_km: int = 50
     default_quality_threshold: float = 0.0

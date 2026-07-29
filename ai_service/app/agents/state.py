@@ -61,17 +61,20 @@ class InventoryState(TypedDict):
     turn_status: Literal["ask", "retrieve", "confirm", "done"]
 
 
-def merge_spec(current: ProductSpec, incoming: ProductSpec) -> ProductSpec:
+def merge_spec(current: ProductSpec | dict, incoming: ProductSpec) -> ProductSpec:
+    if not isinstance(current, ProductSpec):
+        current = ProductSpec.model_validate(current)
     merged = current.model_copy()
-    model_fields = ProductSpec.model_fields
-    for field in model_fields:
+    for field in ProductSpec.model_fields:
         incoming_val = getattr(incoming, field)
-        if incoming_val is not None and incoming_val != model_fields[field].default:
+        if incoming_val is None:
+            continue
+        if field == "required_attributes":
+            merged.required_attributes.update(
+                {k: v for k, v in incoming_val.items() if v}
+            )
+        elif incoming_val != getattr(merged, field):
             setattr(merged, field, incoming_val)
-    if incoming.required_attributes:
-        merged.required_attributes.update(
-            {k: v for k, v in incoming.required_attributes.items() if v}
-        )
     return merged
 
 

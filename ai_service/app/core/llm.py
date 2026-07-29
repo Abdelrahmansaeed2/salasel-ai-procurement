@@ -10,11 +10,10 @@ def get_llm(role: str, settings: Settings | None = None) -> ChatGroq | ChatAnthr
         kwargs: dict = {
             "model": resolved.llm_model,
             "temperature": resolved.llm_temperature,
-            "timeout": None,
+            "timeout": resolved.llm_timeout,
             "stop": None,
             "max_tokens": None,
             "reasoning_format": "parsed",
-            "timeout": None,
             "max_retries": 2,
         }
         if resolved.llm_groq_api_key:
@@ -23,7 +22,7 @@ def get_llm(role: str, settings: Settings | None = None) -> ChatGroq | ChatAnthr
     kwargs = {
         "model_name": resolved.llm_model,
         "temperature": resolved.llm_temperature,
-        "timeout": None,
+        "timeout": resolved.llm_timeout,
         "stop": None,
     }
     if resolved.llm_anthropic_api_key:

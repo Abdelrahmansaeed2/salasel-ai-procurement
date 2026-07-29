@@ -20,14 +20,14 @@ GO
 IF NOT EXISTS (SELECT 1 FROM dbo.SupplierCatalogs WHERE SKU = N'PPE-GLOVES-NITRILE-M')
 BEGIN
     INSERT INTO dbo.SupplierCatalogs
-        (SupplierID, SKU, ProductName, UnitPrice, StockAvailable, DeliveryLeadTime_Days, VectorEmbedding, UpdatedAt)
-    SELECT SupplierID, N'PPE-GLOVES-NITRILE-M', N'Nitrile Gloves Medium', 3.7500, 12000, 2, N'[0.12,0.22,0.31]', SYSUTCDATETIME()
+        (SupplierID, SKU, ProductName, Category, UnitPrice, StockAvailable, DeliveryLeadTime_Days, VectorEmbedding, UpdatedAt)
+    SELECT SupplierID, N'PPE-GLOVES-NITRILE-M', N'Nitrile Gloves Medium', N'PPE', 3.7500, 12000, 2, N'[0.12,0.22,0.31]', SYSUTCDATETIME()
     FROM dbo.SupplierProfiles
     WHERE CompanyName = N'Cairo Wholesale Co';
 
     INSERT INTO dbo.SupplierCatalogs
-        (SupplierID, SKU, ProductName, UnitPrice, StockAvailable, DeliveryLeadTime_Days, VectorEmbedding, UpdatedAt)
-    SELECT SupplierID, N'PACK-BOX-40CM', N'Corrugated Shipping Box 40cm', 1.1500, 5000, 4, N'[0.09,0.18,0.44]', SYSUTCDATETIME()
+        (SupplierID, SKU, ProductName, Category, UnitPrice, StockAvailable, DeliveryLeadTime_Days, VectorEmbedding, UpdatedAt)
+    SELECT SupplierID, N'PACK-BOX-40CM', N'Corrugated Shipping Box 40cm', N'Packaging', 1.1500, 5000, 4, N'[0.09,0.18,0.44]', SYSUTCDATETIME()
     FROM dbo.SupplierProfiles
     WHERE CompanyName = N'Alexandria Industrial Supply';
 END

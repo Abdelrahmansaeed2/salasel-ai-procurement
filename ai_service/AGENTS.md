@@ -13,6 +13,46 @@ model.
 
 ---
 
+## Supporting service: product vectorization sync
+
+Not a graph node — a background task that keeps Qdrant in sync with SQL
+Server, and a hard dependency of the **Retriever agent** below.
+
+**File:** `app/services/vector_store.py` (Qdrant client wrapper) +
+background task triggered from the product create/update path.
+
+**Trigger:** on product create/update in SQL Server (the source of truth).
+
+**Logic:**
+
+```python
+async def sync_product_to_vector_store(product: Product, supplier: Supplier):
+    vector = await embedding_service.embed(product.to_embedding_text())
+    await vector_store.upsert(
+        id=product.id,  # idempotent — re-sync overwrites, never duplicates
+        vector=vector,
+        payload={
+            "product_id": product.id,
+            "supplier_id": supplier.id,
+            "category": product.category,
+            "price": product.price,
+            "geo": {"lat": supplier.lat, "lon": supplier.lon},
+            "quality_score": supplier.quality_score,  # null until Sprint 5's batch job populates it
+        },
+    )
+```
+
+**Quality score updates:** the nightly quality-score batch job
+(`app/services/quality_score_job.py`) issues a payload-only update to every
+affected product's Qdrant point — it does not re-embed, since the vector
+itself doesn't change when a review comes in.
+
+**Testing:** unit test with a fake Qdrant client asserting idempotent
+upsert (same `product_id` twice → one point, not two); integration test
+verifying a real Qdrant query returns the expected payload after sync.
+
+---
+
 ## Conversation agent
 
 **File:** `app/agents/nodes/conversation.py`
@@ -22,14 +62,14 @@ node where reasoning quality matters most; don't downgrade to a cheap model
 here.
 
 **Reads:** `messages`, `spec` (current partial state)
-**Writes:** `spec` (merged, not overwritten), `messages` (appends its
-response or clarifying question)
+**Writes:** `spec` (merged, not overwritten)
 
 **System prompt (template):**
 
 ```
 You are a product-discovery assistant for an inventory platform. Your job
-is to extract structured product requirements from the customer's messages.
+is to extract structured product requirements from the customer's messages
+and output them as a ProductSpec JSON object.
 
 Extract or update these fields when the customer provides them:
 - category
@@ -37,23 +77,24 @@ Extract or update these fields when the customer provides them:
 - required_attributes (key-value pairs specific to the category)
 
 Rules:
-- Do not invent values the customer didn't state.
+- Do not invent values the customer didn't state. Set unknown fields to null.
 - If the customer's message is ambiguous about which attributes apply to
   their category, set needs_attribute_lookup=true instead of guessing.
 - Do not decide whether the spec is "complete" — that is handled elsewhere.
-- If the customer's message is off-topic, respond conversationally without
-  populating spec fields.
+- Always output a valid ProductSpec JSON object. Never respond conversationally.
 ```
 
 **Logic:**
 
 ```python
-def conversation_node(state: InventoryState) -> InventoryState:
-    llm = get_llm(role="conversation").with_structured_output(ProductSpec)
-    result = llm.invoke([
-        SystemMessage(content=CONVERSATION_SYSTEM_PROMPT),
-        *state["messages"],
+def conversation_node(state: InventoryState) -> dict:
+    llm = get_llm(role="conversation").with_structured_output(ProductSpec, method="json_mode")
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", CONVERSATION_SYSTEM_PROMPT),
+        MessagesPlaceholder(variable_name="messages"),
     ])
+    chain = prompt | llm
+    result = ProductSpec.model_validate(chain.invoke({"messages": state["messages"]}))
     merged = merge_spec(state["spec"], result)  # latest non-null value wins per field
     return {"spec": merged}
 ```
@@ -63,8 +104,6 @@ def conversation_node(state: InventoryState) -> InventoryState:
 - Contradictory info across turns (e.g. "under $500" then "$800 is fine") →
   `merge_spec` takes the most recent non-null value per field, never
   concatenates or averages.
-- Off-topic input → node responds conversationally, `spec` unchanged, no
-  fields set.
 - Customer asks a question about available options → sets
   `needs_attribute_lookup=True`, router sends to RAG lookup.
 
@@ -107,7 +146,7 @@ graph behavior and must have 100% branch coverage.
 ## RAG lookup
 
 **File:** `app/agents/nodes/rag_lookup.py`
-**Type:** Deterministic, Redis-cached.
+**Type:** Async, Redis-cached.
 
 **Reads:** `spec.category`
 **Writes:** `messages` (appends a system message with available attribute
@@ -116,15 +155,27 @@ values), `spec.needs_attribute_lookup` (reset to `False`)
 **Logic:**
 
 ```python
-async def rag_lookup_node(state: InventoryState) -> InventoryState:
+async def rag_lookup_node(state: InventoryState) -> dict:
     category = state["spec"].category
+    if category is None:
+        return {
+            "messages": [SystemMessage(content="I need to know what category you're looking for.")],
+            "spec": state["spec"].model_copy(update={"needs_attribute_lookup": False}),
+        }
     cache_key = f"attrs:{category}"
-    attrs = await redis.get(cache_key)
-    if attrs is None:
-        attrs = await product_repository.get_distinct_attributes(category)
-        await redis.set(cache_key, attrs, ex=3600)
+    redis_client = Redis.from_url(str(get_settings().redis_url))
+    cached = redis_client.get(cache_key)
+    if cached is not None:
+        attrs = json.loads(cached)
+    else:
+        async with get_sessionmaker()() as session:
+            repo = ProductRepository(session)
+            attrs = await repo.get_distinct_attributes(category)
+        redis_client.setex(cache_key, 3600, json.dumps(attrs))
+    redis_client.close()
+    attr_text = "\n".join(f"- {a}" for a in attrs)
     return {
-        "messages": [SystemMessage(content=f"Available attributes for {category}: {attrs}")],
+        "messages": [SystemMessage(content=f"Available products in {category}:\n{attr_text}")],
         "spec": state["spec"].model_copy(update={"needs_attribute_lookup": False}),
     }
 ```
@@ -163,7 +214,8 @@ def ask_missing_spec_node(state: InventoryState) -> InventoryState:
 the whole list — this keeps conversation turns natural and avoids
 overwhelming the customer with a checklist.
 
-**Always routes to:** `conversation_agent`.
+**Always routes to:** `END` (graph pauses, waits for the next user message
+on the same `thread_id` to resume from the entry point).
 
 **Testing:** unit test template selection against every possible missing-field combination.
 
@@ -172,23 +224,36 @@ overwhelming the customer with a checklist.
 ## Retriever agent
 
 **File:** `app/agents/nodes/retriever.py`
-**Type:** Deterministic, 3-stage pipeline. No LLM call.
+**Type:** Deterministic, multi-stage pipeline. No LLM call. Queries Qdrant
+directly — does not touch SQL Server in the request path.
+**Status:** **Stub until Sprint 4.** Currently returns a placeholder message
+and sets `turn_status: "done"`. Full implementation requires Sprint 3's
+embedding service, vector store, and Qdrant seeding.
 
 **Reads:** `spec`, `customer_location`, `rejected_ids`, `rank_weights`
 **Writes:** `ranked_results`, or routes back with a clarifying `messages`
 entry if blocked.
 
-**Stage 1 — structured filter (SQL Server):**
+**Stage 1 — embed query + Qdrant vector/payload search:**
 
 ```python
-candidates = await product_repository.filter_candidates(
-    category=spec.category,
-    price_min=spec.price_min, price_max=spec.price_max,
-    location=customer_location, radius_km=DEFAULT_RADIUS_KM,
-    min_quality=DEFAULT_QUALITY_THRESHOLD,
-    exclude_ids=state["rejected_ids"],
+query_vec = await embedding_service.embed(spec.to_query_text())
+
+candidates = await vector_store.search(
+    vector=query_vec,
+    filter={
+        "category": spec.category,
+        "price": {"gte": spec.price_min, "lte": spec.price_max},
+        "geo_radius": {"center": customer_location, "radius_km": DEFAULT_RADIUS_KM},
+        "quality_score": {"gte": DEFAULT_QUALITY_THRESHOLD},
+        "product_id": {"must_not": state["rejected_ids"]},
+    },
+    limit=20,  # over-fetch so the blended re-score in stage 3 has room to reorder
 )
 ```
+
+`vector_store.search` wraps Qdrant's query API — vector similarity and
+payload filtering happen in a single call, not as two separate steps.
 
 **Stage 2 — zero-result relaxation** (one retry, in this priority order):
 
@@ -196,36 +261,41 @@ candidates = await product_repository.filter_candidates(
 2. Widen price band (e.g. ±20%)
 3. Lower quality threshold (e.g. by one tier)
 
-If still zero after relaxation, route to `conversation_agent` with a
-message explaining what was relaxed and that nothing was found — never
-return an empty result silently.
+Re-issue the same Qdrant query with relaxed filter values. If still zero
+after relaxation, route to `conversation_agent` with a message explaining
+what was relaxed and that nothing was found — never return an empty result
+silently.
 
-**Stage 3 — in-memory rank:**
+**Stage 3 — blend and rank:**
 
 ```python
-query_vec = await embedding_service.embed(spec.to_query_text())
-for c in candidates:
-    c.similarity_score = cosine_similarity(query_vec, c.embedding)
-
 w = state["rank_weights"]
 ranked = sorted(candidates, key=lambda c: (
-    w["sim"] * c.similarity_score +
-    w["quality"] * c.quality_score +
-    w["distance"] * (1 - normalize(c.distance_km, max_=DEFAULT_RADIUS_KM))
+    w["sim"] * c.similarity_score +          # returned directly by Qdrant
+    w["quality"] * c.payload["quality_score"] +
+    w["distance"] * (1 - normalize(c.payload["distance_km"], max_=DEFAULT_RADIUS_KM))
 ), reverse=True)[:5]
 ```
 
-**Blocking-field check:** if `customer_location` is `None`, skip stage 1
-entirely and route to `conversation_agent` asking for location — don't let
-the SQL query run with a null parameter.
+Blending stays application-side because `rank_weights` change dynamically
+across rerank cycles (Sprint 5) — Qdrant's own similarity ranking is only
+one input to the final score, not the final score itself.
+
+**Blocking-field check:** if `customer_location` is `None`, skip the Qdrant
+query entirely and route to `conversation_agent` asking for location —
+don't issue a geo-radius filter with a null center point.
 
 **Testing:**
 
-- Unit test `ranking_service` scoring function against a fixed candidate
-  list and hand-computed expected order.
-- Integration test against a seeded test DB verifying stage 1 filter
-  correctness (price/radius/quality boundaries) and stage 2 relaxation
-  triggers correctly on an intentionally over-constrained spec.
+- Unit test `ranking_service`'s blending function against a fixed candidate
+  list and hand-computed expected order — no Qdrant dependency needed for
+  this test.
+- Integration test against a seeded Qdrant collection verifying: filter
+  correctness (price/radius/quality boundaries), stage 2 relaxation
+  triggers on an intentionally over-constrained spec, and that
+  `rejected_ids` passed as a `must_not` filter are verifiably absent from
+  results (don't only check this in Python post-filtering — assert it was
+  pushed into the Qdrant query itself).
 
 ---
 

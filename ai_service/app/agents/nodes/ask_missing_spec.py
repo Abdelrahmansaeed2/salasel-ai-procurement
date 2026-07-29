@@ -1,6 +1,6 @@
 from langchain_core.messages import AIMessage
 
-from app.agents.state import REQUIRED_FIELDS, InventoryState
+from app.agents.state import REQUIRED_FIELDS, InventoryState, ProductSpec
 
 FOLLOWUP_TEMPLATES: dict[str, str] = {
     "category": "What category of product are you looking for?",
@@ -10,7 +10,8 @@ FOLLOWUP_TEMPLATES: dict[str, str] = {
 
 
 def ask_missing_spec_node(state: InventoryState) -> dict:
-    missing = [f for f in REQUIRED_FIELDS if getattr(state["spec"], f) is None]
+    spec = ProductSpec.model_validate(state["spec"])
+    missing = [f for f in REQUIRED_FIELDS if getattr(spec, f) is None]
     if not missing:
         return {"missing_fields": []}
     question = FOLLOWUP_TEMPLATES.get(missing[0], "Could you provide more details about what you need?")

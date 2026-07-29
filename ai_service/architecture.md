@@ -1,4 +1,4 @@
-## Architecture — Multi-Agent Inventory Supplier-Matching System
+# Architecture — Multi-Agent Inventory Supplier-Matching System
 
 ## 1. Overview
 
@@ -16,15 +16,15 @@ reproducible and debuggable.
 
 ## 2. Tech stack
 
-| Layer                 | Choice                                                                                                                                            |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| API                   | FastAPI (async)                                                                                                                                   |
-| Agent orchestration   | LangGraph (`StateGraph`), LangChain for LLM calls                                                                                                 |
-| Database              | SQL Server, async SQLAlchemy 2.0, Alembic migrations                                                                                              |
-| Cache / session state | Redis — LangGraph checkpointer + attribute/embedding cache                                                                                        |
-| Geospatial            | SQL Server native `geography` type + spatial index (no PostGIS needed)                                                                            |
-| Vector similarity     | In-memory cosine similarity (numpy) over a SQL-filtered candidate set — no dedicated vector DB at current scale (thousands of products/suppliers) |
-| Testing               | pytest, pytest-asyncio, Locust (load)                                                                                                             |
+| Layer                 | Choice                                                                                                                                             |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| API                   | FastAPI (async)                                                                                                                                    |
+| Agent orchestration   | LangGraph (`StateGraph`), LangChain for LLM calls                                                                                                  |
+| Database              | SQL Server, async SQLAlchemy 2.0, Alembic migrations — source of truth for product/supplier/quality data                                           |
+| Cache / session state | Redis — LangGraph checkpointer + attribute-lookup cache                                                                                            |
+| Geospatial            | Qdrant native geo-radius payload filtering for retrieval; SQL Server retains a `geography` column with a spatial index for the source-of-truth row |
+| Vector store          | Qdrant (self-hosted via Docker) — single query does vector search plus payload filtering (category, price, geo-radius, quality score)              |
+| Testing               | pytest, pytest-asyncio, Locust (load)                                                                                                              |
 
 ## 3. Agent graph
 
@@ -49,7 +49,7 @@ flowchart TD
     Router -->|spec complete| Retriever
 
     RAG -->|enriched context| Conv
-    AskSpec -->|follow-up question| Conv
+    AskSpec -->|follow-up question| Done
 
     Retriever -->|missing blocking info e.g. location| Conv
     Retriever -->|zero results, relax constraints| Retriever
@@ -72,16 +72,16 @@ flowchart TD
 
 ### 3.1 Node responsibilities
 
-| Node                   | Type                            | Responsibility                                                                                                          | Returns to                                       |
-| ---------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| **Conversation agent** | LLM (structured output)         | Extracts/merges `ProductSpec` fields from customer messages. Never self-decides completeness.                           | Router                                           |
-| **Router**             | Deterministic conditional edge  | Picks exactly one branch per turn: RAG lookup, ask missing spec, or retriever. No LLM call, no fan-out.                 | —                                                |
-| **RAG lookup**         | Deterministic, Redis-cached     | Queries distinct attribute values for the identified category so follow-up questions are grounded in real catalog data. | Conversation agent                               |
-| **Ask missing spec**   | Deterministic/templated         | Formats a targeted follow-up for whichever required fields are still null.                                              | Conversation agent                               |
-| **Retriever agent**    | Deterministic, 3-stage pipeline | SQL structured filter → zero-result relaxation if needed → in-memory cosine similarity + blended ranking.               | Format results, or Conversation agent if blocked |
-| **Format results**     | LLM (cheap model)               | Produces a short, human-readable explanation of the top 5. Never recomputes scores.                                     | Review gate                                      |
-| **Review gate**        | `interrupt()`                   | Pauses the graph for customer confirm/reject input.                                                                     | End, or Rerank                                   |
-| **Rerank**             | Deterministic                   | Excludes rejected IDs, adjusts `rank_weights` based on rejection reason, re-invokes retriever.                          | Retriever agent                                  |
+| Node                   | Type                                | Responsibility                                                                                                                                              | Returns to                                       |
+| ---------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| **Conversation agent** | LLM (structured output)             | Extracts/merges `ProductSpec` fields from customer messages. Never self-decides completeness.                                                               | Router                                           |
+| **Router**             | Deterministic conditional edge      | Picks exactly one branch per turn: RAG lookup, ask missing spec, or retriever. No LLM call, no fan-out.                                                     | —                                                |
+| **RAG lookup**         | Deterministic, Redis-cached         | Queries distinct attribute values for the identified category so follow-up questions are grounded in real catalog data.                                     | Conversation agent                               |
+| **Ask missing spec**   | Deterministic/templated             | Formats a targeted follow-up for whichever required fields are still null.                                                                                  | END (pauses for user input)                      |
+| **Retriever agent**    | Deterministic, multi-stage pipeline | Embeds query → Qdrant vector + payload search (category/price/geo/quality) → zero-result relaxation if needed → blends returned scores with `rank_weights`. | Format results, or Conversation agent if blocked |
+| **Format results**     | LLM (cheap model)                   | Produces a short, human-readable explanation of the top 5. Never recomputes scores.                                                                         | Review gate                                      |
+| **Review gate**        | `interrupt()`                       | Pauses the graph for customer confirm/reject input.                                                                                                         | End, or Rerank                                   |
+| **Rerank**             | Deterministic                       | Excludes rejected IDs, adjusts `rank_weights` based on rejection reason, re-invokes retriever.                                                              | Retriever agent                                  |
 
 ### 3.2 Shared state schema
 
@@ -121,13 +121,20 @@ mechanism that makes horizontal scaling possible.
 
 ## 4. Data layer
 
-- **Source of truth**: SQL Server. No separate vector database is used —
-  candidate volume (thousands of products x suppliers) is filtered
-  structurally in SQL first (category, price, geo radius via
-  `geography.STDistance()`, quality threshold), which typically narrows to
-  tens/low-hundreds of rows before any vector math runs. Cosine similarity
-  on that narrowed set runs in application memory. Revisit this decision
-  only if pre-filter candidate volume grows past roughly 50k–100k.
+- **Source of truth**: SQL Server holds all product, supplier, and quality
+  score data. All writes go here first.
+- **Vector store**: Qdrant holds a synced, vectorized copy of every product,
+  used only for retrieval. Collection payload includes `product_id`,
+  `supplier_id`, `category`, `price`, `geo` (supplier location as a Qdrant
+  geo point), and `quality_score`. Retrieval queries Qdrant directly with a
+  combined vector + payload filter (category, price range, geo-radius,
+  quality threshold) rather than filtering in SQL Server first — this keeps
+  SQL Server out of the retrieval hot path entirely.
+- **Sync**: a background task upserts a product's embedding and payload into
+  Qdrant on create/update in SQL Server, keyed idempotently by
+  `product_id`. The nightly quality-score batch job additionally pushes a
+  payload-only update (`quality_score`) to Qdrant for every affected
+  product — no re-embedding needed since the vector itself didn't change.
 - **Supplier quality score**: computed by a scheduled **batch job**, never
   in the request path. Uses a Bayesian/shrinkage average for review ratings
   (so a supplier with 3 five-star reviews doesn't outrank one with 500
@@ -136,8 +143,9 @@ mechanism that makes horizontal scaling possible.
 - **Product embeddings**: precomputed on write (background task on
   create/update), never generated at query time except for the customer's
   live query text.
-- **Geospatial**: supplier location stored as a `geography` column with a
-  spatial index; distance computed natively via `STDistance()`.
+- **Geospatial**: supplier location is stored as a Qdrant geo point for
+  retrieval-time radius filtering, and as a `geography` column with a
+  spatial index in SQL Server for the source-of-truth record.
 
 ## 5. Scalability (target: thousands of concurrent users)
 
@@ -187,6 +195,7 @@ inventory-multiagent/
 │   │       └── format_results_system.py
 │   ├── services/
 │   │   ├── embedding_service.py
+│   │   ├── vector_store.py
 │   │   ├── ranking_service.py
 │   │   └── quality_score_job.py
 │   ├── repositories/
@@ -222,8 +231,8 @@ The system is built in 6 sprints, each independently verifiable:
 
 1. **Foundation** — scaffolding, DB models/migrations, docker-compose, health check.
 2. **Conversation + router** — spec elicitation loop with a working externalized checkpointer.
-3. **RAG grounding** — attribute lookups, embedding precompute pipeline.
-4. **Retriever + ranking** — structured filter, zero-result relaxation, blended scoring.
+3. **RAG grounding + product vectorization** — attribute lookups from SQL Server, product embedding pipeline synced into Qdrant.
+4. **Retriever + Qdrant-based ranking** — vector + payload search (category/price/geo/quality), zero-result relaxation, blended scoring.
 5. **Quality scoring + review/rerank** — batch job, confirm/reject loop.
 6. **Hardening** — rate limiting, observability, cross-replica session resume, 1,000-concurrent-user load test.
 
