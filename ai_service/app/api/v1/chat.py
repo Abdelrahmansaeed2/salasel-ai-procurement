@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 from app.agents.checkpointer import get_checkpointer
 from app.agents.graph import get_compiled_graph
-from app.agents.state import InventoryState, ProductSpec
+from app.agents.state import Candidate, InventoryState, ProductSpec
 from fastapi import APIRouter, HTTPException, status
 
 router = APIRouter(tags=["chat"])
@@ -20,6 +20,7 @@ class ChatResponse(BaseModel):
     spec: ProductSpec
     turn_status: str
     missing_fields: list[str]
+    ranked_results: list[Candidate]
 
 
 @router.post("/chat", response_model=ChatResponse)
@@ -55,4 +56,5 @@ async def chat(request: ChatRequest) -> ChatResponse:
         spec=result["spec"],
         turn_status=result.get("turn_status", "ask"),
         missing_fields=result.get("missing_fields", []),
+        ranked_results=result.get("ranked_results", []),
     )

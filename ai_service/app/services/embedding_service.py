@@ -20,3 +20,15 @@ async def embed(text: str) -> list[float]:
 async def embed_batch(texts: list[str]) -> list[list[float]]:
     model = _get_model(get_settings().embedding_model)
     return [v.tolist() for v in model.embed(texts)]
+
+
+def embed_sync(text: str) -> list[float]:
+    model = _get_model(get_settings().embedding_model)
+    for vector in model.embed(text):
+        return vector.tolist()
+    return []
+
+
+def embed_batch_sync(texts: list[str]) -> list[list[float]]:
+    model = _get_model(get_settings().embedding_model)
+    return [v.tolist() for v in model.embed(texts)]
