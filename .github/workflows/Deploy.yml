@@ -60,6 +60,7 @@ jobs:
       - name: Checkout (for docker-compose.yml)
         uses: actions/checkout@v4
 
+
       - name: Prep VPS folders (Fix Permissions)
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -71,6 +72,7 @@ jobs:
           script: |
             sudo mkdir -p /opt/salasel
             sudo chown -R toor:toor /opt/salasel
+
 
       - name: Copy docker-compose.yml to VPS
         uses: appleboy/scp-action@v0.1.7
@@ -92,6 +94,7 @@ jobs:
           command_timeout: 10m
           script: |
             cd /opt/salasel
+
 
             # Ensure .env exists
             sudo touch .env
@@ -116,12 +119,17 @@ jobs:
               echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
             fi
 
+
             sudo docker compose pull api
             sudo docker compose up -d --remove-orphans
 
             # Wait for API to be healthy
             echo "Waiting for API to be healthy..."
-            timeout 180 bash -c 'until sudo docker inspect salasel-api --format "{{.State.Health.Status}}" | grep -q "healthy"; do sleep 5; done' || { echo "Health check timed out! Container logs:"; sudo docker compose logs api; exit 1; }
+            timeout 180 bash -c 'until sudo docker inspect salasel-api --format "{{.State.Health.Status}}" | grep -q "healthy"; do sleep 5; done' || {
+              echo "Health check timed out! Container logs:"
+              sudo docker compose logs api
+              exit 1
+            }
 
             echo "✅ Deployed successfully!"
             sudo docker compose ps

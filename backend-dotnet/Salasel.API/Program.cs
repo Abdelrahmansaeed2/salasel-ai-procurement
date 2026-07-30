@@ -14,6 +14,9 @@ using FluentValidation.AspNetCore;
 using Salasel.Application.Validators;
 using Salasel.API.Middlewares;
 using Salasel.Domain.Interfaces;
+using Salasel.Infrastructure.Services;
+using Salasel.Infrastructure.Hubs;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,16 +81,33 @@ builder.Services.AddScoped<IOrderExecutionService, OrderExecutionService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IEmailService, Salasel.Infrastructure.Services.EmailService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+// Voice order pipeline (SignalR + background AI worker)
+builder.Services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
+builder.Services.AddSingleton<IFakeAIService, FakeAIService>();
+builder.Services.AddSingleton<INotificationService, NotificationService>();
+builder.Services.AddScoped<ISupplierAssignmentService, SupplierAssignmentService>();
+builder.Services.AddHostedService<VoiceProcessingWorker>();
+
+builder.Services.AddSignalR(options =>
+{
+    options.MaximumReceiveMessageSize = 10 * 1024 * 1024;
+})
+.AddJsonProtocol(options =>
+{
+    options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
 
 // Add CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
+        policy.SetIsOriginAllowed(_ => true)
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
@@ -100,7 +120,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Salasel API", Version = "v1" });
-    
+
     // Configure Swagger to send JWT token
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -167,6 +187,7 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHub<NotificationHub>("/notificationHub");
 app.MapControllers();
 app.MapHealthChecks("/health");
 
