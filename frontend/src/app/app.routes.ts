@@ -14,6 +14,7 @@ import { ForgotPasswordEmailComponent } from './features/forgot-password/forgot-
 import { ForgotPasswordSentComponent } from './features/forgot-password/forgot-password-sent/forgot-password-sent.component';
 import { ForgotPasswordResetComponent } from './features/forgot-password/forgot-password-reset/forgot-password-reset.component';
 import { ForgotPasswordSuccessComponent } from './features/forgot-password/forgot-password-success/forgot-password-success.component';
+import { authGuard } from './core/auth/auth.guard';
 
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
@@ -33,4 +34,46 @@ export const routes: Routes = [
   { path: 'help-center', component: HelpCenterComponent },
   { path: 'terms', component: TermsPrivacyComponent },
   { path: 'privacy', component: TermsPrivacyComponent },
+  {
+    path: 'portal',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/portal/layout/portal-layout.component').then((m) => m.PortalLayoutComponent),
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/portal/dashboard/portal-dashboard.component').then((m) => m.PortalDashboardComponent),
+      },
+      {
+        path: 'analytics',
+        loadComponent: () =>
+          import('./features/portal/analytics/portal-analytics.component').then((m) => m.PortalAnalyticsComponent),
+      },
+      {
+        path: 'orders',
+        loadComponent: () =>
+          import('./features/portal/orders/portal-orders.component').then((m) => m.PortalOrdersComponent),
+      },
+      {
+        path: 'catalog',
+        loadComponent: () =>
+          import('./features/portal/catalog/portal-catalog.component').then((m) => m.PortalCatalogComponent),
+      },
+      {
+        path: 'roles',
+        loadComponent: () =>
+          import('./features/portal/roles/portal-roles.component').then((m) => m.PortalRolesComponent),
+      },
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./features/portal/knowledge-base/portal-knowledge-base.component').then(
+            (m) => m.PortalKnowledgeBaseComponent,
+          ),
+      },
+      { path: '**', redirectTo: 'dashboard' },
+    ],
+  },
 ];

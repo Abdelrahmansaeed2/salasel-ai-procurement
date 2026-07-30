@@ -12,7 +12,6 @@ import { ContactInfoFormComponent } from './components/contact-info-form/contact
 import { AdditionalDocumentsFormComponent } from './components/additional-documents-form/additional-documents-form.component';
 import { ReviewSubmitFormComponent } from './components/review-submit-form/review-submit-form.component';
 import { RegistrationSuccessComponent } from './components/registration-success/registration-success.component';
-import { StepPlaceholderComponent } from './components/step-placeholder/step-placeholder.component';
 import { SiteFooterComponent } from '../../../shared/site-footer/site-footer.component';
 
 @Component({
@@ -30,7 +29,6 @@ import { SiteFooterComponent } from '../../../shared/site-footer/site-footer.com
     AdditionalDocumentsFormComponent,
     ReviewSubmitFormComponent,
     RegistrationSuccessComponent,
-    StepPlaceholderComponent,
     SiteFooterComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

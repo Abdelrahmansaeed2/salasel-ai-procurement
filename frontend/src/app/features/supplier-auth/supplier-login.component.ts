@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { SiteFooterComponent } from '../../shared/site-footer/site-footer.component';
 import { SiteHeaderComponent } from '../../shared/site-header/site-header.component';
+import { AuthService } from '../../core/auth/auth.service';
 
 interface Statistic {
   value: string;
@@ -21,6 +22,10 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   styleUrl: './supplier-login.component.css',
 })
 export class SupplierLoginComponent {
+  private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly auth = inject(AuthService);
+
   readonly email = signal('');
   readonly password = signal('');
   readonly rememberMe = signal(false);
@@ -63,12 +68,21 @@ export class SupplierLoginComponent {
 
     window.setTimeout(() => {
       this.isSubmitting.set(false);
+      this.auth.login(email);
+      const returnUrl = this.activatedRoute.snapshot.queryParamMap.get('returnUrl');
+      this.router.navigateByUrl(returnUrl ?? '/portal/dashboard');
     }, 900);
   }
 
   loginWithProvider(provider: 'microsoft' | 'google'): void {
     this.errorMessage.set(null);
-    
-    console.log(`تسجيل الدخول بواسطة ${provider}`);
+    this.isSubmitting.set(true);
+
+    window.setTimeout(() => {
+      this.isSubmitting.set(false);
+      this.auth.login(`supplier@${provider}.com`);
+      const returnUrl = this.activatedRoute.snapshot.queryParamMap.get('returnUrl');
+      this.router.navigateByUrl(returnUrl ?? '/portal/dashboard');
+    }, 700);
   }
 }

@@ -338,9 +338,14 @@
   color: #334155;
 }
 
+.checklist-item__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 .checklist-item--done .checklist-item__icon {
   color: #16a34a;
-  font-weight: 800;
 }
 
 .checklist-item--pending .checklist-item__icon {
@@ -478,7 +483,9 @@
 }
 
 .support-widget__icon {
-  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #004ac6;
 }
 
 .support-widget__title {

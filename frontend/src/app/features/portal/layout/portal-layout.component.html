@@ -1,0 +1,125 @@
+<div class="portal-shell">
+  <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
+    <div class="sidebar-top">
+      <div class="brand-row">
+        <button type="button" class="collapse-btn" (click)="toggleSidebar()" aria-label="طي القائمة">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M3.79 13a.55.55 0 0 1-.39-.94l4.42-4.42a1.4 1.4 0 0 0 0-2.28L3.4.93a.55.55 0 1 1 .78-.78l4.42 4.43c.51.5.79 1.17.79 1.87s-.28 1.36-.79 1.87L4.18 12.84a.55.55 0 0 1-.39.16Z" fill="#374957"/>
+          </svg>
+        </button>
+        <img class="brand-logo" src="https://api.builder.io/api/v1/image/assets/TEMP/9dfb8452cd0bb815296ee989654beea1cb671394?width=122" alt="سلاسل" />
+      </div>
+
+      <div class="org-card">
+        <div class="org-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M1.33 14.67h13.34M2 14.67V6.67l3.33 2V6.67L8.67 8.67V4l3.33 2.67v8" stroke="#0F172A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 6.67V4.67h1.33v-1.34H4.67V2h1.33" stroke="#0F172A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="org-meta">
+          <span class="org-name">الجوهرة للتوزيع</span>
+          <span class="org-sub">مورد معتمد</span>
+        </div>
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M3.25 4.875L6.5 8.125L9.75 4.875" stroke="#90A1B9" stroke-width="1.08" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <nav class="nav-list">
+        @for (item of navItems; track item.route) {
+          <a
+            class="nav-item"
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: false }"
+          >
+            <span class="nav-icon" aria-hidden="true">
+              @switch (item.icon) {
+                @case ('dashboard') {
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 2H2.67a.67.67 0 0 0-.67.67v4.66c0 .37.3.67.67.67H6c.37 0 .67-.3.67-.67V2.67A.67.67 0 0 0 6 2Z" stroke="currentColor" stroke-width="1.33"/><path d="M13.33 2h-3.33a.67.67 0 0 0-.67.67v2a.67.67 0 0 0 .67.66h3.33A.67.67 0 0 0 14 4.67v-2A.67.67 0 0 0 13.33 2Z" stroke="currentColor" stroke-width="1.33"/><path d="M13.33 8h-3.33a.67.67 0 0 0-.67.67v4.66c0 .37.3.67.67.67h3.33a.67.67 0 0 0 .67-.67V8.67A.67.67 0 0 0 13.33 8Z" stroke="currentColor" stroke-width="1.33"/><path d="M6 10.67H2.67a.67.67 0 0 0-.67.66v2c0 .37.3.67.67.67H6a.67.67 0 0 0 .67-.67v-2a.67.67 0 0 0-.67-.66Z" stroke="currentColor" stroke-width="1.33"/></svg>
+                }
+                @case ('orders') {
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="5.33" cy="14" r="0.67" stroke="currentColor" stroke-width="1.33"/><circle cx="12.67" cy="14" r="0.67" stroke="currentColor" stroke-width="1.33"/><path d="M1.37 1.37h1.33l1.77 8.28c.07.3.23.57.47.76.24.19.54.3.85.29h6.52c.3 0 .6-.1.83-.3.24-.19.4-.46.47-.76l1.1-4.97H3.41" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                }
+                @case ('catalog') {
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M7.33 14.49c.2.12.43.18.67.18s.46-.06.67-.18l4.66-2.67c.2-.12.37-.29.49-.5.12-.2.18-.43.18-.66V5.33a1.34 1.34 0 0 0-.67-1.16L8.67 1.5a1.34 1.34 0 0 0-1.34 0L2.67 4.18c-.2.12-.37.29-.49.5-.12.2-.18.43-.18.66v5.33c0 .23.06.46.18.66.12.21.29.38.49.5l4.66 2.67Z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 14.67V8M2.19 4.67 8 8l5.81-3.33M5 2.85l6 3.43" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                }
+                @case ('analytics') {
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 13.33V6.67M8 13.33V2.67M4 13.33V9.33" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                }
+                @case ('roles') {
+                  <svg width="16" height="20" viewBox="0 0 16 20" fill="none"><path d="M8 20C5.68 19.42 3.77 18.09 2.26 16.01.75 13.94 0 11.63 0 9.1V3l8-3 8 3v6.1c0 2.53-.75 4.84-2.26 6.91-1.5 2.08-3.42 3.4-5.74 3.99Z" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                }
+                @case ('settings') {
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8.15 1.33h-.3a1.33 1.33 0 0 0-1.33 1.33v.12a1.35 1.35 0 0 1-.68.79l-.28.17a1.35 1.35 0 0 1-1.34 0l-.1-.05a1.33 1.33 0 0 0-1.82.49l-.15.25a1.33 1.33 0 0 0 .49 1.82l.1.07c.2.12.37.29.48.49.12.2.18.43.19.66v.34c0 .23-.06.46-.18.66-.12.2-.29.37-.49.49l-.1.06a1.33 1.33 0 0 0-.49 1.82l.15.25c.18.31.47.53.82.62.34.09.7.04 1-.14l.1-.05a1.35 1.35 0 0 1 1.34 0l.29.17c.2.12.36.29.48.49.12.2.18.43.18.66v.12a1.33 1.33 0 0 0 1.33 1.33h.3a1.33 1.33 0 0 0 1.33-1.33v-.12c0-.23.06-.46.18-.66.12-.2.29-.37.49-.49l.29-.17a1.35 1.35 0 0 1 1.34 0l.1.05a1.33 1.33 0 0 0 1.82-.49l.15-.26a1.33 1.33 0 0 0-.49-1.82l-.1-.06a1.33 1.33 0 0 1-.49-.49 1.35 1.35 0 0 1-.18-.66v-.34c0-.23.06-.46.18-.66.12-.2.29-.37.49-.5l.1-.05a1.33 1.33 0 0 0 .49-1.82l-.15-.26a1.33 1.33 0 0 0-1.82-.49l-.1.05a1.35 1.35 0 0 1-1.34 0l-.29-.17a1.35 1.35 0 0 1-.48-.49 1.35 1.35 0 0 1-.19-.66v-.12A1.33 1.33 0 0 0 8.15 1.33Z" stroke="currentColor" stroke-width="1.33"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.33"/></svg>
+                }
+              }
+            </span>
+            <span class="nav-label">{{ item.label }}</span>
+            @if (item.badge) {
+              <span class="nav-badge">{{ item.badge }}</span>
+            }
+          </a>
+        }
+      </nav>
+    </div>
+
+    <div class="sidebar-bottom">
+      <button type="button" class="add-order-btn">
+        <span>إضافة طلب</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 6.67H0V5h5V0h1.67v5h5v1.67h-5v5H5V6.67Z" fill="white"/></svg>
+      </button>
+      <div class="user-card" [class.open]="userMenuOpen()">
+        <button type="button" class="user-card-trigger" (click)="toggleUserMenu()">
+          <img class="user-avatar" src="https://api.builder.io/api/v1/image/assets/TEMP/80fbd0031b7c7d47d0c3e1c22bc0b70170b8c23d?width=64" alt="" />
+          <div class="user-meta">
+            <span class="user-name">محمد العتيبي</span>
+            <span class="user-email">{{ currentUser()?.email ?? 'admin&#64;jawhra.sa' }}</span>
+          </div>
+          <svg class="user-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M5 6 0 1l1.4-1.4L5 3.2 8.6-.4 10 1 5 6Z" fill="#90A1B9"/></svg>
+        </button>
+        @if (userMenuOpen()) {
+          <div class="user-dropdown">
+            <button type="button" class="user-dropdown-item" (click)="logout()">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 14H3.33A1.33 1.33 0 0 1 2 12.67V3.33A1.33 1.33 0 0 1 3.33 2H6" stroke="#BA1A1A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.67 11.33 14 8l-3.33-3.33" stroke="#BA1A1A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 8H6" stroke="#BA1A1A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>تسجيل الخروج</span>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </aside>
+
+  <div class="portal-main">
+    <header class="topbar">
+      <div class="topbar-actions">
+        <button type="button" class="icon-btn" aria-label="التنبيهات">
+          <svg width="16" height="20" viewBox="0 0 16 20" fill="none"><path d="M0 17v-2h2V8c0-1.38.42-2.61 1.25-3.69A5.9 5.9 0 0 1 6.5 2.2V1.5c0-.42.14-.77.44-1.06.28-.29.63-.44 1.06-.44s.77.14 1.06.44c.3.29.44.64.44 1.06v.7a5.9 5.9 0 0 1 3.25 2.11C13.58 5.39 14 6.62 14 8v7h2v2H0Zm8 3a2.1 2.1 0 0 1-1.41-.59A2.06 2.06 0 0 1 6 18h4a2.06 2.06 0 0 1-.59 1.41A2.1 2.1 0 0 1 8 20ZM4 15h8V8c0-1.1-.39-2.04-1.18-2.83A3.85 3.85 0 0 0 8 4a3.85 3.85 0 0 0-2.83 1.18A3.85 3.85 0 0 0 4 8v7Z" fill="#434655"/></svg>
+          <span class="notif-dot"></span>
+        </button>
+        <button type="button" class="icon-btn" aria-label="المساعدة">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" stroke="#434655" stroke-width="1.6"/><path d="M8 7.6c.2-.6.7-1.1 1.4-1.3.7-.2 1.4 0 1.9.5.5.5.6 1.3.3 1.9-.3.6-.9 1-1.6 1.3v.9" stroke="#434655" stroke-width="1.6" stroke-linecap="round"/><circle cx="10" cy="14" r="0.9" fill="#434655"/></svg>
+        </button>
+        <span class="divider"></span>
+        <div class="org-switcher">
+          <div class="org-switcher-meta">
+            <span class="org-switcher-name">مورد سلاسل</span>
+            <span class="org-switcher-role">صلاحيات المسؤول</span>
+          </div>
+          <img class="org-switcher-avatar" src="https://api.builder.io/api/v1/image/assets/TEMP/4d406b5e0c87f01bd20d30e18a1f660f0179867b?width=60" alt="" />
+        </div>
+      </div>
+
+      <label class="search-field">
+        <span class="visually-hidden">بحث</span>
+        <input type="search" placeholder="ابحث عن الموارد والطلبات والموردين..." />
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M-.57 17.06 5.56 10.6a5.9 5.9 0 0 1-1.4-4.24c.05-1.8.65-3.36 1.87-4.65C7.26.88 8.78.21 10.6.17c1.82-.05 3.37.54 4.66 1.77 1.29 1.22 1.95 2.74 2 4.56.05 1.81-.54 3.37-1.77 4.66-1.22 1.29-2.74 1.96-4.56 2.01a5.8 5.8 0 0 1-3.9-1.32L.86 18.42-.57 17.06ZM6.16 6.78a5.13 5.13 0 0 0 1.4 3.15 5.1 5.1 0 0 0 3.22 1.23 5.15 5.15 0 0 0 3.15-1.4c.85-.9 1.26-1.97 1.23-3.22a5.15 5.15 0 0 0-1.4-3.15A5.13 5.13 0 0 0 10.55 2.2a5.13 5.13 0 0 0-3.15 1.4A5.13 5.13 0 0 0 6.16 6.78Z" fill="#434655" fill-opacity="0.5"/></svg>
+      </label>
+    </header>
+
+    <main class="portal-content">
+      <router-outlet />
+    </main>
+  </div>
+</div>
