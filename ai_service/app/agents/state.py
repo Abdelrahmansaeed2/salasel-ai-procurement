@@ -58,7 +58,8 @@ class InventoryState(TypedDict):
     rejected_ids: list[str]
     rank_weights: dict[str, float]
     missing_fields: list[str]
-    turn_status: Literal["ask", "retrieve", "confirm", "done"]
+    turn_status: Literal["ask", "retrieve", "confirm", "done", "rerank"]
+    interrupt_action: str
 
 
 def merge_spec(current: ProductSpec | dict, incoming: ProductSpec) -> ProductSpec:

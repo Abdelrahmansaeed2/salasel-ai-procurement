@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.0
     llm_timeout: int = 30
 
+    llm_formatting_provider: str = "groq"
+    llm_formatting_model: str = "llama-3.1-8b-instant"
+    llm_formatting_temperature: float = 0.0
+
     qdrant_url: AnyUrl = Field(default="http://localhost:6333")
     embedding_model: str = "BAAI/bge-small-en-v1.5"
 

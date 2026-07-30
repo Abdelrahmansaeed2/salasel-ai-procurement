@@ -10,6 +10,7 @@ from app.api.v1.health import router as health_router
 from app.core.config import get_settings
 from app.db.session import get_sessionmaker
 from app.services.product_sync_service import sync_all_products
+from app.worker.quality_score_scheduler import start_scheduler, stop_scheduler
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,9 @@ async def lifespan(app: FastAPI):
             await sync_all_products(session)
     except Exception:
         logger.exception("Failed to sync products to vector store on startup")
+    start_scheduler()
     yield
+    stop_scheduler()
     close_checkpointer()
 
 
