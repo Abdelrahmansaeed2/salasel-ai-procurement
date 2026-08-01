@@ -9,6 +9,7 @@ services:
       DATABASE_URL: mssql+aioodbc://sa:YourStrong%21Passw0rd@sqlserver:1433/SalaselAiService?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
       REDIS_URL: redis://redis:6379/0
       QDRANT_URL: http://qdrant:6333
+      SQL_SERVER_PASSWORD: YourStrong!Passw0rd
     ports:
       - "8000:8000"
     volumes:
@@ -16,6 +17,7 @@ services:
       - ../../main.py:/app/main.py
       - ../../alembic.ini:/app/alembic.ini
       - ../../pyproject.toml:/app/pyproject.toml
+      - ./seed.sql:/work/seed.sql:ro
     depends_on:
       sqlserver-init:
         condition: service_completed_successfully

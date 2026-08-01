@@ -11,7 +11,6 @@ def _build_groq(model: str, settings: Settings, role: str) -> ChatGroq:
         "timeout": settings.llm_timeout,
         "stop": None,
         "max_tokens": None,
-        "reasoning_format": "parsed",
         "max_retries": 2,
     }
     api_key = settings.llm_groq_api_key

@@ -6,7 +6,6 @@ from langgraph.graph.message import add_messages
 from pydantic import BaseModel, model_validator
 from typing_extensions import TypedDict
 
-
 REQUIRED_FIELDS = ["category", "price_min", "price_max"]
 
 

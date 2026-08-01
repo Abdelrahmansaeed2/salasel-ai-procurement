@@ -1,9 +1,7 @@
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from sqlalchemy import select
 
-from app.db.models import SupplierCatalog
 from app.repositories.product_repository import ProductRepository
 
 

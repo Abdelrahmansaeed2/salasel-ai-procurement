@@ -1,4 +1,4 @@
-from langchain_core.messages import AIMessage, SystemMessage, HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from app.agents.state import InventoryState
 from app.core.llm import get_llm

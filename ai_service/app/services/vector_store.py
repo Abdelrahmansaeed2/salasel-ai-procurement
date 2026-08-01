@@ -36,7 +36,7 @@ def upsert(point_id: str, vector: list[float], payload: dict) -> None:
     ensure_collection(len(vector))
     client.upsert(
         collection_name=_COLLECTION_NAME,
-        points=[PointStruct(id=point_id, vector=vector, payload=payload)],
+        points=[PointStruct(id=int(point_id), vector=vector, payload=payload)],
     )
 
 
@@ -44,14 +44,12 @@ def update_payloads(updates: list[tuple[str, dict]]) -> None:
     if not updates:
         return
     client = get_client()
-    ensure_collection(384)
-    client.upsert(
-        collection_name=_COLLECTION_NAME,
-        points=[
-            PointStruct(id=pid, vector=None, payload=payload)
-            for pid, payload in updates
-        ],
-    )
+    for pid, payload in updates:
+        client.set_payload(
+            collection_name=_COLLECTION_NAME,
+            payload=payload,
+            points=[int(pid)],
+        )
 
 
 def search(

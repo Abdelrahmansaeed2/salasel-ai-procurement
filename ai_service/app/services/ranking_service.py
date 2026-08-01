@@ -1,4 +1,5 @@
 import math
+
 from app.agents.state import Candidate
 
 

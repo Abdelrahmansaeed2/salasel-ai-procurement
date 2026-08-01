@@ -43,10 +43,33 @@ async def sync_product_to_vector_store(
 
 
 async def sync_all_products(session: AsyncSession) -> None:
-    query = select(SupplierCatalog).join(SupplierProfile)
-    result = await session.execute(query)
-    catalogs = result.scalars().all()
+    query = (
+        select(
+            SupplierCatalog.catalog_id,
+            SupplierCatalog.sku,
+            SupplierCatalog.product_name,
+            SupplierCatalog.category,
+            SupplierCatalog.unit_price,
+            SupplierProfile.supplier_id,
+            SupplierProfile.latitude,
+            SupplierProfile.longitude,
+        )
+        .join(SupplierProfile)
+    )
+    rows = (await session.execute(query)).all()
 
-    for catalog in catalogs:
-        await sync_product_to_vector_store(catalog, catalog.supplier, session)
-    logger.info("Synced %d products to vector store", len(catalogs))
+    for row in rows:
+        embedding_text = _to_embedding_text(row.product_name, row.sku, row.category)
+        vector = await embed(embedding_text)
+        payload = {
+            "product_id": str(row.catalog_id),
+            "supplier_id": str(row.supplier_id),
+            "category": row.category or "",
+            "price": float(row.unit_price),
+            "geo": {"lat": float(row.latitude or 0), "lon": float(row.longitude or 0)},
+            "quality_score": None,
+        }
+        vector_upsert(point_id=str(row.catalog_id), vector=vector, payload=payload)
+        logger.info("Synced product %s to vector store", row.catalog_id)
+
+    logger.info("Synced %d products to vector store", len(rows))

@@ -43,6 +43,13 @@ class Settings(BaseSettings):
     llm_formatting_model: str = "llama-3.1-8b-instant"
     llm_formatting_temperature: float = 0.0
 
+    stt_provider: str = "groq"
+    stt_model: str = "whisper-large-v3-turbo"
+    stt_api_key: str = ""
+    stt_timeout: int = 60
+    stt_language: str = ""
+    stt_max_audio_bytes: int = 25 * 1024 * 1024
+
     qdrant_url: AnyUrl = Field(default="http://localhost:6333")
     embedding_model: str = "BAAI/bge-small-en-v1.5"
 

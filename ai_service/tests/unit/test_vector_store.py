@@ -33,12 +33,12 @@ def test_upsert_idempotent(mock_get_client) -> None:
     mock_get_client.return_value = mock_client
     mock_client.get_collections.return_value.collections = []
 
-    upsert("prod-1", [0.1, 0.2, 0.3], {"category": "PPE"})
-    upsert("prod-1", [0.1, 0.2, 0.3], {"category": "PPE"})
+    upsert("42", [0.1, 0.2, 0.3], {"category": "PPE"})
+    upsert("42", [0.1, 0.2, 0.3], {"category": "PPE"})
 
     assert mock_client.upsert.call_count == 2
     for call_args in mock_client.upsert.call_args_list:
         kwargs = call_args[1]
         points = kwargs.get("points", [])
         for point in points:
-            assert point.id == "prod-1"
+            assert point.id == 42
