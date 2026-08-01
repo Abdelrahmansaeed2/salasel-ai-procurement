@@ -110,6 +110,9 @@ jobs:
             if ! grep -q "^JWT_KEY=" .env; then
               echo "JWT_KEY='SalaselSuperSecretKeyThatIsAtLeast32BytesLong!!!123'" | sudo tee -a .env
             fi
+            if ! grep -q "^SEQ_PASSWORD=" .env; then
+              echo "SEQ_PASSWORD='Sls3l_Seq#2026!Secure@Vault91'" | sudo tee -a .env
+            fi
 
             # Update or append IMAGE_TAG in .env securely
             IMAGE_TAG=sha-$(echo ${{ github.sha }} | cut -c1-7)
