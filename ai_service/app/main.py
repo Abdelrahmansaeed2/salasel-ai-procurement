@@ -19,19 +19,21 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    try:
-        async with get_sessionmaker()() as session:
-            await sync_all_products(session)
-    except Exception:
-        logger.exception("Failed to sync products to vector store on startup")
-    try:
-        with get_sync_sessionmaker()() as session:
-            run_quality_score_update(session)
-    except Exception:
-        logger.exception("Failed to push quality scores to vector store on startup")
-    start_scheduler()
+    if get_settings().startup_sync_enabled:
+        try:
+            async with get_sessionmaker()() as session:
+                await sync_all_products(session)
+        except Exception:
+            logger.exception("Failed to sync products to vector store on startup")
+        try:
+            with get_sync_sessionmaker()() as session:
+                run_quality_score_update(session)
+        except Exception:
+            logger.exception("Failed to push quality scores to vector store on startup")
+        start_scheduler()
     yield
-    stop_scheduler()
+    if get_settings().startup_sync_enabled:
+        stop_scheduler()
     close_checkpointer()
 
 

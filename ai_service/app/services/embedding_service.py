@@ -32,3 +32,17 @@ def embed_sync(text: str) -> list[float]:
 def embed_batch_sync(texts: list[str]) -> list[list[float]]:
     model = _get_model(get_settings().embedding_model)
     return [v.tolist() for v in model.embed(texts)]
+
+
+def build_product_text(
+    product_name: str,
+    sku: str = "",
+    category: str = "",
+    description: str = "",
+    attributes: dict[str, str] | None = None,
+) -> str:
+    """Build the embedding source text for a product from its descriptive fields."""
+    parts = [p for p in (product_name, sku, category, description) if p]
+    if attributes:
+        parts.extend(f"{k}: {v}" for k, v in attributes.items() if v)
+    return " ".join(parts)

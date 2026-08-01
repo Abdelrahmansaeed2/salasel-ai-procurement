@@ -52,6 +52,46 @@ def update_payloads(updates: list[tuple[str, dict]]) -> None:
         )
 
 
+def list_by_category(category: str, *, in_stock_only: bool = True, limit: int = 50) -> list[dict]:
+    """Return product payloads in a category (no vectors) for RAG attribute lookup."""
+    client = get_client()
+    conditions = [FieldCondition(key="category", match=MatchValue(value=category))]
+    if in_stock_only:
+        conditions.append(FieldCondition(key="in_stock", match=MatchValue(value=True)))
+    points, _ = client.scroll(
+        collection_name=_COLLECTION_NAME,
+        scroll_filter=Filter(must=conditions),
+        limit=limit,
+        with_payload=True,
+        with_vectors=False,
+    )
+    return [p.payload or {} for p in points]
+
+
+def update_payloads_by_supplier(scores: list[tuple[int, float]]) -> None:
+    """Push payload-only quality_score updates to every product of each supplier."""
+    if not scores:
+        return
+    client = get_client()
+    for supplier_id, score in scores:
+        points, _ = client.scroll(
+            collection_name=_COLLECTION_NAME,
+            scroll_filter=Filter(must=[
+                FieldCondition(key="supplier_id", match=MatchValue(value=str(supplier_id))),
+            ]),
+            limit=10_000,
+            with_payload=False,
+            with_vectors=False,
+        )
+        ids = [p.id for p in points]
+        if ids:
+            client.set_payload(
+                collection_name=_COLLECTION_NAME,
+                payload={"quality_score": score},
+                points=ids,
+            )
+
+
 def search(
     vector: list[float],
     *,

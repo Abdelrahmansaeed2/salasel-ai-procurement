@@ -4,17 +4,36 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import SupplierCatalog, SupplierProfile
-from app.services.embedding_service import embed
+from app.schemas.product import ProductUpsert
+from app.services.embedding_service import build_product_text, embed
+from app.services.ingestion_service import ingest_products, product_payload
 from app.services.vector_store import upsert as vector_upsert
 
 logger = logging.getLogger(__name__)
 
 
-def _to_embedding_text(product_name: str, sku: str, category: str | None) -> str:
-    parts = [product_name, sku]
-    if category:
-        parts.append(category)
-    return " ".join(parts)
+def _to_product_upsert(
+    product_id: int,
+    supplier_id: int,
+    product_name: str,
+    sku: str,
+    category: str | None,
+    unit_price: float,
+    lat: float | None,
+    lon: float | None,
+    stock_available: int,
+) -> ProductUpsert:
+    return ProductUpsert(
+        product_id=product_id,
+        supplier_id=supplier_id,
+        product_name=product_name,
+        sku=sku,
+        category=category or "",
+        price=float(unit_price),
+        lat=float(lat or 0),
+        lon=float(lon or 0),
+        in_stock=stock_available > 0,
+    )
 
 
 async def sync_product_to_vector_store(
@@ -22,23 +41,20 @@ async def sync_product_to_vector_store(
     supplier: SupplierProfile,
     session: AsyncSession | None = None,
 ) -> None:
-    embedding_text = _to_embedding_text(
-        catalog.product_name,
-        catalog.sku,
-        catalog.category,
+    upsert = ProductUpsert(
+        product_id=catalog.catalog_id,
+        supplier_id=supplier.supplier_id,
+        product_name=catalog.product_name,
+        sku=catalog.sku,
+        category=catalog.category or "",
+        price=float(catalog.unit_price),
+        lat=float(supplier.latitude or 0),
+        lon=float(supplier.longitude or 0),
+        in_stock=catalog.stock_available > 0,
     )
-    vector = await embed(embedding_text)
-
-    payload = {
-        "product_id": str(catalog.catalog_id),
-        "supplier_id": str(supplier.supplier_id),
-        "category": catalog.category or "",
-        "price": float(catalog.unit_price),
-        "geo": {"lat": float(supplier.latitude or 0), "lon": float(supplier.longitude or 0)},
-        "quality_score": None,
-    }
-
-    vector_upsert(point_id=str(catalog.catalog_id), vector=vector, payload=payload)
+    text = build_product_text(upsert.product_name, upsert.sku, upsert.category)
+    vector = await embed(text)
+    vector_upsert(point_id=str(upsert.product_id), vector=vector, payload=product_payload(upsert))
     logger.info("Synced product %s to vector store", catalog.catalog_id)
 
 
@@ -46,11 +62,12 @@ async def sync_all_products(session: AsyncSession) -> None:
     query = (
         select(
             SupplierCatalog.catalog_id,
+            SupplierCatalog.supplier_id,
             SupplierCatalog.sku,
             SupplierCatalog.product_name,
             SupplierCatalog.category,
             SupplierCatalog.unit_price,
-            SupplierProfile.supplier_id,
+            SupplierCatalog.stock_available,
             SupplierProfile.latitude,
             SupplierProfile.longitude,
         )
@@ -58,18 +75,20 @@ async def sync_all_products(session: AsyncSession) -> None:
     )
     rows = (await session.execute(query)).all()
 
-    for row in rows:
-        embedding_text = _to_embedding_text(row.product_name, row.sku, row.category)
-        vector = await embed(embedding_text)
-        payload = {
-            "product_id": str(row.catalog_id),
-            "supplier_id": str(row.supplier_id),
-            "category": row.category or "",
-            "price": float(row.unit_price),
-            "geo": {"lat": float(row.latitude or 0), "lon": float(row.longitude or 0)},
-            "quality_score": None,
-        }
-        vector_upsert(point_id=str(row.catalog_id), vector=vector, payload=payload)
-        logger.info("Synced product %s to vector store", row.catalog_id)
+    products = [
+        _to_product_upsert(
+            product_id=row.catalog_id,
+            supplier_id=row.supplier_id,
+            product_name=row.product_name,
+            sku=row.sku,
+            category=row.category,
+            unit_price=float(row.unit_price),
+            lat=row.latitude,
+            lon=row.longitude,
+            stock_available=row.stock_available,
+        )
+        for row in rows
+    ]
 
-    logger.info("Synced %d products to vector store", len(rows))
+    await ingest_products(products)
+    logger.info("Synced %d products to vector store", len(products))

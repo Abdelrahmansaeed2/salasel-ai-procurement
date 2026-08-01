@@ -56,9 +56,27 @@ conversation_agent → router →
 
 Supporting services keep the vector store in sync with the catalog:
 - **Product sync** (`app/services/product_sync_service.py`) — embeds products
-  and upserts them into Qdrant on create/update.
+  and upserts them into Qdrant on create/update (dev/test path).
 - **Quality-score job** (`app/services/quality_score_job.py`) — pushes
   payload-only quality-score updates to Qdrant nightly (and once at startup).
+
+### Data flow — SQL-free in production
+
+The AI service never reads SQL Server in the request path. In production the
+backend (.NET) is the source of truth and drives Qdrant:
+
+- **Ingestion** — the backend pushes product data via
+  `POST /api/v1/admin/products`; the AI service embeds it (name, SKU,
+  category, description, attributes) and stores the payload in Qdrant,
+  idempotent by `product_id`.
+- **Quality** — the backend pushes raw review metrics via
+  `POST /api/v1/admin/quality-metrics`; the AI service computes quality
+  scores and applies payload-only updates (no re-embed).
+- **Retrieval & RAG** — the retriever and RAG lookup read only Qdrant
+  payloads (+ Redis cache); no SQL.
+
+SQL Server is used only when `STARTUP_SYNC_ENABLED=true` (default for local
+dev/test, which seeds Qdrant from the SQL schema on startup).
 
 ## Domain Ownership
 
@@ -80,6 +98,7 @@ Copy `.env.example` to `.env` and set the required values:
 | `DB_COMMAND_TIMEOUT_SECONDS` | DB command timeout | `10` |
 | `REDIS_URL` | Redis connection string (checkpointer + cache) | `redis://localhost:6379/0` |
 | `HEALTH_TIMEOUT_SECONDS` | Health-check timeout | `3` |
+| `STARTUP_SYNC_ENABLED` | Seed Qdrant from SQL Server at startup (dev/test) | `true` |
 | `LLM_PROVIDER` | LLM provider (`groq` or `anthropic`) | `groq` |
 | `LLM_MODEL` | Primary model name | `llama-3.3-70b-versatile` |
 | `LLM_GROQ_API_KEY` | Groq API key | *(empty)* |
@@ -116,7 +135,9 @@ uvicorn app.main:app --reload
 
 ## API Endpoints
 
-All routes are served under the `/api/v1` prefix.
+All routes are served under the `/api/v1` prefix. The complete, interactive
+docs are available at `/docs` (Swagger UI) and `/redoc` while the service
+runs; see [docs/API.md](docs/API.md) for the full written reference.
 
 ### GET /api/v1/health
 
@@ -203,7 +224,7 @@ Returns the same `ChatResponse` shape as `/api/v1/chat`.
 
 ### POST /api/v1/admin/sync-products
 
-Re-run the product → Qdrant sync on demand.
+Re-run the product → Qdrant sync on demand (dev/test; uses SQL Server).
 
 ```powershell
 Invoke-RestMethod http://localhost:8000/api/v1/admin/sync-products -Method POST
@@ -212,6 +233,41 @@ Invoke-RestMethod http://localhost:8000/api/v1/admin/sync-products -Method POST
 Response:
 ```json
 {"status": "ok", "message": "Products synced to vector store"}
+```
+
+### POST /api/v1/admin/products
+
+Production ingestion: the backend pushes a batch of products; the AI service
+embeds them (name, SKU, category, description, attributes) and upserts them
+into Qdrant, idempotent by `product_id`. `quality_score` is set to `null` —
+populate it via `/api/v1/admin/quality-metrics`.
+
+```bash
+curl -X POST http://localhost:8000/api/v1/admin/products \
+  -H "Content-Type: application/json" \
+  -d '{"products": [{"product_id": 1, "supplier_id": 1, "product_name": "Nitrile Gloves Medium", "sku": "NG-MED", "category": "PPE", "description": "Disposable exam gloves", "attributes": {"size": "M"}, "price": 3.75, "lat": 30.04, "lon": 31.24, "in_stock": true}]}'
+```
+
+Response:
+```json
+{"status": "ok", "synced": 1}
+```
+
+### POST /api/v1/admin/quality-metrics
+
+The backend pushes raw review metrics; the AI service computes quality scores
+and applies payload-only updates to every product of each supplier (no
+re-embed). Replaces the nightly SQL job in production.
+
+```bash
+curl -X POST http://localhost:8000/api/v1/admin/quality-metrics \
+  -H "Content-Type: application/json" \
+  -d '{"metrics": [{"supplier_id": 1, "review_count": 50, "average_rating": 4.5, "on_time_delivery_rate": 0.95, "defect_rate": 0.02}]}'
+```
+
+Response:
+```json
+{"status": "ok", "updated_suppliers": 1}
 ```
 
 ## Docker Setup

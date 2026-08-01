@@ -25,26 +25,10 @@ def test_rag_lookup_returns_attributes_for_category() -> None:
     mock_redis = MagicMock()
     mock_redis.get.return_value = None
 
-    mock_session = MagicMock()
-    mock_result = MagicMock()
-    mock_result.all.return_value = [
-        ("Nitrile Gloves Medium", "PPE-GLOVES-NITRILE-M", 3.75),
-    ]
-    mock_session.execute.return_value = mock_result
-
     with patch("app.agents.nodes.rag_lookup.Redis.from_url", return_value=mock_redis), \
-         patch("app.agents.nodes.rag_lookup.get_sync_sessionmaker") as mock_sm, \
-         patch("app.agents.nodes.rag_lookup.ProductRepository") as mock_repo_cls:
-
-        mock_sm_instance = MagicMock()
-        mock_sm_instance.return_value = mock_session
-        mock_sm.return_value = mock_sm_instance
-
-        mock_repo = MagicMock()
-        mock_repo_cls.return_value = mock_repo
-        mock_repo.get_distinct_attributes_sync.return_value = [
-            "Nitrile Gloves Medium (SKU: PPE-GLOVES-NITRILE-M, $3.75)",
-        ]
+         patch("app.agents.nodes.rag_lookup.list_by_category", return_value=[
+             {"product_name": "Nitrile Gloves Medium", "sku": "PPE-GLOVES-NITRILE-M", "price": 3.75},
+         ]) as mock_list:
 
         from app.agents.nodes.rag_lookup import rag_lookup_node
         result = rag_lookup_node(state)
@@ -53,8 +37,24 @@ def test_rag_lookup_returns_attributes_for_category() -> None:
     assert len(result["messages"]) == 1
     content = result["messages"][0].content
     assert "PPE" in content
-    assert "Nitrile Gloves Medium" in content
-    mock_repo.get_distinct_attributes_sync.assert_called_once_with("PPE")
+    assert "Nitrile Gloves Medium (SKU: PPE-GLOVES-NITRILE-M, $3.75)" in content
+    mock_list.assert_called_once_with("PPE", in_stock_only=True)
+
+
+def test_rag_lookup_returns_no_products_message() -> None:
+    spec = ProductSpec(category="PPE", needs_attribute_lookup=True)
+    state = make_state(spec)
+
+    mock_redis = MagicMock()
+    mock_redis.get.return_value = None
+
+    with patch("app.agents.nodes.rag_lookup.Redis.from_url", return_value=mock_redis), \
+         patch("app.agents.nodes.rag_lookup.list_by_category", return_value=[]):
+
+        from app.agents.nodes.rag_lookup import rag_lookup_node
+        result = rag_lookup_node(state)
+
+    assert "No products found for category: PPE" in result["messages"][0].content
 
 
 def test_rag_lookup_cache_hit() -> None:
@@ -66,14 +66,14 @@ def test_rag_lookup_cache_hit() -> None:
     mock_redis.get.return_value = json.dumps(cached_attrs).encode()
 
     with patch("app.agents.nodes.rag_lookup.Redis.from_url", return_value=mock_redis), \
-         patch("app.agents.nodes.rag_lookup.get_sync_sessionmaker") as mock_sm:
+         patch("app.agents.nodes.rag_lookup.list_by_category") as mock_list:
 
         from app.agents.nodes.rag_lookup import rag_lookup_node
         result = rag_lookup_node(state)
 
     assert result["spec"].needs_attribute_lookup is False
     assert len(result["messages"]) == 1
-    mock_sm.assert_not_called()
+    mock_list.assert_not_called()
 
 
 def test_rag_lookup_handles_none_category() -> None:

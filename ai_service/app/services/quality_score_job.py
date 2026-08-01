@@ -5,22 +5,20 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.models import SupplierQualityScore
+from app.services.quality_score_service import compute_supplier_score
 from app.services.vector_store import update_payloads
 
 logger = logging.getLogger(__name__)
 
-REVIEW_SCALE = 30
-
 
 def _compute_score(row: SupplierQualityScore, global_avg: float) -> float:
-    weight = min(1.0, row.review_count / REVIEW_SCALE)
-    adjusted = weight * float(row.average_rating) + (1 - weight) * global_avg
-    score = (
-        adjusted * 0.5
-        + float(row.on_time_delivery_rate) * 0.3
-        + (1 - float(row.defect_rate)) * 0.2
+    return compute_supplier_score(
+        review_count=int(row.review_count),
+        average_rating=float(row.average_rating),
+        on_time_delivery_rate=float(row.on_time_delivery_rate),
+        defect_rate=float(row.defect_rate),
+        global_avg=global_avg,
     )
-    return round(score, 2)
 
 
 def compute_quality_scores(session: Session) -> list[tuple[int, float]]:

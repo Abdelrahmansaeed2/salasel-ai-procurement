@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     redis_url: AnyUrl = Field(default="redis://localhost:6379/0")
     health_timeout_seconds: int = 3
 
+    startup_sync_enabled: bool = True
+
     llm_provider: str = "groq"
     llm_model: str = "llama-3.3-70b-versatile"
     llm_groq_api_key: str = ""
