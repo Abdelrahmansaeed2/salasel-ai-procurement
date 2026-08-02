@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Salasel.Application.DTOs;
 using Salasel.Application.Interfaces;
@@ -45,6 +47,21 @@ public class AuthController : ControllerBase
         }
     }
 
+    // App launch / token restore: client calls this with the stored bearer
+    // token to confirm it's still valid and fetch the current user's info.
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<IActionResult> Me()
+    {
+        var userId = CurrentUserId();
+        if (userId == null) return Unauthorized();
+
+        var me = await _authService.GetMeAsync(userId.Value);
+        if (me == null) return Unauthorized(new { Message = "User no longer exists." });
+
+        return Ok(me);
+    }
+
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto request)
     {
@@ -54,10 +71,10 @@ public class AuthController : ControllerBase
             // Security best practice: Do not reveal if the user exists or not, but return 202 Accepted.
             return Accepted(new { Success = true, Message = "If the email is registered in our system, password reset instructions have been dispatched." });
         }
-        
+
         // Actually dispatch the email using the Enterprise Email Service
         await _emailService.SendPasswordResetEmailAsync(request.Email, token);
-        
+
         return Accepted(new { Success = true, Message = "Password reset instructions have been dispatched to the provided email address." });
     }
 
@@ -70,5 +87,45 @@ public class AuthController : ControllerBase
             return BadRequest(new { Message = "Invalid or expired token." });
         }
         return Ok(new { Message = "Password reset successfully." });
+    }
+
+    // Settings screen: change password while already logged in.
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
+    {
+        var userId = CurrentUserId();
+        if (userId == null) return Unauthorized();
+
+        try
+        {
+            var success = await _authService.ChangePasswordAsync(userId.Value, request);
+            if (!success) return NotFound(new { Message = "User not found." });
+
+            return Ok(new { Message = "Password changed successfully. Please log in again on other devices." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+    // Optional token revoke: bumps the user's token version so the current
+    // (and any other outstanding) token stops validating.
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> Logout()
+    {
+        var userId = CurrentUserId();
+        if (userId == null) return Unauthorized();
+
+        await _authService.LogoutAsync(userId.Value);
+        return Ok(new { Message = "Logged out successfully." });
+    }
+
+    private int? CurrentUserId()
+    {
+        var idStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return int.TryParse(idStr, out var id) ? id : null;
     }
 }

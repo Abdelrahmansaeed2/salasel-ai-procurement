@@ -23,7 +23,7 @@ public class ProcurementService : IProcurementService
             AudioUrl = request.RawAudioURL,
             Transcript = request.TranscribedAmiyaText,
             CreatedAt = DateTime.UtcNow,
-            AIProcessing = new AIProcessing 
+            AIProcessing = new AIProcessing
             {
                 ParsedJson = request.LLMParsedJSON,
                 Confidence = request.NLPConfidenceScore
@@ -40,10 +40,12 @@ public class ProcurementService : IProcurementService
 public class OrderExecutionService : IOrderExecutionService
 {
     private readonly IRepository<MasterOrder> _orderRepository;
+    private readonly IRepository<Product> _productRepository;
 
-    public OrderExecutionService(IRepository<MasterOrder> orderRepository)
+    public OrderExecutionService(IRepository<MasterOrder> orderRepository, IRepository<Product> productRepository)
     {
         _orderRepository = orderRepository;
+        _productRepository = productRepository;
     }
 
     public async Task<int> ExecuteOrderAsync(OrderExecutionRequestDto request)
@@ -61,9 +63,16 @@ public class OrderExecutionService : IOrderExecutionService
 
         foreach (var splitDto in request.Splits)
         {
+            var product = await _productRepository.SingleOrDefaultAsync(p => p.SKU == splitDto.SKU);
+            if (product == null)
+                throw new InvalidOperationException($"No product found for SKU '{splitDto.SKU}'.");
+
             order.SubOrders.Add(new SubOrder
             {
                 SupplierId = splitDto.SupplierID,
+                ProductId = product.Id,
+                Quantity = splitDto.QuantityOrdered,
+                SubTotalAmount = splitDto.SubTotalCost,
                 Status = FulfillmentStatus.Pending_Supplier
             });
         }
@@ -72,33 +81,6 @@ public class OrderExecutionService : IOrderExecutionService
         await _orderRepository.SaveChangesAsync();
 
         return order.Id;
-    }
-}
-
-public class InventoryService : IInventoryService
-{
-    private readonly IRepository<MerchantInventory> _inventoryRepository;
-
-    public InventoryService(IRepository<MerchantInventory> inventoryRepository)
-    {
-        _inventoryRepository = inventoryRepository;
-    }
-
-    public async Task<object> GetInventoryStatusAsync(int merchantId)
-    {
-        var items = await _inventoryRepository.FindAsync(i => i.MerchantID == merchantId);
-
-        return new
-        {
-            MerchantID = merchantId,
-            Items = items.Select(i => new
-            {
-                i.InventoryID,
-                i.ProductId,
-                i.CurrentQty,
-                i.LastUpdated
-            })
-        };
     }
 }
 

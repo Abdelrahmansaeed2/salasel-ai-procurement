@@ -31,3 +31,17 @@ public enum OrderSource : byte
     Manual,      // created manually from the app UI
     AI_Auto      // triggered automatically by AI when stock is low
 }
+
+public enum MerchantVerificationStatus : byte
+{
+    NotSubmitted,
+    UnderReview,
+    Approved,
+    Rejected
+}
+
+public enum MerchantDocumentType : byte
+{
+    CommercialRegistration,
+    OwnerIdentity
+}

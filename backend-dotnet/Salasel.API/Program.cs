@@ -1,21 +1,21 @@
-using Microsoft.EntityFrameworkCore;
-using Serilog;
-
-using Salasel.Application.Interfaces;
-using Salasel.Application.Services;
-using Salasel.Infrastructure.Data;
-using Salasel.Infrastructure.Repositories;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.OpenApi.Models;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using Salasel.Application.Validators;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Salasel.API.Middlewares;
+using Salasel.Application.Interfaces;
+using Salasel.Application.Services;
+using Salasel.Application.Validators;
 using Salasel.Domain.Interfaces;
-using Salasel.Infrastructure.Services;
+using Salasel.Infrastructure.Data;
 using Salasel.Infrastructure.Hubs;
+using Salasel.Infrastructure.Repositories;
+using Salasel.Infrastructure.Services;
+using Serilog;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,6 +61,32 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
     };
+
+    // Enforces logout / change-password revocation: a token is only valid
+    // if the "tokenVersion" claim it was issued with still matches the
+    // user's current TokenVersion in the database.
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async context =>
+        {
+            var userIdStr = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var tokenVersionStr = context.Principal?.FindFirstValue(Salasel.Application.Services.AuthService.TokenVersionClaimType);
+
+            if (!int.TryParse(userIdStr, out var userId) || !int.TryParse(tokenVersionStr, out var tokenVersion))
+            {
+                context.Fail("Invalid token claims.");
+                return;
+            }
+
+            var userRepository = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+            var user = await userRepository.GetByIdAsync(userId);
+
+            if (user == null || !user.IsActive || user.TokenVersion != tokenVersion)
+            {
+                context.Fail("Token has been revoked.");
+            }
+        }
+    };
 });
 
 // Add Repositories
@@ -78,7 +104,9 @@ builder.Services.AddScoped<IVoiceProcurementLogRepository, VoiceProcurementLogRe
 // Add Services
 builder.Services.AddScoped<IProcurementService, ProcurementService>();
 builder.Services.AddScoped<IOrderExecutionService, OrderExecutionService>();
+builder.Services.AddScoped<IOrderQueryService, OrderQueryService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IMerchantDashboardService, MerchantDashboardService>();
 builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -178,7 +206,9 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<LangfuseMiddleware>();
 
-// app.UseHttpsRedirection(); // Disabled because Nginx handles HTTPS termination
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
 app.UseSerilogRequestLogging(); // <-- Records HTTP request times extremely fast
 
 

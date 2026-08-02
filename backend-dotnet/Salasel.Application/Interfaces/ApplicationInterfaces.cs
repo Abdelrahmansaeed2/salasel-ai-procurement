@@ -12,9 +12,27 @@ public interface IOrderExecutionService
     Task<int> ExecuteOrderAsync(OrderExecutionRequestDto request);
 }
 
+public interface IOrderQueryService
+{
+    Task<OrderSummaryDto> GetOrderSummaryAsync(int merchantId);
+}
+
 public interface IInventoryService
 {
-    Task<object> GetInventoryStatusAsync(int merchantId);
+    Task<InventoryListResultDto> GetInventoryListAsync(int merchantId, string? category, string? q, string? status);
+    Task<InventoryItemDetailDto?> GetInventoryItemAsync(int inventoryId);
+    Task<InventoryItemDetailDto?> UpdateInventoryItemAsync(int inventoryId, UpdateInventoryItemDto request);
+    Task<InventoryItemDetailDto?> UpdateQuantityAsync(int inventoryId, UpdateInventoryQuantityDto request);
+    Task<ReorderResultDto> ReorderAsync(int inventoryId, ReorderRequestDto request);
+    Task<List<InventoryAlertDto>> GetAlertsAsync(int merchantId);
+    Task<bool> DismissAlertAsync(int inventoryId);
+    Task<ReorderResultDto> AddAlertToOrderAsync(int inventoryId);
+}
+
+public interface IMerchantDashboardService
+{
+    Task<MerchantDashboardDto> GetDashboardAsync(int merchantId);
+    Task<List<RecentOrderDto>> GetRecentOrdersAsync(int merchantId, int take = 10);
 }
 
 public interface ICatalogService
