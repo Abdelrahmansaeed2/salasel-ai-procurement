@@ -13,6 +13,10 @@ namespace Salasel.Application.Services;
 
 public class AuthService : IAuthService
 {
+    // Shared with Program.cs's JwtBearerEvents.OnTokenValidated — keep the
+    // literal in sync if you rename it there.
+    public const string TokenVersionClaimType = "tokenVersion";
+
     private readonly IUserRepository _userRepository;
     private readonly IMerchantProfileRepository _merchantRepository;
     private readonly ISupplierProfileRepository _supplierRepository;
@@ -44,7 +48,10 @@ public class AuthService : IAuthService
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             Role = request.Role,
             IsActive = true,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            // Admins have no onboarding step, so they start "set up".
+            // Merchants/Suppliers start false until they fill in their profile.
+            IsSetupCompleted = request.Role == UserRole.Admin
         };
 
         await _userRepository.AddAsync(user);
@@ -76,14 +83,7 @@ public class AuthService : IAuthService
 
         await _userRepository.SaveChangesAsync();
 
-        var token = GenerateJwtToken(user, 720); // 30 days for login
-
-        return new AuthResponseDto
-        {
-            UserID = user.UserID,
-            Token = token,
-            Role = user.Role.ToString()
-        };
+        return BuildAuthResponse(user);
     }
 
     public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request)
@@ -99,14 +99,61 @@ public class AuthService : IAuthService
             throw new Exception("Account is deactivated.");
         }
 
-        var token = GenerateJwtToken(user, 720); // 30 days
+        return BuildAuthResponse(user);
+    }
 
-        return new AuthResponseDto
+    public async Task<MeResponseDto?> GetMeAsync(int userId)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+
+        if (user == null || !user.IsActive)
+            return null;
+
+        return new MeResponseDto
         {
             UserID = user.UserID,
-            Token = token,
-            Role = user.Role.ToString()
+            FullName = user.FullName,
+            Email = user.Email,
+            Role = user.Role.ToString(),
+            IsSetupCompleted = user.IsSetupCompleted
         };
+    }
+
+    public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordRequestDto request)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null) return false;
+
+        if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
+        {
+            throw new Exception("Current password is incorrect.");
+        }
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        // Invalidate every token issued before this point, on every device.
+        user.TokenVersion++;
+
+        await _userRepository.UpdateAsync(user);
+        await _userRepository.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<bool> LogoutAsync(int userId)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null) return false;
+
+        // Stateless JWTs can't be deleted server-side, so "revoke" means
+        // bumping the version embedded in the token — every previously
+        // issued token (this device and any other) fails validation
+        // from this point on.
+        user.TokenVersion++;
+
+        await _userRepository.UpdateAsync(user);
+        await _userRepository.SaveChangesAsync();
+
+        return true;
     }
 
     public async Task<string> GeneratePasswordResetTokenAsync(ForgotPasswordRequestDto request)
@@ -151,6 +198,8 @@ public class AuthService : IAuthService
             if (user == null) return false;
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            user.TokenVersion++; // reset also revokes any token issued before it
+
             await _userRepository.UpdateAsync(user);
             await _userRepository.SaveChangesAsync();
 
@@ -160,6 +209,21 @@ public class AuthService : IAuthService
         {
             return false;
         }
+    }
+
+    private AuthResponseDto BuildAuthResponse(User user)
+    {
+        var token = GenerateJwtToken(user, 720); // 30 days
+
+        return new AuthResponseDto
+        {
+            UserID = user.UserID,
+            Token = token,
+            Role = user.Role.ToString(),
+            FullName = user.FullName,
+            Email = user.Email,
+            IsSetupCompleted = user.IsSetupCompleted
+        };
     }
 
     private string GenerateJwtToken(User user, double expirationHours)
@@ -172,7 +236,8 @@ public class AuthService : IAuthService
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserID.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role.ToString())
+                new Claim(ClaimTypes.Role, user.Role.ToString()),
+                new Claim(TokenVersionClaimType, user.TokenVersion.ToString())
             }),
             Expires = DateTime.UtcNow.AddHours(expirationHours),
             Issuer = _configuration["Jwt:Issuer"],

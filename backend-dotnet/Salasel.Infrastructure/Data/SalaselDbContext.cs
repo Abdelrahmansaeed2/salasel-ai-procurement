@@ -18,6 +18,7 @@ public class SalaselDbContext : DbContext
     public DbSet<SubOrder> SubOrders { get; set; } = null!;
     public DbSet<VoiceProcurementLog> VoiceProcurementLogs { get; set; } = null!;
     public DbSet<AIProcessing> AIProcessings { get; set; } = null!;
+    public DbSet<MerchantDocument> MerchantDocuments { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,6 +29,7 @@ public class SalaselDbContext : DbContext
         modelBuilder.Entity<MerchantsProfile>().HasKey(m => m.MerchantID);
         modelBuilder.Entity<SupplierProfile>().HasKey(s => s.SupplierID);
         modelBuilder.Entity<MerchantInventory>().HasKey(m => m.InventoryID);
+        modelBuilder.Entity<MerchantDocument>().HasKey(d => d.Id);
 
         // ─── Unique Indexes ──────────────────────────────────────────────────────
         modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
@@ -38,6 +40,8 @@ public class SalaselDbContext : DbContext
         modelBuilder.Entity<MasterOrder>().Property(m => m.Status).HasConversion<string>().HasMaxLength(30);
         modelBuilder.Entity<MasterOrder>().Property(m => m.Source).HasConversion<string>().HasMaxLength(20);
         modelBuilder.Entity<SubOrder>().Property(s => s.Status).HasConversion<string>().HasMaxLength(30);
+        modelBuilder.Entity<MerchantsProfile>().Property(m => m.VerificationStatus).HasConversion<string>().HasMaxLength(20);
+        modelBuilder.Entity<MerchantDocument>().Property(d => d.DocumentType).HasConversion<string>().HasMaxLength(30);
 
         // ─── MaxLength on Strings ────────────────────────────────────────────────
         modelBuilder.Entity<User>().Property(u => u.FullName).HasMaxLength(150);
@@ -45,6 +49,16 @@ public class SalaselDbContext : DbContext
 
         modelBuilder.Entity<MerchantsProfile>().Property(m => m.ShopName).HasMaxLength(200);
         modelBuilder.Entity<MerchantsProfile>().Property(m => m.ContactPhone).HasMaxLength(30);
+        modelBuilder.Entity<MerchantsProfile>().Property(m => m.OwnerName).HasMaxLength(150);
+        modelBuilder.Entity<MerchantsProfile>().Property(m => m.CrNumber).HasMaxLength(50);
+        modelBuilder.Entity<MerchantsProfile>().Property(m => m.OwnerIdentityNumber).HasMaxLength(50);
+        modelBuilder.Entity<MerchantsProfile>().Property(m => m.Category).HasMaxLength(100);
+        modelBuilder.Entity<MerchantsProfile>().Property(m => m.StoreSize).HasMaxLength(50);
+        modelBuilder.Entity<MerchantsProfile>().Property(m => m.Governorate).HasMaxLength(100);
+        modelBuilder.Entity<MerchantsProfile>().Property(m => m.BusinessCity).HasMaxLength(100);
+        modelBuilder.Entity<MerchantsProfile>().Property(m => m.Address).HasMaxLength(300);
+
+        modelBuilder.Entity<MerchantDocument>().Property(d => d.FileUrl).IsRequired().HasMaxLength(500);
 
         modelBuilder.Entity<SupplierProfile>().Property(s => s.CompanyName).HasMaxLength(200);
         modelBuilder.Entity<SupplierProfile>().Property(s => s.ContactPhone).HasMaxLength(30);
@@ -103,6 +117,13 @@ public class SalaselDbContext : DbContext
             .HasOne(i => i.Merchant)
             .WithMany(m => m.Inventories)
             .HasForeignKey(i => i.MerchantID)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // MerchantsProfile → MerchantDocument
+        modelBuilder.Entity<MerchantDocument>()
+            .HasOne(d => d.Merchant)
+            .WithMany(m => m.Documents)
+            .HasForeignKey(d => d.MerchantId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Product → MerchantInventory

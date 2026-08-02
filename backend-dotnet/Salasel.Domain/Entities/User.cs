@@ -12,6 +12,13 @@ public class User
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public int TokenVersion { get; set; } = 0;
+
+    // Flips true the first time the merchant/supplier fills in their real
+    // profile (see MerchantsController/SuppliersController.Update).
+    // Admins are created already "set up" — they have no onboarding step.
+    public bool IsSetupCompleted { get; set; } = false;
+
     public ICollection<MerchantsProfile> MerchantsProfiles { get; set; } = new List<MerchantsProfile>();
     public ICollection<SupplierProfile> SupplierProfiles { get; set; } = new List<SupplierProfile>();
 }
