@@ -19,6 +19,7 @@ public class SalaselDbContext : DbContext
     public DbSet<VoiceProcurementLog> VoiceProcurementLogs { get; set; } = null!;
     public DbSet<AIProcessing> AIProcessings { get; set; } = null!;
     public DbSet<MerchantDocument> MerchantDocuments { get; set; } = null!;
+    public DbSet<Bid> Bids { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,6 +40,8 @@ public class SalaselDbContext : DbContext
         modelBuilder.Entity<User>().Property(u => u.Role).HasConversion<string>().HasMaxLength(20);
         modelBuilder.Entity<MasterOrder>().Property(m => m.Status).HasConversion<string>().HasMaxLength(30);
         modelBuilder.Entity<MasterOrder>().Property(m => m.Source).HasConversion<string>().HasMaxLength(20);
+        modelBuilder.Entity<MasterOrder>().Property(m => m.PaymentMethod).HasConversion<string>().HasMaxLength(20);
+        modelBuilder.Entity<MasterOrder>().Property(m => m.PaymentStatus).HasConversion<string>().HasMaxLength(20);
         modelBuilder.Entity<SubOrder>().Property(s => s.Status).HasConversion<string>().HasMaxLength(30);
         modelBuilder.Entity<MerchantsProfile>().Property(m => m.VerificationStatus).HasConversion<string>().HasMaxLength(20);
         modelBuilder.Entity<MerchantDocument>().Property(d => d.DocumentType).HasConversion<string>().HasMaxLength(30);
@@ -71,6 +74,10 @@ public class SalaselDbContext : DbContext
         modelBuilder.Entity<Product>().Property(p => p.Unit).HasMaxLength(30);
 
         modelBuilder.Entity<AIProcessing>().Property(a => a.ModelUsed).HasMaxLength(60);
+
+        modelBuilder.Entity<MasterOrder>().Property(m => m.PaymentReference).HasMaxLength(100);
+        modelBuilder.Entity<SubOrder>().Property(s => s.DriverName).HasMaxLength(150);
+        modelBuilder.Entity<SubOrder>().Property(s => s.DriverPhone).HasMaxLength(30);
 
         // ─── Decimal Precision ───────────────────────────────────────────────────
         modelBuilder.Entity<MasterOrder>().Property(o => o.TotalAmount).HasPrecision(18, 4);
@@ -169,12 +176,31 @@ public class SalaselDbContext : DbContext
             .HasForeignKey(s => s.MasterId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // SupplierProfile → SubOrder
+        // SupplierProfile → SubOrder (optional — an open RFQ has no supplier
+        // assigned yet; see SubOrder.SupplierId / Status.Bidding)
         modelBuilder.Entity<SubOrder>()
             .HasOne(s => s.Supplier)
             .WithMany(sup => sup.SubOrders)
             .HasForeignKey(s => s.SupplierId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
+
+        // SubOrder → Bid (one RFQ line can receive many competing bids)
+        modelBuilder.Entity<Bid>()
+            .HasOne(b => b.SubOrder)
+            .WithMany(s => s.Bids)
+            .HasForeignKey(b => b.SubOrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // SupplierProfile → Bid
+        modelBuilder.Entity<Bid>()
+            .HasOne(b => b.Supplier)
+            .WithMany()
+            .HasForeignKey(b => b.SupplierId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Bid>().Property(b => b.Status).HasConversion<string>().HasMaxLength(20);
+        modelBuilder.Entity<Bid>().Property(b => b.Price).HasPrecision(18, 4);
 
         // Product → SubOrder (optional — see SubOrder.ProductId)
         modelBuilder.Entity<SubOrder>()

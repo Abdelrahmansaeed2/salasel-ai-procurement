@@ -67,10 +67,16 @@ public class MerchantDashboardService : IMerchantDashboardService
 
     private static RecentOrderDto MapToRecentOrderDto(MasterOrder order)
     {
-        var supplierNames = order.SubOrders.Select(s => s.Supplier.CompanyName).Distinct().ToList();
+        var supplierNames = order.SubOrders
+            .Where(s => s.Supplier != null)
+            .Select(s => s.Supplier!.CompanyName)
+            .Distinct()
+            .ToList();
+
+        var hasOpenRfqLine = order.SubOrders.Any(s => s.Supplier == null);
         var supplier = supplierNames.Count switch
         {
-            0 => "Unassigned",
+            0 => hasOpenRfqLine ? "Awaiting bids" : "Unassigned",
             1 => supplierNames[0],
             _ => "Multiple Suppliers"
         };

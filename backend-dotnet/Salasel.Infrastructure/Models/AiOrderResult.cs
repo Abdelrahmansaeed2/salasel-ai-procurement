@@ -2,6 +2,7 @@ namespace Salasel.Infrastructure.Models;
 
 public class AiOrderItem
 {
+    public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public string ProductName { get; set; } = string.Empty;
     public int Quantity { get; set; }
     public decimal Price { get; set; }

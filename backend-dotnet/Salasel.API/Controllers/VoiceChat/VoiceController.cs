@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration.UserSecrets;
 using Salasel.Domain.Entities;
 using Salasel.Infrastructure.Data;
 using Salasel.Infrastructure.Services;
