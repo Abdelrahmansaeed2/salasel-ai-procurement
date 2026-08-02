@@ -176,6 +176,14 @@ public class SalaselDbContext : DbContext
             .HasForeignKey(s => s.SupplierId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Product → SubOrder (optional — see SubOrder.ProductId)
+        modelBuilder.Entity<SubOrder>()
+            .HasOne(s => s.Product)
+            .WithMany()
+            .HasForeignKey(s => s.ProductId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
+
         // MerchantsProfile → VoiceProcurementLog
         modelBuilder.Entity<VoiceProcurementLog>()
             .HasOne(v => v.Merchant)

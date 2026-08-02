@@ -104,7 +104,9 @@ builder.Services.AddScoped<IVoiceProcurementLogRepository, VoiceProcurementLogRe
 // Add Services
 builder.Services.AddScoped<IProcurementService, ProcurementService>();
 builder.Services.AddScoped<IOrderExecutionService, OrderExecutionService>();
+builder.Services.AddScoped<IOrderQueryService, OrderQueryService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IMerchantDashboardService, MerchantDashboardService>();
 builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -204,7 +206,9 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<LangfuseMiddleware>();
 
-// app.UseHttpsRedirection(); // Disabled because Nginx handles HTTPS termination
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
 app.UseSerilogRequestLogging(); // <-- Records HTTP request times extremely fast
 
 

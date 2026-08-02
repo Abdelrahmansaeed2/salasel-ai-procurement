@@ -21,17 +21,20 @@ public class MerchantsController : ControllerBase
     private readonly IRepository<MerchantsProfile> _repository;
     private readonly IRepository<MerchantDocument> _documentRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IMerchantDashboardService _dashboardService;
     private readonly IWebHostEnvironment _env;
 
     public MerchantsController(
         IRepository<MerchantsProfile> repository,
         IRepository<MerchantDocument> documentRepository,
         IUserRepository userRepository,
+        IMerchantDashboardService dashboardService,
         IWebHostEnvironment env)
     {
         _repository = repository;
         _documentRepository = documentRepository;
         _userRepository = userRepository;
+        _dashboardService = dashboardService;
         _env = env;
     }
 
@@ -394,6 +397,47 @@ public class MerchantsController : ControllerBase
             FileUrl = document.FileUrl,
             UploadedAt = document.UploadedAt
         });
+    }
+
+    // ─────────────────────────── Dashboard / home ──────────────────────────
+
+    // GET /api/v1/merchants/me/dashboard — home KPIs + recent orders.
+    // Uses the primary (oldest) shop, consistent with the other "me" endpoints
+    // above; pass a shopId query param here later if multi-shop dashboards
+    // are needed.
+    [HttpGet("me/dashboard")]
+    [Authorize(Roles = "Merchant")]
+    public async Task<IActionResult> GetDashboard()
+    {
+        var userId = CurrentUserId();
+        if (userId == null) return Unauthorized();
+
+        var shop = await GetPrimaryShopAsync(userId.Value);
+        if (shop == null)
+        {
+            return NotFound(new { Message = "No shop found. Register a shop first via POST /api/v1/merchants/register-shop." });
+        }
+
+        var dashboard = await _dashboardService.GetDashboardAsync(shop.MerchantID);
+        return Ok(dashboard);
+    }
+
+    // GET /api/v1/merchants/me/recent-orders
+    [HttpGet("me/recent-orders")]
+    [Authorize(Roles = "Merchant")]
+    public async Task<IActionResult> GetRecentOrders([FromQuery] int take = 10)
+    {
+        var userId = CurrentUserId();
+        if (userId == null) return Unauthorized();
+
+        var shop = await GetPrimaryShopAsync(userId.Value);
+        if (shop == null)
+        {
+            return NotFound(new { Message = "No shop found. Register a shop first via POST /api/v1/merchants/register-shop." });
+        }
+
+        var orders = await _dashboardService.GetRecentOrdersAsync(shop.MerchantID, take);
+        return Ok(orders);
     }
 
     // ───────────────────────────── Helpers ─────────────────────────────────

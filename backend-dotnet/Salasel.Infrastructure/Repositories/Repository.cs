@@ -40,6 +40,11 @@ public class Repository<T> : IRepository<T> where T : class
         return await _dbSet.SingleOrDefaultAsync(predicate);
     }
 
+    public IQueryable<T> Query()
+    {
+        return _dbSet.AsNoTracking();
+    }
+
     public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
     {
         return await _dbSet.AnyAsync(predicate);
