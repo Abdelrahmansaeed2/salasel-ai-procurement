@@ -10,7 +10,7 @@ def _build_groq(model: str, settings: Settings, role: str) -> ChatGroq:
         "temperature": settings.llm_temperature if role == "conversation" else settings.llm_formatting_temperature,
         "timeout": settings.llm_timeout,
         "stop": None,
-        "max_tokens": None,
+        "max_tokens": settings.llm_max_tokens,
         "max_retries": 2,
     }
     api_key = settings.llm_groq_api_key

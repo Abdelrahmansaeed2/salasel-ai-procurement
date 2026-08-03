@@ -15,6 +15,9 @@ FastAPI service for the AI procurement supplier-matching pipeline.
   weights when a match is rejected.
 - **Voice ordering** — audio uploads are transcribed to text (Groq Whisper)
   and fed through the same agent pipeline.
+- **Voice → order drafts** — a dedicated LangGraph pipeline turns a spoken
+  request into a structured order schema (products → RAG-enhanced matching →
+  deterministic order rendering), aligned with the backend order DTOs.
 - **Runs in Docker** — SQL Server + Redis + Qdrant with automatic migrations
   and test-only seed data on startup.
 
@@ -105,6 +108,7 @@ Copy `.env.example` to `.env` and set the required values:
 | `LLM_ANTHROPIC_API_KEY` | Anthropic API key | *(empty)* |
 | `LLM_TEMPERATURE` | Primary model temperature | `0.0` |
 | `LLM_TIMEOUT` | Primary model timeout (s) | `30` |
+| `LLM_MAX_TOKENS` | Max completion tokens for LLM calls | `4096` |
 | `LLM_FORMATTING_MODEL` | Format-results model | `llama-3.1-8b-instant` |
 | `STT_PROVIDER` | Speech-to-text provider | `groq` |
 | `STT_MODEL` | Transcription model | `whisper-large-v3-turbo` |
@@ -221,6 +225,41 @@ curl.exe -X POST http://localhost:8000/api/v1/voice/chat `
 ```
 
 Returns the same `ChatResponse` shape as `/api/v1/chat`.
+
+### POST /api/v1/voice/order
+
+Transcribe an audio recording and generate a draft order schema in one call.
+Runs a dedicated 5-node LangGraph pipeline (`app/agents/order/`): extract
+requested products (LLM) → enrich with RAG metadata from Qdrant → resolve
+defaults (user value wins, else catalog/default) → match each product to its
+best vector-store match → assemble the schema deterministically. The output
+matches the backend's `OrderExecutionRequestDto` (merchant, splits with
+supplier/SKU/quantity/subtotal, totals).
+
+```powershell
+curl.exe -X POST http://localhost:8000/api/v1/voice/order `
+  -F "audio=@order.wav" `
+  -F 'request={"merchantId": 42, "location": {"lat": 30.04, "lon": 31.24}}'
+```
+
+The `request` form field is a JSON-encoded `OrderRequest` (`merchantId`, plus an
+optional nested `location {lat, lon}` for near-match ranking) so the backend
+caller can post camelCase fields alongside the audio.
+
+Response:
+```json
+{
+  "merchant_id": 42,
+  "total_order_cost": 18.75,
+  "splits": [
+    {"supplier_id": 10, "sku": "NG-M", "quantity_ordered": 5, "sub_total_cost": 18.75}
+  ],
+  "unresolved": []
+}
+```
+
+Products that cannot be matched to the catalog appear in `unresolved` for
+review — never silently dropped.
 
 ### POST /api/v1/admin/sync-products
 

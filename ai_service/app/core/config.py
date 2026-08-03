@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     llm_anthropic_api_key: str = ""
     llm_temperature: float = 0.0
     llm_timeout: int = 30
+    llm_max_tokens: int = 4096
 
     llm_formatting_provider: str = "groq"
     llm_formatting_model: str = "llama-3.1-8b-instant"

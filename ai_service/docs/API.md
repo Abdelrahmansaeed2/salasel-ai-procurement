@@ -13,6 +13,7 @@ Requests and responses are UTF-8.
 | POST | `/chat` | Multi-turn agent conversation |
 | POST | `/voice/transcribe` | Speech-to-text (audio → text) |
 | POST | `/voice/chat` | Speech-to-text + agent turn in one call |
+| POST | `/voice/order` | Speech-to-text → order schema draft |
 | POST | `/admin/sync-products` | Re-run SQL → Qdrant sync (dev/test) |
 | POST | `/admin/products` | Backend product ingestion → Qdrant |
 | POST | `/admin/quality-metrics` | Compute + push quality scores from raw metrics |
@@ -147,7 +148,7 @@ Turn 2 (same `session_id`, message `"between 2 and 5 dollars"`):
       "product_id": "1",
       "supplier_id": "1",
       "similarity_score": 0.71,
-      "quality_score": 92.5,
+      "quality_score": 2.83,
       "distance_km": 0.0,
       "price": 3.75
     }
@@ -234,6 +235,82 @@ Same as `/voice/transcribe` for the transcription stage, plus:
 |---|---|
 | `422` | `customer_location` is not a valid `"lat,lon"` pair |
 | `500` | Agent (graph) pipeline failure |
+
+---
+
+## POST /voice/order
+
+Transcribe an audio recording and generate a draft order schema matching the
+backend's `OrderExecutionRequestDto`. Runs a dedicated 5-node LangGraph pipeline:
+extract requested products (LLM) → enrich with RAG metadata from Qdrant →
+resolve defaults (user-specified value wins, else catalog/default) → match each
+product to the best vector-store match → assemble the order schema
+deterministically (no LLM in the final aggregation, so totals are never
+invented).
+
+```bash
+curl -X POST http://localhost:8000/api/v1/voice/order \
+  -F "audio=@order.wav" \
+  -F 'request={"merchantId": 42, "location": {"lat": 30.04, "lon": 31.24}}'
+```
+
+### Request (multipart form)
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `audio` | file | yes | Audio to transcribe (format/size limits match `/voice/transcribe`) |
+| `request` | JSON string | yes | Encoded `OrderRequest` (see below) |
+
+### Request — `OrderRequest`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `merchantId` | integer | yes | Merchant creating the order (from caller/auth) |
+| `location` | object | no | Merchant coordinates `{lat, lon}` used for near-match ranking |
+
+```json
+{
+  "merchantId": 42,
+  "location": {"lat": 30.04, "lon": 31.24}
+}
+```
+
+### Response — `OrderResponse`
+
+| Field | Type | Description |
+|---|---|---|
+| `merchant_id` | integer\|null | Echoes the request merchant |
+| `total_order_cost` | number | Sum of all split subtotals |
+| `splits` | array | One entry per matched product |
+| `unresolved` | array of string | Product names that could not be matched, surfaced for review (never silently dropped) |
+
+```json
+{
+  "merchant_id": 42,
+  "total_order_cost": 18.75,
+  "splits": [
+    {
+      "supplier_id": 10,
+      "sku": "NG-M",
+      "quantity_ordered": 5,
+      "sub_total_cost": 18.75
+    }
+  ],
+  "unresolved": []
+}
+```
+
+`splits[].supplier_id` / `sku` / `quantity_ordered` / `sub_total_cost` map to
+the backend `OrderSplitDto`.
+
+### Errors
+
+Same as `/voice/transcribe` for the transcription stage, plus:
+
+| Status | Trigger |
+|---|---|
+| `422` | `request` missing / invalid JSON / bad `merchantId` or `location` |
+| `500` | Order graph failure |
 
 ---
 
@@ -366,7 +443,7 @@ Response `200`:
 | `product_id` | string | Product identifier |
 | `supplier_id` | string | Supplier identifier |
 | `similarity_score` | number | Vector similarity (0–1) from Qdrant |
-| `quality_score` | number | Supplier quality score (0–100) |
+| `quality_score` | number | Blend of rating/delivery/defect signals (max ≈ 3; see `/admin/quality-metrics`) |
 | `distance_km` | number | Distance from the customer's location |
 | `price` | number | Product price |
 
@@ -387,6 +464,38 @@ Response `200`:
 | `turn_status` | string | `ask`, `retrieve`, `confirm`, `done`, or `rerank` |
 | `missing_fields` | array of string | Missing required fields |
 | `ranked_results` | array of `Candidate` | Up to 5 ranked matches |
+
+### OrderRequest
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `merchantId` | integer | yes | Merchant creating the order |
+| `location` | `OrderLocation` | no | Merchant coordinates `{lat, lon}` for near-match ranking |
+
+`OrderLocation`:
+
+| Field | Type | Description |
+|---|---|---|
+| `lat` | number | Latitude |
+| `lon` | number | Longitude |
+
+### OrderResponse
+
+| Field | Type | Description |
+|---|---|---|
+| `merchant_id` | integer\|null | Echoes the request merchant |
+| `total_order_cost` | number | Sum of all split subtotals |
+| `splits` | array of `OrderSplit` | One entry per matched product |
+| `unresolved` | array of string | Product names that could not be matched (surfaced, never dropped) |
+
+### OrderSplit
+
+| Field | Type | Description |
+|---|---|---|
+| `supplier_id` | integer | Supplier identifier |
+| `sku` | string | Matched product SKU |
+| `quantity_ordered` | integer | Quantity for this line |
+| `sub_total_cost` | number | `quantity × unit_price` for this line |
 
 ### TranscribeResponse
 
@@ -412,7 +521,7 @@ Response `200`:
 | `400` | Malformed request (FastAPI validation) |
 | `413` | Audio file too large (voice endpoints) |
 | `415` | Unsupported audio format (voice endpoints) |
-| `422` | Validation failure — missing field, empty/no-speech transcript, or bad `customer_location` |
+| `422` | Validation failure — missing field, empty/no-speech transcript, bad `customer_location`, or invalid `/voice/order` `request` JSON |
 | `500` | Speech-to-text provider failure or agent pipeline failure |
 
 Error bodies follow FastAPI's convention:
