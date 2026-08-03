@@ -207,7 +207,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<LangfuseMiddleware>();
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // Disabled because Nginx handles HTTPS termination
 app.UseStaticFiles();
 
 app.UseSerilogRequestLogging(); // <-- Records HTTP request times extremely fast
