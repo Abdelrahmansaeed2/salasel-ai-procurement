@@ -174,6 +174,7 @@ public static class OrderMapper
         // caller should pass aiResult when available. Items may be empty when listing.
         var items = (aiResult?.Items ?? new List<AiOrderItem>()).Select(i => new
         {
+            id = i.Id,
             productName = i.ProductName,
             quantity = i.Quantity,
             price = i.Price,

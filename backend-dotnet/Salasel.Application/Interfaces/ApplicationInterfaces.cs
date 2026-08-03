@@ -39,3 +39,16 @@ public interface ICatalogService
 {
     Task<int> UploadCatalogAsync(CatalogUploadRequestDto request);
 }
+
+public interface IBiddingService
+{
+    // Needed so a Bidding-status, unassigned SubOrder can exist at all —
+    // see CreateRfqDto for why this had to be added.
+    Task<int> CreateRfqAsync(CreateRfqDto request);
+
+    Task<KanbanResponseDto> GetKanbanAsync(int supplierId);
+    Task<BidDto> SubmitBidAsync(int subOrderId, int supplierId, SubmitBidDto request);
+    Task<List<BidDto>> GetBidsAsync(int masterOrderId);
+    Task<BidDto> AcceptBidAsync(int masterOrderId, int bidId);
+    Task UpdateRfqStatusAsync(int subOrderId, int supplierId, string status);
+}
