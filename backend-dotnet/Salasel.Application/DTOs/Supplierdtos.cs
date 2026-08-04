@@ -1,4 +1,4 @@
-﻿namespace Salasel.Application.DTOs;
+namespace Salasel.Application.DTOs;
 
 public class WarehouseDto
 {
@@ -7,15 +7,49 @@ public class WarehouseDto
     public decimal Lng { get; set; }
 }
 
+public class SupplierFacilityInfoDto
+{
+    public string LegalName { get; set; } = string.Empty;
+    public string BusinessType { get; set; } = string.Empty;
+    public string RegistrationNumber { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+}
+
+public class SupplierContactInfoDto
+{
+    public string FullName { get; set; } = string.Empty;
+    public string JobTitle { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string PhoneNumber { get; set; } = string.Empty;
+}
+
+public class SupplierTaxInfoDto
+{
+    public string VatNumber { get; set; } = string.Empty;
+    public string TaxId { get; set; } = string.Empty;
+    public bool IsVatExempt { get; set; }
+}
+
+public class SupplierSetupWarehouseDto
+{
+    public string WarehouseName { get; set; } = string.Empty;
+    public string Capacity { get; set; } = string.Empty;
+    public decimal Lat { get; set; }
+    public decimal Lng { get; set; }
+    public string City { get; set; } = string.Empty;
+}
+
 // POST /api/v1/suppliers/register — consolidated wizard submission
 public class SupplierSetupDto
 {
-    public string CompanyName { get; set; } = string.Empty;
-    public string CrNumber { get; set; } = string.Empty;
-    public string TaxNumber { get; set; } = string.Empty;
+    public SupplierFacilityInfoDto FacilityInfo { get; set; } = new();
+    public SupplierContactInfoDto ContactInfo { get; set; } = new();
+    public SupplierTaxInfoDto TaxInfo { get; set; } = new();
+    public List<SupplierSetupWarehouseDto> Warehouses { get; set; } = new();
+    
+    // Kept for backward compatibility if needed, but the main data is now nested
     public string BankName { get; set; } = string.Empty;
     public string Iban { get; set; } = string.Empty;
-    public List<WarehouseDto> Warehouses { get; set; } = new();
 }
 
 // GET /api/v1/suppliers/me
