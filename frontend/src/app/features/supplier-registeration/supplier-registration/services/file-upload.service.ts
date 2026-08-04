@@ -6,6 +6,7 @@ export interface UploadFileItem {
   size: string;
   progress: number;
   status: 'uploading' | 'completed';
+  rawFile?: File;
 }
 
 @Injectable({
@@ -36,7 +37,8 @@ export class FileUploadService {
         name: file.name,
         size: this.formatBytes(file.size),
         progress: 0,
-        status: 'uploading'
+        status: 'uploading',
+        rawFile: file
       };
 
       newItems.push(item);

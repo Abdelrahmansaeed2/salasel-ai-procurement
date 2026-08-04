@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -13,6 +13,7 @@ import { AdditionalDocumentsFormComponent } from './components/additional-docume
 import { ReviewSubmitFormComponent } from './components/review-submit-form/review-submit-form.component';
 import { RegistrationSuccessComponent } from './components/registration-success/registration-success.component';
 import { SiteFooterComponent } from '../../../shared/site-footer/site-footer.component';
+import { SupplierService, SupplierSetupDto } from './services/supplier.service';
 
 @Component({
   selector: 'app-supplier-registration',
@@ -37,6 +38,7 @@ import { SiteFooterComponent } from '../../../shared/site-footer/site-footer.com
 })
 export class SupplierRegistration {
   readonly currentStep = signal<number>(1);
+  readonly isSubmitting = signal<boolean>(false);
   
   readonly steps = [
     'معلومات المنشأة',
@@ -56,7 +58,8 @@ export class SupplierRegistration {
 
   private registrationData: Record<string, any> = {};
 
-  constructor(private router: Router) {}
+  private router = inject(Router);
+  private supplierService = inject(SupplierService);
 
   nextStep(formData?: any): void {
     if (formData) {
@@ -91,8 +94,83 @@ export class SupplierRegistration {
   }
 
   onFinish(): void {
-    console.log('Final registration submission:', this.registrationData);
-    this.router.navigate(['/dashboard']);
+    if (this.isSubmitting()) return;
+    this.isSubmitting.set(true);
+
+    const dto: SupplierSetupDto = {
+      facilityInfo: {
+        legalName: this.registrationData.facilityInfo?.legalName || '',
+        businessType: this.registrationData.facilityInfo?.businessType || '',
+        registrationNumber: this.registrationData.facilityInfo?.registrationNumber || '',
+        address: this.registrationData.facilityInfo?.address || ''
+      },
+      contactInfo: {
+        fullName: this.registrationData.contactInfo?.fullName || '',
+        jobTitle: this.registrationData.contactInfo?.jobTitle || '',
+        email: this.registrationData.contactInfo?.email || '',
+        phoneNumber: this.registrationData.contactInfo?.phoneNumber || ''
+      },
+      taxInfo: {
+        vatNumber: this.registrationData.taxInfo?.vatNumber || '',
+        taxId: this.registrationData.taxInfo?.taxId || '',
+        isVatExempt: this.registrationData.taxInfo?.isVatExempt || false
+      },
+      warehouses: [
+        {
+          warehouseName: this.registrationData.warehouseInfo?.warehouseName || '',
+          capacity: this.registrationData.warehouseInfo?.capacity || '',
+          lat: this.registrationData.warehouseInfo?.lat || 24.7136,
+          lng: this.registrationData.warehouseInfo?.lng || 46.6753,
+          city: this.registrationData.warehouseInfo?.city || ''
+        }
+      ]
+    };
+
+    this.supplierService.registerSupplier(dto).subscribe({
+      next: () => {
+        const filesToUpload: File[] = [];
+
+        // Collect files from license step
+        if (this.registrationData.licenseInfo?.tradeLicense?.rawFile) {
+          filesToUpload.push(this.registrationData.licenseInfo.tradeLicense.rawFile);
+        }
+
+        // Collect files from tax step
+        if (this.registrationData.taxInfo?.taxCertificate?.rawFile) {
+          filesToUpload.push(this.registrationData.taxInfo.taxCertificate.rawFile);
+        }
+
+        // Collect files from additional documents step
+        if (this.registrationData.documents) {
+          const docs = this.registrationData.documents;
+          if (docs.bankStatement?.rawFile) filesToUpload.push(docs.bankStatement.rawFile);
+          if (docs.articleOfAssociation?.rawFile) filesToUpload.push(docs.articleOfAssociation.rawFile);
+          if (docs.managerId?.rawFile) filesToUpload.push(docs.managerId.rawFile);
+        }
+
+        if (filesToUpload.length > 0) {
+          this.supplierService.uploadDocuments(filesToUpload).subscribe({
+            next: () => {
+              this.isSubmitting.set(false);
+              this.nextStep(); // Move to success step
+            },
+            error: (err) => {
+              this.isSubmitting.set(false);
+              alert('تم تسجيل البيانات ولكن حدث خطأ أثناء رفع الملفات.');
+              console.error(err);
+            }
+          });
+        } else {
+          this.isSubmitting.set(false);
+          this.nextStep(); // Move to success step
+        }
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        alert('حدث خطأ أثناء التسجيل. يرجى المحاولة لاحقاً.');
+        console.error(err);
+      }
+    });
   }
 
   private updateGuidanceNote(): void {
