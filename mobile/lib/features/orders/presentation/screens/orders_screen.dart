@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../controllers/orders_list_controller.dart';
+import 'checkout_screen.dart';
+import 'delivery_tracking_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -199,7 +201,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
       case 'تم الشحن':
         return const Color(0xFF7C3AED);
       default:
-        return const Color(0xFF2563EB); // Color for "في الطريق" or others
+        return const Color(0xFF2563EB);
     }
   }
 
@@ -508,7 +510,6 @@ class _OrderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Header ──
           Padding(
             padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 12.h),
             child: Row(
@@ -553,7 +554,6 @@ class _OrderCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 12.w),
-                // Supplier avatar
                 Container(
                   width: 44.w,
                   height: 44.h,
@@ -577,14 +577,12 @@ class _OrderCard extends StatelessWidget {
             ),
           ),
 
-          // ── Stepper ──
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: _OrderStepper(steps: steps, activeStep: activeStep),
           ),
           SizedBox(height: 16.h),
 
-          // ── Items ──
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Column(
@@ -618,7 +616,6 @@ class _OrderCard extends StatelessWidget {
           ),
           SizedBox(height: 12.h),
 
-          // ── Footer ──
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Row(
@@ -660,27 +657,39 @@ class _OrderCard extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
 
-          // ── Details Button ──
           Padding(
             padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
             child: SizedBox(
               width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF1E293B),
-                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+              child: ElevatedButton(
+                onPressed: () {
+                  if (activeStep == 1) {
+                    Get.to(() => CheckoutScreen(
+                      orderId: order.orderNumber, 
+                      totalAmount: '${order.total.toStringAsFixed(0)} جنيه'
+                    ));
+                  } else if (activeStep == 2) {
+                    Get.to(() => DeliveryTrackingScreen(orderId: order.orderNumber));
+                  } else {
+
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: (activeStep == 1 || activeStep == 2) ? const Color(0xFF2563EB) : Colors.white,
+                  foregroundColor: (activeStep == 1 || activeStep == 2) ? Colors.white : const Color(0xFF1E293B),
+                  elevation: 0,
+                  side: BorderSide(color: (activeStep == 1 || activeStep == 2) ? Colors.transparent : const Color(0xFFE2E8F0)),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.r)),
                   padding: EdgeInsets.symmetric(vertical: 12.h),
                 ),
                 child: Text(
-                  'التفاصيل',
+                  activeStep == 1 ? 'الدفع الآن' : (activeStep == 2 ? 'تتبع التوصيل' : 'التفاصيل'),
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
                     fontFamily: 'Cairo',
-                    color: const Color(0xFF1E293B),
+                    color: (activeStep == 1 || activeStep == 2) ? Colors.white : const Color(0xFF1E293B),
                   ),
                 ),
               ),
@@ -703,7 +712,6 @@ class _OrderStepper extends StatelessWidget {
     return Row(
       children: List.generate(steps.length * 2 - 1, (i) {
         if (i.isOdd) {
-          // Connector line
           final stepIndex = i ~/ 2;
           final filled = stepIndex < activeStep;
           return Expanded(
@@ -713,7 +721,6 @@ class _OrderStepper extends StatelessWidget {
             ),
           );
         }
-        // Step dot
         final stepIndex = i ~/ 2;
         final done = stepIndex < activeStep;
         final active = stepIndex == activeStep;

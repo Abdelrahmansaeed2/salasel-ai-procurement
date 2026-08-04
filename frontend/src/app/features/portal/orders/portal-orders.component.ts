@@ -63,12 +63,9 @@ export class PortalOrdersComponent {
   readonly detailOrderId = signal<string | null>(null);
   readonly viewMode = signal<ViewMode>('feed');
 
-  // --- Bidding & Dispatch States ---
   readonly biddingOrderId = signal<string | null>(null);
   readonly bidAmount = signal<string>('');
   readonly isSubmittingBid = signal(false);
-
-  // --- Orders Feed (List View) ---
 
   readonly orders = signal<OperationsOrder[]>([
     {
@@ -245,7 +242,6 @@ export class PortalOrdersComponent {
     this.detailOrderId.set(null);
   }
 
-  // --- Bidding Drawer ---
   openBiddingDrawer(orderId: string) {
     this.biddingOrderId.set(orderId);
     this.bidAmount.set('');
@@ -257,11 +253,9 @@ export class PortalOrdersComponent {
 
   submitBid() {
     this.isSubmittingBid.set(true);
-    // Mock API call
     setTimeout(() => {
       const orderId = this.biddingOrderId();
       if (orderId) {
-        // Move from Pending to Accepted in the mock board (for demonstration)
         this.moveCard(orderId, 'pending', 'accepted');
       }
       this.isSubmittingBid.set(false);
@@ -269,9 +263,8 @@ export class PortalOrdersComponent {
     }, 1500);
   }
 
-  // --- Delivery Dispatch ---
   markAsOutForDelivery(orderId: string, event: Event) {
-    event.stopPropagation(); // prevent opening drawer/detail
+    event.stopPropagation();
     this.moveCard(orderId, 'accepted', 'shipped');
   }
 
