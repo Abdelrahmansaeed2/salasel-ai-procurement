@@ -20,6 +20,7 @@ public class SalaselDbContext : DbContext
     public DbSet<AIProcessing> AIProcessings { get; set; } = null!;
     public DbSet<MerchantDocument> MerchantDocuments { get; set; } = null!;
     public DbSet<Bid> Bids { get; set; } = null!;
+    public DbSet<SupplierWarehouse> SupplierWarehouses { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -66,6 +67,12 @@ public class SalaselDbContext : DbContext
         modelBuilder.Entity<SupplierProfile>().Property(s => s.CompanyName).HasMaxLength(200);
         modelBuilder.Entity<SupplierProfile>().Property(s => s.ContactPhone).HasMaxLength(30);
         modelBuilder.Entity<SupplierProfile>().Property(s => s.PaymentTerms).HasMaxLength(100);
+        modelBuilder.Entity<SupplierProfile>().Property(s => s.CrNumber).HasMaxLength(20);
+        modelBuilder.Entity<SupplierProfile>().Property(s => s.TaxNumber).HasMaxLength(20);
+        modelBuilder.Entity<SupplierProfile>().Property(s => s.BankName).HasMaxLength(150);
+        modelBuilder.Entity<SupplierProfile>().Property(s => s.Iban).HasMaxLength(34);
+
+        modelBuilder.Entity<SupplierWarehouse>().Property(w => w.City).HasMaxLength(100);
 
         modelBuilder.Entity<Category>().Property(c => c.Name).HasMaxLength(100);
 
@@ -90,6 +97,9 @@ public class SalaselDbContext : DbContext
         modelBuilder.Entity<SupplierProfile>().Property(s => s.LocationLat).HasPrecision(10, 6);
         modelBuilder.Entity<SupplierProfile>().Property(s => s.LocationLng).HasPrecision(10, 6);
         modelBuilder.Entity<SupplierProfile>().Property(s => s.CoverageRadiusKm).HasPrecision(8, 2);
+
+        modelBuilder.Entity<SupplierWarehouse>().Property(w => w.Lat).HasPrecision(10, 6);
+        modelBuilder.Entity<SupplierWarehouse>().Property(w => w.Lng).HasPrecision(10, 6);
 
         modelBuilder.Entity<MerchantsProfile>().Property(m => m.LocationLat).HasPrecision(10, 6);
         modelBuilder.Entity<MerchantsProfile>().Property(m => m.LocationLng).HasPrecision(10, 6);
@@ -145,6 +155,13 @@ public class SalaselDbContext : DbContext
             .HasOne(sp => sp.Supplier)
             .WithMany(s => s.SupplierProducts)
             .HasForeignKey(sp => sp.SupplierId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // SupplierProfile → SupplierWarehouse
+        modelBuilder.Entity<SupplierWarehouse>()
+            .HasOne(w => w.Supplier)
+            .WithMany(s => s.Warehouses)
+            .HasForeignKey(w => w.SupplierId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // Product → SupplierProduct

@@ -14,5 +14,6 @@ public class SupplierProduct
     public int AvailableQty { get; set; }
     public int MinOrderQty { get; set; }      // minimum units the supplier accepts per order
     public int LeadTimeDays { get; set; }     // estimated delivery time in days
+    public bool IsActive { get; set; } = true; // DELETE /me/products/{id} deactivates rather than hard-deletes
     public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 }

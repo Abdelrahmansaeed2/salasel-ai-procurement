@@ -20,6 +20,19 @@ public class SupplierProfile
     public bool IsActiveForRouting { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    // Registration wizard (SupplierSetupDto)
+    public string CrNumber { get; set; } = string.Empty;
+    public string TaxNumber { get; set; } = string.Empty;
+    public string BankName { get; set; } = string.Empty;
+    public string Iban { get; set; } = string.Empty;
+
+    // How far through the wizard the supplier has gotten. Set to
+    // SuppliersMeController.TotalRegistrationSteps once POST /register
+    // succeeds — there's no per-step save endpoint, the wizard is submitted
+    // as one consolidated request, same as the merchant shop wizard.
+    public int RegistrationStep { get; set; } = 0;
+
     public ICollection<SubOrder> SubOrders { get; set; } = new List<SubOrder>();
     public ICollection<SupplierProduct> SupplierProducts { get; set; } = new List<SupplierProduct>();
+    public ICollection<SupplierWarehouse> Warehouses { get; set; } = new List<SupplierWarehouse>();
 }
