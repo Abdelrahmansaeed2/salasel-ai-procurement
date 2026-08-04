@@ -1026,3 +1026,124 @@
 @media (max-width: 900px) {
   .board-columns { flex-wrap: nowrap; }
 }
+
+/* Dispatch & Board Enhancements */
+.board-card-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.board-card-meta-group {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.btn-dispatch {
+  width: 100%;
+  padding: 10px;
+  background: var(--color-success);
+  color: white;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  transition: filter 0.2s;
+}
+.btn-dispatch:hover {
+  filter: brightness(1.1);
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Bidding Drawer */
+.bidding-drawer {
+  width: 500px;
+}
+
+.bidding-input-section {
+  background: var(--color-surface);
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.modern-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modern-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.drawer-footer-actions {
+  display: flex;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-background);
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text-main);
+  font-weight: 600;
+  border: 1px solid var(--color-border);
+}
+
+.btn-submit {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: white;
+  font-weight: 700;
+}
+.btn-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

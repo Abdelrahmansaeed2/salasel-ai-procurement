@@ -16,6 +16,8 @@ import { ForgotPasswordResetComponent } from './features/forgot-password/forgot-
 import { ForgotPasswordSuccessComponent } from './features/forgot-password/forgot-password-success/forgot-password-success.component';
 import { authGuard } from './core/auth/auth.guard';
 
+import { roleGuard } from './core/auth/role.guard';
+
 export const routes: Routes = [
   { path: '', component: LandingPageComponent },
   { path: 'about', component: AboutPageComponent },
@@ -48,6 +50,8 @@ export const routes: Routes = [
       },
       {
         path: 'analytics',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin'] },
         loadComponent: () =>
           import('./features/portal/analytics/portal-analytics.component').then((m) => m.PortalAnalyticsComponent),
       },
@@ -62,7 +66,16 @@ export const routes: Routes = [
           import('./features/portal/catalog/portal-catalog.component').then((m) => m.PortalCatalogComponent),
       },
       {
+        path: 'approvals',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin'] },
+        loadComponent: () =>
+          import('./features/portal/admin-approvals/admin-approvals.component').then((m) => m.AdminApprovalsComponent),
+      },
+      {
         path: 'roles',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin'] },
         loadComponent: () =>
           import('./features/portal/roles/portal-roles.component').then((m) => m.PortalRolesComponent),
       },

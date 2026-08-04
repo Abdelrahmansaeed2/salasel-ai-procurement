@@ -63,6 +63,13 @@ export class PortalOrdersComponent {
   readonly detailOrderId = signal<string | null>(null);
   readonly viewMode = signal<ViewMode>('feed');
 
+  // --- Bidding & Dispatch States ---
+  readonly biddingOrderId = signal<string | null>(null);
+  readonly bidAmount = signal<string>('');
+  readonly isSubmittingBid = signal(false);
+
+  // --- Orders Feed (List View) ---
+
   readonly orders = signal<OperationsOrder[]>([
     {
       id: '#ORD-9776',
@@ -236,5 +243,53 @@ export class PortalOrdersComponent {
 
   closeDetail() {
     this.detailOrderId.set(null);
+  }
+
+  // --- Bidding Drawer ---
+  openBiddingDrawer(orderId: string) {
+    this.biddingOrderId.set(orderId);
+    this.bidAmount.set('');
+  }
+
+  closeBiddingDrawer() {
+    this.biddingOrderId.set(null);
+  }
+
+  submitBid() {
+    this.isSubmittingBid.set(true);
+    // Mock API call
+    setTimeout(() => {
+      const orderId = this.biddingOrderId();
+      if (orderId) {
+        // Move from Pending to Accepted in the mock board (for demonstration)
+        this.moveCard(orderId, 'pending', 'accepted');
+      }
+      this.isSubmittingBid.set(false);
+      this.closeBiddingDrawer();
+    }, 1500);
+  }
+
+  // --- Delivery Dispatch ---
+  markAsOutForDelivery(orderId: string, event: Event) {
+    event.stopPropagation(); // prevent opening drawer/detail
+    this.moveCard(orderId, 'accepted', 'shipped');
+  }
+
+  private moveCard(cardId: string, fromCol: BoardColumnKey, toCol: BoardColumnKey) {
+    this.boardColumns.update(cols => {
+      const newCols = JSON.parse(JSON.stringify(cols)) as BoardColumn[];
+      const sourceCol = newCols.find(c => c.key === fromCol);
+      const destCol = newCols.find(c => c.key === toCol);
+      if (!sourceCol || !destCol) return cols;
+
+      const cardIdx = sourceCol.cards.findIndex(c => c.id === cardId);
+      if (cardIdx > -1) {
+        const [card] = sourceCol.cards.splice(cardIdx, 1);
+        destCol.cards.unshift(card);
+        sourceCol.count--;
+        destCol.count++;
+      }
+      return newCols;
+    });
   }
 }

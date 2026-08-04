@@ -27,7 +27,7 @@
       </div>
 
       <nav class="nav-list">
-        @for (item of navItems; track item.route) {
+        @for (item of navItems(); track item.route) {
           <a
             class="nav-item"
             [routerLink]="item.route"
@@ -38,6 +38,9 @@
               @switch (item.icon) {
                 @case ('dashboard') {
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 2H2.67a.67.67 0 0 0-.67.67v4.66c0 .37.3.67.67.67H6c.37 0 .67-.3.67-.67V2.67A.67.67 0 0 0 6 2Z" stroke="currentColor" stroke-width="1.33"/><path d="M13.33 2h-3.33a.67.67 0 0 0-.67.67v2a.67.67 0 0 0 .67.66h3.33A.67.67 0 0 0 14 4.67v-2A.67.67 0 0 0 13.33 2Z" stroke="currentColor" stroke-width="1.33"/><path d="M13.33 8h-3.33a.67.67 0 0 0-.67.67v4.66c0 .37.3.67.67.67h3.33a.67.67 0 0 0 .67-.67V8.67A.67.67 0 0 0 13.33 8Z" stroke="currentColor" stroke-width="1.33"/><path d="M6 10.67H2.67a.67.67 0 0 0-.67.66v2c0 .37.3.67.67.67H6a.67.67 0 0 0 .67-.67v-2a.67.67 0 0 0-.67-.66Z" stroke="currentColor" stroke-width="1.33"/></svg>
+                }
+                @case ('audit') {
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 }
                 @case ('orders') {
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="5.33" cy="14" r="0.67" stroke="currentColor" stroke-width="1.33"/><circle cx="12.67" cy="14" r="0.67" stroke="currentColor" stroke-width="1.33"/><path d="M1.37 1.37h1.33l1.77 8.28c.07.3.23.57.47.76.24.19.54.3.85.29h6.52c.3 0 .6-.1.83-.3.24-.19.4-.46.47-.76l1.1-4.97H3.41" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -94,10 +97,44 @@
   <div class="portal-main">
     <header class="topbar">
       <div class="topbar-actions">
-        <button type="button" class="icon-btn" aria-label="التنبيهات">
-          <svg width="16" height="20" viewBox="0 0 16 20" fill="none"><path d="M0 17v-2h2V8c0-1.38.42-2.61 1.25-3.69A5.9 5.9 0 0 1 6.5 2.2V1.5c0-.42.14-.77.44-1.06.28-.29.63-.44 1.06-.44s.77.14 1.06.44c.3.29.44.64.44 1.06v.7a5.9 5.9 0 0 1 3.25 2.11C13.58 5.39 14 6.62 14 8v7h2v2H0Zm8 3a2.1 2.1 0 0 1-1.41-.59A2.06 2.06 0 0 1 6 18h4a2.06 2.06 0 0 1-.59 1.41A2.1 2.1 0 0 1 8 20ZM4 15h8V8c0-1.1-.39-2.04-1.18-2.83A3.85 3.85 0 0 0 8 4a3.85 3.85 0 0 0-2.83 1.18A3.85 3.85 0 0 0 4 8v7Z" fill="#434655"/></svg>
-          <span class="notif-dot"></span>
-        </button>
+        <div class="notif-container" [class.open]="notificationsOpen()">
+          <button type="button" class="icon-btn btn-press" aria-label="التنبيهات" (click)="toggleNotifications()">
+            <svg width="16" height="20" viewBox="0 0 16 20" fill="none"><path d="M0 17v-2h2V8c0-1.38.42-2.61 1.25-3.69A5.9 5.9 0 0 1 6.5 2.2V1.5c0-.42.14-.77.44-1.06.28-.29.63-.44 1.06-.44s.77.14 1.06.44c.3.29.44.64.44 1.06v.7a5.9 5.9 0 0 1 3.25 2.11C13.58 5.39 14 6.62 14 8v7h2v2H0Zm8 3a2.1 2.1 0 0 1-1.41-.59A2.06 2.06 0 0 1 6 18h4a2.06 2.06 0 0 1-.59 1.41A2.1 2.1 0 0 1 8 20ZM4 15h8V8c0-1.1-.39-2.04-1.18-2.83A3.85 3.85 0 0 0 8 4a3.85 3.85 0 0 0-2.83 1.18A3.85 3.85 0 0 0 4 8v7Z" fill="#434655"/></svg>
+            @if (unreadCount() > 0) {
+              <span class="notif-dot pulse-anim"></span>
+            }
+          </button>
+          
+          @if (notificationsOpen()) {
+            <div class="notif-dropdown fade-in">
+              <div class="notif-header">
+                <h3>الإشعارات</h3>
+                <button type="button" class="mark-read-btn" (click)="markAllAsRead()">تحديد كـ مقروء</button>
+              </div>
+              <div class="notif-body">
+                @for (notif of recentNotifications(); track notif.id) {
+                  <div class="notif-item hover-lift" [class.unread]="notif.unread">
+                    <div class="notif-icon">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1v14M1 8h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </div>
+                    <div class="notif-content">
+                      <h4>{{ notif.title }}</h4>
+                      <p>{{ notif.text }}</p>
+                      <span class="notif-time">{{ notif.time }}</span>
+                    </div>
+                    @if (notif.unread) {
+                      <div class="unread-dot"></div>
+                    }
+                  </div>
+                }
+              </div>
+              <div class="notif-footer">
+                <button type="button" class="view-all-btn">عرض كل الإشعارات</button>
+                <button type="button" class="view-all-btn" (click)="triggerDemoToast()" style="opacity: 0.3">Demo Toast</button>
+              </div>
+            </div>
+          }
+        </div>
         <button type="button" class="icon-btn" aria-label="المساعدة">
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" stroke="#434655" stroke-width="1.6"/><path d="M8 7.6c.2-.6.7-1.1 1.4-1.3.7-.2 1.4 0 1.9.5.5.5.6 1.3.3 1.9-.3.6-.9 1-1.6 1.3v.9" stroke="#434655" stroke-width="1.6" stroke-linecap="round"/><circle cx="10" cy="14" r="0.9" fill="#434655"/></svg>
         </button>
@@ -123,3 +160,19 @@
     </main>
   </div>
 </div>
+
+<!-- SignalR Toast -->
+@if (showToast()) {
+  <div class="toast-overlay slide-in-toast">
+    <div class="toast-card hover-lift">
+      <div class="toast-icon pulse-anim">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16z" fill="#004AC6"/><path d="M10 6v5l3 3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="toast-content">
+        <h4>طلب صوتي جديد!</h4>
+        <p>طلب تسعير مستعجل من "أسواق المزرعة". انقر للمزايدة.</p>
+      </div>
+      <button class="toast-close" (click)="showToast.set(false)">×</button>
+    </div>
+  </div>
+}

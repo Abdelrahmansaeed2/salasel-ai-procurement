@@ -68,7 +68,15 @@ export class SupplierLoginComponent {
 
     window.setTimeout(() => {
       this.isSubmitting.set(false);
-      this.auth.login(email);
+      
+      let role = 'Supplier';
+      if (email.toLowerCase() === 'admin@salasel.com') {
+        role = 'Admin';
+      } else if (email.toLowerCase() === 'supplier@salasel.com') {
+        role = 'Supplier';
+      }
+
+      this.auth.login(email, role);
       const returnUrl = this.activatedRoute.snapshot.queryParamMap.get('returnUrl');
       this.router.navigateByUrl(returnUrl ?? '/portal/dashboard');
     }, 900);

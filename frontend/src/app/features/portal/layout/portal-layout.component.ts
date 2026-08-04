@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 
@@ -26,14 +26,54 @@ export class PortalLayoutComponent {
   readonly userMenuOpen = signal(false);
   readonly currentUser = this.auth.currentUser;
 
-  readonly navItems: PortalNavItem[] = [
-    { label: 'لوحة التحكم', route: '/portal/dashboard', icon: 'dashboard' },
-    { label: 'الطلبات', route: '/portal/orders', icon: 'orders', badge: 7 },
-    { label: 'الكتالوج', route: '/portal/catalog', icon: 'catalog' },
-    { label: 'التحليلات', route: '/portal/analytics', icon: 'analytics' },
-    { label: 'مصفوفة الأدوار', route: '/portal/roles', icon: 'roles' },
-    { label: 'الإعدادات', route: '/portal/settings', icon: 'settings' },
-  ];
+  // Notifications State
+  readonly notificationsOpen = signal(false);
+  readonly unreadCount = signal(3);
+  readonly showToast = signal(false);
+  
+  readonly recentNotifications = signal([
+    { id: 1, title: 'طلب تسعير جديد', text: 'تم استلام طلب تسعير من "بقالة ركن الياسمين".', time: 'منذ دقيقتين', unread: true },
+    { id: 2, title: 'تحديث حالة الطلب', text: 'الطلب #ORD-8791 تم تسليمه بنجاح.', time: 'منذ ٤٥ دقيقة', unread: true },
+    { id: 3, title: 'اعتماد حساب', text: 'تم توثيق حسابك كمورد معتمد بنجاح.', time: 'منذ ساعتين', unread: true },
+  ]);
+
+  toggleNotifications() {
+    this.notificationsOpen.update((v) => !v);
+    if (this.notificationsOpen()) {
+      this.userMenuOpen.set(false);
+    }
+  }
+
+  markAllAsRead() {
+    this.unreadCount.set(0);
+    this.recentNotifications.update(n => n.map(item => ({ ...item, unread: false })));
+  }
+
+  triggerDemoToast() {
+    this.showToast.set(true);
+    setTimeout(() => this.showToast.set(false), 5000);
+  }
+
+  readonly navItems = computed<PortalNavItem[]>(() => {
+    const role = this.currentUser()?.role;
+
+    if (role === 'Admin') {
+      return [
+        { label: 'التحليلات', route: '/portal/analytics', icon: 'analytics' },
+        { label: 'اعتمادات النظام', route: '/portal/approvals', icon: 'audit', badge: 2 },
+        { label: 'مصفوفة الأدوار', route: '/portal/roles', icon: 'roles' },
+        { label: 'الإعدادات', route: '/portal/settings', icon: 'settings' },
+      ];
+    } else {
+      // Default: Supplier
+      return [
+        { label: 'لوحة التحكم', route: '/portal/dashboard', icon: 'dashboard' },
+        { label: 'الطلبات', route: '/portal/orders', icon: 'orders', badge: 7 },
+        { label: 'الكتالوج', route: '/portal/catalog', icon: 'catalog' },
+        { label: 'الإعدادات', route: '/portal/settings', icon: 'settings' },
+      ];
+    }
+  });
 
   toggleSidebar() {
     this.sidebarCollapsed.update((v) => !v);
@@ -41,6 +81,9 @@ export class PortalLayoutComponent {
 
   toggleUserMenu() {
     this.userMenuOpen.update((v) => !v);
+    if (this.userMenuOpen()) {
+      this.notificationsOpen.set(false);
+    }
   }
 
   logout() {

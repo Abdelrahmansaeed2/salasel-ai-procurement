@@ -5,6 +5,7 @@ const STORAGE_KEY = 'jawhra_portal_session';
 interface PortalSession {
   name: string;
   email: string;
+  role: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -14,8 +15,8 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this.session() !== null);
   readonly currentUser = computed(() => this.session());
 
-  login(email: string, name = 'محمد العتيبي'): void {
-    const session: PortalSession = { name, email };
+  login(email: string, role = 'Supplier', name = 'محمد العتيبي'): void {
+    const session: PortalSession = { name, email, role };
     this.session.set(session);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
   }

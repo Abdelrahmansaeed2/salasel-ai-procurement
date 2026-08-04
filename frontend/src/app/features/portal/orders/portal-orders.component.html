@@ -67,7 +67,7 @@
 
           <div class="board-column-body">
             @for (card of column.cards; track card.id) {
-              <article class="board-card">
+              <article class="board-card" (click)="column.key === 'pending' ? openBiddingDrawer(card.id) : openDetail(card.id)" [class.cursor-pointer]="true">
                 <div class="board-card-top">
                   <svg width="10" height="16" viewBox="0 0 10 16" fill="none"><path d="M2 16a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM2 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM2 4a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" fill="#737686"/></svg>
                   <div class="board-card-id-row">
@@ -99,10 +99,17 @@
                 </div>
 
                 <div class="board-card-footer">
-                  @if (card.metaRight) {
-                    <span class="board-card-meta">{{ card.metaRight }}</span>
+                  <div class="board-card-meta-group">
+                    @if (card.metaRight) {
+                      <span class="board-card-meta">{{ card.metaRight }}</span>
+                    }
+                    <span class="board-card-meta">{{ card.metaLeft }}</span>
+                  </div>
+                  @if (column.key === 'accepted') {
+                    <button type="button" class="btn-dispatch btn-press" (click)="markAsOutForDelivery(card.id, $event)">
+                      تأكيد التوصيل
+                    </button>
                   }
-                  <span class="board-card-meta">{{ card.metaLeft }}</span>
                 </div>
               </article>
             }
@@ -275,6 +282,67 @@
           </ul>
         </section>
       </div>
+    </aside>
+  }
+
+  <!-- Bidding Drawer -->
+  @if (biddingOrderId(); as orderId) {
+    <div class="drawer-backdrop fade-in" (click)="closeBiddingDrawer()"></div>
+    <aside class="detail-drawer bidding-drawer" dir="rtl">
+      <button type="button" class="drawer-close btn-press" (click)="closeBiddingDrawer()" aria-label="إغلاق">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12.4 3.6 8 8l4.4 4.4-1.4 1.4L6.6 9.4 2.2 13.8.8 12.4 5.2 8 .8 3.6 2.2 2.2l4.4 4.4L11 2.2Z" fill="currentColor"/></svg>
+      </button>
+
+      <div class="drawer-body">
+        <section class="drawer-section">
+          <div class="merchant-row">
+            <div class="merchant-meta">
+              <h4>طلب التسعير {{ orderId }}</h4>
+              <p>مطلوب تسعير البضائع وتأكيد التوفر.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="drawer-section">
+          <h4 class="section-title">قائمة المشتريات المطلوبة</h4>
+          <div class="items-list">
+            <div class="item-row">
+              <div class="item-meta">
+                <span class="item-name">حليب كامل الدسم المراعي 1 لتر</span>
+                <span class="item-qty">الكمية: 50 كرتون</span>
+              </div>
+            </div>
+            <div class="item-row">
+              <div class="item-meta">
+                <span class="item-name">سكر أسرة ناعم 10 كجم</span>
+                <span class="item-qty">الكمية: 20 كيس</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="drawer-section bidding-input-section">
+          <h4 class="section-title">تقديم عرض السعر</h4>
+          <div class="form-group">
+            <label for="bidAmount" class="form-label">إجمالي السعر الشامل (ر.س)</label>
+            <div class="input-wrapper">
+              <input type="number" id="bidAmount" class="modern-input" placeholder="أدخل سعرك هنا..." [value]="bidAmount()" (input)="bidAmount.set($any($event.target).value)" />
+            </div>
+          </div>
+        </section>
+      </div>
+      
+      <footer class="drawer-footer-actions">
+        <button type="button" class="btn-cancel btn-press" (click)="closeBiddingDrawer()">إلغاء</button>
+        <button type="button" class="btn-submit btn-press" (click)="submitBid()" [disabled]="!bidAmount() || isSubmittingBid()">
+          @if (isSubmittingBid()) {
+            <span class="spinner"></span>
+            جاري التقديم...
+          } @else {
+            تقديم العرض النهائي
+          }
+        </button>
+      </footer>
     </aside>
   }
 </div>
