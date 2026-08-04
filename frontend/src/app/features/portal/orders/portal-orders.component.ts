@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-
+import { ChangeDetectionStrategy, Component, computed, signal, inject } from '@angular/core';
+import { OrderService } from '../../../core/services/order.service';
+import { AuthService } from '../../../core/auth/auth.service';
 type OrderPriority = 'review' | 'urgent' | 'scheduled';
 type QuickFilter = 'premium' | 'low-confidence' | 'high-priority';
 type ViewMode = 'feed' | 'board';
@@ -251,21 +252,43 @@ export class PortalOrdersComponent {
     this.biddingOrderId.set(null);
   }
 
+  private readonly orderService = inject(OrderService);
+  private readonly authService = inject(AuthService);
+
   submitBid() {
     this.isSubmittingBid.set(true);
-    setTimeout(() => {
-      const orderId = this.biddingOrderId();
-      if (orderId) {
-        this.moveCard(orderId, 'pending', 'accepted');
-      }
-      this.isSubmittingBid.set(false);
-      this.closeBiddingDrawer();
-    }, 1500);
+    const orderIdStr = this.biddingOrderId();
+    if (orderIdStr) {
+      // Clean '#ORD-' string prefix if any, assuming backend expects int id
+      const id = parseInt(orderIdStr.replace(/[^0-9]/g, ''));
+      const amount = parseFloat(this.bidAmount());
+      
+      this.orderService.submitBid(id, amount).subscribe({
+        next: () => {
+          this.moveCard(orderIdStr, 'pending', 'accepted');
+          this.isSubmittingBid.set(false);
+          this.closeBiddingDrawer();
+        },
+        error: (err) => {
+          console.error(err);
+          this.isSubmittingBid.set(false);
+        }
+      });
+    }
   }
 
-  markAsOutForDelivery(orderId: string, event: Event) {
+  markAsOutForDelivery(orderIdStr: string, event: Event) {
     event.stopPropagation();
-    this.moveCard(orderId, 'accepted', 'shipped');
+    const id = parseInt(orderIdStr.replace(/[^0-9]/g, ''));
+    
+    this.orderService.dispatchOrder(id).subscribe({
+      next: () => {
+        this.moveCard(orderIdStr, 'accepted', 'shipped');
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
   }
 
   private moveCard(cardId: string, fromCol: BoardColumnKey, toCol: BoardColumnKey) {

@@ -21,6 +21,7 @@ public class SalaselDbContext : DbContext
     public DbSet<MerchantDocument> MerchantDocuments { get; set; } = null!;
     public DbSet<Bid> Bids { get; set; } = null!;
     public DbSet<SupplierWarehouse> SupplierWarehouses { get; set; } = null!;
+    public DbSet<KnowledgeBaseArticle> KnowledgeBaseArticles { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,6 +33,7 @@ public class SalaselDbContext : DbContext
         modelBuilder.Entity<SupplierProfile>().HasKey(s => s.SupplierID);
         modelBuilder.Entity<MerchantInventory>().HasKey(m => m.InventoryID);
         modelBuilder.Entity<MerchantDocument>().HasKey(d => d.Id);
+        modelBuilder.Entity<KnowledgeBaseArticle>().HasKey(k => k.Id);
 
         // ─── Unique Indexes ──────────────────────────────────────────────────────
         modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
@@ -75,6 +77,8 @@ public class SalaselDbContext : DbContext
         modelBuilder.Entity<SupplierWarehouse>().Property(w => w.City).HasMaxLength(100);
 
         modelBuilder.Entity<Category>().Property(c => c.Name).HasMaxLength(100);
+        modelBuilder.Entity<KnowledgeBaseArticle>().Property(k => k.Title).HasMaxLength(250);
+        modelBuilder.Entity<KnowledgeBaseArticle>().Property(k => k.Category).HasMaxLength(100);
 
         modelBuilder.Entity<Product>().Property(p => p.Name).HasMaxLength(200);
         modelBuilder.Entity<Product>().Property(p => p.SKU).HasMaxLength(100);

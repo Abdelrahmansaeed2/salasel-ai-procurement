@@ -5,6 +5,7 @@ using Salasel.Application.DTOs;
 using Salasel.Application.Interfaces;
 using Salasel.Domain.Entities;
 using Salasel.Domain.Interfaces;
+using Salasel.Domain.Enums;
 using Salasel.Infrastructure.Services;
 
 namespace Salasel.API.Controllers;
@@ -170,6 +171,34 @@ public class OrdersController : ControllerBase
         {
             await _biddingService.UpdateRfqStatusAsync(id, supplierId.Value, request.Status);
             return Ok(new { Message = "Status updated." });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { Message = ex.Message });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+    }
+
+    // PUT /api/v1/orders/voice/{id}/dispatch
+    [HttpPut("voice/{id:int}/dispatch")]
+    [Authorize(Roles = "Supplier")]
+    public async Task<IActionResult> DispatchOrder(int id)
+    {
+        var supplierId = await CurrentSupplierIdAsync();
+        if (supplierId == null) return Forbid();
+
+        try
+        {
+            // Moving to Shipped status
+            await _biddingService.UpdateRfqStatusAsync(id, supplierId.Value, FulfillmentStatus.Shipped.ToString());
+            return Ok(new { Message = "Order dispatched successfully." });
         }
         catch (KeyNotFoundException ex)
         {
