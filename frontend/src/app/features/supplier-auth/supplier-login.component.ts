@@ -66,31 +66,35 @@ export class SupplierLoginComponent {
     this.errorMessage.set(null);
     this.isSubmitting.set(true);
 
-    window.setTimeout(() => {
-      this.isSubmitting.set(false);
-      
-      let role = 'Supplier';
-      if (email.toLowerCase() === 'admin@salasel.com') {
-        role = 'Admin';
-      } else if (email.toLowerCase() === 'supplier@salasel.com') {
-        role = 'Supplier';
+    this.auth.login(email, password).subscribe({
+      next: (res) => {
+        this.isSubmitting.set(false);
+        const returnUrl = this.activatedRoute.snapshot.queryParamMap.get('returnUrl');
+        
+        // If they are not verified/setup yet, you could route them to the setup wizard here
+        // if (!res.isSetupCompleted) { ... }
+        
+        this.router.navigateByUrl(returnUrl ?? '/portal/dashboard');
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        if (err.status === 401) {
+          this.errorMessage.set('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+        } else {
+          this.errorMessage.set('حدث خطأ في الاتصال بالخادم. يرجى المحاولة لاحقاً');
+        }
       }
-
-      this.auth.login(email, role);
-      const returnUrl = this.activatedRoute.snapshot.queryParamMap.get('returnUrl');
-      this.router.navigateByUrl(returnUrl ?? '/portal/dashboard');
-    }, 900);
+    });
   }
 
   loginWithProvider(provider: 'microsoft' | 'google'): void {
     this.errorMessage.set(null);
     this.isSubmitting.set(true);
 
+    // TODO: Implement actual OAuth when API supports it
     window.setTimeout(() => {
       this.isSubmitting.set(false);
-      this.auth.login(`supplier@${provider}.com`);
-      const returnUrl = this.activatedRoute.snapshot.queryParamMap.get('returnUrl');
-      this.router.navigateByUrl(returnUrl ?? '/portal/dashboard');
+      this.errorMessage.set('تسجيل الدخول عبر الحسابات غير مدعوم حالياً');
     }, 700);
   }
 }

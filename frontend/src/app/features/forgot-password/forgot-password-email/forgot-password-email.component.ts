@@ -4,6 +4,8 @@ import { Router, RouterLink } from '@angular/router';
 
 import { DashboardTopbarComponent } from '../../../shared/dashboard-topbar/dashboard-topbar.component';
 
+import { AuthService } from '../../../core/auth/auth.service';
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 @Component({
@@ -21,7 +23,10 @@ export class ForgotPasswordEmailComponent {
 
   readonly canSubmit = computed(() => this.email().trim().length > 0);
 
-  constructor(private readonly router: Router) {}
+  constructor(
+    private readonly router: Router,
+    private readonly authService: AuthService
+  ) {}
 
   onSubmit(): void {
     const email = this.email().trim();
@@ -34,9 +39,19 @@ export class ForgotPasswordEmailComponent {
     this.errorMessage.set(null);
     this.isSubmitting.set(true);
 
-    window.setTimeout(() => {
-      this.isSubmitting.set(false);
-      this.router.navigate(['/forgot-password/sent'], { queryParams: { email } });
-    }, 700);
+    this.authService.forgotPassword(email).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.router.navigate(['/forgot-password/sent'], { queryParams: { email } });
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        if (err.status === 404) {
+          this.errorMessage.set('لم نتمكن من العثور على حساب بهذا البريد الإلكتروني');
+        } else {
+          this.errorMessage.set('حدث خطأ أثناء إرسال الرابط. يرجى المحاولة لاحقاً');
+        }
+      }
+    });
   }
 }

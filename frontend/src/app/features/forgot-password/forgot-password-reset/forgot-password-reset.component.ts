@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { DashboardTopbarComponent } from '../../../shared/dashboard-topbar/dashboard-topbar.component';
+
+import { AuthService } from '../../../core/auth/auth.service';
 
 interface PasswordRequirement {
   key: string;
@@ -75,7 +77,11 @@ export class ForgotPasswordResetComponent {
 
   readonly canSubmit = computed(() => this.metCount() === 5 && this.passwordsMatch());
 
-  constructor(private readonly router: Router) {}
+  constructor(
+    private readonly router: Router,
+    private readonly activatedRoute: ActivatedRoute,
+    private readonly authService: AuthService
+  ) {}
 
   togglePasswordVisibility(): void {
     this.showPassword.update((visible) => !visible);
@@ -96,12 +102,28 @@ export class ForgotPasswordResetComponent {
       return;
     }
 
+    const token = this.activatedRoute.snapshot.queryParamMap.get('token');
+    if (!token) {
+      this.errorMessage.set('رابط إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية');
+      return;
+    }
+
     this.errorMessage.set(null);
     this.isSubmitting.set(true);
 
-    window.setTimeout(() => {
-      this.isSubmitting.set(false);
-      this.router.navigate(['/forgot-password/success']);
-    }, 700);
+    this.authService.resetPassword(token, this.password()).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.router.navigate(['/forgot-password/success']);
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        if (err.status === 400) {
+          this.errorMessage.set('الرابط منتهي الصلاحية أو غير صالح');
+        } else {
+          this.errorMessage.set('حدث خطأ أثناء إعادة تعيين كلمة المرور');
+        }
+      }
+    });
   }
 }
