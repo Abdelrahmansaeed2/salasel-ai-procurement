@@ -119,6 +119,10 @@ builder.Services.AddSingleton<INotificationService, NotificationService>();
 builder.Services.AddScoped<ISupplierAssignmentService, SupplierAssignmentService>();
 builder.Services.AddHostedService<VoiceProcessingWorker>();
 
+// RAG knowledge base indexing pipeline (same shape as the voice pipeline above)
+builder.Services.AddSingleton<IKnowledgeIndexingQueue, KnowledgeIndexingQueue>();
+builder.Services.AddHostedService<KnowledgeIndexingWorker>();
+
 builder.Services.AddSignalR(options =>
 {
     options.MaximumReceiveMessageSize = 10 * 1024 * 1024;

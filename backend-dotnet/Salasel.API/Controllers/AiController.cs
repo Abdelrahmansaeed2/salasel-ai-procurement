@@ -1,0 +1,114 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Salasel.Application.DTOs;
+using Salasel.Application.Interfaces;
+using Salasel.Domain.Entities;
+using Salasel.Domain.Enums;
+using Salasel.Domain.Interfaces;
+
+namespace Salasel.API.Controllers;
+
+// Rule-based today, not real ML — same honesty as InventoryAlertDto's
+// EstimatedDaysUntilStockOut: no fake numbers where there's no data to back
+// them (see NextOrderPrediction's HasEnoughData). Swap the internals for a
+// real model later without changing these routes.
+[ApiController]
+[Route("api/v1/ai")]
+[Authorize]
+public class AiController : ControllerBase
+{
+    private readonly IInventoryService _inventoryService;
+    private readonly ISupplierProductRepository _supplierProductRepository;
+    private readonly IRepository<MasterOrder> _orderRepository;
+
+    public AiController(
+        IInventoryService inventoryService,
+        ISupplierProductRepository supplierProductRepository,
+        IRepository<MasterOrder> orderRepository)
+    {
+        _inventoryService = inventoryService;
+        _supplierProductRepository = supplierProductRepository;
+        _orderRepository = orderRepository;
+    }
+
+    // Inventory AI card — same underlying data as
+    // GET /api/v1/inventory/alerts, exposed under the AI namespace too since
+    // both paths were requested separately.
+    [HttpGet("predictions/out-of-stock")]
+    public async Task<IActionResult> GetOutOfStockPredictions([FromQuery] int merchantId)
+    {
+        var alerts = await _inventoryService.GetAlertsAsync(merchantId);
+        return Ok(alerts);
+    }
+
+    // Smart suggestions: for each low-stock item, find the best currently
+    // listed offer (cheapest active price) to reorder from.
+    [HttpGet("recommendations")]
+    public async Task<IActionResult> GetRecommendations([FromQuery] int merchantId)
+    {
+        var alerts = await _inventoryService.GetAlertsAsync(merchantId);
+        var recommendations = new List<ProductRecommendationDto>();
+
+        foreach (var alert in alerts)
+        {
+            var bestOffer = await _supplierProductRepository.Query()
+                .Include(sp => sp.Supplier)
+                .Where(sp => sp.ProductId == alert.ProductId
+                          && sp.IsActive
+                          && sp.Supplier.IsActiveForRouting)
+                .OrderBy(sp => sp.UnitPrice)
+                .FirstOrDefaultAsync();
+
+            recommendations.Add(new ProductRecommendationDto
+            {
+                ProductId = alert.ProductId,
+                ProductName = alert.ProductName,
+                Reason = "Stock is at or below the reorder threshold.",
+                CurrentQty = alert.CurrentQty,
+                ReorderThreshold = alert.ReorderThreshold,
+                RecommendedSupplierId = bestOffer?.SupplierId,
+                RecommendedSupplierName = bestOffer?.Supplier.CompanyName,
+                RecommendedUnitPrice = bestOffer?.UnitPrice,
+                RecommendedLeadTimeDays = bestOffer?.LeadTimeDays
+            });
+        }
+
+        return Ok(recommendations);
+    }
+
+    // Optional: naive forecast from the merchant's own order cadence.
+    // Needs at least 2 real (non-rejected) past orders — otherwise says so
+    // explicitly rather than guessing.
+    [HttpGet("next-order")]
+    public async Task<IActionResult> GetNextOrderPrediction([FromQuery] int merchantId)
+    {
+        var orders = (await _orderRepository.FindAsync(
+                o => o.MerchantId == merchantId && o.Status != ApprovalStatus.Rejected))
+            .OrderBy(o => o.OrderDate)
+            .ToList();
+
+        if (orders.Count < 2)
+        {
+            return Ok(new NextOrderPredictionDto
+            {
+                MerchantId = merchantId,
+                HasEnoughData = false,
+                Message = "Not enough order history yet to predict the next order (need at least 2 completed orders)."
+            });
+        }
+
+        var intervals = orders.Zip(orders.Skip(1), (a, b) => (b.OrderDate - a.OrderDate).TotalDays);
+        var avgIntervalDays = intervals.Average();
+        var lastOrderDate = orders.Last().OrderDate;
+
+        return Ok(new NextOrderPredictionDto
+        {
+            MerchantId = merchantId,
+            HasEnoughData = true,
+            LastOrderDate = lastOrderDate,
+            AverageIntervalDays = Math.Round(avgIntervalDays, 1),
+            PredictedNextOrderDate = lastOrderDate.AddDays(avgIntervalDays)
+        });
+    }
+}
