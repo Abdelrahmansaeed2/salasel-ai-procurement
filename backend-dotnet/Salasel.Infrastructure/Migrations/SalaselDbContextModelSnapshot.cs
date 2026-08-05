@@ -61,6 +61,47 @@ namespace Salasel.Infrastructure.Migrations
                     b.ToTable("AIProcessings");
                 });
 
+            modelBuilder.Entity("Salasel.Domain.Entities.Bid", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("SubOrderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubOrderId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("Bids");
+                });
+
             modelBuilder.Entity("Salasel.Domain.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -79,6 +120,39 @@ namespace Salasel.Infrastructure.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("Salasel.Domain.Entities.KnowledgeBaseArticle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("KnowledgeBaseArticles");
+                });
+
             modelBuilder.Entity("Salasel.Domain.Entities.MasterOrder", b =>
                 {
                     b.Property<int>("Id")
@@ -95,6 +169,22 @@ namespace Salasel.Infrastructure.Migrations
 
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("PaymentReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Source")
                         .IsRequired()
@@ -125,6 +215,37 @@ namespace Salasel.Infrastructure.Migrations
                     b.ToTable("MasterOrders");
                 });
 
+            modelBuilder.Entity("Salasel.Domain.Entities.MerchantDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("MerchantId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MerchantId");
+
+                    b.ToTable("MerchantDocuments");
+                });
+
             modelBuilder.Entity("Salasel.Domain.Entities.MerchantInventory", b =>
                 {
                     b.Property<int>("InventoryID")
@@ -138,6 +259,12 @@ namespace Salasel.Infrastructure.Migrations
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LowStockAlertDismissedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("LowStockAlertDismissedAtQty")
+                        .HasColumnType("int");
 
                     b.Property<int>("MerchantID")
                         .HasColumnType("int");
@@ -165,13 +292,38 @@ namespace Salasel.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MerchantID"));
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("BusinessCity")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("ContactPhone")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
+                    b.Property<string>("CrNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Governorate")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
@@ -184,6 +336,16 @@ namespace Salasel.Infrastructure.Migrations
                         .HasPrecision(10, 6)
                         .HasColumnType("decimal(10,6)");
 
+                    b.Property<string>("OwnerIdentityNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("OwnerName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
                     b.Property<int>("OwnerUserId")
                         .HasColumnType("int");
 
@@ -191,6 +353,16 @@ namespace Salasel.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("StoreSize")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("VerificationStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("MerchantID");
 
@@ -252,14 +424,37 @@ namespace Salasel.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime?>("AcceptedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeliveredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DriverName")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("DriverPhone")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<int>("MasterId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("ReceiptConfirmedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ShippedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -270,7 +465,7 @@ namespace Salasel.Infrastructure.Migrations
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
 
-                    b.Property<int>("SupplierId")
+                    b.Property<int?>("SupplierId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -279,6 +474,8 @@ namespace Salasel.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MasterId");
+
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("SupplierId");
 
@@ -295,6 +492,9 @@ namespace Salasel.Infrastructure.Migrations
 
                     b.Property<int>("AvailableQty")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("datetime2");
@@ -332,6 +532,19 @@ namespace Salasel.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SupplierID"));
 
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BankName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("BusinessType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CompanyName")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -346,11 +559,28 @@ namespace Salasel.Infrastructure.Migrations
                         .HasPrecision(8, 2)
                         .HasColumnType("decimal(8,2)");
 
+                    b.Property<string>("CrNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Iban")
+                        .IsRequired()
+                        .HasMaxLength(34)
+                        .HasColumnType("nvarchar(34)");
+
                     b.Property<bool>("IsActiveForRouting")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsVatExempt")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("JobTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("LocationLat")
                         .HasPrecision(10, 6)
@@ -368,15 +598,66 @@ namespace Salasel.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("RegistrationStep")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("ReliabilityScore")
                         .HasPrecision(5, 2)
                         .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("TaxNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("VatNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("SupplierID");
 
                     b.HasIndex("OwnerUserId");
 
                     b.ToTable("SupplierProfiles");
+                });
+
+            modelBuilder.Entity("Salasel.Domain.Entities.SupplierWarehouse", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Capacity")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("Lat")
+                        .HasPrecision(10, 6)
+                        .HasColumnType("decimal(10,6)");
+
+                    b.Property<decimal>("Lng")
+                        .HasPrecision(10, 6)
+                        .HasColumnType("decimal(10,6)");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("WarehouseName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("SupplierWarehouses");
                 });
 
             modelBuilder.Entity("Salasel.Domain.Entities.User", b =>
@@ -403,6 +684,9 @@ namespace Salasel.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsSetupCompleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -411,6 +695,9 @@ namespace Salasel.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("TokenVersion")
+                        .HasColumnType("int");
 
                     b.HasKey("UserID");
 
@@ -461,6 +748,25 @@ namespace Salasel.Infrastructure.Migrations
                     b.Navigation("VoiceLog");
                 });
 
+            modelBuilder.Entity("Salasel.Domain.Entities.Bid", b =>
+                {
+                    b.HasOne("Salasel.Domain.Entities.SubOrder", "SubOrder")
+                        .WithMany("Bids")
+                        .HasForeignKey("SubOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Salasel.Domain.Entities.SupplierProfile", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("SubOrder");
+
+                    b.Navigation("Supplier");
+                });
+
             modelBuilder.Entity("Salasel.Domain.Entities.MasterOrder", b =>
                 {
                     b.HasOne("Salasel.Domain.Entities.MerchantsProfile", "Merchant")
@@ -477,6 +783,17 @@ namespace Salasel.Infrastructure.Migrations
                     b.Navigation("Merchant");
 
                     b.Navigation("VoiceLog");
+                });
+
+            modelBuilder.Entity("Salasel.Domain.Entities.MerchantDocument", b =>
+                {
+                    b.HasOne("Salasel.Domain.Entities.MerchantsProfile", "Merchant")
+                        .WithMany("Documents")
+                        .HasForeignKey("MerchantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Merchant");
                 });
 
             modelBuilder.Entity("Salasel.Domain.Entities.MerchantInventory", b =>
@@ -528,13 +845,19 @@ namespace Salasel.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Salasel.Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Salasel.Domain.Entities.SupplierProfile", "Supplier")
                         .WithMany("SubOrders")
                         .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("MasterOrder");
+
+                    b.Navigation("Product");
 
                     b.Navigation("Supplier");
                 });
@@ -569,6 +892,17 @@ namespace Salasel.Infrastructure.Migrations
                     b.Navigation("Owner");
                 });
 
+            modelBuilder.Entity("Salasel.Domain.Entities.SupplierWarehouse", b =>
+                {
+                    b.HasOne("Salasel.Domain.Entities.SupplierProfile", "Supplier")
+                        .WithMany("Warehouses")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Supplier");
+                });
+
             modelBuilder.Entity("Salasel.Domain.Entities.VoiceProcurementLog", b =>
                 {
                     b.HasOne("Salasel.Domain.Entities.MerchantsProfile", "Merchant")
@@ -592,6 +926,8 @@ namespace Salasel.Infrastructure.Migrations
 
             modelBuilder.Entity("Salasel.Domain.Entities.MerchantsProfile", b =>
                 {
+                    b.Navigation("Documents");
+
                     b.Navigation("Inventories");
 
                     b.Navigation("MasterOrders");
@@ -606,11 +942,18 @@ namespace Salasel.Infrastructure.Migrations
                     b.Navigation("SupplierProducts");
                 });
 
+            modelBuilder.Entity("Salasel.Domain.Entities.SubOrder", b =>
+                {
+                    b.Navigation("Bids");
+                });
+
             modelBuilder.Entity("Salasel.Domain.Entities.SupplierProfile", b =>
                 {
                     b.Navigation("SubOrders");
 
                     b.Navigation("SupplierProducts");
+
+                    b.Navigation("Warehouses");
                 });
 
             modelBuilder.Entity("Salasel.Domain.Entities.User", b =>

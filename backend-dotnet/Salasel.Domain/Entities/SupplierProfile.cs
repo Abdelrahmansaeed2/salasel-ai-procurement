@@ -25,6 +25,13 @@ public class SupplierProfile
     public string TaxNumber { get; set; } = string.Empty;
     public string BankName { get; set; } = string.Empty;
     public string Iban { get; set; } = string.Empty;
+    
+    // New expanded fields from the frontend wizard
+    public string BusinessType { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+    public string JobTitle { get; set; } = string.Empty;
+    public string VatNumber { get; set; } = string.Empty;
+    public bool IsVatExempt { get; set; }
 
     // How far through the wizard the supplier has gotten. Set to
     // SuppliersMeController.TotalRegistrationSteps once POST /register

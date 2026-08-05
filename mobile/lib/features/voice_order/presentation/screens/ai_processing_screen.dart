@@ -8,6 +8,7 @@ import '../../../../core/widgets/animated_pressable.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../orders/presentation/screens/order_review_screen.dart';
 import '../controllers/ai_processing_controller.dart';
+import 'ai_clarification_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 const String _mascotImageUrl =
@@ -147,12 +148,20 @@ class AiProcessingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(AiProcessingController());
-    controller.start(() {
-      Get.off(
-        () => OrderReviewScreen(),
-        transition: Transition.rightToLeftWithFade,
-        duration: Duration(milliseconds: 350),
-      );
+    controller.start((bool needsClarification) {
+      if (needsClarification) {
+        Get.off(
+          () => const AiClarificationScreen(),
+          transition: Transition.rightToLeftWithFade,
+          duration: const Duration(milliseconds: 350),
+        );
+      } else {
+        Get.off(
+          () => const OrderReviewScreen(),
+          transition: Transition.rightToLeftWithFade,
+          duration: const Duration(milliseconds: 350),
+        );
+      }
     });
 
     return Directionality(

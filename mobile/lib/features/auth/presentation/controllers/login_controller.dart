@@ -4,6 +4,7 @@ import '../../../../features/stores/presentation/screens/welcomepage_screen.dart
 import '../../../../features/home/presentation/screens/home_screen.dart';
 import '../../../../core/network/api_client.dart';
 import '../screens/register_screen.dart';
+import '../../data/repositories/auth_repository.dart';
 
 class LoginController extends GetxController {
   static const String welcomeEmail = 'welcome@salasel.com';
@@ -14,7 +15,7 @@ class LoginController extends GetxController {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   
-  final ApiClient _apiClient = ApiClient();
+  final AuthRepository _authRepository = AuthRepository();
 
   RxBool hasText = false.obs;
   RxBool isFocused = false.obs;
@@ -52,36 +53,23 @@ class LoginController extends GetxController {
     errorMessage.value = '';
 
     try {
-      // TODO: Replace with real endpoint
-      /*
-      final response = await _apiClient.dio.post('/auth/login', data: {
-        'email': email,
-        'password': password,
-      });
-      final token = response.data['token'];
-      await _apiClient.saveToken(token);
-      */
+      final authResponse = await _authRepository.login(email, password);
       
-      await Future.delayed(Duration(seconds: 1)); // Mock network delay
-      
-      // Keeping mock logic for now so UI remains testable
-      if (email == welcomeEmail && password == welcomePassword) {
-        Get.offAll(
-          () => StoresScreen(),
-          transition: Transition.fadeIn,
-          duration: Duration(milliseconds: 350),
-        );
-      } else if (email == homeEmail && password == homePassword) {
+      if (authResponse.isSetupCompleted) {
         Get.offAll(
           () => HomeScreen(),
           transition: Transition.fadeIn,
           duration: Duration(milliseconds: 350),
         );
       } else {
-        errorMessage.value = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+        Get.offAll(
+          () => StoresScreen(),
+          transition: Transition.fadeIn,
+          duration: Duration(milliseconds: 350),
+        );
       }
     } catch (e) {
-      errorMessage.value = 'حدث خطأ في الاتصال بالخادم';
+      errorMessage.value = e.toString().replaceAll('Exception: ', '');
     } finally {
       isLoading.value = false;
     }

@@ -1,0 +1,347 @@
+<div class="orders-page">
+  <header class="orders-header">
+    <div class="header-actions">
+      <button type="button" class="btn-primary">
+        <span>إنشاء طلبية</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 6.67H0V5h5V0h1.67v5h5v1.67h-5v5H5V6.67Z" fill="white"/></svg>
+      </button>
+      <button type="button" class="btn-outline">
+        <span>تصدير CSV</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M6.67 10 2.5 5.83l1.17-1.2 2.16 2.16V0h1.67v6.79l2.17-2.16 1.16 1.2L6.67 10ZM1.67 13.33c-.46 0-.85-.16-1.18-.49A1.6 1.6 0 0 1 0 11.67V9.17h1.67v2.5h10v-2.5h1.66v2.5c0 .46-.16.85-.49 1.17-.33.33-.72.49-1.17.49H1.67Z" fill="#191B23"/></svg>
+      </button>
+    </div>
+    <div class="header-titles">
+      <h1>مركز عمليات الطلبات</h1>
+      <div class="header-meta">
+        <span class="active-count">
+          <svg width="20" height="17" viewBox="0 0 20 17" fill="none"><path d="M0 16.2V.37h9.22v2h-8.24v13.83H0Z" fill="#004AC6"/></svg>
+          الطلبات الواردة النشطة:
+        </span>
+        <span class="system-status">
+          <span class="status-dot"></span>
+          حالة النظام: متصل
+        </span>
+      </div>
+      <div class="view-toggle">
+        <button type="button" class="view-toggle-btn" [class.active]="viewMode() === 'feed'" (click)="setViewMode('feed')">عرض القائمة</button>
+        <button type="button" class="view-toggle-btn" [class.active]="viewMode() === 'board'" (click)="setViewMode('board')">أعمدة</button>
+      </div>
+    </div>
+  </header>
+
+  @if (viewMode() === 'board') {
+    <section class="board-actions">
+      <button type="button" class="btn-primary">
+        <span>تصدير CSV</span>
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M4.67 7V3.21L2.75 5.37 1.58 4.17 4.67 0l3.08 4.17-1.17 1.2L4.67 3.2V7ZM1.17 9.33c-.32 0-.6-.11-.83-.34A1.13 1.13 0 0 1 0 8.17V6.42h1.17v1.75h7v-1.75h1.16v1.75c0 .32-.11.6-.34.83-.23.23-.5.34-.82.34H1.17Z" fill="white"/></svg>
+      </button>
+      <button type="button" class="btn-outline">
+        <span>المزيد من الفلاتر</span>
+        <svg width="11" height="7" viewBox="0 0 11 7" fill="none"><path d="M4.08 7V5.83h2.34V7H4.08ZM1.75 4.08V2.92h7v1.16h-7ZM0 1.17V0h10.5v1.17H0Z" fill="#191B23"/></svg>
+      </button>
+      <button type="button" class="btn-outline">
+        <span>24 أكتوبر - 31 أكتوبر، 2023</span>
+        <svg width="11" height="12" viewBox="0 0 11 12" fill="none"><path d="M1.17 11.67c-.32 0-.6-.11-.83-.34A1.13 1.13 0 0 1 0 10.5V2.33c0-.32.11-.6.34-.83.23-.23.5-.34.83-.34h.58V0h1.17v1.17h4.66V0h1.17v1.17h.58c.32 0 .6.11.83.33.23.23.34.51.34.83v8.17c0 .32-.11.6-.34.82-.23.23-.5.34-.83.34H1.17Zm0-1.17h8.16V4.67H1.17V10.5Zm0-7h8.16V2.33H1.17V3.5Z" fill="#191B23"/></svg>
+      </button>
+    </section>
+
+    <section class="board-columns">
+      @for (column of boardColumns(); track column.key) {
+        <div class="board-column">
+          <div class="board-column-header">
+            <div class="board-column-actions">
+              <button type="button" class="board-icon-btn" aria-label="المزيد">
+                <svg width="14" height="4" viewBox="0 0 14 4" fill="none"><path d="M1.67 3.33c-.46 0-.85-.16-1.18-.49A1.6 1.6 0 0 1 0 1.67c0-.46.16-.85.49-1.18A1.6 1.6 0 0 1 1.67 0c.46 0 .85.16 1.17.49.33.33.5.72.5 1.18 0 .46-.17.85-.5 1.17-.32.33-.71.49-1.17.49Zm5 0c-.46 0-.85-.16-1.18-.49a1.6 1.6 0 0 1-.49-1.17c0-.46.16-.85.49-1.18A1.6 1.6 0 0 1 6.67 0c.46 0 .85.16 1.17.49.33.33.5.72.5 1.18 0 .46-.17.85-.5 1.17-.32.33-.71.49-1.17.49Zm5 0c-.46 0-.85-.16-1.18-.49a1.6 1.6 0 0 1-.49-1.17c0-.46.16-.85.49-1.18A1.6 1.6 0 0 1 11.67 0c.46 0 .85.16 1.17.49.33.33.5.72.5 1.18 0 .46-.17.85-.5 1.17-.32.33-.71.49-1.17.49Z" fill="#191B23"/></svg>
+              </button>
+              <button type="button" class="board-icon-btn" aria-label="إضافة">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 6.67H0V5h5V0h1.67v5h5v1.67h-5v5H5V6.67Z" fill="#191B23"/></svg>
+              </button>
+            </div>
+            <div class="board-column-title">
+              <h3 [style.color]="column.color">{{ column.label }} ({{ column.count }})</h3>
+              <span class="board-column-dot" [style.color]="column.color">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.08"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <div class="board-column-body">
+            @for (card of column.cards; track card.id) {
+              <article class="board-card" (click)="column.key === 'pending' ? openBiddingDrawer(card.id) : openDetail(card.id)" [class.cursor-pointer]="true">
+                <div class="board-card-top">
+                  <svg width="10" height="16" viewBox="0 0 10 16" fill="none"><path d="M2 16a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM2 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM2 4a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" fill="#737686"/></svg>
+                  <div class="board-card-id-row">
+                    <span class="board-card-id">{{ card.id }}</span>
+                    <span class="board-card-checkbox"></span>
+                  </div>
+                </div>
+
+                <h4 class="board-card-merchant">{{ card.merchant }}</h4>
+
+                @if (column.key === 'rejected') {
+                  <p class="board-card-reason">{{ card.subtitle }}</p>
+                } @else {
+                  <div class="board-card-subtitle-row">
+                    <span class="board-card-subtitle">{{ card.subtitle }}</span>
+                    @if (card.avatarInitials) {
+                      <span class="board-card-avatar">{{ card.avatarInitials }}</span>
+                    }
+                  </div>
+                }
+
+                <div class="board-card-mid">
+                  @if (card.badgeLabel) {
+                    <span class="board-card-badge" [class]="'board-card-badge--' + (card.badgeVariant ?? 'neutral')">{{ card.badgeLabel }}</span>
+                  } @else {
+                    <span></span>
+                  }
+                  <span class="board-card-total">{{ card.total }}</span>
+                </div>
+
+                <div class="board-card-footer">
+                  <div class="board-card-meta-group">
+                    @if (card.metaRight) {
+                      <span class="board-card-meta">{{ card.metaRight }}</span>
+                    }
+                    <span class="board-card-meta">{{ card.metaLeft }}</span>
+                  </div>
+                  @if (column.key === 'accepted') {
+                    <button type="button" class="btn-dispatch btn-press" (click)="markAsOutForDelivery(card.id, $event)">
+                      تأكيد التوصيل
+                    </button>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+        </div>
+      }
+    </section>
+  } @else {
+    <section class="filters-row">
+      <div class="filters-left">
+        <div class="quick-filters">
+          <button type="button" class="pill" [class.active]="activeFilter() === 'premium'" (click)="toggleFilter('premium')">تجار مميزون</button>
+          <button type="button" class="pill" [class.active]="activeFilter() === 'low-confidence'" (click)="toggleFilter('low-confidence')">ثقة منخفضة</button>
+          <button type="button" class="pill pill--primary" [class.active]="activeFilter() === 'high-priority'" (click)="toggleFilter('high-priority')">عالي الأهمية</button>
+        </div>
+        <span class="filter-label">فلترة سريعة:</span>
+      </div>
+      <button type="button" class="range-select">
+        <span>آخر ٢٤ ساعة</span>
+        <svg width="17" height="6" viewBox="0 0 17 6" fill="none"><path d="M4.5 5.55 0 1.05 1.05 0 4.5 3.45 7.95 0 9 1.05 4.5 5.55Z" fill="#737686"/></svg>
+      </button>
+    </section>
+
+    <section class="order-cards">
+      @for (order of orders(); track order.id) {
+        <article class="order-card">
+          <div class="order-card-top">
+            <div class="confidence-ring" [style.--ring-color]="order.confidenceColor" [style.--ring-percent]="order.confidence">
+              <span>{{ order.confidence }}٪</span>
+            </div>
+            <div class="order-card-meta">
+              <span class="priority-label" [class]="'priority-' + order.priority">{{ order.priorityLabel }}</span>
+              <h3>{{ order.id }}</h3>
+              <p>{{ order.merchant }}</p>
+            </div>
+          </div>
+
+          @if (order.warning) {
+            <div class="order-warning">
+              <span>{{ order.warning }}</span>
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="#BA1A1A" stroke-width="1"/></svg>
+            </div>
+          }
+
+          @if (order.aiNote) {
+            <div class="order-ai-note">{{ order.aiNote }}</div>
+          }
+
+          <ul class="order-items">
+            @for (item of order.items; track item.label) {
+              <li>
+                <span class="item-price">{{ item.price }}</span>
+                <span class="item-label">{{ item.label }}</span>
+              </li>
+            }
+          </ul>
+
+          <div class="order-card-footer">
+            <div class="total-row">
+              <span class="total-value">{{ order.total }}</span>
+              <span class="total-label">إجمالي القيمة</span>
+            </div>
+            <div class="action-row">
+              <button type="button" class="btn-resolve" (click)="resolve(order.id)">حل المشكلة</button>
+              <button type="button" class="btn-contact">الاتصال بالتاجر</button>
+            </div>
+            @if (order.priority !== 'review') {
+              <div class="action-row action-row--accept">
+                <button type="button" class="btn-reject" (click)="reject(order.id)">رفض</button>
+                <button type="button" class="btn-accept" (click)="accept(order.id)">
+                  {{ order.priority === 'scheduled' ? 'قبول سريع' : 'قبول' }}
+                </button>
+              </div>
+            }
+            <button type="button" class="btn-link" (click)="openDetail(order.id)">عرض التفاصيل</button>
+          </div>
+        </article>
+      }
+      @if (orders().length === 0) {
+        <p class="empty-state">لا توجد طلبات نشطة حالياً.</p>
+      }
+    </section>
+  }
+
+  <section class="ai-banner">
+    <svg width="24" height="23" viewBox="0 0 24 23" fill="none"><path d="M2.67 22.67a2.67 2.67 0 1 1 0-5.34c.13 0 .25 0 .35.01l6.07-6.07a1 1 0 0 1-.06-.34c0-.73.26-1.36.78-1.88.52-.52 1.15-.78 1.88-.78s1.36.26 1.88.78c.52.52.78 1.15.78 1.87 0 .04-.02.27-.07.67L18 14.73a1 1 0 0 1 .35-.06c.1 0 .22 0 .35.06l4.73-4.73a1 1 0 0 1-.07-.34c0-.73.26-1.36.78-1.88.52-.52 1.15-.79 1.88-.79" fill="none"/></svg>
+    <span>رؤية كفاءة المشتريات: يقترح الذكاء الاصطناعي تحسين مسار (جدة - الشرق) لإرسالية الساعة 4 مساءً لتوفير حوالي 12% من تكاليف الوقود بناءً على أنماط حركة المرور في الوقت الفعلي.</span>
+    <button type="button" class="btn-apply">تطبيق المقترح</button>
+  </section>
+
+  <button type="button" class="fab" aria-label="طلب جديد">
+    <svg width="19" height="19" viewBox="0 0 19 19" fill="none"><path d="M8 10.67H0V8h8V0h2.67v8h8v2.67h-8v8H8V10.67Z" fill="white"/></svg>
+  </button>
+
+  @if (detailOrder(); as order) {
+    <div class="drawer-backdrop" (click)="closeDetail()"></div>
+    <aside class="detail-drawer" dir="ltr">
+      <button type="button" class="drawer-close" (click)="closeDetail()" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12.4 3.6 8 8l4.4 4.4-1.4 1.4L6.6 9.4 2.2 13.8.8 12.4 5.2 8 .8 3.6 2.2 2.2l4.4 4.4L11 2.2Z" fill="#374957"/></svg>
+      </button>
+
+      <div class="drawer-body">
+        <section class="drawer-section">
+          <div class="merchant-row">
+            <div class="merchant-avatar">{{ order.merchant.slice(0, 2) }}</div>
+            <div class="merchant-meta">
+              <h4>{{ order.merchant }}</h4>
+              <p>Tier 1 Strategic Partner • Riyadh, KSA</p>
+            </div>
+          </div>
+          <div class="merchant-stats">
+            <div class="merchant-stat">
+              <span class="stat-label">CUSTOMER CREDIT</span>
+              <span class="stat-value">SAR 1.2M / 2.5M</span>
+            </div>
+            <div class="merchant-stat">
+              <span class="stat-label">LAST ORDER</span>
+              <span class="stat-value">2 days ago</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="drawer-section ai-section">
+          <div class="ai-heading">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M18 8 16.75 5.25 14 4l2.75-1.25L18 0l1.25 2.75L22 4l-2.75 1.25L18 8Zm0 14-1.25-2.75L14 18l2.75-1.25L18 14l1.25 2.75L22 18l-2.75 1.25L18 22ZM8 19l-2.5-5.5L0 11l5.5-2.5L8 3l2.5 5.5L16 11l-5.5 2.5L8 19Z" fill="#004AC6"/></svg>
+            <h4>AI Route Validation</h4>
+          </div>
+          <p>Order {{ order.id }} matches standard procurement patterns. Inventory available in Riyadh Central Hub. Suggested driver: Ahmad K. (Nearest with correct vehicle capacity).</p>
+          <div class="ai-badges">
+            <span class="ai-badge">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5.02 8.52 9.13 4.4 8.31 3.59 5.02 6.88 3.35 5.22l-.81.81L5.02 8.52Z" fill="#16A34A"/></svg>
+              Inventory OK
+            </span>
+            <span class="ai-badge">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5.02 8.52 9.13 4.4 8.31 3.59 5.02 6.88 3.35 5.22l-.81.81L5.02 8.52Z" fill="#16A34A"/></svg>
+              Route optimized
+            </span>
+          </div>
+        </section>
+
+        <section class="drawer-section">
+          <h4 class="section-title">Order Items ({{ detailItems.length }})</h4>
+          <div class="items-list">
+            @for (item of detailItems; track item.name) {
+              <div class="item-row">
+                <div class="item-icon">
+                  <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M2 22v-4.2A3.2 3.2 0 0 1 0 15V5h2V1a1 1 0 0 1 2 0v4h2v10a3.2 3.2 0 0 1-2 2.8V22H2Z" fill="#434655"/></svg>
+                </div>
+                <div class="item-meta">
+                  <span class="item-name">{{ item.name }}</span>
+                  <span class="item-qty">{{ item.qty }}</span>
+                </div>
+                <span class="item-total">{{ item.total }}</span>
+              </div>
+            }
+          </div>
+          <button type="button" class="view-all-btn">View All Items</button>
+        </section>
+
+        <section class="drawer-section">
+          <h4 class="section-title">Fulfillment Timeline</h4>
+          <ul class="timeline">
+            @for (step of timeline; track step.label) {
+              <li class="timeline-step" [class.timeline-step--pending]="!step.done">
+                <span class="timeline-dot"></span>
+                <span class="timeline-label">{{ step.label }}</span>
+                <span class="timeline-time">{{ step.time }}</span>
+              </li>
+            }
+          </ul>
+        </section>
+      </div>
+    </aside>
+  }
+
+  @if (biddingOrderId(); as orderId) {
+    <div class="drawer-backdrop fade-in" (click)="closeBiddingDrawer()"></div>
+    <aside class="detail-drawer bidding-drawer" dir="rtl">
+      <button type="button" class="drawer-close btn-press" (click)="closeBiddingDrawer()" aria-label="إغلاق">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12.4 3.6 8 8l4.4 4.4-1.4 1.4L6.6 9.4 2.2 13.8.8 12.4 5.2 8 .8 3.6 2.2 2.2l4.4 4.4L11 2.2Z" fill="currentColor"/></svg>
+      </button>
+
+      <div class="drawer-body">
+        <section class="drawer-section">
+          <div class="merchant-row">
+            <div class="merchant-meta">
+              <h4>طلب التسعير {{ orderId }}</h4>
+              <p>مطلوب تسعير البضائع وتأكيد التوفر.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="drawer-section">
+          <h4 class="section-title">قائمة المشتريات المطلوبة</h4>
+          <div class="items-list">
+            <div class="item-row">
+              <div class="item-meta">
+                <span class="item-name">حليب كامل الدسم المراعي 1 لتر</span>
+                <span class="item-qty">الكمية: 50 كرتون</span>
+              </div>
+            </div>
+            <div class="item-row">
+              <div class="item-meta">
+                <span class="item-name">سكر أسرة ناعم 10 كجم</span>
+                <span class="item-qty">الكمية: 20 كيس</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="drawer-section bidding-input-section">
+          <h4 class="section-title">تقديم عرض السعر</h4>
+          <div class="form-group">
+            <label for="bidAmount" class="form-label">إجمالي السعر الشامل (ر.س)</label>
+            <div class="input-wrapper">
+              <input type="number" id="bidAmount" class="modern-input" placeholder="أدخل سعرك هنا..." [value]="bidAmount()" (input)="bidAmount.set($any($event.target).value)" />
+            </div>
+          </div>
+        </section>
+      </div>
+      
+      <footer class="drawer-footer-actions">
+        <button type="button" class="btn-cancel btn-press" (click)="closeBiddingDrawer()">إلغاء</button>
+        <button type="button" class="btn-submit btn-press" (click)="submitBid()" [disabled]="!bidAmount() || isSubmittingBid()">
+          @if (isSubmittingBid()) {
+            <span class="spinner"></span>
+            جاري التقديم...
+          } @else {
+            تقديم العرض النهائي
+          }
+        </button>
+      </footer>
+    </aside>
+  }
+</div>

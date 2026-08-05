@@ -185,6 +185,9 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 // ── Auto-apply EF Core migrations on startup ────────────────────────────────
+bool migrationSuccess = true;
+string? migrationError = null;
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<SalaselDbContext>();
@@ -198,7 +201,11 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         logger.LogError(ex, "Failed to apply database migrations.");
-        throw;
+        migrationSuccess = false;
+        migrationError = ex.Message;
+        // We purposely do NOT throw here anymore.
+        // This ensures the API server stays alive even if the DB is down,
+        // allowing Nginx to route traffic and us to see the /api/diagnostics page.
     }
 }
 
@@ -211,7 +218,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<LangfuseMiddleware>();
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // Disabled because Nginx handles HTTPS termination
 app.UseStaticFiles();
 
 app.UseSerilogRequestLogging(); // <-- Records HTTP request times extremely fast
@@ -225,5 +232,39 @@ app.UseAuthorization();
 app.MapHub<NotificationHub>("/notificationHub");
 app.MapControllers();
 app.MapHealthChecks("/health");
+
+app.MapGet("/api/diagnostics", async (SalaselDbContext db, IConfiguration config) =>
+{
+    bool dbCanConnect = false;
+    string? dbError = null;
+
+    try
+    {
+        dbCanConnect = await db.Database.CanConnectAsync();
+    }
+    catch (Exception ex)
+    {
+        dbError = ex.Message;
+    }
+
+    return Results.Ok(new
+    {
+        status = "API is running and reachable by Nginx!",
+        serverTimeUtc = DateTime.UtcNow,
+        environment = app.Environment.EnvironmentName,
+        database = new
+        {
+            connectionStringConfigured = !string.IsNullOrEmpty(config.GetConnectionString("DefaultConnection")),
+            canConnectNow = dbCanConnect,
+            connectionTestError = dbError,
+            startupMigrationSuccess = migrationSuccess,
+            startupMigrationError = migrationError
+        },
+        jwt = new
+        {
+            keyConfigured = !string.IsNullOrEmpty(config["Jwt:Key"])
+        }
+    });
+});
 
 app.Run();

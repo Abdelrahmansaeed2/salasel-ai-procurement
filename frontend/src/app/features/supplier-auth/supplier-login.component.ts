@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { SiteFooterComponent } from '../../shared/site-footer/site-footer.component';
 import { SiteHeaderComponent } from '../../shared/site-header/site-header.component';
+import { AuthService } from '../../core/auth/auth.service';
 
 interface Statistic {
   value: string;
@@ -21,6 +22,10 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   styleUrl: './supplier-login.component.css',
 })
 export class SupplierLoginComponent {
+  private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly auth = inject(AuthService);
+
   readonly email = signal('');
   readonly password = signal('');
   readonly rememberMe = signal(false);
@@ -61,14 +66,35 @@ export class SupplierLoginComponent {
     this.errorMessage.set(null);
     this.isSubmitting.set(true);
 
-    window.setTimeout(() => {
-      this.isSubmitting.set(false);
-    }, 900);
+    this.auth.login(email, password).subscribe({
+      next: (res) => {
+        this.isSubmitting.set(false);
+        const returnUrl = this.activatedRoute.snapshot.queryParamMap.get('returnUrl');
+        
+        // If they are not verified/setup yet, you could route them to the setup wizard here
+        // if (!res.isSetupCompleted) { ... }
+        
+        this.router.navigateByUrl(returnUrl ?? '/portal/dashboard');
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        if (err.status === 401) {
+          this.errorMessage.set('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+        } else {
+          this.errorMessage.set('حدث خطأ في الاتصال بالخادم. يرجى المحاولة لاحقاً');
+        }
+      }
+    });
   }
 
   loginWithProvider(provider: 'microsoft' | 'google'): void {
     this.errorMessage.set(null);
-    
-    console.log(`تسجيل الدخول بواسطة ${provider}`);
+    this.isSubmitting.set(true);
+
+    // TODO: Implement actual OAuth when API supports it
+    window.setTimeout(() => {
+      this.isSubmitting.set(false);
+      this.errorMessage.set('تسجيل الدخول عبر الحسابات غير مدعوم حالياً');
+    }, 700);
   }
 }

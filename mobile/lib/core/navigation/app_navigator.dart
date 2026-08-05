@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/inventory/presentation/screens/inventory_screen.dart';
 import '../../features/orders/presentation/screens/orders_screen.dart';
+import '../../features/profile/presentation/screens/profile_screen.dart';
 
 /// مركز التنقل — كل الـ controllers بتستخدمه عشان مفيش circular imports
 class AppNavigator {
@@ -28,6 +29,12 @@ class AppNavigator {
     } else if (index == 2) {
       Get.to(
         () => const OrdersScreen(),
+        transition: Transition.fadeIn,
+        duration: const Duration(milliseconds: 200),
+      );
+    } else if (index == 3) {
+      Get.to(
+        () => const ProfileScreen(),
         transition: Transition.fadeIn,
         duration: const Duration(milliseconds: 200),
       );

@@ -155,7 +155,7 @@ class SetupCompleteScreen extends StatelessWidget {
               
               // Footer Text
               Text(
-                'سلاسل © 2024 - منصة التوريد الذكية',
+                'سلاسل © 2026 - منصة التوريد الذكية',
                 textAlign: TextAlign.center,
                 style: AppTextStyles.footerBody.copyWith(fontSize: 11.sp),
               ),

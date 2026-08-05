@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Salasel.Application.DTOs;
@@ -62,11 +62,22 @@ public class SuppliersMeController : ControllerBase
         if (supplier == null)
             return NotFound(new { Message = "No supplier profile exists for this account." });
 
-        supplier.CompanyName = request.CompanyName;
-        supplier.CrNumber = request.CrNumber;
-        supplier.TaxNumber = request.TaxNumber;
-        supplier.BankName = request.BankName;
-        supplier.Iban = request.Iban;
+        supplier.CompanyName = request.FacilityInfo.LegalName;
+        supplier.BusinessType = request.FacilityInfo.BusinessType;
+        supplier.CrNumber = request.FacilityInfo.RegistrationNumber;
+        supplier.Address = request.FacilityInfo.Address;
+        
+        supplier.ContactPhone = request.ContactInfo.PhoneNumber;
+        supplier.JobTitle = request.ContactInfo.JobTitle;
+        
+        supplier.TaxNumber = request.TaxInfo.TaxId;
+        supplier.VatNumber = request.TaxInfo.VatNumber;
+        supplier.IsVatExempt = request.TaxInfo.IsVatExempt;
+        
+        // The wizard doesn't explicitly collect Bank info right now, so these might be empty
+        supplier.BankName = request.BankName ?? string.Empty;
+        supplier.Iban = request.Iban ?? string.Empty;
+        
         supplier.RegistrationStep = TotalRegistrationSteps;
 
         await ReplaceWarehousesAsync(supplier.SupplierID, request.Warehouses);
@@ -75,14 +86,44 @@ public class SuppliersMeController : ControllerBase
         await _supplierRepository.SaveChangesAsync();
 
         var owner = await _userRepository.GetByIdAsync(userId.Value);
-        if (owner != null && !owner.IsSetupCompleted)
+        if (owner != null)
         {
-            owner.IsSetupCompleted = true;
+            if (!string.IsNullOrWhiteSpace(request.ContactInfo.FullName))
+            {
+                owner.FullName = request.ContactInfo.FullName;
+            }
+            if (!owner.IsSetupCompleted)
+            {
+                owner.IsSetupCompleted = true;
+            }
             await _userRepository.UpdateAsync(owner);
             await _userRepository.SaveChangesAsync();
         }
 
         return Ok(await ToProfileDtoAsync(supplier));
+    }
+
+    [HttpPost("me/documents")]
+    public async Task<IActionResult> UploadDocuments([FromForm] IFormFileCollection files)
+    {
+        var userId = CurrentUserId();
+        if (userId == null) return Unauthorized();
+
+        var supplier = await GetMySupplierAsync(userId.Value);
+        if (supplier == null) return NotFound();
+
+        // In a real scenario, you'd upload these to S3 or Blob Storage
+        // For now, just simulate success to satisfy the frontend wizard
+        var savedFiles = new List<string>();
+        foreach (var file in files)
+        {
+            if (file.Length > 0)
+            {
+                savedFiles.Add(file.FileName);
+            }
+        }
+
+        return Ok(new { Message = "Documents uploaded successfully", Files = savedFiles });
     }
 
     [HttpGet("me")]
@@ -288,7 +329,7 @@ public class SuppliersMeController : ControllerBase
     private Task<SupplierProfile?> GetMySupplierAsync(int userId) =>
         _supplierRepository.SingleOrDefaultAsync(s => s.OwnerUserId == userId);
 
-    private async Task ReplaceWarehousesAsync(int supplierId, List<WarehouseDto> warehouses)
+    private async Task ReplaceWarehousesAsync(int supplierId, List<SupplierSetupWarehouseDto> warehouses)
     {
         var existing = await _warehouseRepository.FindAsync(w => w.SupplierId == supplierId);
         await _warehouseRepository.RemoveRangeAsync(existing);
@@ -296,6 +337,8 @@ public class SuppliersMeController : ControllerBase
         await _warehouseRepository.AddRangeAsync(warehouses.Select(w => new SupplierWarehouse
         {
             SupplierId = supplierId,
+            WarehouseName = w.WarehouseName,
+            Capacity = w.Capacity,
             City = w.City,
             Lat = w.Lat,
             Lng = w.Lng

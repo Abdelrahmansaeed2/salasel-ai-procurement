@@ -32,7 +32,7 @@ services:
     restart: unless-stopped
     environment:
       ACCEPT_EULA: "Y"
-      SEQ_FIRSTRUN_ADMINPASSWORD: "${SEQ_PASSWORD:-Sls3l_Seq#2026!Secure@Vault91}"
+      SEQ_FIRSTRUN_ADMINPASSWORD: "${SEQ_PASSWORD}"
     ports:
       - "5342:80"     # UI and Ingestion
     volumes:
