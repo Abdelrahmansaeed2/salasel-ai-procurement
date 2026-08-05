@@ -1,15 +1,7 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-interface MerchantApproval {
-  id: string;
-  name: string;
-  crNumber: string;
-  location: string;
-  category: string;
-  submittedAt: Date;
-  status: 'Pending' | 'Approved' | 'Rejected';
-}
+import { AdminService, PendingMerchant } from '../../../core/services/admin.service';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-admin-approvals',
@@ -19,33 +11,24 @@ interface MerchantApproval {
   styleUrl: './admin-approvals.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdminApprovalsComponent {
-  // Mock Data for UI/UX Review
-  readonly pendingMerchants = signal<MerchantApproval[]>([
-    {
-      id: 'MER-1002',
-      name: 'أسواق التميمي',
-      crNumber: '1010998877',
-      location: 'الرياض، السعودية',
-      category: 'سوبر ماركت',
-      submittedAt: new Date(Date.now() - 3600000 * 2), // 2 hours ago
-      status: 'Pending',
-    },
-    {
-      id: 'MER-1005',
-      name: 'بقالة ركن الياسمين',
-      crNumber: '2050112233',
-      location: 'جدة، السعودية',
-      category: 'تموينات',
-      submittedAt: new Date(Date.now() - 3600000 * 5),
-      status: 'Pending',
-    },
-  ]);
+export class AdminApprovalsComponent implements OnInit {
+  private readonly adminService = inject(AdminService);
 
-  readonly selectedMerchant = signal<MerchantApproval | null>(null);
+  readonly pendingMerchants = signal<PendingMerchant[]>([]);
+  readonly selectedMerchant = signal<PendingMerchant | null>(null);
   readonly isDrawerOpen = signal(false);
 
-  openReviewDrawer(merchant: MerchantApproval) {
+  ngOnInit() {
+    this.loadMerchants();
+  }
+
+  loadMerchants() {
+    this.adminService.getPendingMerchants().pipe(take(1)).subscribe((merchants) => {
+      this.pendingMerchants.set(merchants);
+    });
+  }
+
+  openReviewDrawer(merchant: PendingMerchant) {
     this.selectedMerchant.set(merchant);
     this.isDrawerOpen.set(true);
   }
@@ -55,17 +38,20 @@ export class AdminApprovalsComponent {
     setTimeout(() => this.selectedMerchant.set(null), 300); // Wait for transition
   }
 
-  approveMerchant(id: string) {
-    this.pendingMerchants.update((merchants) =>
-      merchants.filter((m) => m.id !== id)
-    );
-    this.closeDrawer();
+  approveMerchant(id: number) {
+    this.adminService.approveMerchant(id).subscribe({
+      next: () => {
+        this.pendingMerchants.update((merchants) => merchants.filter((m) => m.merchantID !== id));
+        this.closeDrawer();
+      },
+      error: (err) => console.error('Failed to approve merchant', err)
+    });
   }
 
-  rejectMerchant(id: string) {
-    this.pendingMerchants.update((merchants) =>
-      merchants.filter((m) => m.id !== id)
-    );
+  rejectMerchant(id: number) {
+    // Backend doesn't have an explicit reject yet, but we can simulate removing it from UI
+    this.pendingMerchants.update((merchants) => merchants.filter((m) => m.merchantID !== id));
     this.closeDrawer();
   }
 }
+

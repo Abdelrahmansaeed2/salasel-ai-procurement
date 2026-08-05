@@ -27,7 +27,7 @@
   </header>
 
   <section class="kpi-strip">
-    @for (kpi of kpis; track kpi.label) {
+    @for (kpi of kpis(); track kpi.label) {
       <article class="kpi-card">
         <div class="kpi-top">
           <span class="kpi-change">

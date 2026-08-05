@@ -38,28 +38,28 @@
           </tr>
         </thead>
         <tbody>
-          @for (merchant of pendingMerchants(); track merchant.id) {
+          @for (merchant of pendingMerchants(); track merchant.merchantID) {
             <tr class="hover-lift">
               <td>
                 <div class="merchant-info">
                   <div class="avatar-placeholder">
-                    {{ merchant.name.charAt(0) }}
+                    {{ merchant.shopName.charAt(0) }}
                   </div>
                   <div class="merchant-details">
-                    <span class="merchant-name">{{ merchant.name }}</span>
+                    <span class="merchant-name">{{ merchant.shopName }}</span>
                     <span class="merchant-location">
                       <svg width="12" height="12" viewBox="0 0 16 16" fill="none" class="location-icon">
                         <path d="M8 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="currentColor"/>
                         <path d="M8 15s6-4.5 6-9A6 6 0 1 0 2 6c0 4.5 6 9 6 9Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
                       </svg>
-                      {{ merchant.location }}
+                      {{ merchant.businessCity }}
                     </span>
                   </div>
                 </div>
               </td>
               <td class="mono-text">{{ merchant.crNumber }}</td>
-              <td><span class="category-badge">{{ merchant.category }}</span></td>
-              <td>{{ merchant.submittedAt | date:'shortTime' }}</td>
+              <td><span class="category-badge">{{ merchant.ownerName }}</span></td>
+              <td>{{ merchant.createdAt | date:'shortTime' }}</td>
               <td>
                 <span class="status-badge status-pending">قيد المراجعة</span>
               </td>
@@ -101,8 +101,8 @@
         <div class="drawer-body">
           <!-- Merchant Summary -->
           <div class="drawer-summary">
-            <div class="summary-avatar">{{ merchant.name.charAt(0) }}</div>
-            <h4>{{ merchant.name }}</h4>
+            <div class="summary-avatar">{{ merchant.shopName.charAt(0) }}</div>
+            <h4>{{ merchant.shopName }}</h4>
             <p>{{ merchant.crNumber }}</p>
           </div>
 
@@ -123,8 +123,8 @@
         </div>
 
         <footer class="drawer-footer">
-          <button class="btn-reject btn-press" (click)="rejectMerchant(merchant.id)">رفض الطلب</button>
-          <button class="btn-approve btn-press" (click)="approveMerchant(merchant.id)">اعتماد التاجر</button>
+          <button class="btn-reject btn-press" (click)="rejectMerchant(merchant.merchantID)">رفض الطلب</button>
+          <button class="btn-approve btn-press" (click)="approveMerchant(merchant.merchantID)">اعتماد التاجر</button>
         </footer>
       }
     </aside>

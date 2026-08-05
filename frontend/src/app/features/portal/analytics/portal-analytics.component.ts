@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal, inject, OnInit } from '@angular/core';
 import { AreaLineChartComponent } from '../ui/area-line-chart.component';
 import { BarChartComponent } from '../ui/bar-chart.component';
 import { DonutChartComponent, DonutSegment } from '../ui/donut-chart.component';
 import { SparklineComponent } from '../ui/sparkline.component';
 import { PaginationComponent } from '../ui/pagination.component';
+import { AdminService } from '../../../core/services/admin.service';
+import { take } from 'rxjs';
 
 interface AnalyticsKpi {
   label: string;
@@ -35,19 +37,31 @@ const MONTH_LABELS = ['يان', 'فبر', 'مار', 'أبر', 'ماي', 'يون'
   styleUrl: './portal-analytics.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PortalAnalyticsComponent {
+export class PortalAnalyticsComponent implements OnInit {
+  private readonly adminService = inject(AdminService);
+
   readonly year = signal(2026);
   readonly yearMenuOpen = signal(false);
 
   readonly monthLabels = MONTH_LABELS;
 
-  readonly kpis: AnalyticsKpi[] = [
-    { label: 'دوران المخزون', sublabel: 'معدل دوران شهري', value: '7.2', suffix: '×', change: '17.6٪', trend: [40, 55, 48, 52, 60, 68, 62, 70, 78, 85, 90, 98], iconBg: 'rgba(6,182,212,0.08)', iconColor: '#06B6D4' },
-    { label: 'الطلبات', value: '١٥٬٧٢٢', change: '17.6٪', trend: [38, 46, 55, 50, 58, 66, 60, 72, 80, 90, 96, 98], iconBg: 'rgba(139,92,246,0.08)', iconColor: '#8B5CF6' },
-    { label: 'معدل النمو', sublabel: 'نمو سنوي مقارن', value: '45', suffix: '٪', change: '17.6٪', trend: [42, 50, 58, 54, 62, 70, 66, 76, 82, 88, 94, 98], iconBg: 'rgba(16,185,129,0.08)', iconColor: '#10B981' },
-    { label: 'أداء الموردين', value: '96', suffix: '٪', change: '17.6٪', trend: [45, 52, 60, 56, 64, 72, 68, 78, 84, 90, 95, 98], iconBg: 'rgba(245,158,11,0.08)', iconColor: '#F59E0B' },
-    { label: 'الإيرادات', sublabel: '12 أشهر مجتمعة', value: '39.6', suffix: 'مليون جنيه', change: '17.6٪', trend: [36, 44, 52, 48, 56, 64, 60, 70, 78, 84, 92, 98], iconBg: 'rgba(37,99,235,0.08)', iconColor: '#2563EB' },
-  ];
+  readonly kpis = signal<AnalyticsKpi[]>([
+    { label: 'الطلبات', value: '...', change: '...', trend: [38, 46, 55, 50, 58, 66, 60, 72, 80, 90, 96, 98], iconBg: 'rgba(139,92,246,0.08)', iconColor: '#8B5CF6' },
+    { label: 'الإيرادات', sublabel: '12 أشهر مجتمعة', value: '...', suffix: 'EGP', change: '...', trend: [36, 44, 52, 48, 56, 64, 60, 70, 78, 84, 92, 98], iconBg: 'rgba(37,99,235,0.08)', iconColor: '#2563EB' },
+    { label: 'إجمالي التجار', value: '...', change: '...', trend: [42, 50, 58, 54, 62, 70, 66, 76, 82, 88, 94, 98], iconBg: 'rgba(16,185,129,0.08)', iconColor: '#10B981' },
+    { label: 'إجمالي الموردين', value: '...', change: '...', trend: [45, 52, 60, 56, 64, 72, 68, 78, 84, 90, 95, 98], iconBg: 'rgba(245,158,11,0.08)', iconColor: '#F59E0B' },
+  ]);
+
+  ngOnInit() {
+    this.adminService.getAnalytics().pipe(take(1)).subscribe((data) => {
+      this.kpis.set([
+        { label: 'الطلبات', value: data.totalOrders.toString(), change: '+12%', trend: [38, 46, 55, 50, 58, 66, 60, 72, 80, 90, 96, 98], iconBg: 'rgba(139,92,246,0.08)', iconColor: '#8B5CF6' },
+        { label: 'الإيرادات', sublabel: 'GMV', value: data.totalGmv.toLocaleString(), suffix: 'EGP', change: '+8%', trend: [36, 44, 52, 48, 56, 64, 60, 70, 78, 84, 92, 98], iconBg: 'rgba(37,99,235,0.08)', iconColor: '#2563EB' },
+        { label: 'إجمالي التجار', value: data.totalMerchants.toString(), change: '+5%', trend: [42, 50, 58, 54, 62, 70, 66, 76, 82, 88, 94, 98], iconBg: 'rgba(16,185,129,0.08)', iconColor: '#10B981' },
+        { label: 'إجمالي الموردين', value: data.totalSuppliers.toString(), change: '+3%', trend: [45, 52, 60, 56, 64, 72, 68, 78, 84, 90, 95, 98], iconBg: 'rgba(245,158,11,0.08)', iconColor: '#F59E0B' },
+      ]);
+    });
+  }
 
   readonly supplierDistribution: DonutSegment[] = [
     { label: 'الأندلس', value: 35, color: '#2563EB' },
