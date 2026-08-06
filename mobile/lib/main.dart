@@ -75,7 +75,7 @@ class _AppEntry extends StatelessWidget {
       displayDuration: Duration(seconds: 3),
       onTimeout: () {
         // Changed temporarily to show the CheckoutScreen directly for testing
-        Get.off(() => const CheckoutScreen(),
+               Get.off(() => const LoginScreen(),
             transition: Transition.fadeIn,
             duration: Duration(milliseconds: 400));
       },
