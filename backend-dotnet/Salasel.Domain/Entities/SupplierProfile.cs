@@ -1,3 +1,5 @@
+using Salasel.Domain.Enums;
+
 namespace Salasel.Domain.Entities;
 
 public class SupplierProfile
@@ -17,7 +19,13 @@ public class SupplierProfile
 
     public decimal ReliabilityScore { get; set; }  // 0-100, updated after each delivery
     public string PaymentTerms { get; set; } = string.Empty;
+
+    // Kept in sync with VerificationStatus == Approved, same pattern as
+    // MerchantsProfile.IsVerified — suppliers can't receive routed orders
+    // until an admin approves them.
     public bool IsActiveForRouting { get; set; }
+    public MerchantVerificationStatus VerificationStatus { get; set; } = MerchantVerificationStatus.NotSubmitted;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Registration wizard (SupplierSetupDto)
@@ -25,7 +33,7 @@ public class SupplierProfile
     public string TaxNumber { get; set; } = string.Empty;
     public string BankName { get; set; } = string.Empty;
     public string Iban { get; set; } = string.Empty;
-    
+
     // New expanded fields from the frontend wizard
     public string BusinessType { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;

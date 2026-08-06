@@ -46,7 +46,7 @@ public class SupplierSetupDto
     public SupplierContactInfoDto ContactInfo { get; set; } = new();
     public SupplierTaxInfoDto TaxInfo { get; set; } = new();
     public List<SupplierSetupWarehouseDto> Warehouses { get; set; } = new();
-    
+
     // Kept for backward compatibility if needed, but the main data is now nested
     public string BankName { get; set; } = string.Empty;
     public string Iban { get; set; } = string.Empty;
@@ -66,6 +66,7 @@ public class SupplierProfileDto
     public bool IsSetupCompleted { get; set; }
     public decimal ReliabilityScore { get; set; }
     public bool IsActiveForRouting { get; set; }
+    public string VerificationStatus { get; set; } = string.Empty;
     public List<WarehouseDto> Warehouses { get; set; } = new();
 }
 

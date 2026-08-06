@@ -70,7 +70,9 @@ public class VoiceProcessingWorker : BackgroundService
 
         try
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             var aiResult = await ai.ProcessVoiceAsync(absoluteFilePath, job.MerchantId, ct);
+            stopwatch.Stop();
 
             var merchant = await db.MerchantsProfiles
                 .FirstOrDefaultAsync(m => m.MerchantID == aiResult.MerchantId, ct);
@@ -91,6 +93,7 @@ public class VoiceProcessingWorker : BackgroundService
                 Prompt = "voice-order-extraction",
                 ParsedJson = JsonSerializer.Serialize(aiResult),
                 Confidence = 0.85m,
+                ProcessingDurationMs = (int)stopwatch.ElapsedMilliseconds,
                 CreatedAt = DateTime.UtcNow
             };
             db.AIProcessings.Add(aiProcessing);

@@ -11,5 +11,6 @@ public class AIProcessing
     public string Prompt { get; set; } = string.Empty;
     public string ParsedJson { get; set; } = string.Empty;
     public decimal Confidence { get; set; }
+    public int? ProcessingDurationMs { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
