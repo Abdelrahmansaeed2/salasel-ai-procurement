@@ -124,7 +124,7 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: "mssql+aioodbc://sa:${DB_PASSWORD}@sqlserver:1433/SalaselAiService?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
+      DB_PASSWORD: "${DB_PASSWORD}"
       REDIS_URL: "redis://redis:6379/0"
       QDRANT_URL: "http://qdrant:6333"
     ports:
