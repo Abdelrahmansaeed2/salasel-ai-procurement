@@ -314,6 +314,28 @@ Response:
 {"status": "ok", "updated_suppliers": 1}
 ```
 
+### GET /api/v1/admin/products
+
+Read-only browse of the Qdrant `products` collection — filter by
+`category`/`supplier_id`/`in_stock`/`price_min`/`price_max`, paginate with
+`offset`/`limit`, and optionally include embeddings (`with_vectors=true`).
+Also available: `GET /api/v1/admin/products/{product_id}` (single point) and
+`GET /api/v1/admin/collection` (count/dimension/distance).
+
+```bash
+curl "http://127.0.0.1:8000/api/v1/admin/products?category=PPE&limit=10"
+```
+
+Response:
+```json
+{
+  "items": [{"id": 1, "product_id": "1", "product_name": "Nitrile Gloves Medium", "sku": "NG-MED", "category": "PPE", "price": 3.75, "geo": {"lat": 30.04, "lon": 31.24}, "quality_score": null, "in_stock": true}],
+  "total": 1,
+  "offset": 0,
+  "limit": 10
+}
+```
+
 ## Docker Setup
 
 Start Redis, Qdrant, and the app:

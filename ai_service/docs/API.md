@@ -16,6 +16,9 @@ Requests and responses are UTF-8.
 | POST | `/voice/order` | Speech-to-text → order schema draft |
 | POST | `/admin/products` | Backend product ingestion → Qdrant |
 | POST | `/admin/quality-metrics` | Compute + push quality scores from raw metrics |
+| GET | `/admin/products` | Browse Qdrant product points (filter + paginate) |
+| GET | `/admin/products/{product_id}` | Single Qdrant product point (payload ± vector) |
+| GET | `/admin/collection` | Qdrant collection overview (count/dimension/distance) |
 
 Interactive docs are also available while the service runs:
 [Swagger UI](http://127.0.0.1:8000/docs) and
@@ -396,6 +399,98 @@ Response `200`:
 
 ```json
 {"status": "ok", "updated_suppliers": 1}
+```
+
+---
+
+## GET /admin/products
+
+Read-only browse of the Qdrant `products` collection (payloads, optionally the
+embedding vectors). Paginated with integer `offset` — "start from this point
+ID". Does not modify the vector store.
+
+```bash
+curl "http://127.0.0.1:8000/api/v1/admin/products?category=PPE&limit=10&offset=0"
+```
+
+### Query parameters
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `category` | string | — | Filter by category |
+| `supplier_id` | integer | — | Filter by supplier (`≥ 1`) |
+| `in_stock` | boolean | — | Filter by `in_stock` flag |
+| `price_min` | number | — | Lower price bound (`≥ 0`) |
+| `price_max` | number | — | Upper price bound (`≥ 0`) |
+| `offset` | integer | `0` | Start from this point ID (for pagination) |
+| `limit` | integer | `50` | Max points to return (`1`–`1000`) |
+| `with_vectors` | boolean | `false` | Include the `384`-dim embedding per point |
+
+Response `200`:
+
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "product_id": "1",
+      "supplier_id": "1",
+      "product_name": "Nitrile Gloves Medium",
+      "sku": "NG-MED",
+      "category": "PPE",
+      "description": "Disposable exam gloves",
+      "attributes": {"size": "M"},
+      "price": 3.75,
+      "geo": {"lat": 30.04, "lon": 31.24},
+      "quality_score": 90.0,
+      "in_stock": true
+    }
+  ],
+  "total": 1,
+  "offset": 0,
+  "limit": 10
+}
+```
+
+Each item is the point payload plus its integer `id` (`product_id`). `total` is
+the count matching the filters independent of `offset`/`limit`.
+
+### Errors
+
+| Status | Trigger |
+|---|---|
+| `422` | Invalid query value (e.g. `supplier_id=0`, `limit=2000`) |
+
+---
+
+## GET /admin/products/{product_id}
+
+Read a single product point by ID (the integer `product_id`, which is also the
+Qdrant point ID).
+
+```bash
+curl "http://127.0.0.1:8000/api/v1/admin/products/1?with_vectors=true"
+```
+
+Response `200` is the same item shape as the list endpoint (with `vector` added
+when `with_vectors=true`). `404` when the point does not exist; `422` for a
+non-integer `product_id`.
+
+---
+
+## GET /admin/collection
+
+High-level overview of the Qdrant collection: current point count and vector
+configuration.
+
+```bash
+curl http://127.0.0.1:8000/api/v1/admin/collection
+```
+
+Response `200`:
+
+```json
+{"collection": "products", "count": 12, "dimension": 384, "distance": "Cosine"}
 ```
 
 ---
