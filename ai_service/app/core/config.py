@@ -34,16 +34,16 @@ class Settings(BaseSettings):
 
     startup_sync_enabled: bool = True
 
-    llm_provider: str = "groq"
-    llm_model: str = "llama-3.3-70b-versatile"
-    llm_groq_api_key: str = ""
+    llm_provider: str = "gemini"
+    llm_model: str = "gemini-2.5-flash"
+    llm_gemini_api_key: str = ""
     llm_anthropic_api_key: str = ""
     llm_temperature: float = 0.0
     llm_timeout: int = 30
     llm_max_tokens: int = 4096
 
-    llm_formatting_provider: str = "groq"
-    llm_formatting_model: str = "llama-3.1-8b-instant"
+    llm_formatting_provider: str = "gemini"
+    llm_formatting_model: str = "gemini-2.5-flash"
     llm_formatting_temperature: float = 0.0
 
     stt_provider: str = "groq"
