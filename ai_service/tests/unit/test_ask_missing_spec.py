@@ -16,32 +16,30 @@ def make_state(spec: ProductSpec) -> InventoryState:
     )
 
 
-def test_asks_for_category_when_missing() -> None:
+def test_asks_for_product_name_when_missing() -> None:
     state = make_state(ProductSpec())
     result = ask_missing_spec_node(state)
-    assert result["missing_fields"] == ["category", "price_min", "price_max"]
-    assert result["messages"][0].content == FOLLOWUP_TEMPLATES["category"]
+    assert result["missing_fields"] == ["product_name", "price"]
+    assert result["messages"][0].content == FOLLOWUP_TEMPLATES["product_name"]
 
 
-def test_asks_for_price_min_when_category_given() -> None:
-    spec = ProductSpec(category="electronics")
+def test_no_missing_fields_when_product_name_given() -> None:
+    spec = ProductSpec(product_name="gloves")
     state = make_state(spec)
     result = ask_missing_spec_node(state)
-    assert result["missing_fields"] == ["price_min", "price_max"]
-    assert result["messages"][0].content == FOLLOWUP_TEMPLATES["price_min"]
+    assert result["missing_fields"] == ["price"]
+    assert result["messages"][0].content == FOLLOWUP_TEMPLATES["price"]
 
 
-def test_asks_for_price_max_when_only_category_and_min_price() -> None:
-    spec = ProductSpec(category="electronics", price_min=10.0)
-    state = make_state(spec)
+def test_asks_for_price_when_missing() -> None:
+    state = make_state(ProductSpec(product_name="gloves"))
     result = ask_missing_spec_node(state)
-    assert result["missing_fields"] == ["price_max"]
-    assert result["messages"][0].content == FOLLOWUP_TEMPLATES["price_max"]
+    assert result["missing_fields"] == ["price"]
+    assert result["messages"][0].content == FOLLOWUP_TEMPLATES["price"]
 
 
-def test_no_missing_fields_when_spec_complete() -> None:
-    spec = ProductSpec(category="electronics", price_min=10.0, price_max=100.0)
-    state = make_state(spec)
+def test_no_missing_fields_when_price_given() -> None:
+    state = make_state(ProductSpec(product_name="gloves", price_max=50.0))
     result = ask_missing_spec_node(state)
     assert result["missing_fields"] == []
     assert "messages" not in result

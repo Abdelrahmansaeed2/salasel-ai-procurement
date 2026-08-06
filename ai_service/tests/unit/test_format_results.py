@@ -27,7 +27,9 @@ def test_format_results_returns_formatted_message(mock_get_llm: MagicMock) -> No
     mock_get_llm.return_value = mock_llm
 
     ranked = [
-        Candidate(product_id="P1", supplier_id="S1", similarity_score=0.95, quality_score=0.9, distance_km=5.0, price=100.0),
+        Candidate(product_id="P1", supplier_id="S1", similarity_score=0.95, quality_score=0.9, distance_km=5.0, price=100.0,
+                  product_name="Nitrile Gloves Large", sku="PPE-GLOVES-NITRILE-L", category="PPE",
+                  description="Powder-free disposable exam gloves.", attributes={"size": "L", "material": "nitrile"}, in_stock=True),
     ]
     state = make_state(ranked)
     from app.agents.nodes.format_results import format_results_node
@@ -37,6 +39,12 @@ def test_format_results_returns_formatted_message(mock_get_llm: MagicMock) -> No
     assert len(result["messages"]) == 1
     assert "Product P1" in result["messages"][0].content
     mock_get_llm.assert_called_once_with(role="formatting")
+
+    args, _ = mock_llm.invoke.call_args
+    human_payload = args[0][1].content
+    assert "Nitrile Gloves Large" in human_payload
+    assert "PPE-GLOVES-NITRILE-L" in human_payload
+    assert "nitrile" in human_payload
 
 
 @patch("app.agents.nodes.format_results.get_llm")

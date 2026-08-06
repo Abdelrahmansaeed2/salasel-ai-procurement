@@ -13,10 +13,12 @@ Requests and responses are UTF-8.
 | POST | `/chat` | Multi-turn agent conversation |
 | POST | `/voice/transcribe` | Speech-to-text (audio → text) |
 | POST | `/voice/chat` | Speech-to-text + agent turn in one call |
-| POST | `/voice/order` | Speech-to-text → order schema draft |
+| POST | `/voice/order/{merchant_id}` | Speech-to-text → order schema draft |
+| POST | `/order/{merchant_id}` | Text (JSON) → order schema draft (STT-free) |
 | POST | `/admin/products` | Backend product ingestion → Qdrant |
 | POST | `/admin/quality-metrics` | Compute + push quality scores from raw metrics |
 | GET | `/admin/products` | Browse Qdrant product points (filter + paginate) |
+| GET | `/admin/products/all` | Dump the full Qdrant catalog (all points, payload-only) |
 | GET | `/admin/products/{product_id}` | Single Qdrant product point (payload ± vector) |
 | GET | `/admin/collection` | Qdrant collection overview (count/dimension/distance) |
 
@@ -313,6 +315,42 @@ Same as `/voice/transcribe` for the transcription stage, plus:
 
 ---
 
+## POST /order/{merchant_id}
+
+Text alternative to `/voice/order/{merchant_id}` — the same 5-node order
+pipeline, but the transcript is taken from the JSON body instead of being
+transcribed from audio. Response shape is identical (`OrderResponse`).
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/order/42 \
+  -H "Content-Type: application/json" \
+  -d '{"transcript": "five boxes of nitrile gloves, one hundred KN95 masks", "lat": 30.04, "lon": 31.24}'
+```
+
+### Request — `OrderTextRequest`
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `transcript` | string | yes | Order description in natural language (non-empty) |
+| `lat` | number | no | Merchant latitude — enables near-match ranking |
+| `lon` | number | no | Merchant longitude (must be provided with `lat`) |
+
+`lat`/`lon` must be passed together; a single coordinate returns `422`. An
+empty or whitespace-only `transcript` also returns `422`.
+
+### Response — `OrderResponse`
+
+Same shape as `/voice/order/{merchant_id}` (see above).
+
+### Errors
+
+| Status | Trigger |
+|---|---|
+| `422` | Empty `transcript`, non-integer `merchant_id`, or `lat`/`lon` provided without the other |
+| `500` | Order graph failure |
+
+---
+
 ## POST /admin/products
 
 Production ingestion endpoint. The backend (.NET) pushes a batch of products;
@@ -460,6 +498,46 @@ the count matching the filters independent of `offset`/`limit`.
 | Status | Trigger |
 |---|---|
 | `422` | Invalid query value (e.g. `supplier_id=0`, `limit=2000`) |
+
+---
+
+## GET /admin/products/all
+
+Return the **entire** Qdrant catalog in one response — no filters, no manual
+pagination. Internally follows Qdrant's cursor until the collection is fully
+scanned, so it returns every point regardless of catalog size.
+
+```bash
+curl "http://127.0.0.1:8000/api/v1/admin/products/all"
+```
+
+Payload-only: embeddings are not included (all points would otherwise bloat the
+response with thousands of 384-dim floats).
+
+Response `200`:
+
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "product_id": "1",
+      "supplier_id": "1",
+      "product_name": "Nitrile Gloves Medium",
+      "sku": "NG-MED",
+      "category": "PPE",
+      "price": 3.75,
+      "geo": {"lat": 30.04, "lon": 31.24},
+      "quality_score": 2.68,
+      "in_stock": true
+    }
+  ],
+  "total": 10
+}
+```
+
+`items` uses the same shape as `/admin/products`, and `total` equals
+`len(items)`.
 
 ---
 

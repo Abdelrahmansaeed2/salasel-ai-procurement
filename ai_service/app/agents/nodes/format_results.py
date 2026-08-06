@@ -6,8 +6,10 @@ from app.core.llm import get_llm
 FORMAT_RESULTS_SYSTEM_PROMPT = (
     "You are given 5 ranked product/supplier matches as structured data. "
     "Write one short line per result explaining why it matches (price, quality, "
-    "distance) in plain language. Do not alter, reorder, or invent values "
-    "\u2014 use exactly the numbers provided."
+    "distance) in plain language. Preface each line with the product name (and, "
+    "optionally, a key attribute or brief descriptor) when present, so the match "
+    "is identifiable. Do not alter, reorder, or invent values \u2014 use exactly "
+    "the numbers and details provided."
 )
 
 

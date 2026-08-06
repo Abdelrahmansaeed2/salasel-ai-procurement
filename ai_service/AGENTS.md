@@ -8,8 +8,7 @@ state it reads/writes, its exact logic, error handling, and how it's tested
 without updating `app/agents/state.py` and this file together.
 
 Only **Conversation agent** and **Format results** call an LLM. Every other
-node is deterministic Python and must be unit-tested without mocking a
-model.
+node is deterministic Python and must be unit-tested without mocking a model.
 
 ---
 
@@ -75,14 +74,19 @@ is to extract structured product requirements from the customer's messages
 and output them as a ProductSpec JSON object.
 
 Extract or update these fields when the customer provides them:
-- category
-- price_min / price_max
-- required_attributes (key-value pairs specific to the category)
+- product_name: the item the customer is looking for, as they described it
+  (e.g. "nitrile gloves", "KN95 masks")
+- price_min / price_max: only when the customer states a budget
+- required_attributes (key-value pairs the customer mentions, specific to the
+  product)
 
 Rules:
-- Do not invent values the customer didn't state. Set unknown fields to null.
-- If the customer's message is ambiguous about which attributes apply to
-  their category, set needs_attribute_lookup=true instead of guessing.
+- product_name is the required entity field. Do not invent values the customer
+  didn't state; set unknown fields to null.
+- Do NOT set the category field. The category is derived from our catalog by a
+  lookup node, so it must stay null in the LLM's output.
+- If the customer's message is ambiguous about which product they want, or they
+  ask what options exist, set needs_attribute_lookup=true instead of guessing.
 - Do not decide whether the spec is "complete" — that is handled elsewhere.
 - Always output a valid ProductSpec JSON object. Never respond conversationally.
 ```
@@ -108,7 +112,7 @@ def conversation_node(state: InventoryState) -> dict:
   `merge_spec` takes the most recent non-null value per field, never
   concatenates or averages.
 - Customer asks a question about available options → sets
-  `needs_attribute_lookup=True`, router sends to RAG lookup.
+  `needs_attribute_lookup=True`, router sends to resolve_product.
 
 **Testing:** integration-level only (requires LLM); assert against fixed
 input/output pairs with a recorded/cassette-based LLM response to avoid
@@ -127,72 +131,155 @@ flaky live-model tests in CI.
 **Logic:**
 
 ```python
-def route_after_conversation(state: InventoryState) -> Literal["rag_lookup", "ask_missing_spec", "retriever"]:
-    if state["spec"].needs_attribute_lookup:
-        return "rag_lookup"
-    if not state["spec"].is_complete:
+def route_after_conversation(state: InventoryState) -> Literal["ask_missing_spec", "resolve_product", "retriever"]:
+    if not is_spec_complete(state["spec"]):
         return "ask_missing_spec"
+    if state["spec"].needs_attribute_lookup or state["spec"].category is None:
+        return "resolve_product"
     return "retriever"
 ```
 
 `spec.is_complete` is computed by a pure function
-`is_spec_complete(spec) -> bool` checking all `REQUIRED_FIELDS` are
-non-null — keep this function separate and unit-tested on its own, since
-it's the actual completeness contract.
+`is_spec_complete(spec) -> bool` — keep this function separate and unit-tested
+on its own, since it's the actual completeness contract. A spec is complete
+when `product_name` is non-blank **and** at least one price bound
+(`price_min`/`price_max`) is set; both are asked by `ask_missing_spec`, one
+question per turn.
 
 **Testing:** exhaustive unit tests over all combinations of
-`needs_attribute_lookup` / completeness — this function fully determines
-graph behavior and must have 100% branch coverage.
+`needs_attribute_lookup` / completeness / category-resolved — this function
+fully determines graph behavior and must have 100% branch coverage.
 
 ---
 
-## RAG lookup
+## Resolve product
 
-**File:** `app/agents/nodes/rag_lookup.py`
-**Type:** Async, Redis-cached.
+**File:** `app/agents/nodes/resolve_product.py`
+**Type:** Deterministic, Redis-cached semantic lookup. No LLM call.
 
-**Reads:** `spec.category`
-**Writes:** `messages` (appends a system message with available attribute
-values), `spec.needs_attribute_lookup` (reset to `False`)
+**Reads:** `spec.product_name`
+**Writes:** `spec.category` (derived from the catalog), `spec.needs_attribute_lookup`
+(reset to `False`), `messages` (catalog matches, or guidance on a miss),
+`resolved_candidates` (raw hits incl. product attributes)
+
+The customer supplies a product **name**, not a category. This node embeds the
+name and runs a category-less semantic search against Qdrant, then derives the
+category from the top-1 hit's payload so downstream exact `category` filters
+always use canonical values.
 
 **Logic:**
 
 ```python
-async def rag_lookup_node(state: InventoryState) -> dict:
-    category = state["spec"].category
-    if category is None:
+def resolve_product_node(state: InventoryState) -> dict:
+    product_name = state["spec"].product_name
+    if product_name is None or not product_name.strip():
         return {
-            "messages": [SystemMessage(content="I need to know what category you're looking for.")],
+            "messages": [AIMessage(content="What product are you looking for?")],
             "spec": state["spec"].model_copy(update={"needs_attribute_lookup": False}),
         }
-    cache_key = f"attrs:{category}"
+    cache_key = f"resolve:{normalize(product_name)}"
     redis_client = Redis.from_url(str(get_settings().redis_url))
     cached = redis_client.get(cache_key)
     if cached is not None:
-        attrs = json.loads(cached)
+        resolved = json.loads(cached)
     else:
-        products = list_by_category(category, in_stock_only=True)
-        attrs = _format_attrs(products, category)
-        redis_client.setex(cache_key, 3600, json.dumps(attrs))
+        query_vec = embed_sync(product_name)
+        resolved = vector_search(query_vec, category=None, limit=5)
+        redis_client.setex(cache_key, 3600, json.dumps(resolved))
     redis_client.close()
-    attr_text = "\n".join(f"- {a}" for a in attrs)
-    return {
-        "messages": [SystemMessage(content=f"Available products in {category}:\n{attr_text}")],
-        "spec": state["spec"].model_copy(update={"needs_attribute_lookup": False}),
-    }
+    if not resolved:
+        return {
+            "messages": [AIMessage(content=f"I couldn't find a product like {product_name!r} in our catalog...")],
+            "spec": state["spec"].model_copy(update={"needs_attribute_lookup": False}),
+        }
+    top = resolved[0]["payload"]
+    updated = state["spec"].model_copy(update={"needs_attribute_lookup": False})
+    if top.get("category"):
+        updated.category = str(top["category"])
+    return {"messages": [SystemMessage(content=...)], "spec": updated, "resolved_candidates": resolved}
 ```
 
-Attribute values are read from Qdrant payloads (`list_by_category`, no SQL).
+Results are cached in Redis by normalized product name (idempotent — a cache
+hit avoids re-embedding and re-searching). A category is only assigned when the
+top-1 hit's `similarity_score` meets `resolve_min_similarity`
+(`app/core/config.py`) — otherwise the query is treated as a miss so garbage
+terms never get misassigned to an unrelated category.
 
-**Always routes to:** `conversation_agent` — never talks to the customer
-directly, only enriches context for the next conversation turn.
+It also writes the raw lookup hits into `resolved_candidates` so the Ask
+attributes node has real catalog attribute data to enumerate.
 
-**Edge cases:** `category` is `None` (shouldn't happen if router logic is
-correct, but guard it) → return without a lookup and log a warning, since
-this indicates a router/state bug worth catching in tests, not production.
+**Routes:** on a hit (category derived) → `ask_attributes`. On a miss →
+`END` with a guidance message asking the customer to rephrase (the next user
+message restarts from `conversation_agent`).
 
-**Testing:** unit test with a fake repository + fake Redis; assert cache
-hit avoids the repository call on the second invocation.
+**Edge cases:** `product_name` is `None`/blank (router bug) → guidance message
+and log a warning. No catalog match → guidance message; category stays unset so
+`is_spec_complete` stays true but the router re-enters `resolve_product` on the
+next turn.
+
+**Testing:** unit test with a fake Redis + fake `vector_search` asserting:
+top-1 payload sets `category`, a cache hit avoids `vector_search`, and the
+no-hit path returns guidance without setting `category`.
+
+---
+
+## Ask attributes
+
+**File:** `app/agents/nodes/ask_attributes.py`
+**Type:** Deterministic, sequential questioning. No LLM call.
+
+**Reads:** `spec.product_name`, `spec.required_attributes`, `resolved_candidates`,
+`pending_attributes`, `key_attribute_asked`
+**Writes:** `messages` (the question), `key_attribute` (current attribute being
+asked), `attribute_options`, `attribute_prompt`, `key_attribute_asked`,
+`pending_attributes` (the attributes still left to ask) — or, when there is
+nothing left to ask, just `attribute_prompt: null`.
+
+After the product name and category are resolved, this node asks the customer
+about **every attribute that varies across the candidate products**, one
+attribute per turn (most-varied first), so the retriever can pick the variant
+that best matches their preferences. Attributes every candidate shares (e.g.
+all gloves are `nitrile`) are skipped as noise.
+
+**Logic:**
+
+```python
+def ask_attributes_node(state) -> dict:
+    if not state.get("key_attribute_asked"):
+        pending = [a for a in plan_attributes(candidates) if a not in answered]
+    else:
+        pending = [a for a in state.get("pending_attributes", []) if a not in answered]
+    if not pending:
+        return {"attribute_prompt": None, "pending_attributes": []}
+    current, remaining = pending[0], pending[1:]
+    options = attribute_values(candidates, current)
+    question = f"What {current} would you like? Options: {', '.join(options)}"
+    return {"messages": [AIMessage(content=question)],
+            "key_attribute": current, "attribute_options": options,
+            "attribute_prompt": question, "key_attribute_asked": True,
+            "pending_attributes": remaining, "turn_status": "ask"}
+```
+
+`plan_attributes` returns the union of attribute keys across candidates that
+have more than one distinct value, ordered by distinct-value count descending.
+Attributes the customer already supplied (present in `required_attributes`) are
+skipped, so a preference stated up front is never re-asked.
+
+**Routes:** on `attribute_prompt` set → `END` (pauses; the customer's answer is
+extracted on the next turn by `conversation_agent`, guided by `key_attribute`).
+On `attribute_prompt` null → `retriever` directly (sequence finished or nothing
+to ask). The router re-enters `ask_attributes` while `pending_attributes` is
+non-empty.
+
+The customer's answers flow back through `conversation_agent`, which is prompted
+to store them in `required_attributes`; `retriever` then applies each committed
+answer as a hard filter (`attributes.<key>` match in Qdrant). Vague answers
+("any", "don't care") and values not present in the catalog are **not** applied
+as filters, so they never empty the results.
+
+**Testing:** unit test `plan_attributes` ordering/skipping, one-at-a-time
+sequencing, skipping already-answered attributes, and sequence completion with
+empty `pending_attributes`.
 
 ---
 
@@ -208,11 +295,20 @@ template or, at most, a cheap-model paraphrase of a template.
 **Logic:**
 
 ```python
-def ask_missing_spec_node(state: InventoryState) -> InventoryState:
-    missing = [f for f in REQUIRED_FIELDS if getattr(state["spec"], f) is None]
+def ask_missing_spec_node(state: InventoryState) -> dict:
+    spec = ProductSpec.model_validate(state["spec"])
+    missing = missing_fields(spec)
+    if not missing:
+        return {"missing_fields": []}
     question = FOLLOWUP_TEMPLATES[missing[0]]  # ask one field at a time, not all at once
     return {"messages": [AIMessage(content=question)], "missing_fields": missing}
 ```
+
+`missing_fields(spec)` (in `state.py`) drives both this node and
+`is_spec_complete`: it returns the `REQUIRED_FIELDS` (`product_name`) the
+customer hasn't supplied, plus a synthetic `"price"` entry when neither
+`price_min` nor `price_max` is set. Templates ask for the product name first,
+then the budget — **one question per turn**.
 
 **Design note:** ask for one missing field at a time rather than dumping
 the whole list — this keeps conversation turns natural and avoids
@@ -405,10 +501,10 @@ previously accumulated entries across multiple reject cycles.
 - **State mutation:** every node returns a partial dict of only the fields
   it changes — never mutate `state` in place, LangGraph merges the return
   value.
-- **Idempotency:** deterministic nodes (router, rag_lookup, ask_missing_spec,
-  retriever, rerank) must produce the same output for the same input state
-  — required for reliable unit testing and for safe retries on transient
-  DB/Redis errors.
+- **Idempotency:** deterministic nodes (router, resolve_product, ask_attributes,
+  ask_missing_spec, retriever, rerank) must produce the same output for the same
+  input state — required for reliable unit testing and for safe retries on
+  transient DB/Redis errors.
 - **Timeouts:** every LLM call and DB call in every node must have an
   explicit timeout configured via `app/core/config.py`; no unbounded waits.
 - **Logging:** every node logs its entry/exit with `session_id` and a

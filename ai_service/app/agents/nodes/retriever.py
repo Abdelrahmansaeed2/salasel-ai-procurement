@@ -14,6 +14,64 @@ _RELAX_RADIUS_FACTOR = 3
 _RELAX_PRICE_MARGIN = 0.2
 _RELAX_QUALITY_TIER = 0.2
 
+_SIZE_WORD_MAP = {
+    "s": "S", "sm": "S", "small": "S",
+    "m": "M", "md": "M", "med": "M", "medium": "M",
+    "l": "L", "lg": "L", "large": "L",
+    "xl": "XL", "xxl": "XXL",
+    "one size": "One Size", "onesize": "One Size", "free size": "One Size",
+}
+
+_VAGUE_ANSWER_TOKENS = {
+    "any", "anything", "whatever", "don't care", "dont care", "no preference",
+    "doesn't matter", "does not matter", "i don't know", "i dunno", "no",
+}
+
+
+def _canonical_attribute_value(value: str, options: list[str]) -> str:
+    """Map a free-form user answer onto one of the offered canonical options.
+
+    Falls back to the raw value when no offered option matches, so the filter
+    still applies verbatim for values that aren't standard size words.
+    """
+    v = " ".join(value.strip().lower().split())
+    for option in options:
+        if " ".join(option.strip().lower().split()) == v:
+            return option
+    if v in _SIZE_WORD_MAP:
+        return _SIZE_WORD_MAP[v]
+    return value
+
+
+def _is_vague(value: str) -> bool:
+    return " ".join(value.strip().lower().split()) in _VAGUE_ANSWER_TOKENS
+
+
+def _attribute_filters(
+    required_attributes: dict[str, str], candidates: list[dict]
+) -> list[tuple[str, str]]:
+    """Build hard attribute filters for every committed answer.
+
+    A filter is only applied when the answer maps onto a real catalog option;
+    vague answers ("any", "don't care") and values that don't exist in the
+    catalog are skipped so they never empty the result set.
+    """
+    valid: dict[str, set[str]] = {}
+    for c in candidates:
+        attrs = (c.get("payload") or {}).get("attributes") or {}
+        for key, value in attrs.items():
+            valid.setdefault(str(key), set()).add(str(value))
+
+    filters: list[tuple[str, str]] = []
+    for key, value in (required_attributes or {}).items():
+        if not value or _is_vague(str(value)):
+            continue
+        options = sorted(valid.get(key, set()))
+        canonical = _canonical_attribute_value(str(value), options)
+        if canonical in valid.get(key, set()):
+            filters.append((key, canonical))
+    return filters
+
 
 def retriever_node(state: InventoryState) -> dict:
     spec = ProductSpec.model_validate(state["spec"])
@@ -30,9 +88,26 @@ def retriever_node(state: InventoryState) -> dict:
             "turn_status": "ask",
         }
 
+    lat, lon = location[0], location[1]
+    if not (-90.0 <= lat <= 90.0 and -180.0 <= lon <= 180.0):
+        return {
+            "messages": [AIMessage(
+                content=(
+                    f"Your coordinates ({lat:.2f}, {lon:.2f}) look invalid. "
+                    "Latitude must be between -90 and 90, longitude between -180 and 180. "
+                    "Could you check them or provide your city instead?"
+                )
+            )],
+            "turn_status": "ask",
+        }
+
     query_vec = embed_sync(spec.to_query_text())
     original_radius = settings.default_radius_km
     quality_threshold = settings.default_quality_threshold
+
+    attribute_filters = _attribute_filters(
+        spec.required_attributes, state.get("resolved_candidates", [])
+    )
 
     def search_with(radius_km: float, price_min: float | None, price_max: float | None, quality_min: float) -> list[dict]:
         return vector_search(
@@ -44,6 +119,7 @@ def retriever_node(state: InventoryState) -> dict:
             geo_radius_km=radius_km,
             quality_min=quality_min,
             excluded_ids=rejected_ids if rejected_ids else None,
+            attributes=attribute_filters if attribute_filters else None,
             limit=20,
         )
 
@@ -81,6 +157,20 @@ def retriever_node(state: InventoryState) -> dict:
         candidates = search_with(relaxed_radius, relaxed_min, relaxed_max, relaxed_quality)
         if candidates:
             relaxed_constraints.append("quality threshold lowered")
+
+    if not candidates:
+        candidates = vector_search(
+            query_vec,
+            category=spec.category,
+            price_min=relaxed_min,
+            price_max=relaxed_max,
+            quality_min=relaxed_quality,
+            excluded_ids=rejected_ids if rejected_ids else None,
+            attributes=attribute_filters if attribute_filters else None,
+            limit=20,
+        )
+        if candidates:
+            relaxed_constraints.append("search radius limit removed (showing closest available matches)")
 
     if not candidates:
         msg = "I couldn't find any products matching your requirements."

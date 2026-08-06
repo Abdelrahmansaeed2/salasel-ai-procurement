@@ -37,6 +37,12 @@ def _fresh_state(message: str, customer_location: tuple[float, float] | None = N
         missing_fields=[],
         turn_status="ask",
         interrupt_action="",
+        resolved_candidates=[],
+        key_attribute=None,
+        attribute_options=[],
+        attribute_prompt=None,
+        key_attribute_asked=False,
+        pending_attributes=[],
     )
 
 

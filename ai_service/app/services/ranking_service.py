@@ -50,6 +50,12 @@ def blend_and_rank(
             quality_score=quality_score,
             distance_km=distance_km,
             price=float(payload.get("price") or 0),
+            product_name=payload.get("product_name"),
+            sku=payload.get("sku"),
+            category=payload.get("category"),
+            description=payload.get("description"),
+            attributes=payload.get("attributes") or {},
+            in_stock=payload.get("in_stock"),
         )
         scored.append((blended, ranked))
 

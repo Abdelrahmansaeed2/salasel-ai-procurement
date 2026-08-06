@@ -10,12 +10,19 @@ from app.api.v1.health import router as health_router
 from app.api.v1.order import router as order_router
 from app.api.v1.voice import router as voice_router
 from app.core.config import get_settings
+from app.services.seed_service import seed_dev_data
 
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    settings = get_settings()
+    if settings.seed_on_startup:
+        try:
+            await seed_dev_data()
+        except Exception:
+            logger.exception("Dev seed failed; continuing startup")
     yield
     close_checkpointer()
 

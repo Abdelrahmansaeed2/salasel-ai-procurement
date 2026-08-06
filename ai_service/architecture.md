@@ -32,7 +32,8 @@ flowchart TD
     User([User])
     Conv[Conversation agent]
     Router{Router}
-    RAG[RAG lookup]
+    Resolve[Resolve product]
+    AskAttrs[Ask attributes]
     AskSpec[Ask missing spec]
     Retriever[Retriever agent]
     Format[Format top 5 results]
@@ -43,11 +44,15 @@ flowchart TD
     User -->|message| Conv
     Conv --> Router
 
-    Router -->|needs attribute data| RAG
+    Router -->|category unknown| Resolve
     Router -->|spec incomplete| AskSpec
+    Router -->|attribute still pending| AskAttrs
     Router -->|spec complete| Retriever
 
-    RAG -->|enriched context| Conv
+    Resolve -->|category derived| AskAttrs
+    Resolve -->|no match| Done
+    AskAttrs -->|question asked| Done
+    AskAttrs -->|all answered| Retriever
     AskSpec -->|follow-up question| Done
 
     Retriever -->|missing blocking info e.g. location| Conv
@@ -65,7 +70,7 @@ flowchart TD
     classDef gate fill:#FAECE7,stroke:#993C1D,color:#4A1B0C;
 
     class Conv,Format llm
-    class RAG,AskSpec,Retriever,Rerank deterministic
+    class Resolve,AskAttrs,AskSpec,Retriever,Rerank deterministic
     class Router,Review gate
 ```
 
@@ -74,10 +79,11 @@ flowchart TD
 | Node                   | Type                                | Responsibility                                                                                                                                              | Returns to                                       |
 | ---------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | **Conversation agent** | LLM (structured output)             | Extracts/merges `ProductSpec` fields from customer messages. Never self-decides completeness.                                                               | Router                                           |
-| **Router**             | Deterministic conditional edge      | Picks exactly one branch per turn: RAG lookup, ask missing spec, or retriever. No LLM call, no fan-out.                                                     | —                                                |
-| **RAG lookup**         | Deterministic, Redis-cached         | Queries distinct attribute values for the identified category so follow-up questions are grounded in real catalog data.                                     | Conversation agent                               |
+| **Router**             | Deterministic conditional edge      | Picks exactly one branch per turn: resolve product, ask missing spec, or retriever. No LLM call, no fan-out.                                               | —                                                |
+| **Resolve product**    | Deterministic, Redis-cached         | Semantic lookup of the product name → derives canonical `category` from the top hit, writes `resolved_candidates`.                                            | Ask attributes, or END on a miss                 |
+| **Ask attributes**     | Deterministic, sequential            | Asks the customer about every varying attribute (most-varied first), one per turn, via `attribute_prompt`; re-entered while `pending_attributes` is non-empty. | END (pauses for user input), or Retriever        |
 | **Ask missing spec**   | Deterministic/templated             | Formats a targeted follow-up for whichever required fields are still null.                                                                                  | END (pauses for user input)                      |
-| **Retriever agent**    | Deterministic, multi-stage pipeline | Embeds query → Qdrant vector + payload search (category/price/geo/quality) → zero-result relaxation if needed → blends returned scores with `rank_weights`. | Format results, or Conversation agent if blocked |
+| **Retriever agent**    | Deterministic, multi-stage pipeline | Embeds query → Qdrant vector + payload search (category/price/geo/quality/attribute) → zero-result relaxation if needed → blends returned scores with `rank_weights`. | Format results, or Conversation agent if blocked |
 | **Format results**     | LLM (cheap model)                   | Produces a short, human-readable explanation of the top 5. Never recomputes scores.                                                                         | Review gate                                      |
 | **Review gate**        | `interrupt()`                       | Pauses the graph for customer confirm/reject input.                                                                                                         | End, or Rerank                                   |
 | **Rerank**             | Deterministic                       | Excludes rejected IDs, adjusts `rank_weights` based on rejection reason, re-invokes retriever.                                                              | Retriever agent                                  |
@@ -188,7 +194,7 @@ inventory-multiagent/
 │       ├── nodes/
 │       │   ├── conversation.py
 │       │   ├── router.py
-│       │   ├── rag_lookup.py
+│       │   ├── resolve_product.py
 │       │   ├── ask_missing_spec.py
 │       │   ├── retriever.py
 │       │   ├── format_results.py

@@ -183,6 +183,31 @@ def collection_info() -> dict:
     }
 
 
+def fetch_all_products(page_size: int = 1000) -> list[dict]:
+    """Return every product payload in the collection.
+
+    Follows Qdrant's opaque next_page_offset until exhausted, so a single call
+    yields all points regardless of catalog size. Payload-only (no embeddings).
+    """
+    client = get_client()
+    records: list[dict] = []
+    offset = None
+    while True:
+        points, next_offset = client.scroll(
+            collection_name=_COLLECTION_NAME,
+            scroll_filter=None,
+            offset=offset,
+            limit=page_size,
+            with_payload=True,
+            with_vectors=False,
+        )
+        records.extend(_point_record(p, with_vectors=False) for p in points)
+        if next_offset is None:
+            break
+        offset = next_offset
+    return records
+
+
 def _point_record(point, with_vectors: bool) -> dict:
     record = {"id": point.id, **((point.payload) or {})}
     if with_vectors:
@@ -225,6 +250,7 @@ def search(
     geo_radius_km: float | None = None,
     quality_min: float | None = None,
     excluded_ids: list[str] | None = None,
+    attributes: list[tuple[str, str]] | None = None,
     limit: int = 20,
 ) -> list[dict]:
     client = get_client()
@@ -267,6 +293,13 @@ def search(
             key="product_id",
             match=MatchExcept(**{"except": excluded_ids}),
         ))
+
+    if attributes:
+        for key, value in attributes:
+            conditions.append(FieldCondition(
+                key=f"attributes.{key}",
+                match=MatchValue(value=value),
+            ))
 
     qdrant_filter = Filter(must=conditions) if conditions else None
 

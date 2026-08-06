@@ -1,7 +1,38 @@
+import logging
+from typing import Any
+
 from langchain_anthropic import ChatAnthropic
 from langchain_groq import ChatGroq
 
 from app.core.config import Settings, get_settings
+
+logger = logging.getLogger(__name__)
+
+
+def _is_json_validation_error(exc: Exception) -> bool:
+    text = str(exc).lower()
+    return "json_validate_failed" in text or "failed to validate json" in text
+
+
+def invoke_with_json_retry(chain: Any, payload: Any, retries: int = 2) -> Any:
+    """Invoke a structured-output chain, retrying transient JSON validation failures.
+
+    Providers (e.g. Groq json_mode) intermittently return a 400
+    ``json_validate_failed`` with an empty generation even for identical inputs;
+    langchain's own retry only covers 429/5xx, so these are surfaced as hard
+    errors. Retry a bounded number of times before propagating.
+    """
+    for attempt in range(retries + 1):
+        try:
+            return chain.invoke(payload)
+        except Exception as exc:
+            if attempt < retries and _is_json_validation_error(exc):
+                logger.warning(
+                    "LLM structured-output JSON validation failed (attempt %s/%s); retrying: %s",
+                    attempt + 1, retries + 1, exc,
+                )
+                continue
+            raise
 
 
 def _build_groq(model: str, settings: Settings, role: str) -> ChatGroq:

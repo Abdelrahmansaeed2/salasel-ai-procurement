@@ -145,6 +145,35 @@ def test_admin_explore_products_validation(admin_module) -> None:
     assert response.status_code == 422
 
 
+def test_admin_explore_all_products(admin_module, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        admin_module,
+        "fetch_all_products",
+        lambda: [{"id": 1, "product_name": "A"}, {"id": 2, "product_name": "B"}],
+    )
+
+    response = TestClient(app).get("/api/v1/admin/products/all")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["total"] == 2
+    assert body["items"] == [{"id": 1, "product_name": "A"}, {"id": 2, "product_name": "B"}]
+
+
+def test_admin_products_all_is_not_product_detail(admin_module, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(admin_module, "fetch_all_products", lambda: [{"id": 1}])
+
+    def fail_if_called(pid, with_vectors=False):
+        raise AssertionError("get_product should not be called for /admin/products/all")
+
+    monkeypatch.setattr(admin_module, "get_product", fail_if_called)
+
+    response = TestClient(app).get("/api/v1/admin/products/all")
+
+    assert response.status_code == 200
+    assert response.json() == {"items": [{"id": 1}], "total": 1}
+
+
 def test_admin_get_product(admin_module, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         admin_module,

@@ -1,17 +1,16 @@
 from langchain_core.messages import AIMessage
 
-from app.agents.state import REQUIRED_FIELDS, InventoryState, ProductSpec
+from app.agents.state import InventoryState, ProductSpec, missing_fields
 
 FOLLOWUP_TEMPLATES: dict[str, str] = {
-    "category": "What category of product are you looking for?",
-    "price_min": "What is your minimum budget for this product?",
-    "price_max": "What is the maximum price you are willing to pay?",
+    "product_name": "What product are you looking for? For example: nitrile gloves, KN95 masks, or safety goggles.",
+    "price": "What is your budget? For example: up to $50, or between $20 and $100.",
 }
 
 
 def ask_missing_spec_node(state: InventoryState) -> dict:
     spec = ProductSpec.model_validate(state["spec"])
-    missing = [f for f in REQUIRED_FIELDS if getattr(spec, f) is None]
+    missing = missing_fields(spec)
     if not missing:
         return {"missing_fields": []}
     question = FOLLOWUP_TEMPLATES.get(missing[0], "Could you provide more details about what you need?")

@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     app_name: str = "Salasel AI Service"
     app_env: str = "local"
     api_v1_prefix: str = "/api/v1"
+    seed_on_startup: bool = False
 
     redis_url: AnyUrl = Field(default="redis://localhost:6379/0")
     health_timeout_seconds: int = 3
@@ -39,6 +40,7 @@ class Settings(BaseSettings):
 
     qdrant_url: AnyUrl = Field(default="http://localhost:6333")
     embedding_model: str = "BAAI/bge-small-en-v1.5"
+    resolve_min_similarity: float = 0.6
 
     default_radius_km: int = 50
     default_quality_threshold: float = 0.0

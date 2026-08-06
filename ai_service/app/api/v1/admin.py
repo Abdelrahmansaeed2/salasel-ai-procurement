@@ -9,6 +9,7 @@ from app.services.quality_score_service import compute_scores
 from app.services.vector_store import (
     collection_info,
     count_products,
+    fetch_all_products,
     get_product,
     scroll_products,
     update_payloads_by_supplier,
@@ -53,6 +54,12 @@ async def admin_explore_products(
         price_max=price_max,
     )
     return {"items": items, "total": total, "offset": offset, "limit": limit}
+
+
+@router.get("/admin/products/all")
+async def admin_explore_all_products() -> dict:
+    items = fetch_all_products()
+    return {"items": items, "total": len(items)}
 
 
 @router.get("/admin/products/{product_id}")

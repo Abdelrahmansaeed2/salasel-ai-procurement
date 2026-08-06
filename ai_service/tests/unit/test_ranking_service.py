@@ -67,3 +67,38 @@ def test_blend_and_rank_candidate_fields() -> None:
     assert c.quality_score == 0.8
     assert c.distance_km > 0
     assert c.price == 99.99
+
+
+def test_blend_and_rank_copies_product_metadata_from_payload() -> None:
+    location = (0.0, 0.0)
+    candidates = [
+        {"product_id": "X1", "similarity_score": 0.9,
+         "payload": {
+             "supplier_id": "S1",
+             "quality_score": 0.8,
+             "geo": {"lat": 0.0, "lon": 0.01},
+             "price": 99.99,
+             "product_name": "Nitrile Gloves Large",
+             "sku": "PPE-GLOVES-NITRILE-L",
+             "category": "PPE",
+             "description": "Powder-free disposable exam gloves, latex-free.",
+             "attributes": {"size": "L", "material": "nitrile"},
+             "in_stock": True,
+         }},
+        # A candidate without metadata fields -> defaults are kept
+        {"product_id": "Y2", "similarity_score": 0.8,
+         "payload": {"supplier_id": "S2", "quality_score": 0.6, "geo": None, "price": 10.0}},
+    ]
+    result = blend_and_rank(candidates, {"sim": 1.0, "quality": 1.0, "distance": 0.0}, location)
+    c = next(x for x in result if x.product_id == "X1")
+    assert c.product_name == "Nitrile Gloves Large"
+    assert c.sku == "PPE-GLOVES-NITRILE-L"
+    assert c.category == "PPE"
+    assert "latex-free" in c.description
+    assert c.attributes == {"size": "L", "material": "nitrile"}
+    assert c.in_stock is True
+
+    c2 = next(x for x in result if x.product_id == "Y2")
+    assert c2.product_name is None
+    assert c2.attributes == {}
+    assert c2.in_stock is None

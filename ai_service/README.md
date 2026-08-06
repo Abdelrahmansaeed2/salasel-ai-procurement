@@ -28,22 +28,26 @@ The system uses a LangGraph `StateGraph` with the following flow:
 
 ```
 conversation_agent → router →
-  ├─ needs_attribute_lookup → rag_lookup → conversation_agent
-  ├─ spec incomplete        → ask_missing_spec → END
-  └─ spec complete          → retriever → format_results → review_gate →
+  ├─ product_name missing    → ask_missing_spec → END
+  ├─ needs_attribute_lookup  → resolve_product
+  ├─ category unresolved     → resolve_product → (hit → retriever | miss → END)
+  └─ spec resolved           → retriever → format_results → review_gate →
        ├─ done → END
        └─ rerank → retriever
 ```
 
 - **Conversation agent** — LLM node (primary model) with structured output to
-  `ProductSpec`. Extracts category / price range / attributes and merges them
-  into state; latest non-null value per field wins.
+  `ProductSpec`. Extracts the product the customer wants (`product_name`),
+  optional budget / attributes, and merges them into state; latest non-null
+  value per field wins. It never invents `category` — that is derived from the
+  catalog.
 - **Router** — deterministic conditional edge: picks one branch per turn
-  (RAG lookup, ask missing spec, or retriever). No LLM call.
+  (ask missing spec, resolve product, or retriever). No LLM call.
 - **Ask missing spec** — templated follow-up for one missing field at a time
-  (category, price_min, price_max).
-- **RAG lookup** — Redis-cached list of available attribute values for the
-  category, appended as context for the next conversation turn.
+  (only `product_name` is required; price is optional).
+- **Resolve product** — Redis-cached semantic lookup: embeds `product_name`,
+  runs a category-less Qdrant search, and assigns `category` from the top-1
+  hit's payload so downstream exact category filters always use catalog values.
 - **Retriever** — deterministic multi-stage pipeline. Embeds the spec, runs a
   Qdrant vector + payload search with geo-radius / price / quality filters,
   relaxes the filter once on zero results, then blends and ranks. No LLM call.
@@ -118,6 +122,9 @@ Copy `.env.example` to `.env` and set the required values:
 
 | Variable | Description | Default |
 |---|---|---|
+| `APP_NAME` | App name | `Salasel AI Service` |
+| `APP_ENV` | Environment (`local` etc.) | `local` |
+| `SEED_ON_STARTUP` | Seed a dev/test catalog into Qdrant on startup when empty | `false` |
 | `REDIS_URL` | Redis connection string (checkpointer + cache) | `redis://localhost:6379/0` |
 | `HEALTH_TIMEOUT_SECONDS` | Health-check timeout | `3` |
 | `LLM_PROVIDER` | LLM provider (`groq` or `anthropic`) | `groq` |
@@ -136,6 +143,7 @@ Copy `.env.example` to `.env` and set the required values:
 | `STT_MAX_AUDIO_BYTES` | Max upload size in bytes | `26214400` (25 MB) |
 | `QDRANT_URL` | Qdrant endpoint | `http://localhost:6333` |
 | `EMBEDDING_MODEL` | fastembed model | `BAAI/bge-small-en-v1.5` |
+| `RESOLVE_MIN_SIMILARITY` | Min top-1 similarity to assign a product category | `0.6` |
 | `DEFAULT_RADIUS_KM` | Default geo search radius | `50` |
 | `DEFAULT_QUALITY_THRESHOLD` | Min quality score | `0.0` |
 | `RANK_WEIGHT_SIMILARITY` | Blend weight: similarity | `1.0` |
@@ -198,10 +206,10 @@ Request:
 Response:
 ```json
 {
-  "response": "What is your minimum budget for this product?",
-  "spec": {"category": "PPE", "price_min": null, "price_max": null, "required_attributes": {}, "is_complete": false, "needs_attribute_lookup": false},
+  "response": "What product are you looking for? For example: nitrile gloves, KN95 masks, or safety goggles.",
+  "spec": {"product_name": null, "category": null, "price_min": null, "price_max": null, "required_attributes": {}, "is_complete": false, "needs_attribute_lookup": false},
   "turn_status": "ask",
-  "missing_fields": ["price_min", "price_max"],
+  "missing_fields": ["product_name"],
   "ranked_results": []
 }
 ```
@@ -279,6 +287,20 @@ Response:
 Products that cannot be matched to the catalog appear in `unresolved` for
 review — never silently dropped.
 
+### POST /api/v1/order/{merchant_id}
+
+Text alternative to the voice order endpoint — same pipeline, same
+`OrderResponse`, but the transcript comes from a JSON body instead of audio.
+
+```powershell
+curl.exe -X POST http://127.0.0.1:8000/api/v1/order/42 `
+  -H "Content-Type: application/json" `
+  -d '{"transcript": "five boxes of nitrile gloves, one hundred KN95 masks", "lat": 30.04, "lon": 31.24}'
+```
+
+`transcript` is required and non-empty; optional `lat`/`lon` enable near-match
+ranking and must be provided together.
+
 ### POST /api/v1/admin/products
 
 Production ingestion: the backend pushes a batch of products; the AI service
@@ -319,8 +341,9 @@ Response:
 Read-only browse of the Qdrant `products` collection — filter by
 `category`/`supplier_id`/`in_stock`/`price_min`/`price_max`, paginate with
 `offset`/`limit`, and optionally include embeddings (`with_vectors=true`).
-Also available: `GET /api/v1/admin/products/{product_id}` (single point) and
-`GET /api/v1/admin/collection` (count/dimension/distance).
+Also available: `GET /api/v1/admin/products/all` (entire catalog in one
+response, payload-only), `GET /api/v1/admin/products/{product_id}` (single
+point) and `GET /api/v1/admin/collection` (count/dimension/distance).
 
 ```bash
 curl "http://127.0.0.1:8000/api/v1/admin/products?category=PPE&limit=10"
@@ -344,9 +367,12 @@ Start Redis, Qdrant, and the app:
 docker compose -f infra/docker/docker-compose.yml up --build
 ```
 
-The service has no database — no migrations or seed step. A freshly-started
-stack has an empty catalog until the backend pushes data via
-`POST /api/v1/admin/products` (+ `/api/v1/admin/quality-metrics`).
+The service has no database — no migrations. With `SEED_ON_STARTUP=true` (set in
+`.env.example`), a fresh stack auto-seeds a small dev/test catalog (10 products,
+3 suppliers, PPE + janitorial) into Qdrant on first boot, plus supplier quality
+scores. Seeding is skipped once the collection has any points, so backend-pushed
+data via `POST /api/v1/admin/products` (+ `/api/v1/admin/quality-metrics`) is
+never clobbered.
 
 The `app/` directory is volume-mounted with uvicorn `--reload`, so Python
 changes hot-reload without a rebuild — but adding a dependency to
@@ -373,7 +399,7 @@ gated behind `RUN_INTEGRATION=true`.
 | `test_router.py` | 5 | All 3 routing branches (100% coverage) |
 | `test_retriever.py` | 5 | Retriever location gate + ranked results |
 | `test_ask_missing_spec.py` | 4 | Template selection per missing field |
-| `test_rag_lookup.py` | 4 | Redis-cached attribute lookup |
+| `test_resolve_product.py` | 4 | Semantic product-name lookup → category resolution |
 | `test_format_results.py` | 3 | Formatting node + unchanged scores |
 | `test_rerank.py` | 6 | Weight adjustment + rejected-id accumulation |
 | `test_ranking_service.py` | 5 | Blend/rank ordering + haversine |

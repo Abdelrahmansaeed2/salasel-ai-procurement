@@ -7,6 +7,12 @@ class OrderPipelineSchema(BaseModel):
     transcript: str
 
 
+class OrderTextRequest(BaseModel):
+    transcript: str
+    lat: float | None = None
+    lon: float | None = None
+
+
 class OrderSplit(BaseModel):
     supplier_id: int
     sku: str

@@ -5,6 +5,7 @@ from app.services.vector_store import (
     collection_info,
     count_products,
     ensure_collection,
+    fetch_all_products,
     get_product,
     list_by_category,
     scroll_products,
@@ -227,3 +228,50 @@ def test_collection_info(mock_get_client) -> None:
     result = collection_info()
 
     assert result == {"collection": "products", "count": 3, "dimension": 384, "distance": "Cosine"}
+
+
+def make_point(point_id: int, name: str):
+    point = MagicMock()
+    point.id = point_id
+    point.payload = {"product_id": str(point_id), "product_name": name}
+    point.vector = [0.1]
+    return point
+
+
+@patch("app.services.vector_store.get_client")
+def test_fetch_all_products_single_page(mock_get_client) -> None:
+    mock_client = MagicMock()
+    mock_get_client.return_value = mock_client
+    mock_client.scroll.return_value = ([make_point(1, "A"), make_point(2, "B")], None)
+
+    result = fetch_all_products()
+
+    assert result == [
+        {"id": 1, "product_id": "1", "product_name": "A"},
+        {"id": 2, "product_id": "2", "product_name": "B"},
+    ]
+    mock_client.scroll.assert_called_once()
+
+
+@patch("app.services.vector_store.get_client")
+def test_fetch_all_products_follows_cursor_across_pages(mock_get_client) -> None:
+    mock_client = MagicMock()
+    mock_get_client.return_value = mock_client
+    mock_client.scroll.side_effect = [
+        ([make_point(1, "A")], "next-token"),
+        ([make_point(2, "B")], None),
+    ]
+
+    result = fetch_all_products(page_size=1)
+
+    assert result == [
+        {"id": 1, "product_id": "1", "product_name": "A"},
+        {"id": 2, "product_id": "2", "product_name": "B"},
+    ]
+    assert mock_client.scroll.call_count == 2
+    first = mock_client.scroll.call_args_list[0][1]
+    assert first["limit"] == 1
+    assert first["with_vectors"] is False
+    assert first["offset"] is None
+    second = mock_client.scroll.call_args_list[1][1]
+    assert second["offset"] == "next-token"
