@@ -24,6 +24,8 @@ public class SalaselDbContext : DbContext
     public DbSet<SupplierKnowledgeDocument> SupplierKnowledgeDocuments { get; set; } = null!;
     public DbSet<KnowledgeBaseArticle> KnowledgeBaseArticles { get; set; } = null!;
     public DbSet<Notification> Notifications { get; set; } = null!;
+    public DbSet<ContactMessage> ContactMessages { get; set; } = null!;
+    public DbSet<UserNotificationSettings> UserNotificationSettings { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -193,6 +195,17 @@ public class SalaselDbContext : DbContext
 
         modelBuilder.Entity<Notification>().Property(n => n.EventName).HasMaxLength(60);
         modelBuilder.Entity<Notification>().HasIndex(n => new { n.UserId, n.IsRead });
+
+        modelBuilder.Entity<ContactMessage>().Property(c => c.Name).IsRequired().HasMaxLength(200);
+        modelBuilder.Entity<ContactMessage>().Property(c => c.Email).IsRequired().HasMaxLength(200);
+        modelBuilder.Entity<ContactMessage>().Property(c => c.Message).IsRequired().HasMaxLength(2000);
+
+        modelBuilder.Entity<UserNotificationSettings>().HasIndex(s => s.UserId).IsUnique();
+        modelBuilder.Entity<UserNotificationSettings>()
+            .HasOne(s => s.User)
+            .WithMany()
+            .HasForeignKey(s => s.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Product → SupplierProduct
         modelBuilder.Entity<SupplierProduct>()
