@@ -21,7 +21,9 @@ COPY infra/docker/entrypoint.sh /entrypoint.sh
 # RUN pip install --no-cache-dir ".[dev]" \
 #     && chmod +x /entrypoint.sh
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install ".[dev]"
+    pip install ".[dev]" \
+    && chmod +x /entrypoint.sh \
+    && sed -i 's/\r$//' /entrypoint.sh
 
 EXPOSE 8000
 
