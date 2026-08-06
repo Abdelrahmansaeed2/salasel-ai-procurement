@@ -1,0 +1,3 @@
+Alembic migrations for AI-service test scaffolding.
+
+Production catalog and supplier domain ownership remains in ../backend-dotnet/Salasel.Domain.

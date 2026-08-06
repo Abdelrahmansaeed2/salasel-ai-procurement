@@ -1,0 +1,1 @@
+"""Salasel AI service package."""
