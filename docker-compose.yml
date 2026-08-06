@@ -77,3 +77,79 @@ volumes:
     name: salasel_sqlserver_data
   seq_data:
     name: salasel_seq_data
+  qdrant_data:
+    name: salasel_qdrant_data
+
+  # ─────────────────────────────────────────────────────────────────
+  #  AI Service Dependencies
+  # ─────────────────────────────────────────────────────────────────
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: salasel-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: salasel-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/localhost/6333 && echo -e 'GET /healthz HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 && grep -q 200 <&3"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  sqlserver-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: salasel-sqlserver-init
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    volumes:
+      - ./ai_service/infra/docker/init-db.sql:/work/init-db.sql:ro
+      - ./ai_service/infra/docker/seed.sql:/work/seed.sql:ro
+    command: >
+      /bin/bash -c "/opt/mssql-tools18/bin/sqlcmd
+      -S sqlserver -U sa -P '$$DB_PASSWORD' -C
+      -i /work/init-db.sql"
+    environment:
+      DB_PASSWORD: "${DB_PASSWORD}"
+
+  # ─────────────────────────────────────────────────────────────────
+  #  Salasel AI Service
+  # ─────────────────────────────────────────────────────────────────
+  ai-service:
+    build:
+      context: ./ai_service
+      dockerfile: infra/docker/Dockerfile
+    container_name: salasel-ai-service
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: "mssql+aioodbc://sa:${DB_PASSWORD}@sqlserver:1433/SalaselAiService?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
+      REDIS_URL: "redis://redis:6379/0"
+      QDRANT_URL: "http://qdrant:6333"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ai_service/app:/app/app
+      - ./ai_service/main.py:/app/main.py
+      - ./ai_service/alembic.ini:/app/alembic.ini
+      - ./ai_service/pyproject.toml:/app/pyproject.toml
+      - ./ai_service/infra/docker/seed.sql:/work/seed.sql:ro
+    depends_on:
+      sqlserver-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
