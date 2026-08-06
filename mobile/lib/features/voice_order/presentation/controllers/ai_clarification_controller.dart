@@ -3,81 +3,144 @@ import 'package:get/get.dart';
 
 import '../../../orders/presentation/screens/order_review_screen.dart';
 
-class ChatMessage {
-  final String text;
-  final bool isUser;
-  final DateTime timestamp;
+/// A single confirmed/missing line inside the AI analysis card.
+class OrderLineItem {
+  final String quantity;
+  final String name;
+  final bool isMissing;
 
-  ChatMessage({
-    required this.text,
-    required this.isUser,
-    required this.timestamp,
+  const OrderLineItem({
+    required this.quantity,
+    required this.name,
+    this.isMissing = false,
+  });
+}
+
+sealed class ChatEntry {
+  const ChatEntry();
+}
+
+/// The customer's original voice note bubble.
+class VoiceMessageEntry extends ChatEntry {
+  final String duration;
+  final String transcript;
+
+  const VoiceMessageEntry({required this.duration, required this.transcript});
+}
+
+/// The AI's structured breakdown of what it understood from the order.
+class AiAnalysisEntry extends ChatEntry {
+  final String title;
+  final List<OrderLineItem> items;
+
+  const AiAnalysisEntry({required this.title, required this.items});
+}
+
+/// The AI's follow-up clarification question, styled like an outgoing bubble.
+class ClarificationEntry extends ChatEntry {
+  final String question;
+
+  const ClarificationEntry(this.question);
+}
+
+/// A short confirmation bubble shown once the clarification is resolved.
+class ConfirmationEntry extends ChatEntry {
+  final String message;
+
+  const ConfirmationEntry(this.message);
+}
+
+class OrderSummaryLine {
+  final String label;
+  final String value;
+  final bool missing;
+
+  const OrderSummaryLine({
+    required this.label,
+    required this.value,
+    this.missing = false,
   });
 }
 
 class AiClarificationController extends GetxController {
   final textController = TextEditingController();
-  final messages = <ChatMessage>[].obs;
-  final isProcessing = false.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    messages.add(ChatMessage(
-      text: 'أحتاج طماطم وبصل لفرع الرياض',
-      isUser: true,
-      timestamp: DateTime.now().subtract(const Duration(minutes: 1)),
-    ));
-    messages.add(ChatMessage(
-      text: 'عفواً، كم كمية الطماطم التي تحتاجها؟',
-      isUser: false,
-      timestamp: DateTime.now(),
-    ));
+  final messages = <ChatEntry>[
+    const VoiceMessageEntry(
+      duration: '0:04',
+      transcript: '"محتاج لبن، وسكر، وشاي"',
+    ),
+    const AiAnalysisEntry(
+      title: 'لقد حددت معظم طلبك.',
+      items: [
+        OrderLineItem(quantity: '20 كرتون', name: 'حليب المراعي'),
+        OrderLineItem(quantity: '5 علب', name: 'شاي ليبتون'),
+        OrderLineItem(quantity: 'الكمية مطلوبة', name: 'سكر الأسرة', isMissing: true),
+      ],
+    ),
+    const ClarificationEntry(
+      'لقد طلبت السكر، لكن لم أتمكن من تحديد الكمية. كم كيس سكر تود أن تطلب؟',
+    ),
+  ].obs;
+
+  final quickReplies = <String>['5 أكياس', '20 كيس', '10 أكياس'].obs;
+  final awaitingClarification = true.obs;
+
+  final summary = <OrderSummaryLine>[
+    const OrderSummaryLine(label: 'سكر:', value: '؟؟؟', missing: true),
+    const OrderSummaryLine(label: 'شاي:', value: '5'),
+    const OrderSummaryLine(label: 'حليب:', value: '20'),
+  ].obs;
+
+  void selectSugarQuantity(String option) {
+    if (!awaitingClarification.value) return;
+    _resolveSugar(
+      summaryValue: option,
+      confirmationMessage: 'تم تحديد كمية السكر: $option.',
+    );
+  }
+
+  void skipSugarQuantity() {
+    if (!awaitingClarification.value) return;
+    _resolveSugar(
+      summaryValue: 'لم تُحدد',
+      confirmationMessage: 'تم تخطي تحديد كمية السكر، سنتواصل معك لاحقاً لتأكيدها.',
+      stillMissing: true,
+    );
   }
 
   void sendMessage() {
     final text = textController.text.trim();
     if (text.isEmpty) return;
-
-    messages.add(ChatMessage(
-      text: text,
-      isUser: true,
-      timestamp: DateTime.now(),
-    ));
     textController.clear();
 
-    _processReply();
+    if (awaitingClarification.value) {
+      selectSugarQuantity(text);
+    }
   }
 
-  void recordVoice() {
-    messages.add(ChatMessage(
-      text: '(رسالة صوتية) ٥٠ كيلو طماطم',
-      isUser: true,
-      timestamp: DateTime.now(),
-    ));
+  void _resolveSugar({
+    required String summaryValue,
+    required String confirmationMessage,
+    bool stillMissing = false,
+  }) {
+    awaitingClarification.value = false;
+    quickReplies.clear();
 
-    _processReply();
-  }
+    summary[0] = OrderSummaryLine(
+      label: 'سكر:',
+      value: summaryValue,
+      missing: stillMissing,
+    );
 
-  void _processReply() {
-    isProcessing.value = true;
-    
-    Future.delayed(const Duration(seconds: 2), () {
-      isProcessing.value = false;
-      
-      messages.add(ChatMessage(
-        text: 'ممتاز! جاري تجهيز الطلب بالكميات المحددة...',
-        isUser: false,
-        timestamp: DateTime.now(),
-      ));
+    messages.add(ConfirmationEntry(confirmationMessage));
 
-      Future.delayed(const Duration(seconds: 1), () {
-        Get.off(
-          () => const OrderReviewScreen(),
-          transition: Transition.rightToLeftWithFade,
-          duration: const Duration(milliseconds: 350),
-        );
-      });
+    Future.delayed(const Duration(milliseconds: 900), () {
+      Get.off(
+        () => const OrderReviewScreen(),
+        transition: Transition.rightToLeftWithFade,
+        duration: const Duration(milliseconds: 350),
+      );
     });
   }
 

@@ -6,6 +6,7 @@ import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../controllers/orders_list_controller.dart';
 import 'checkout_screen.dart';
 import 'delivery_tracking_screen.dart';
+import 'voice_order_detail_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -670,8 +671,10 @@ class _OrderCard extends StatelessWidget {
                     ));
                   } else if (activeStep == 2) {
                     Get.to(() => DeliveryTrackingScreen(orderId: order.orderNumber));
-                  } else {
-
+                  } else if (activeStep == 3) {
+                    Get.to(() => VoiceOrderDetailScreen(
+                      orderNumber: '#${order.orderNumber}',
+                    ));
                   }
                 },
                 style: ElevatedButton.styleFrom(
