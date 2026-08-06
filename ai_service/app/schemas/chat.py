@@ -9,6 +9,11 @@ class ChatRequest(BaseModel):
     customer_location: tuple[float, float] | None = None
 
 
+class VoiceChatRequest(BaseModel):
+    session_id: str
+    customer_location: tuple[float, float] | None = None
+
+
 class ChatResponse(BaseModel):
     response: str
     spec: ProductSpec

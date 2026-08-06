@@ -1,6 +1,6 @@
 # Salasel AI Service — API Reference
 
-Base URL: `http://localhost:8000/api/v1`
+Base URL: `http://127.0.0.1:8000/api/v1`
 
 All endpoints return JSON. There is no authentication on these routes yet.
 Requests and responses are UTF-8.
@@ -9,44 +9,42 @@ Requests and responses are UTF-8.
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/health` | Service health (DB + Redis reachability) |
+| GET | `/health` | Service health (Redis reachability) |
 | POST | `/chat` | Multi-turn agent conversation |
 | POST | `/voice/transcribe` | Speech-to-text (audio → text) |
 | POST | `/voice/chat` | Speech-to-text + agent turn in one call |
 | POST | `/voice/order` | Speech-to-text → order schema draft |
-| POST | `/admin/sync-products` | Re-run SQL → Qdrant sync (dev/test) |
 | POST | `/admin/products` | Backend product ingestion → Qdrant |
 | POST | `/admin/quality-metrics` | Compute + push quality scores from raw metrics |
 
 Interactive docs are also available while the service runs:
-[Swagger UI](http://localhost:8000/docs) and
-[ReDoc](http://localhost:8000/redoc), plus the raw spec at
+[Swagger UI](http://127.0.0.1:8000/docs) and
+[ReDoc](http://127.0.0.1:8000/redoc), plus the raw spec at
 `/openapi.json`.
 
 ---
 
 ## GET /health
 
-Returns whether the database and Redis are reachable.
+Returns whether Redis is reachable.
 
 ```powershell
-Invoke-RestMethod http://localhost:8000/api/v1/health
+Invoke-RestMethod http://127.0.0.1:8000/api/v1/health
 ```
 
 ```bash
-curl http://localhost:8000/api/v1/health
+curl http://127.0.0.1:8000/api/v1/health
 ```
 
 Response `200`:
 
 ```json
-{"status": "ok", "database": true, "redis": true}
+{"status": "ok", "redis": true}
 ```
 
 | Field | Type | Description |
 |---|---|---|
-| `status` | string | `"ok"` when both dependencies pass, else `"degraded"` |
-| `database` | boolean | SQL Server reachable |
+| `status` | string | `"ok"` when all dependencies pass, else `"degraded"` |
 | `redis` | boolean | Redis reachable |
 
 ---
@@ -59,7 +57,7 @@ the same session (it maps to the LangGraph `thread_id`); a fresh
 service restart mid-conversation resumes correctly.
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/chat \
+curl -X POST http://127.0.0.1:8000/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{"session_id": "test-1", "message": "I need PPE under 5 dollars", "customer_location": [30.0444, 31.2357]}'
 ```
@@ -170,7 +168,7 @@ Supported formats: `m4a`, `mp3`, `wav`, `webm`, `ogg`, `flac`, `mp4`,
 (Arabic and English supported) unless `STT_LANGUAGE` is set.
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/voice/transcribe \
+curl -X POST http://127.0.0.1:8000/api/v1/voice/transcribe \
   -F "audio=@recording.m4a"
 ```
 
@@ -209,10 +207,9 @@ Same session semantics as `/chat` — reuse `session_id` to continue a
 conversation.
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/voice/chat \
+curl -X POST http://127.0.0.1:8000/api/v1/voice/chat \
   -F "audio=@recording.m4a" \
-  -F "session_id=voice-1" \
-  -F "customer_location=30.0444,31.2357"
+  -F 'request={"session_id": "voice-1", "customer_location": [30.0444, 31.2357]}'
 ```
 
 ### Request (multipart)
@@ -220,8 +217,14 @@ curl -X POST http://localhost:8000/api/v1/voice/chat \
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `audio` | file | yes | The audio file to transcribe |
+| `request` | string | yes | JSON-encoded `VoiceChatRequest` |
+
+`VoiceChatRequest`:
+
+| Field | Type | Required | Description |
+|---|---|---|---|
 | `session_id` | string | yes | Session / conversation identifier |
-| `customer_location` | string | no | `"lat,lon"` — enables geo-radius retrieval |
+| `customer_location` | array\<number\> | no | `[lat, lon]` — enables geo-radius retrieval |
 
 ### Response
 
@@ -233,12 +236,12 @@ Same as `/voice/transcribe` for the transcription stage, plus:
 
 | Status | Trigger |
 |---|---|
-| `422` | `customer_location` is not a valid `"lat,lon"` pair |
+| `422` | `request` is not valid JSON, or `customer_location` is not a `[lat, lon]` pair |
 | `500` | Agent (graph) pipeline failure |
 
 ---
 
-## POST /voice/order
+## POST /voice/order/{merchant_id}
 
 Transcribe an audio recording and generate a draft order schema matching the
 backend's `OrderExecutionRequestDto`. Runs a dedicated 5-node LangGraph pipeline:
@@ -249,31 +252,24 @@ deterministically (no LLM in the final aggregation, so totals are never
 invented).
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/voice/order \
-  -F "audio=@order.wav" \
-  -F 'request={"merchantId": 42, "location": {"lat": 30.04, "lon": 31.24}}'
+curl -X POST "http://127.0.0.1:8000/api/v1/voice/order/42?lat=30.04&lon=31.24" \
+  -F "audio=@order.wav"
 ```
 
-### Request (multipart form)
+### Path parameter
 
-| Field | Type | Required | Description |
+| Parameter | Type | Required | Description |
 |---|---|---|---|
-| `audio` | file | yes | Audio to transcribe (format/size limits match `/voice/transcribe`) |
-| `request` | JSON string | yes | Encoded `OrderRequest` (see below) |
+| `merchant_id` | integer | yes | Merchant creating the order |
 
-### Request — `OrderRequest`
+### Query parameters
 
-| Field | Type | Required | Description |
+| Parameter | Type | Required | Description |
 |---|---|---|---|
-| `merchantId` | integer | yes | Merchant creating the order (from caller/auth) |
-| `location` | object | no | Merchant coordinates `{lat, lon}` used for near-match ranking |
+| `lat` | number | no | Merchant latitude — enables near-match ranking |
+| `lon` | number | no | Merchant longitude (must be provided with `lat`) |
 
-```json
-{
-  "merchantId": 42,
-  "location": {"lat": 30.04, "lon": 31.24}
-}
-```
+`lat`/`lon` must be passed together; a single coordinate returns `422`.
 
 ### Response — `OrderResponse`
 
@@ -309,27 +305,8 @@ Same as `/voice/transcribe` for the transcription stage, plus:
 
 | Status | Trigger |
 |---|---|
-| `422` | `request` missing / invalid JSON / bad `merchantId` or `location` |
+| `422` | Non-integer `merchant_id`, or `lat`/`lon` provided without the other |
 | `500` | Order graph failure |
-
----
-
-## POST /admin/sync-products
-
-Re-run the product → Qdrant synchronization on demand. The same sync also
-runs automatically at service startup (only when `STARTUP_SYNC_ENABLED=true`,
-the dev/test default). This path reads SQL Server and is not used in
-production.
-
-```bash
-curl -X POST http://localhost:8000/api/v1/admin/sync-products
-```
-
-Response `200`:
-
-```json
-{"status": "ok", "message": "Products synced to vector store"}
-```
 
 ---
 
@@ -342,7 +319,7 @@ product overwrites, never duplicates). `quality_score` is stored as `null` —
 populate it with `/admin/quality-metrics`.
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/admin/products \
+curl -X POST http://127.0.0.1:8000/api/v1/admin/products \
   -H "Content-Type: application/json" \
   -d '{"products": [{"product_id": 1, "supplier_id": 1, "product_name": "Nitrile Gloves Medium", "sku": "NG-MED", "category": "PPE", "description": "Disposable exam gloves", "attributes": {"size": "M"}, "price": 3.75, "lat": 30.04, "lon": 31.24, "in_stock": true}]}'
 ```
@@ -397,10 +374,10 @@ The backend pushes raw review metrics; the AI service computes quality scores
 (blending each supplier's average rating toward the batch global average,
 then combining rating / on-time delivery / defect signals) and applies
 payload-only updates to every product of that supplier in Qdrant — no
-re-embedding. This replaces the nightly SQL job in production.
+re-embedding.
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/admin/quality-metrics \
+curl -X POST http://127.0.0.1:8000/api/v1/admin/quality-metrics \
   -H "Content-Type: application/json" \
   -d '{"metrics": [{"supplier_id": 1, "review_count": 50, "average_rating": 4.5, "on_time_delivery_rate": 0.95, "defect_rate": 0.02}]}'
 ```
@@ -455,6 +432,13 @@ Response `200`:
 | `message` | string | yes | The customer's message |
 | `customer_location` | array `[lat, lon]` | no | Customer location |
 
+### VoiceChatRequest
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `session_id` | string | yes | Session / conversation identifier |
+| `customer_location` | array `[lat, lon]` | no | Customer location |
+
 ### ChatResponse
 
 | Field | Type | Description |
@@ -464,20 +448,6 @@ Response `200`:
 | `turn_status` | string | `ask`, `retrieve`, `confirm`, `done`, or `rerank` |
 | `missing_fields` | array of string | Missing required fields |
 | `ranked_results` | array of `Candidate` | Up to 5 ranked matches |
-
-### OrderRequest
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `merchantId` | integer | yes | Merchant creating the order |
-| `location` | `OrderLocation` | no | Merchant coordinates `{lat, lon}` for near-match ranking |
-
-`OrderLocation`:
-
-| Field | Type | Description |
-|---|---|---|
-| `lat` | number | Latitude |
-| `lon` | number | Longitude |
 
 ### OrderResponse
 
@@ -509,7 +479,6 @@ Response `200`:
 | Field | Type | Description |
 |---|---|---|
 | `status` | string | `"ok"` or `"degraded"` |
-| `database` | boolean | SQL Server reachable |
 | `redis` | boolean | Redis reachable |
 
 ---
@@ -521,7 +490,7 @@ Response `200`:
 | `400` | Malformed request (FastAPI validation) |
 | `413` | Audio file too large (voice endpoints) |
 | `415` | Unsupported audio format (voice endpoints) |
-| `422` | Validation failure — missing field, empty/no-speech transcript, bad `customer_location`, or invalid `/voice/order` `request` JSON |
+| `422` | Validation failure — missing field, empty/no-speech transcript, bad `customer_location`, non-integer `/voice/order` `merchant_id`, or partial `lat`/`lon` |
 | `500` | Speech-to-text provider failure or agent pipeline failure |
 
 Error bodies follow FastAPI's convention:

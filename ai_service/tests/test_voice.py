@@ -26,7 +26,8 @@ class FakeSttClient:
 
 def _post_voice_chat(*, data: dict | None = None, files: dict | None = None) -> object:
     files = files or {"audio": ("voice.m4a", b"fakeaudio", "audio/mp4")}
-    return TestClient(app).post("/api/v1/voice/chat", files=files, data=data or {"session_id": "s"})
+    data = data or {"request": '{"session_id": "s"}'}
+    return TestClient(app).post("/api/v1/voice/chat", files=files, data=data)
 
 
 def test_voice_transcribe_returns_text() -> None:
@@ -67,7 +68,7 @@ def test_voice_chat_transcribes_then_runs_chat(monkeypatch: pytest.MonkeyPatch) 
     app.dependency_overrides[get_stt_client] = lambda: stt
     try:
         response = _post_voice_chat(
-            data={"session_id": "voice-1", "customer_location": "30.0444,31.2357"}
+            data={"request": '{"session_id": "voice-1", "customer_location": [30.0444, 31.2357]}'}
         )
     finally:
         app.dependency_overrides.clear()
@@ -95,7 +96,7 @@ def test_voice_chat_runs_chat_without_location(monkeypatch: pytest.MonkeyPatch) 
     stt = FakeSttClient()
     app.dependency_overrides[get_stt_client] = lambda: stt
     try:
-        response = _post_voice_chat(data={"session_id": "voice-2"})
+        response = _post_voice_chat(data={"request": '{"session_id": "voice-2"}'})
     finally:
         app.dependency_overrides.clear()
 
@@ -113,7 +114,26 @@ def test_voice_chat_rejects_bad_location_format(monkeypatch: pytest.MonkeyPatch)
     stt = FakeSttClient()
     app.dependency_overrides[get_stt_client] = lambda: stt
     try:
-        response = _post_voice_chat(data={"session_id": "voice-3", "customer_location": "cairo"})
+        response = _post_voice_chat(
+            data={"request": '{"session_id": "voice-3", "customer_location": "cairo"}'}
+        )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 422
+
+
+def test_voice_chat_rejects_invalid_request_json(monkeypatch: pytest.MonkeyPatch) -> None:
+    import app.api.v1.voice as voice_module
+
+    async def fake_run_chat(session_id: str, message: str, customer_location=None) -> ChatResponse:
+        raise AssertionError("run_chat should not be reached")
+
+    monkeypatch.setattr(voice_module, "run_chat", fake_run_chat)
+    stt = FakeSttClient()
+    app.dependency_overrides[get_stt_client] = lambda: stt
+    try:
+        response = _post_voice_chat(data={"request": "not json"})
     finally:
         app.dependency_overrides.clear()
 

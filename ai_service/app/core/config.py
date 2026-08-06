@@ -15,24 +15,8 @@ class Settings(BaseSettings):
     app_env: str = "local"
     api_v1_prefix: str = "/api/v1"
 
-    database_url: str = Field(
-        default=(
-            "mssql+aioodbc://sa:YourStrong%21Passw0rd@localhost:1433/"
-            "SalaselAiService?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
-        )
-    )
-
-    @property
-    def sync_database_url(self) -> str:
-        return self.database_url.replace("+aioodbc", "+pyodbc")
-    db_pool_size: int = 5
-    db_max_overflow: int = 10
-    db_command_timeout_seconds: int = 10
-
     redis_url: AnyUrl = Field(default="redis://localhost:6379/0")
     health_timeout_seconds: int = 3
-
-    startup_sync_enabled: bool = True
 
     llm_provider: str = "groq"
     llm_model: str = "llama-3.3-70b-versatile"

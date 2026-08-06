@@ -1,16 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field
-
-
-class OrderLocation(BaseModel):
-    lat: float
-    lon: float
-
-
-class OrderRequest(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-
-    merchant_id: int = Field(alias="merchantId")
-    location: OrderLocation | None = Field(default=None, alias="location")
+from pydantic import BaseModel, Field
 
 
 class OrderPipelineSchema(BaseModel):

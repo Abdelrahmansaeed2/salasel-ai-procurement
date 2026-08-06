@@ -1,12 +1,10 @@
-import json
-
 from fastapi.testclient import TestClient
 
 from app.main import app
 
 
-def _voice_url() -> str:
-    return "/api/v1/voice/order"
+def _voice_url(merchant_id: int = 42) -> str:
+    return f"/api/v1/voice/order/{merchant_id}"
 
 
 def test_voice_order_endpoint_returns_schema(monkeypatch) -> None:
@@ -32,9 +30,9 @@ def test_voice_order_endpoint_returns_schema(monkeypatch) -> None:
     monkeypatch.setattr(order_module, "run_order_pipeline", fake_pipeline)
 
     response = TestClient(app).post(
-        _voice_url(),
+        _voice_url(42),
+        params={"lat": 30.0, "lon": 31.0},
         files={"audio": ("order.wav", b"RIFF-test-audio", "audio/wav")},
-        data={"request": json.dumps({"merchantId": 42, "location": {"lat": 30.0, "lon": 31.0}})},
     )
 
     assert response.status_code == 200
@@ -65,45 +63,39 @@ def test_voice_order_endpoint_without_location(monkeypatch) -> None:
     monkeypatch.setattr(order_module, "run_order_pipeline", fake_pipeline)
 
     response = TestClient(app).post(
-        _voice_url(),
+        _voice_url(42),
         files={"audio": ("order.wav", b"RIFF-test-audio", "audio/wav")},
-        data={"request": json.dumps({"merchantId": 42})},
     )
 
     assert response.status_code == 200
     assert captured["location"] is None
 
 
-def test_voice_order_endpoint_requires_request() -> None:
+def test_voice_order_endpoint_partial_location() -> None:
     response = TestClient(app).post(
-        _voice_url(),
+        _voice_url(42),
+        params={"lat": 30.0},
         files={"audio": ("order.wav", b"RIFF-test-audio", "audio/wav")},
     )
     assert response.status_code == 422
 
 
-def test_voice_order_endpoint_invalid_request_json() -> None:
+def test_voice_order_endpoint_requires_audio() -> None:
+    response = TestClient(app).post(_voice_url(42))
+    assert response.status_code == 422
+
+
+def test_voice_order_endpoint_non_integer_merchant() -> None:
     response = TestClient(app).post(
-        _voice_url(),
+        "/api/v1/voice/order/abc",
         files={"audio": ("order.wav", b"RIFF-test-audio", "audio/wav")},
-        data={"request": "not-json"},
     )
     assert response.status_code == 422
 
 
-def test_voice_order_endpoint_missing_merchant() -> None:
+def test_voice_order_endpoint_missing_merchant_path() -> None:
     response = TestClient(app).post(
-        _voice_url(),
+        "/api/v1/voice/order",
         files={"audio": ("order.wav", b"RIFF-test-audio", "audio/wav")},
-        data={"request": json.dumps({})},
     )
-    assert response.status_code == 422
-
-
-def test_voice_order_endpoint_bad_location() -> None:
-    response = TestClient(app).post(
-        _voice_url(),
-        files={"audio": ("order.wav", b"RIFF-test-audio", "audio/wav")},
-        data={"request": json.dumps({"merchantId": 42, "location": {"lat": 30.0}})},
-    )
-    assert response.status_code == 422
+    assert response.status_code == 404

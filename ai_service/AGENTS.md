@@ -15,13 +15,15 @@ model.
 
 ## Supporting service: product vectorization sync
 
-Not a graph node — a background task that keeps Qdrant in sync with SQL
-Server, and a hard dependency of the **Retriever agent** below.
+Not a graph node — the API layer keeps Qdrant in sync with products pushed by
+the backend. SQL Server has been removed from this service; the backend (.NET)
+is the source of truth and drives Qdrant via `/api/v1/admin/products`.
 
 **File:** `app/services/vector_store.py` (Qdrant client wrapper) +
-background task triggered from the product create/update path.
+`app/services/ingestion_service.py` (ingest path).
 
-**Trigger:** on product create/update in SQL Server (the source of truth).
+**Trigger:** the backend pushes product create/update via
+`POST /api/v1/admin/products`.
 
 **Logic:**
 
@@ -37,15 +39,16 @@ async def sync_product_to_vector_store(product: Product, supplier: Supplier):
             "category": product.category,
             "price": product.price,
             "geo": {"lat": supplier.lat, "lon": supplier.lon},
-            "quality_score": supplier.quality_score,  # null until Sprint 5's batch job populates it
+            "quality_score": supplier.quality_score,  # null until the backend pushes metrics
         },
     )
 ```
 
-**Quality score updates:** the nightly quality-score batch job
-(`app/services/quality_score_job.py`) issues a payload-only update to every
-affected product's Qdrant point — it does not re-embed, since the vector
-itself doesn't change when a review comes in.
+**Quality score updates:** the backend pushes raw review metrics via
+`POST /api/v1/admin/quality-metrics`; the AI service computes scores and
+issues a payload-only update to every affected product's Qdrant point — it
+does not re-embed, since the vector itself doesn't change when a review comes
+in.
 
 **Testing:** unit test with a fake Qdrant client asserting idempotent
 upsert (same `product_id` twice → one point, not two); integration test
@@ -168,9 +171,8 @@ async def rag_lookup_node(state: InventoryState) -> dict:
     if cached is not None:
         attrs = json.loads(cached)
     else:
-        async with get_sessionmaker()() as session:
-            repo = ProductRepository(session)
-            attrs = await repo.get_distinct_attributes(category)
+        products = list_by_category(category, in_stock_only=True)
+        attrs = _format_attrs(products, category)
         redis_client.setex(cache_key, 3600, json.dumps(attrs))
     redis_client.close()
     attr_text = "\n".join(f"- {a}" for a in attrs)
@@ -179,6 +181,8 @@ async def rag_lookup_node(state: InventoryState) -> dict:
         "spec": state["spec"].model_copy(update={"needs_attribute_lookup": False}),
     }
 ```
+
+Attribute values are read from Qdrant payloads (`list_by_category`, no SQL).
 
 **Always routes to:** `conversation_agent` — never talks to the customer
 directly, only enriches context for the next conversation turn.
@@ -225,7 +229,7 @@ on the same `thread_id` to resume from the entry point).
 
 **File:** `app/agents/nodes/retriever.py`
 **Type:** Deterministic, multi-stage pipeline. No LLM call. Queries Qdrant
-directly — does not touch SQL Server in the request path.
+directly.
 **Status:** **Stub until Sprint 4.** Currently returns a placeholder message
 and sets `turn_status: "done"`. Full implementation requires Sprint 3's
 embedding service, vector store, and Qdrant seeding.

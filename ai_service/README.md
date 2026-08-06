@@ -15,11 +15,12 @@ FastAPI service for the AI procurement supplier-matching pipeline.
   weights when a match is rejected.
 - **Voice ordering** — audio uploads are transcribed to text (Groq Whisper)
   and fed through the same agent pipeline.
-- **Voice → order drafts** — a dedicated LangGraph pipeline turns a spoken
-  request into a structured order schema (products → RAG-enhanced matching →
-  deterministic order rendering), aligned with the backend order DTOs.
-- **Runs in Docker** — SQL Server + Redis + Qdrant with automatic migrations
-  and test-only seed data on startup.
+- **Voice → order drafts** — a dedicated, single-turn 5-node LangGraph
+  pipeline (2 LLM calls) turns a spoken request into a structured order schema
+  (extract products → RAG-enhanced matching → deterministic order rendering),
+  aligned with the backend `OrderExecutionRequestDto`.
+- **Runs in Docker** — Redis + Qdrant only; no database. Catalog data arrives
+  via the admin ingestion endpoints from the backend.
 
 ## Architecture
 
@@ -57,16 +58,39 @@ conversation_agent → router →
 - **LLM usage** — only `conversation_agent` and `format_results` call an LLM;
   every other node is deterministic Python.
 
-Supporting services keep the vector store in sync with the catalog:
-- **Product sync** (`app/services/product_sync_service.py`) — embeds products
-  and upserts them into Qdrant on create/update (dev/test path).
-- **Quality-score job** (`app/services/quality_score_job.py`) — pushes
-  payload-only quality-score updates to Qdrant nightly (and once at startup).
+### Order pipeline
 
-### Data flow — SQL-free in production
+The `/voice/order` endpoint runs a separate, single-turn 5-node graph
+(`app/agents/order/`) with no checkpointer — each request compiles a fresh
+graph, so there is no pause/resume. Two of the five nodes call an LLM (the
+primary model via the shared `conversation` role); the rest are deterministic
+or RAG-based:
 
-The AI service never reads SQL Server in the request path. In production the
-backend (.NET) is the source of truth and drives Qdrant:
+```
+extract_products → enrich_metadata → resolve_defaults → match_best → generate_order → END
+```
+
+- **Extract products** — LLM (primary model, structured `json_mode`). Parses
+  the transcript into `OrderLine[]` (`product_name`, `quantity`, `category`,
+  `requested_attributes`, price bounds); unknown fields stay null; an empty
+  extraction sets an error.
+- **Enrich metadata** — per line, embeds the product name and searches Qdrant
+  for candidate `ProductMatch` payloads (no LLM).
+- **Resolve defaults** — deterministic. Quantity defaults to 1 and absent
+  attributes are back-filled from the catalog payload (user value wins).
+- **Match best** — embeds name + resolved attributes, re-searches with
+  category/price filters, and when a customer location is present blends
+  similarity/quality/distance (default weights 1.0/0.7/0.5) to pick the best
+  match; computes the line subtotal.
+- **Generate order** — deterministic. Assembles the `OrderResponse`
+  (`merchant_id`, `total_order_cost`, `splits[]`, `unresolved[]`) mirroring
+  the backend's `OrderExecutionRequestDto`. Lines that never matched land in
+  `unresolved` — never silently dropped.
+
+### Data flow — SQL-free
+
+The AI service has no database dependency. The backend (.NET) is the source of
+truth and drives Qdrant:
 
 - **Ingestion** — the backend pushes product data via
   `POST /api/v1/admin/products`; the AI service embeds it (name, SKU,
@@ -78,16 +102,15 @@ backend (.NET) is the source of truth and drives Qdrant:
 - **Retrieval & RAG** — the retriever and RAG lookup read only Qdrant
   payloads (+ Redis cache); no SQL.
 
-SQL Server is used only when `STARTUP_SYNC_ENABLED=true` (default for local
-dev/test, which seeds Qdrant from the SQL schema on startup).
+A freshly-started stack has an empty catalog until the backend pushes data
+through the admin endpoints.
 
 ## Domain Ownership
 
 The production catalog and supplier domain model lives in
-`../backend-dotnet/Salasel.Domain`. The SQLAlchemy models in this service are
-AI-service test scaffolding for local development and integration tests. Their
-table names intentionally mirror the current .NET entities, but they are not
-the source of truth.
+`../backend-dotnet/Salasel.Domain`. The AI service never stores catalog data
+itself — Qdrant holds the searchable snapshot pushed via `/api/v1/admin/*`,
+and the backend remains the source of truth.
 
 ## Configuration
 
@@ -95,13 +118,8 @@ Copy `.env.example` to `.env` and set the required values:
 
 | Variable | Description | Default |
 |---|---|---|
-| `DATABASE_URL` | SQL Server async connection string | `mssql+aioodbc://...` |
-| `DB_POOL_SIZE` | Async pool size | `5` |
-| `DB_MAX_OVERFLOW` | Max pool overflow | `10` |
-| `DB_COMMAND_TIMEOUT_SECONDS` | DB command timeout | `10` |
 | `REDIS_URL` | Redis connection string (checkpointer + cache) | `redis://localhost:6379/0` |
 | `HEALTH_TIMEOUT_SECONDS` | Health-check timeout | `3` |
-| `STARTUP_SYNC_ENABLED` | Seed Qdrant from SQL Server at startup (dev/test) | `true` |
 | `LLM_PROVIDER` | LLM provider (`groq` or `anthropic`) | `groq` |
 | `LLM_MODEL` | Primary model name | `llama-3.3-70b-versatile` |
 | `LLM_GROQ_API_KEY` | Groq API key | *(empty)* |
@@ -148,7 +166,7 @@ runs; see [docs/API.md](docs/API.md) for the full written reference.
 Returns service health status (DB + Redis reachability).
 
 ```powershell
-Invoke-RestMethod http://localhost:8000/api/v1/health
+Invoke-RestMethod http://127.0.0.1:8000/api/v1/health
 ```
 
 Response:
@@ -163,7 +181,7 @@ continue a session. `customer_location` is optional and enables geo-radius
 retrieval.
 
 ```powershell
-Invoke-RestMethod http://localhost:8000/api/v1/chat `
+Invoke-RestMethod http://127.0.0.1:8000/api/v1/chat `
   -Method POST `
   -Body '{"session_id": "test-1", "message": "I need PPE under 5 dollars", "customer_location": [30.0444, 31.2357]}'
 ```
@@ -199,7 +217,7 @@ resumes correctly.
 Transcribe an audio file to text (multipart `audio` field).
 
 ```powershell
-curl.exe -X POST http://localhost:8000/api/v1/voice/transcribe `
+curl.exe -X POST http://127.0.0.1:8000/api/v1/voice/transcribe `
   -F "audio=@recording.m4a"
 ```
 
@@ -214,14 +232,15 @@ Response:
 ### POST /api/v1/voice/chat
 
 Transcribe an audio file and run it through the agent pipeline in one call.
-Same session semantics as `/chat` — reuse `session_id` to continue, and pass
-`customer_location` (`"lat,lon"`) to enable geo-radius retrieval.
+Same session semantics as `/chat` — reuse `session_id` to continue. The
+`request` form field is a JSON-encoded `VoiceChatRequest` with `session_id`
+(required) and an optional `customer_location` `[lat, lon]` array enabling
+geo-radius retrieval.
 
 ```powershell
-curl.exe -X POST http://localhost:8000/api/v1/voice/chat `
+curl.exe -X POST http://127.0.0.1:8000/api/v1/voice/chat `
   -F "audio=@recording.m4a" `
-  -F "session_id=voice-1" `
-  -F "customer_location=30.0444,31.2357"
+  -F 'request={"session_id": "voice-1", "customer_location": [30.0444, 31.2357]}'
 ```
 
 Returns the same `ChatResponse` shape as `/api/v1/chat`.
@@ -237,14 +256,13 @@ matches the backend's `OrderExecutionRequestDto` (merchant, splits with
 supplier/SKU/quantity/subtotal, totals).
 
 ```powershell
-curl.exe -X POST http://localhost:8000/api/v1/voice/order `
-  -F "audio=@order.wav" `
-  -F 'request={"merchantId": 42, "location": {"lat": 30.04, "lon": 31.24}}'
+curl.exe -X POST "http://127.0.0.1:8000/api/v1/voice/order/42?lat=30.04&lon=31.24" `
+  -F "audio=@order.wav"
 ```
 
-The `request` form field is a JSON-encoded `OrderRequest` (`merchantId`, plus an
-optional nested `location {lat, lon}` for near-match ranking) so the backend
-caller can post camelCase fields alongside the audio.
+The merchant ID is a path parameter; an optional `lat`/`lon` query pair enables
+near-match ranking (both must be provided together). No request body is needed
+besides the audio file.
 
 Response:
 ```json
@@ -261,19 +279,6 @@ Response:
 Products that cannot be matched to the catalog appear in `unresolved` for
 review — never silently dropped.
 
-### POST /api/v1/admin/sync-products
-
-Re-run the product → Qdrant sync on demand (dev/test; uses SQL Server).
-
-```powershell
-Invoke-RestMethod http://localhost:8000/api/v1/admin/sync-products -Method POST
-```
-
-Response:
-```json
-{"status": "ok", "message": "Products synced to vector store"}
-```
-
 ### POST /api/v1/admin/products
 
 Production ingestion: the backend pushes a batch of products; the AI service
@@ -282,7 +287,7 @@ into Qdrant, idempotent by `product_id`. `quality_score` is set to `null` —
 populate it via `/api/v1/admin/quality-metrics`.
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/admin/products \
+curl -X POST http://127.0.0.1:8000/api/v1/admin/products \
   -H "Content-Type: application/json" \
   -d '{"products": [{"product_id": 1, "supplier_id": 1, "product_name": "Nitrile Gloves Medium", "sku": "NG-MED", "category": "PPE", "description": "Disposable exam gloves", "attributes": {"size": "M"}, "price": 3.75, "lat": 30.04, "lon": 31.24, "in_stock": true}]}'
 ```
@@ -296,10 +301,10 @@ Response:
 
 The backend pushes raw review metrics; the AI service computes quality scores
 and applies payload-only updates to every product of each supplier (no
-re-embed). Replaces the nightly SQL job in production.
+re-embed).
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/admin/quality-metrics \
+curl -X POST http://127.0.0.1:8000/api/v1/admin/quality-metrics \
   -H "Content-Type: application/json" \
   -d '{"metrics": [{"supplier_id": 1, "review_count": 50, "average_rating": 4.5, "on_time_delivery_rate": 0.95, "defect_rate": 0.02}]}'
 ```
@@ -311,16 +316,15 @@ Response:
 
 ## Docker Setup
 
-Start SQL Server, Redis, Qdrant, and the app:
+Start Redis, Qdrant, and the app:
 
 ```powershell
 docker compose -f infra/docker/docker-compose.yml up --build
 ```
 
-On container start the entrypoint applies Alembic migrations
-(`alembic upgrade head`) and runs the test seed data (`seed.sql`, 14
-suppliers / 34 catalog items / 14 quality scores) with `sqlcmd -b` so any SQL
-error fails startup. No manual migration or seed step is required.
+The service has no database — no migrations or seed step. A freshly-started
+stack has an empty catalog until the backend pushes data via
+`POST /api/v1/admin/products` (+ `/api/v1/admin/quality-metrics`).
 
 The `app/` directory is volume-mounted with uvicorn `--reload`, so Python
 changes hot-reload without a rebuild — but adding a dependency to
@@ -332,25 +336,29 @@ changes hot-reload without a rebuild — but adding a dependency to
 pytest
 ```
 
-67 tests across 16 test files. Unit/API tests use dependency overrides and do
-not require live SQL Server, Redis, Qdrant, or an LLM connection. Integration
-tests are gated behind `RUN_INTEGRATION=true`.
+96 tests across 20 test files. Unit/API tests use dependency overrides and do
+not require live Redis, Qdrant, or an LLM connection. Integration tests are
+gated behind `RUN_INTEGRATION=true`.
 
 | File | Tests | Scope |
 |---|---|---|
 | `test_config.py` | 1 | Settings defaults |
 | `test_health.py` | 2 | Health endpoint (overridden deps) |
-| `test_voice.py` | 8 | Voice endpoints (stubbed STT + graph) |
+| `test_voice.py` | 9 | Voice endpoints (stubbed STT + graph) |
+| `test_order_api.py` | 6 | `/voice/order` endpoint (path/query parsing + validation) |
+| `test_admin.py` | 3 | Admin ingest/quality endpoints |
 | `test_state.py` | 7 | `merge_spec`, `is_spec_complete` |
 | `test_router.py` | 5 | All 3 routing branches (100% coverage) |
 | `test_retriever.py` | 5 | Retriever location gate + ranked results |
 | `test_ask_missing_spec.py` | 4 | Template selection per missing field |
-| `test_rag_lookup.py` | 3 | Redis-cached attribute lookup |
+| `test_rag_lookup.py` | 4 | Redis-cached attribute lookup |
 | `test_format_results.py` | 3 | Formatting node + unchanged scores |
 | `test_rerank.py` | 6 | Weight adjustment + rejected-id accumulation |
-| `test_ranking_service.py` | 5 | Blend/rank ordering |
+| `test_ranking_service.py` | 5 | Blend/rank ordering + haversine |
 | `test_stt_service.py` | 8 | STT client + validation |
 | `test_embedding_service.py` | 2 | Embedding service |
-| `test_vector_store.py` | 3 | Qdrant wrapper |
-| `test_quality_score_job.py` | 3 | Quality-score payload updates |
-| `test_product_repository.py` | 2 | Product repository |
+| `test_ingestion_service.py` | 3 | Admin ingestion payload handling |
+| `test_vector_store.py` | 8 | Qdrant wrapper (sync + payload updates) |
+| `test_quality_score_service.py` | 4 | Score computation |
+| `test_order_nodes.py` | 9 | Order pipeline nodes |
+| `test_order_service.py` | 2 | Order pipeline orchestration |

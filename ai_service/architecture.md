@@ -20,9 +20,8 @@ reproducible and debuggable.
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | API                   | FastAPI (async)                                                                                                                                    |
 | Agent orchestration   | LangGraph (`StateGraph`), LangChain for LLM calls                                                                                                  |
-| Database              | SQL Server, async SQLAlchemy 2.0, Alembic migrations — source of truth for product/supplier/quality data                                           |
+| Database              | None — the backend (.NET) is the source of truth; the AI service holds a Qdrant snapshot only                                                      |
 | Cache / session state | Redis — LangGraph checkpointer + attribute-lookup cache                                                                                            |
-| Geospatial            | Qdrant native geo-radius payload filtering for retrieval; SQL Server retains a `geography` column with a spatial index for the source-of-truth row |
 | Vector store          | Qdrant (self-hosted via Docker) — single query does vector search plus payload filtering (category, price, geo-radius, quality score)              |
 | Testing               | pytest, pytest-asyncio, Locust (load)                                                                                                              |
 
@@ -121,38 +120,36 @@ mechanism that makes horizontal scaling possible.
 
 ## 4. Data layer
 
-- **Source of truth**: SQL Server holds all product, supplier, and quality
-  score data. All writes go here first.
-- **Vector store**: Qdrant holds a synced, vectorized copy of every product,
-  used only for retrieval. Collection payload includes `product_id`,
+- **Source of truth**: the backend (.NET, `../backend-dotnet`) owns all
+  product, supplier, and quality data. The AI service persists nothing; it
+  keeps a searchable snapshot of that data in Qdrant.
+- **Vector store**: Qdrant holds the synced, vectorized copy of every product,
+  used for retrieval. Collection payload includes `product_id`,
   `supplier_id`, `category`, `price`, `geo` (supplier location as a Qdrant
   geo point), and `quality_score`. Retrieval queries Qdrant directly with a
   combined vector + payload filter (category, price range, geo-radius,
-  quality threshold) rather than filtering in SQL Server first — this keeps
-  SQL Server out of the retrieval hot path entirely.
-- **Sync**: a background task upserts a product's embedding and payload into
-  Qdrant on create/update in SQL Server, keyed idempotently by
-  `product_id`. The nightly quality-score batch job additionally pushes a
-  payload-only update (`quality_score`) to Qdrant for every affected
-  product — no re-embedding needed since the vector itself didn't change.
-- **Supplier quality score**: computed by a scheduled **batch job**, never
-  in the request path. Uses a Bayesian/shrinkage average for review ratings
+  quality threshold).
+- **Sync**: the backend pushes products via `POST /api/v1/admin/products`;
+  the AI service embeds and upserts into Qdrant, keyed idempotently by
+  `product_id`. Quality scores arrive via
+  `POST /api/v1/admin/quality-metrics`, which applies a payload-only update
+  (`quality_score`) to Qdrant for every affected product — no re-embedding
+  needed since the vector itself doesn't change.
+- **Supplier quality score**: computed on quality-metrics ingestion, never in
+  the request path. Uses a Bayesian/shrinkage average for review ratings
   (so a supplier with 3 five-star reviews doesn't outrank one with 500
   reviews at 4.7), blended with on-time-delivery rate and defect/return
   rate.
-- **Product embeddings**: precomputed on write (background task on
-  create/update), never generated at query time except for the customer's
-  live query text.
+- **Product embeddings**: precomputed on ingest (admin push), never generated
+  at query time except for the customer's live query text.
 - **Geospatial**: supplier location is stored as a Qdrant geo point for
-  retrieval-time radius filtering, and as a `geography` column with a
-  spatial index in SQL Server for the source-of-truth record.
+  retrieval-time radius filtering.
 
 ## 5. Scalability (target: thousands of concurrent users)
 
 - Stateless FastAPI instances behind a load balancer; all session state
   lives in the external LangGraph checkpointer.
-- Async I/O throughout — SQLAlchemy async engine with explicitly tuned
-  `pool_size`/`max_overflow`, async LLM calls, no blocking calls in any node.
+- Async I/O throughout — async LLM calls, no blocking calls in any node.
 - Redis caching for category-attribute lookups and repeated embedding
   lookups, with explicit TTLs.
 - Per-user token-bucket rate limiting on `/chat`, returning 429 rather than
@@ -169,57 +166,46 @@ mechanism that makes horizontal scaling possible.
 inventory-multiagent/
 ├── app/
 │   ├── main.py
-│   ├── api/
-│   │   ├── v1/
-│   │   │   ├── chat.py
-│   │   │   └── health.py
-│   │   └── deps.py
-│   ├── core/
-│   │   ├── config.py
-│   │   ├── logging.py
-│   │   └── rate_limit.py
-│   ├── agents/
-│   │   ├── graph.py
-│   │   ├── state.py
-│   │   ├── checkpointer.py
-│   │   ├── nodes/
-│   │   │   ├── conversation.py
-│   │   │   ├── router.py
-│   │   │   ├── rag_lookup.py
-│   │   │   ├── ask_missing_spec.py
-│   │   │   ├── retriever.py
-│   │   │   ├── format_results.py
-│   │   │   └── rerank.py
-│   │   └── prompts/
-│   │       ├── conversation_system.py
-│   │       └── format_results_system.py
 │   ├── services/
 │   │   ├── embedding_service.py
 │   │   ├── vector_store.py
 │   │   ├── ranking_service.py
-│   │   └── quality_score_job.py
-│   ├── repositories/
-│   │   ├── base.py
-│   │   ├── product_repository.py
-│   │   └── supplier_repository.py
-│   ├── db/
-│   │   ├── session.py
-│   │   ├── models.py
-│   │   └── migrations/
+│   │   └── quality_score_service.py
 │   ├── schemas/
 │   │   ├── chat.py
 │   │   └── product.py
-│   └── worker/
-│       └── quality_score_scheduler.py
+│   ├── api/
+│   │   └── v1/
+│   │       ├── chat.py
+│   │       ├── voice.py
+│   │       ├── order.py
+│   │       ├── admin.py
+│   │       └── health.py
+│   └── agents/
+│       ├── graph.py
+│       ├── state.py
+│       ├── checkpointer.py
+│       ├── nodes/
+│       │   ├── conversation.py
+│       │   ├── router.py
+│       │   ├── rag_lookup.py
+│       │   ├── ask_missing_spec.py
+│       │   ├── retriever.py
+│       │   ├── format_results.py
+│       │   ├── review.py
+│       │   └── rerank.py
+│       └── order/
+│           ├── graph.py
+│           ├── state.py
+│           └── nodes.py
 ├── tests/
 │   ├── unit/
-│   ├── integration/
-│   └── load/
+│   └── integration/
 ├── infra/
 │   └── docker/
 │       ├── Dockerfile
+│       ├── entrypoint.sh
 │       └── docker-compose.yml
-├── alembic.ini
 ├── pyproject.toml
 ├── .env.example
 └── README.md
@@ -229,11 +215,11 @@ inventory-multiagent/
 
 The system is built in 6 sprints, each independently verifiable:
 
-1. **Foundation** — scaffolding, DB models/migrations, docker-compose, health check.
+1. **Foundation** — scaffolding, docker-compose, health check.
 2. **Conversation + router** — spec elicitation loop with a working externalized checkpointer.
-3. **RAG grounding + product vectorization** — attribute lookups from SQL Server, product embedding pipeline synced into Qdrant.
+3. **RAG grounding + product vectorization** — attribute lookups from Qdrant payloads, product ingestion pushed by the backend into Qdrant.
 4. **Retriever + Qdrant-based ranking** — vector + payload search (category/price/geo/quality), zero-result relaxation, blended scoring.
-5. **Quality scoring + review/rerank** — batch job, confirm/reject loop.
+5. **Quality scoring + review/rerank** — backend-pushed metrics, confirm/reject loop.
 6. **Hardening** — rate limiting, observability, cross-replica session resume, 1,000-concurrent-user load test.
 
 See `inventory_multiagent_sprint_plan.md` for the full per-sprint build

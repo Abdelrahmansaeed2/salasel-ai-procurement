@@ -27,7 +27,7 @@ def compute_scores(metrics: list[SupplierQualityMetrics]) -> list[tuple[int, flo
     """Compute quality scores for a batch of supplier metrics.
 
     The global average rating is derived from the batch itself, matching the
-    behavior of the nightly SQL job.
+    behavior of the backend-pushed `/admin/quality-metrics` endpoint.
     """
     if not metrics:
         return []
