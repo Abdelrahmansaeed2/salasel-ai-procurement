@@ -96,7 +96,7 @@ services:
     volumes:
       - qdrant_data:/qdrant/storage
     healthcheck:
-      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/localhost/6333 && echo -e 'GET /healthz HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 && grep -q 200 <&3"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:6333/healthz || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -112,7 +112,7 @@ services:
       - ./ai_service/infra/docker/seed.sql:/work/seed.sql:ro
     command: >
       /bin/bash -c "/opt/mssql-tools18/bin/sqlcmd
-      -S sqlserver -U sa -P '$$DB_PASSWORD' -C
+      -S sqlserver -U sa -P '${DB_PASSWORD}' -C
       -i /work/init-db.sql"
     environment:
       DB_PASSWORD: "${DB_PASSWORD}"
