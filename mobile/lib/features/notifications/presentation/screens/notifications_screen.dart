@@ -36,84 +36,47 @@ class NotificationsScreen extends StatelessWidget {
                       SizedBox(height: 24.h),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _SectionHeader(label: 'اليوم'),
-                            SizedBox(height: 16.h),
-                            _VoiceFeatureCard(
-                              onStartTap: () => Get.to(() => const VoiceRecordingScreen()),
-                            ),
-                            SizedBox(height: 16.h),
-                            _NotificationCard(
-                              iconBg: const Color(0x33BC4800),
-                              iconColor: const Color(0xFFBC4800),
-                              iconPath:
-                                  'M2 20C1.45 20 0.979167 19.8042 0.5875 19.4125C0.195833 19.0208 0 18.55 0 18V6C0 5.45 0.195833 4.97917 0.5875 4.5875C0.979167 4.19583 1.45 4 2 4H4C4 2.9 4.39167 1.95833 5.175 1.175C5.95833 0.391667 6.9 0 8 0C9.1 0 10.0417 0.391667 10.825 1.175C11.6083 1.95833 12 2.9 12 4H14C14.55 4 15.0208 4.19583 15.4125 4.5875C15.8042 4.97917 16 5.45 16 6V18C16 18.55 15.8042 19.0208 15.4125 19.4125C15.0208 19.8042 14.55 20 14 20H2ZM6 4H10C10 3.45 9.80417 2.97917 9.4125 2.5875C9.02083 2.19583 8.55 2 8 2C7.45 2 6.97917 2.19583 6.5875 2.5875C6.19583 2.97917 6 3.45 6 4ZM11 9C11.2833 9 11.5208 8.90417 11.7125 8.7125C11.9042 8.52083 12 8.28333 12 8V6H10V8C10 8.28333 10.0958 8.52083 10.2875 8.7125C10.4792 8.90417 10.7167 9 11 9ZM5 9C5.28333 9 5.52083 8.90417 5.7125 8.7125C5.90417 8.52083 6 8.28333 6 8V6H4V8C4 8.28333 4.09583 8.52083 4.2875 8.7125C4.47917 8.90417 4.71667 9 5 9Z',
-                              iconWidth: 16,
-                              iconHeight: 20,
-                              title: 'تم قبول طلبك رقم #8842',
-                              description:
-                                  "المورد 'النيل للأغذية' قبل طلبك. جاري التحضير.",
-                              buttonLabel: 'تتبع الطلب',
-                              radius: 8,
-                              onButtonTap: () => Get.to(
-                                () => const DeliveryTrackingScreen(orderId: '#8842'),
+                        child: Obx(() {
+                          if (c.isLoading.value) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+
+                          if (c.filteredNotifications.isEmpty) {
+                            return const Center(
+                              child: Text('لا توجد إشعارات حالياً',
+                                  style: TextStyle(fontFamily: 'Cairo')),
+                            );
+                          }
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _VoiceFeatureCard(
+                                onStartTap: () => Get.to(() => const VoiceRecordingScreen()),
                               ),
-                            ),
-                            SizedBox(height: 24.h),
-                            _SectionHeader(label: 'أمس'),
-                            SizedBox(height: 16.h),
-                            _NotificationCard(
-                              iconBg: const Color(0xFFFFDAD6),
-                              iconColor: const Color(0xFFBA1A1A),
-                              iconPath:
-                                  'M3 20C2.45 20 1.97917 19.8042 1.5875 19.4125C1.19583 19.0208 1 18.55 1 18V6.725C0.7 6.54167 0.458333 6.30417 0.275 6.0125C0.0916667 5.72083 0 5.38333 0 5V2C0 1.45 0.195833 0.979167 0.5875 0.5875C0.979167 0.195833 1.45 0 2 0H18C18.55 0 19.0208 0.195833 19.4125 0.5875C19.8042 0.979167 20 1.45 20 2V5C20 5.38333 19.9083 5.72083 19.725 6.0125C19.5417 6.30417 19.3 6.54167 19 6.725V18C19 18.55 18.8042 19.0208 18.4125 19.4125C18.0208 19.8042 17.55 20 17 20H3ZM2 5H18V2H2V5ZM7 12H13V10H7V12Z',
-                              iconWidth: 20,
-                              iconHeight: 20,
-                              title: 'تنبيه: مخزون منخفض',
-                              description:
-                                  'حليب المراعي (1 لتر) وصل إلى الحد الأدنى (5 كراتين).',
-                              buttonLabel: 'إعادة طلب',
-                              radius: 8,
-                              onButtonTap: () => Get.to(() => const InventoryScreen()),
-                            ),
-                            SizedBox(height: 16.h),
-                            _NotificationCard(
-                              iconBg: const Color(0xFFDBE1FF),
-                              iconColor: const Color(0xFF004AC6),
-                              iconPath:
-                                  'M5 16C4.16667 16 3.45833 15.7083 2.875 15.125C2.29167 14.5417 2 13.8333 2 13H0V2C0 1.45 0.195833 0.979167 0.5875 0.5875C0.979167 0.195833 1.45 0 2 0H16V4H19L22 8V13H20C20 13.8333 19.7083 14.5417 19.125 15.125C18.5417 15.7083 17.8333 16 17 16C16.1667 16 15.4583 15.7083 14.875 15.125C14.2917 14.5417 14 13.8333 14 13H8C8 13.8333 7.70833 14.5417 7.125 15.125C6.54167 15.7083 5.83333 16 5 16ZM5 14C5.28333 14 5.52083 13.9042 5.7125 13.7125C5.90417 13.5208 6 13.2833 6 13C6 12.7167 5.90417 12.4792 5.7125 12.2875C5.52083 12.0958 5.28333 12 5 12C4.71667 12 4.47917 12.0958 4.2875 12.2875C4.09583 12.4792 4 12.7167 4 13C4 13.2833 4.09583 13.5208 4.2875 13.7125C4.47917 13.9042 4.71667 14 5 14ZM17 14C17.2833 14 17.5208 13.9042 17.7125 13.7125C17.9042 13.5208 18 13.2833 18 13C18 12.7167 17.9042 12.4792 17.7125 12.2875C17.5208 12.0958 17.2833 12 17 12C16.7167 12 16.4792 12.0958 16.2875 12.2875C16.0958 12.4792 16 12.7167 16 13C16 13.2833 16.0958 13.5208 16.2875 13.7125C16.4792 13.9042 16.7167 14 17 14ZM16 9H20.25L18 6H16V9Z',
-                              iconWidth: 22,
-                              iconHeight: 16,
-                              title: 'الشحنة في الطريق',
-                              description:
-                                  'المندوب يقترب من موقعك، سيصل خلال 15 دقيقة.',
-                              buttonLabel: 'عرض الخريطة',
-                              radius: 8,
-                              onButtonTap: () => Get.to(
-                                () => const DeliveryTrackingScreen(orderId: '#8842'),
-                              ),
-                            ),
-                            SizedBox(height: 24.h),
-                            _SectionHeader(label: 'هذا الأسبوع'),
-                            SizedBox(height: 16.h),
-                            _NotificationCard(
-                              iconBg: const Color(0xFFE8F5E9),
-                              iconColor: const Color(0xFF2E7D32),
-                              iconPath:
-                                  'M7.6 21L5.7 17.8L2.1 17L2.45 13.3L0 10.5L2.45 7.7L2.1 4L5.7 3.2L7.6 0L11 1.45L14.4 0L16.3 3.2L19.9 4L19.55 7.7L22 10.5L19.55 13.3L19.9 17L16.3 17.8L14.4 21L11 19.55L7.6 21ZM9.95 14.05L15.6 8.4L14.2 6.95L9.95 11.2L7.8 9.1L6.4 10.5L9.95 14.05Z',
-                              iconWidth: 22,
-                              iconHeight: 21,
-                              title: 'تم توثيق المنشأة بنجاح',
-                              description:
-                                  'يمكنك الآن الوصول إلى كافة ميزات المنصة.',
-                              buttonLabel: 'الملف الشخصي',
-                              radius: 20,
-                              onButtonTap: () => Get.to(() => const ProfileScreen()),
-                            ),
-                          ],
-                        ),
+                              SizedBox(height: 16.h),
+                              ...c.filteredNotifications.map((notif) {
+                                // Default icon for now
+                                return Padding(
+                                  padding: EdgeInsets.only(bottom: 16.h),
+                                  child: _NotificationCard(
+                                    iconBg: const Color(0x33BC4800),
+                                    iconColor: const Color(0xFFBC4800),
+                                    iconPath:
+                                        'M2 20C1.45 20 0.979167 19.8042 0.5875 19.4125C0.195833 19.0208 0 18.55 0 18V6C0 5.45 0.195833 4.97917 0.5875 4.5875C0.979167 4.19583 1.45 4 2 4H4C4 2.9 4.39167 1.95833 5.175 1.175C5.95833 0.391667 6.9 0 8 0C9.1 0 10.0417 0.391667 10.825 1.175C11.6083 1.95833 12 2.9 12 4H14C14.55 4 15.0208 4.19583 15.4125 4.5875C15.8042 4.97917 16 5.45 16 6V18C16 18.55 15.8042 19.0208 15.4125 19.4125C15.0208 19.8042 14.55 20 14 20H2ZM6 4H10C10 3.45 9.80417 2.97917 9.4125 2.5875C9.02083 2.19583 8.55 2 8 2C7.45 2 6.97917 2.19583 6.5875 2.5875C6.19583 2.97917 6 3.45 6 4ZM11 9C11.2833 9 11.5208 8.90417 11.7125 8.7125C11.9042 8.52083 12 8.28333 12 8V6H10V8C10 8.28333 10.0958 8.52083 10.2875 8.7125C10.4792 8.90417 10.7167 9 11 9ZM5 9C5.28333 9 5.52083 8.90417 5.7125 8.7125C5.90417 8.52083 6 8.28333 6 8V6H4V8C4 8.28333 4.09583 8.52083 4.2875 8.7125C4.47917 8.90417 4.71667 9 5 9Z',
+                                    iconWidth: 16,
+                                    iconHeight: 20,
+                                    title: notif.eventName,
+                                    description: notif.payload.toString(),
+                                    buttonLabel: 'التفاصيل',
+                                    radius: 8,
+                                    onButtonTap: () {},
+                                  ),
+                                );
+                              }),
+                            ],
+                          );
+                        }),
                       ),
                     ],
                   ),

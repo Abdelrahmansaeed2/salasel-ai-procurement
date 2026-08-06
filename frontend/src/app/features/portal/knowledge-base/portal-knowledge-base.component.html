@@ -77,21 +77,21 @@
       @for (asset of assets(); track asset.id) {
         <div class="assets-table-row">
           <div class="doc-cell">
-            <span class="file-icon" [class]="'file-icon--' + asset.type.toLowerCase()">{{ asset.type }}</span>
+            <span class="file-icon" [class]="'file-icon--' + asset.fileType.toLowerCase()">{{ asset.fileType }}</span>
             <div class="doc-meta">
-              <span class="doc-name">{{ asset.name }}</span>
-              @if (asset.error) {
-                <span class="doc-error">{{ asset.error }}</span>
+              <span class="doc-name">{{ asset.fileName }}</span>
+              @if (asset.errorMessage) {
+                <span class="doc-error">{{ asset.errorMessage }}</span>
               } @else if (asset.size) {
                 <span class="doc-size">{{ asset.size }}</span>
               }
             </div>
           </div>
-          <span class="type-chip">{{ asset.type }}</span>
+          <span class="type-chip">{{ asset.fileType }}</span>
           <div class="status-cell">
             @switch (asset.status) {
-              @case ('archived') { <span class="status-dot status-dot--success"></span><span class="status-text status-text--success">{{ asset.statusLabel }}</span> }
-              @case ('processing') { <span class="status-dot status-dot--primary"></span><span class="status-text status-text--primary">{{ asset.statusLabel }}</span> }
+              @case ('Completed') { <span class="status-dot status-dot--success"></span><span class="status-text status-text--success">مكتمل</span> }
+              @case ('Processing') { <span class="status-dot status-dot--primary"></span><span class="status-text status-text--primary">جاري المعالجة</span> }
               @case ('uploading') {
                 <div class="upload-progress">
                   <div class="upload-progress-head">
@@ -101,7 +101,8 @@
                   <div class="progress-track"><div class="progress-fill" [style.width.%]="asset.progress"></div></div>
                 </div>
               }
-              @case ('failed') { <span class="status-dot status-dot--danger"></span><span class="status-text status-text--danger">{{ asset.statusLabel }}</span> }
+              @case ('Failed') { <span class="status-dot status-dot--danger"></span><span class="status-text status-text--danger">فشل</span> }
+              @default { <span class="status-dot status-dot--primary"></span><span class="status-text status-text--primary">{{ asset.status }}</span> }
             }
           </div>
           <span class="updated-at">{{ asset.updatedAt }}</span>
@@ -109,7 +110,7 @@
             <button type="button" class="icon-action" (click)="remove(asset.id)" aria-label="حذف">
               <svg width="14" height="16" viewBox="0 0 14 16" fill="none"><path d="M2 16c-.41 0-.76-.15-1.06-.44A1.44 1.44 0 0 1 .5 14.5V3H0V1h4V0h5v1h4v2h-.5v11.5c0 .41-.15.76-.44 1.06-.29.3-.65.44-1.06.44H2ZM10 3H2v11.5h8V3ZM4 12h1.5V4H4v8Zm3 0h1.5V4H7v8ZM2 3v11.5V3Z" fill="#DC2626"/></svg>
             </button>
-            @if (asset.status === 'failed') {
+            @if (asset.status === 'Failed') {
               <button type="button" class="icon-action" (click)="retry(asset.id)" aria-label="إعادة المحاولة">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 16c-2.23 0-4.13-.78-5.68-2.33A7.73 7.73 0 0 1 0 8c0-2.23.78-4.13 2.32-5.68A7.73 7.73 0 0 1 8 0c1.15 0 2.25.24 3.3.71 1.05.48 1.95 1.16 2.7 2.04V0h2v7H9V5h4.2a6.6 6.6 0 0 0-2.64-2.8A6.35 6.35 0 0 0 8 2c-1.67 0-3.08.58-4.25 1.75A5.78 5.78 0 0 0 2 8c0 1.67.58 3.08 1.75 4.25A5.78 5.78 0 0 0 8 14c1.28 0 2.44-.37 3.48-1.1a5.86 5.86 0 0 0 2.17-2.9h2.1a7.2 7.2 0 0 1-2.75 4.33A7.27 7.27 0 0 1 8 16Z" fill="#374957"/></svg>
               </button>
