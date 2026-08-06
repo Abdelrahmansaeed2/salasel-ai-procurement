@@ -77,7 +77,7 @@ public class AuthService : IAuthService
                 CompanyName = $"{user.FullName}'s Company",
                 ReliabilityScore = 100m,
                 PaymentTerms = "Net 30",
-                IsActiveForRouting = true
+                IsActiveForRouting = false
             });
         }
 

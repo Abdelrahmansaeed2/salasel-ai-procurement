@@ -23,6 +23,9 @@ public class SalaselDbContext : DbContext
     public DbSet<SupplierWarehouse> SupplierWarehouses { get; set; } = null!;
     public DbSet<SupplierKnowledgeDocument> SupplierKnowledgeDocuments { get; set; } = null!;
     public DbSet<KnowledgeBaseArticle> KnowledgeBaseArticles { get; set; } = null!;
+    public DbSet<Notification> Notifications { get; set; } = null!;
+    public DbSet<ContactMessage> ContactMessages { get; set; } = null!;
+    public DbSet<UserNotificationSettings> UserNotificationSettings { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -75,6 +78,7 @@ public class SalaselDbContext : DbContext
         modelBuilder.Entity<SupplierProfile>().Property(s => s.TaxNumber).HasMaxLength(20);
         modelBuilder.Entity<SupplierProfile>().Property(s => s.BankName).HasMaxLength(150);
         modelBuilder.Entity<SupplierProfile>().Property(s => s.Iban).HasMaxLength(34);
+        modelBuilder.Entity<SupplierProfile>().Property(s => s.VerificationStatus).HasConversion<string>().HasMaxLength(20);
 
         modelBuilder.Entity<SupplierWarehouse>().Property(w => w.City).HasMaxLength(100);
 
@@ -181,6 +185,27 @@ public class SalaselDbContext : DbContext
         modelBuilder.Entity<SupplierKnowledgeDocument>().Property(d => d.FileUrl).HasMaxLength(500);
         modelBuilder.Entity<SupplierKnowledgeDocument>().Property(d => d.FileType).HasMaxLength(10);
         modelBuilder.Entity<SupplierKnowledgeDocument>().Property(d => d.Status).HasConversion<string>().HasMaxLength(20);
+
+        // User → Notification
+        modelBuilder.Entity<Notification>()
+            .HasOne(n => n.User)
+            .WithMany()
+            .HasForeignKey(n => n.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Notification>().Property(n => n.EventName).HasMaxLength(60);
+        modelBuilder.Entity<Notification>().HasIndex(n => new { n.UserId, n.IsRead });
+
+        modelBuilder.Entity<ContactMessage>().Property(c => c.Name).IsRequired().HasMaxLength(200);
+        modelBuilder.Entity<ContactMessage>().Property(c => c.Email).IsRequired().HasMaxLength(200);
+        modelBuilder.Entity<ContactMessage>().Property(c => c.Message).IsRequired().HasMaxLength(2000);
+
+        modelBuilder.Entity<UserNotificationSettings>().HasIndex(s => s.UserId).IsUnique();
+        modelBuilder.Entity<UserNotificationSettings>()
+            .HasOne(s => s.User)
+            .WithMany()
+            .HasForeignKey(s => s.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Product → SupplierProduct
         modelBuilder.Entity<SupplierProduct>()

@@ -19,6 +19,10 @@ public class User
     // Admins are created already "set up" — they have no onboarding step.
     public bool IsSetupCompleted { get; set; } = false;
 
+    // PUT /api/v1/users/me/language — optional per the spec (client-only is
+    // also acceptable), but persisting it means language survives a reinstall/new device.
+    public string PreferredLanguage { get; set; } = "en";
+
     public ICollection<MerchantsProfile> MerchantsProfiles { get; set; } = new List<MerchantsProfile>();
     public ICollection<SupplierProfile> SupplierProfiles { get; set; } = new List<SupplierProfile>();
 }

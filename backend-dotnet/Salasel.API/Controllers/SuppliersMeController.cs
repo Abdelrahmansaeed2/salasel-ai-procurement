@@ -66,19 +66,22 @@ public class SuppliersMeController : ControllerBase
         supplier.BusinessType = request.FacilityInfo.BusinessType;
         supplier.CrNumber = request.FacilityInfo.RegistrationNumber;
         supplier.Address = request.FacilityInfo.Address;
-        
+
         supplier.ContactPhone = request.ContactInfo.PhoneNumber;
         supplier.JobTitle = request.ContactInfo.JobTitle;
-        
+
         supplier.TaxNumber = request.TaxInfo.TaxId;
         supplier.VatNumber = request.TaxInfo.VatNumber;
         supplier.IsVatExempt = request.TaxInfo.IsVatExempt;
-        
+
         // The wizard doesn't explicitly collect Bank info right now, so these might be empty
         supplier.BankName = request.BankName ?? string.Empty;
         supplier.Iban = request.Iban ?? string.Empty;
-        
+
         supplier.RegistrationStep = TotalRegistrationSteps;
+        // Wizard completion doubles as the CR/verification submission — there's
+        // no separate "submit-verification" step for suppliers like merchants have.
+        supplier.VerificationStatus = MerchantVerificationStatus.UnderReview;
 
         await ReplaceWarehousesAsync(supplier.SupplierID, request.Warehouses);
 
@@ -365,6 +368,7 @@ public class SuppliersMeController : ControllerBase
             IsSetupCompleted = owner?.IsSetupCompleted ?? false,
             ReliabilityScore = supplier.ReliabilityScore,
             IsActiveForRouting = supplier.IsActiveForRouting,
+            VerificationStatus = supplier.VerificationStatus.ToString(),
             Warehouses = warehouses.Select(w => new WarehouseDto { City = w.City, Lat = w.Lat, Lng = w.Lng }).ToList()
         };
     }
