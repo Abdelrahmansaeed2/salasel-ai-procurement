@@ -21,6 +21,7 @@ public class SalaselDbContext : DbContext
     public DbSet<MerchantDocument> MerchantDocuments { get; set; } = null!;
     public DbSet<Bid> Bids { get; set; } = null!;
     public DbSet<SupplierWarehouse> SupplierWarehouses { get; set; } = null!;
+    public DbSet<SupplierKnowledgeDocument> SupplierKnowledgeDocuments { get; set; } = null!;
     public DbSet<KnowledgeBaseArticle> KnowledgeBaseArticles { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -33,6 +34,7 @@ public class SalaselDbContext : DbContext
         modelBuilder.Entity<SupplierProfile>().HasKey(s => s.SupplierID);
         modelBuilder.Entity<MerchantInventory>().HasKey(m => m.InventoryID);
         modelBuilder.Entity<MerchantDocument>().HasKey(d => d.Id);
+        modelBuilder.Entity<SupplierKnowledgeDocument>().HasKey(d => d.Id);
         modelBuilder.Entity<KnowledgeBaseArticle>().HasKey(k => k.Id);
 
         // ─── Unique Indexes ──────────────────────────────────────────────────────
@@ -167,6 +169,18 @@ public class SalaselDbContext : DbContext
             .WithMany(s => s.Warehouses)
             .HasForeignKey(w => w.SupplierId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // SupplierProfile → SupplierKnowledgeDocument
+        modelBuilder.Entity<SupplierKnowledgeDocument>()
+            .HasOne(d => d.Supplier)
+            .WithMany()
+            .HasForeignKey(d => d.SupplierId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<SupplierKnowledgeDocument>().Property(d => d.FileName).HasMaxLength(255);
+        modelBuilder.Entity<SupplierKnowledgeDocument>().Property(d => d.FileUrl).HasMaxLength(500);
+        modelBuilder.Entity<SupplierKnowledgeDocument>().Property(d => d.FileType).HasMaxLength(10);
+        modelBuilder.Entity<SupplierKnowledgeDocument>().Property(d => d.Status).HasConversion<string>().HasMaxLength(20);
 
         // Product → SupplierProduct
         modelBuilder.Entity<SupplierProduct>()

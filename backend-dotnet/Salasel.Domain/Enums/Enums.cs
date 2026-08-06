@@ -70,3 +70,10 @@ public enum PaymentStatus : byte
     Paid,
     Failed
 }
+
+public enum KnowledgeDocumentStatus : byte
+{
+    Processing,
+    Indexed,
+    Failed
+}

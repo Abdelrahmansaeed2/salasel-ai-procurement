@@ -119,6 +119,10 @@ builder.Services.AddSingleton<INotificationService, NotificationService>();
 builder.Services.AddScoped<ISupplierAssignmentService, SupplierAssignmentService>();
 builder.Services.AddHostedService<VoiceProcessingWorker>();
 
+// RAG knowledge base indexing pipeline (same shape as the voice pipeline above)
+builder.Services.AddSingleton<IKnowledgeIndexingQueue, KnowledgeIndexingQueue>();
+builder.Services.AddHostedService<KnowledgeIndexingWorker>();
+
 builder.Services.AddSignalR(options =>
 {
     options.MaximumReceiveMessageSize = 10 * 1024 * 1024;
@@ -182,7 +186,7 @@ var app = builder.Build();
 
 // ── Auto-apply EF Core migrations on startup ────────────────────────────────
 bool migrationSuccess = true;
-string migrationError = null;
+string? migrationError = null;
 
 using (var scope = app.Services.CreateScope())
 {
@@ -229,11 +233,12 @@ app.MapHub<NotificationHub>("/notificationHub");
 app.MapControllers();
 app.MapHealthChecks("/health");
 
-app.MapGet("/api/diagnostics", async (SalaselDbContext db, IConfiguration config) => 
+app.MapGet("/api/diagnostics", async (SalaselDbContext db, IConfiguration config) =>
 {
     bool dbCanConnect = false;
-    string dbError = null;
-    try 
+    string? dbError = null;
+
+    try
     {
         dbCanConnect = await db.Database.CanConnectAsync();
     }
@@ -242,12 +247,12 @@ app.MapGet("/api/diagnostics", async (SalaselDbContext db, IConfiguration config
         dbError = ex.Message;
     }
 
-    return Results.Ok(new 
+    return Results.Ok(new
     {
         status = "API is running and reachable by Nginx!",
         serverTimeUtc = DateTime.UtcNow,
         environment = app.Environment.EnvironmentName,
-        database = new 
+        database = new
         {
             connectionStringConfigured = !string.IsNullOrEmpty(config.GetConnectionString("DefaultConnection")),
             canConnectNow = dbCanConnect,
@@ -255,7 +260,7 @@ app.MapGet("/api/diagnostics", async (SalaselDbContext db, IConfiguration config
             startupMigrationSuccess = migrationSuccess,
             startupMigrationError = migrationError
         },
-        jwt = new 
+        jwt = new
         {
             keyConfigured = !string.IsNullOrEmpty(config["Jwt:Key"])
         }
