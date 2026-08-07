@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../features/stores/presentation/screens/welcomepage_screen.dart';
 import 'package:get_storage/get_storage.dart';
-import '../../shop_registration/presentation/screens/registration_submitted_screen.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../home/presentation/screens/home_screen.dart';
+import '../../../shop_registration/presentation/screens/registration_submitted_screen.dart';
 import '../screens/register_screen.dart';
 import '../../data/repositories/auth_repository.dart';
 
