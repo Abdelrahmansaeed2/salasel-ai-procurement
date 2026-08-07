@@ -26,3 +26,40 @@ public class NextOrderPredictionDto
     public double? AverageIntervalDays { get; set; }
     public DateTime? PredictedNextOrderDate { get; set; }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI-forwarding proxy payloads (POST /api/v1/ai/chat, /order/{id}, /voice/order/{id}).
+// These mirror the ai_service schemas (snake_case over the wire) so the backend
+// can forward client requests to the FastAPI service and relay its response
+// untouched. See ai_service/app/schemas/{chat,order}.py.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// <summary>Request payload for POST /api/v1/ai/chat → ai_service POST /api/v1/chat.</summary>
+public class ChatRequestPayload
+{
+    public string SessionId { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+
+    /// <summary>[lat, lon] when the caller knows the customer's location.</summary>
+    public double[]? CustomerLocation { get; set; }
+}
+
+/// <summary>Request payload for POST /api/v1/ai/order/{merchantId} → ai_service POST /api/v1/order/{merchantId}.</summary>
+public class OrderRequestPayload
+{
+    public string Transcript { get; set; } = string.Empty;
+    public double? Lat { get; set; }
+    public double? Lon { get; set; }
+}
+
+/// <summary>
+/// Raw proxy transport result: the ai_service status code plus its JSON body,
+/// relayed to the backend caller without reshaping.
+/// </summary>
+public class AiProxyResponse
+{
+    public int StatusCode { get; set; }
+    public string Body { get; set; } = string.Empty;
+
+    public bool IsSuccess => StatusCode is >= 200 and < 300;
+}

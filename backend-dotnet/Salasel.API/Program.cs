@@ -114,10 +114,20 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Voice order pipeline (SignalR + background AI worker)
 builder.Services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
-builder.Services.AddSingleton<IFakeAIService, FakeAIService>();
+builder.Services.AddHttpClient<IAIService, AIService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["AiService:BaseUrl"] ?? "http://localhost:8000");
+    client.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue("AiService:TimeoutSeconds", 120));
+});
+builder.Services.AddHttpClient<IAISyncService, AISyncService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["AiService:BaseUrl"] ?? "http://localhost:8000");
+    client.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue("AiService:TimeoutSeconds", 120));
+});
 builder.Services.AddSingleton<INotificationService, NotificationService>();
 builder.Services.AddScoped<ISupplierAssignmentService, SupplierAssignmentService>();
 builder.Services.AddHostedService<VoiceProcessingWorker>();
+builder.Services.AddHostedService<CatalogSyncWorker>();
 
 // RAG knowledge base indexing pipeline (same shape as the voice pipeline above)
 builder.Services.AddSingleton<IKnowledgeIndexingQueue, KnowledgeIndexingQueue>();

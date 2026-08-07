@@ -283,7 +283,7 @@ curl -X POST "http://127.0.0.1:8000/api/v1/voice/order/42?lat=30.04&lon=31.24" \
 | `merchant_id` | integer\|null | Echoes the request merchant |
 | `total_order_cost` | number | Sum of all split subtotals |
 | `splits` | array | One entry per matched product |
-| `unresolved` | array of string | Product names that could not be matched, surfaced for review (never silently dropped) |
+| `unresolved` | array of string | Product names that could not be matched, surfaced for review (never silently dropped). Includes items whose best catalog match scored below `RESOLVE_MIN_SIMILARITY` (default `0.6`) — out-of-catalog terms are never force-matched to the nearest unrelated product |
 
 ```json
 {

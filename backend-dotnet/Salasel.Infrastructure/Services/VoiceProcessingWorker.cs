@@ -51,7 +51,7 @@ public class VoiceProcessingWorker : BackgroundService
     {
         using var scope = _scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<SalaselDbContext>();
-        var ai = scope.ServiceProvider.GetRequiredService<IFakeAIService>();
+        var ai = scope.ServiceProvider.GetRequiredService<IAIService>();
         var supplierAssignment = scope.ServiceProvider.GetRequiredService<ISupplierAssignmentService>();
         var notifications = scope.ServiceProvider.GetRequiredService<INotificationService>();
 
@@ -62,6 +62,11 @@ public class VoiceProcessingWorker : BackgroundService
             return;
         }
 
+        var merchant = await db.MerchantsProfiles
+            .FirstOrDefaultAsync(m => m.MerchantID == job.MerchantId, ct);
+        if (merchant == null)
+            throw new InvalidOperationException($"Merchant {job.MerchantId} not found.");
+
         var webRoot = string.IsNullOrEmpty(_env.WebRootPath)
             ? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")
             : _env.WebRootPath;
@@ -71,25 +76,35 @@ public class VoiceProcessingWorker : BackgroundService
         try
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-            var aiResult = await ai.ProcessVoiceAsync(absoluteFilePath, job.MerchantId, ct);
+            var aiResult = await ai.ProcessVoiceAsync(
+                absoluteFilePath,
+                job.MerchantId,
+                (double)merchant.LocationLat,
+                (double)merchant.LocationLng,
+                ct);
             stopwatch.Stop();
 
-            var merchant = await db.MerchantsProfiles
-                .FirstOrDefaultAsync(m => m.MerchantID == aiResult.MerchantId, ct);
+            // ai_service returns SKU-level splits; resolve SKU -> product name for a
+            // human-readable draft (SKU is unique on Product). Unknown SKUs keep the raw value.
+            aiResult = await EnrichProductNamesAsync(db, aiResult, ct);
 
-            if (merchant == null)
-                throw new InvalidOperationException($"Merchant {aiResult.MerchantId} not found.");
+            // Assign the AI's preferred (dominant) supplier, falling back to the
+            // nearest routed supplier when the AI returned no usable split.
+            int? supplierId = aiResult.PreferredSupplierId;
+            if (supplierId is null || !await db.SupplierProfiles.AnyAsync(s => s.SupplierID == supplierId, ct))
+                supplierId = await supplierAssignment.GetNearestSupplierAsync(job.MerchantId, ct);
+            if (supplierId is 0)
+                supplierId = null;
 
-            var supplierId = await supplierAssignment.GetNearestSupplierAsync(aiResult.MerchantId, ct);
-
-            var total = aiResult.Items.Sum(i => i.Quantity * i.Price);
+            var total = aiResult.TotalOrderCost > 0 ? aiResult.TotalOrderCost
+                                                    : aiResult.Items.Sum(i => i.Quantity * i.Price);
             var totalQty = aiResult.Items.Sum(i => i.Quantity);
 
             // Persist AI result
             var aiProcessing = new AIProcessing
             {
                 VoiceLogId = voiceLog.Id,
-                ModelUsed = "FakeAI-Demo",
+                ModelUsed = aiResult.ModelUsed ?? "ai_service",
                 Prompt = "voice-order-extraction",
                 ParsedJson = JsonSerializer.Serialize(aiResult),
                 Confidence = 0.85m,
@@ -154,6 +169,30 @@ public class VoiceProcessingWorker : BackgroundService
 
             throw;
         }
+    }
+
+    private async Task<AiOrderResult> EnrichProductNamesAsync(
+        SalaselDbContext db,
+        AiOrderResult aiResult,
+        CancellationToken ct)
+    {
+        var skus = aiResult.Items.Select(i => i.ProductName).Distinct().ToList();
+        if (skus.Count == 0)
+            return aiResult;
+
+        var skuToName = await db.Products
+            .AsNoTracking()
+            .Where(p => skus.Contains(p.SKU))
+            .Select(p => new { p.SKU, p.Name })
+            .ToDictionaryAsync(x => x.SKU, x => x.Name, ct);
+
+        foreach (var item in aiResult.Items)
+        {
+            if (skuToName.TryGetValue(item.ProductName, out var name))
+                item.ProductName = name;
+        }
+
+        return aiResult;
     }
 }
 

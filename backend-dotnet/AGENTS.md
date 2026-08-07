@@ -54,8 +54,8 @@ dotnet run --project Salasel.API
 # EF migrations — project & startup project are ALWAYS required
 dotnet ef migrations add <Name> -p Salasel.Infrastructure -s Salasel.API
 
-# Full stack infra for local dev (from repo root)
-docker compose up -d sqlserver seq
+# Full local dev stack in Docker — sqlserver, seq, redis, qdrant, api, and the AI service (from backend-dotnet/)
+docker compose up -d --build
 ```
 
 The solution currently has **no test project**. If you add tests, put them in a
@@ -74,8 +74,10 @@ locator / static singletons in business code.
   repositories override it for query-heavy aggregates (see §4).
 - **Services:** `AddScoped` for per-request services.
 - **Background pipelines** (`BackgroundQueue`, `KnowledgeIndexingQueue`,
-  `NotificationService`, `IFakeAIService`): **`AddSingleton`**, with their
+  `NotificationService`, `IAIService`): **`AddSingleton`**, with their
   hosted workers registered via `AddHostedService<T>()`.
+- **External HTTP clients** (`IAIService`, `IAISyncService`): registered with
+  `AddHttpClient<...>` and `BaseAddress` from `AiService:BaseUrl`.
 - Validation: `AddFluentValidationAutoValidation()` +
   `AddValidatorsFromAssemblyContaining<RegisterRequestDtoValidator>()` — new
   validators are picked up automatically.
@@ -149,11 +151,10 @@ Voice pipeline / Knowledge indexing), keeping the existing grouping.
 Two HostedService worker patterns, both queued:
 
 1. **Voice procurement** — `VoiceController` enqueues raw voice requests onto
-   `BackgroundQueue`; `VoiceProcessingWorker` processes them through
-   `IFakeAIService` (currently a stub until the real `ai_service` is wired),
-   writes `VoiceProcurementLog`, and eventually creates a `MasterOrder`
-   (`Source = Voice`) with `SubOrder`s. Progress is pushed over SignalR via
-   `NotificationService`.
+   `BackgroundQueue`; `VoiceProcessingWorker` uploads the audio to the real
+   `ai_service` via `IAIService` (`POST /api/v1/voice/order/{merchantId}`),
+   writes `VoiceProcurementLog`, and creates a `MasterOrder` (`Source = Voice`)
+   with `SubOrder`s. Progress is pushed over SignalR via `NotificationService`.
 2. **Knowledge indexing** — `AdminKnowledgeBaseController` /
    `SupplierKnowledgeController` enqueue indexing jobs onto
    `KnowledgeIndexingQueue`; `KnowledgeIndexingWorker` runs them.
@@ -176,15 +177,25 @@ non-blocking, worker is idempotent on retry, progress/notifications go through
 
 ## 9. AI service integration points
 
-- `Salasel.Infrastructure/Services/FakeAIService.cs` is the **stub** for the
-  real AI reasoning; replace its implementation with HTTP calls to
-  `../ai_service` (FastAPI) rather than inlining AI logic into the backend.
-- The backend remains the **source of truth** for products/suppliers. When
-  connecting to the AI service, it pushes products & quality metrics to
-  Qdrant via the `ai_service` admin endpoints (see
+- The backend calls the external `ai_service` (FastAPI) through two typed HTTP
+  clients, both with `BaseAddress` from `AiService:BaseUrl`:
+  `IAIService` (voice order: `POST /api/v1/voice/order/{merchantId}`) and
+  `IAISyncService` (catalog push: `POST /api/v1/admin/products`). Do not
+  inline AI logic into the backend.
+- The backend remains the **source of truth** for products/suppliers. It pushes
+  products & quality metrics to Qdrant via the `ai_service` admin endpoints (see
   `../ai_service/architecture.md` §4) — don't add a second source of truth.
+  Catalog sync runs best-effort on startup (`CatalogSyncWorker`) and on demand
+  via `POST /api/v1/admin/ai/sync-catalog`.
 - `AiController.cs` / `AiDtos.cs` host the current AI-facing surface; keep DTO
   shapes aligned with `ai_service` schemas.
+- **Public proxy forwarding:** `AiController` exposes three anonymous relay
+  routes to ai_service, returning its JSON verbatim — `POST /api/v1/ai/chat`,
+  `POST /api/v1/ai/order/{merchantId}`, `POST /api/v1/ai/voice/order/{merchantId}`
+  (multipart `file` + `lat`/`lon`). Request payloads are serialized snake_case to
+  match pydantic (see `ChatRequestPayload`/`OrderRequestPayload` in `AiDtos.cs`).
+- Full reference: `docs/ai-service-integration.md` (config, DTOs, voice
+  pipeline, catalog sync, testing/troubleshooting).
 
 ---
 

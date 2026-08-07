@@ -23,8 +23,8 @@ free of infrastructure concerns.
 The design principle is separation: controllers only translate HTTP ↔ service
 calls; service interfaces define the business contract; implementations in
 `Infrastructure` touch EF/IO/AI; and AI reasoning is never inlined — it is
-delegated to the external `ai_service` (via the `FakeAIService` stub until that
-service is wired).
+delegated to the external `ai_service` via the typed `IAIService`/`IAISyncService`
+HTTP clients.
 
 ---
 
@@ -43,7 +43,7 @@ service is wired).
     │  business logic,          │          │  Repositories                     │
     │  validators               │          │  Worker pipelines, queues         │
     └────────────┬──────────────┘          │  NotificationHub (SignalR)        │
-                 │ depends                 │  Email, FakeAIService             │
+                 │ depends                 │  Email, IAIService/AISyncService  │
     ┌────────────▼──────────────┐          └────────────────────┬───────────────┘
     │  Salasel.Domain           │                               │ EF
     │  Entities + Enums (pure)  │                               ▼
@@ -113,10 +113,10 @@ Two queued HostedService worker patterns (see `AGENTS.md` §7 for rules):
 
 1. **Voice procurement** — `VoiceController` enqueues raw requests onto
    `BackgroundQueue` (singleton). `VoiceProcessingWorker` drains the queue,
-   calls `IFakeAIService` (stub — will become HTTP calls to `ai_service`),
-   persists a `VoiceProcurementLog`, then materializes a
-   `MasterOrder` (`Source = Voice`) + `SubOrder`s. Progress updates flow over
-   SignalR via `NotificationService`.
+   uploads the audio to `ai_service` via `IAIService`
+   (`POST /api/v1/voice/order/{merchantId}`), persists a `VoiceProcurementLog`,
+   then materializes a `MasterOrder` (`Source = Voice`) + `SubOrder`s. Progress
+   updates flow over SignalR via `NotificationService`.
 2. **Knowledge indexing** — RAG document indexing jobs enqueued via
    `KnowledgeIndexingQueue` and run by `KnowledgeIndexingWorker`.
 
@@ -161,23 +161,36 @@ request logging → CORS (`AllowAll`) → `UseAuthentication` →
 ## 8. Integration contract with `ai_service`
 
 - The backend is the **source of truth** for products, suppliers, and quality.
-  When wired, it pushes product create/update and quality metrics to the
-  `ai_service` admin endpoints, which maintain a Qdrant snapshot (see
-  `ai_service/architecture.md` §4). Do not add a second source of truth.
-- Today `FakeAIService.cs` stands in for that HTTP client — replace its
-  implementation (don't inline AI reasoning into the backend).
+  It pushes product create/update and quality metrics to the `ai_service`
+  admin endpoints, which maintain a Qdrant snapshot (see
+  `ai_service/architecture.md` §4). Do not add a second source of truth. The
+  catalog is pushed best-effort on startup by `CatalogSyncWorker` and on
+  demand via `POST /api/v1/admin/ai/sync-catalog`.
+- Voice orders hit the service through the typed `IAIService` HTTP client
+  (`POST /api/v1/voice/order/{merchantId}`); `AIService` is that client —
+  AI reasoning stays entirely in `ai_service`.
 - `AiController.cs` / `AiDtos.cs` keep the AI-facing surface aligned with the
   `ai_service` schemas; the LangGraph multi-agent conversation lives entirely
   in the `ai_service` service.
+- Full integration reference (endpoints, config, sync, testing):
+  `docs/ai-service-integration.md`.
 
 ---
 
-## 9. Infrastructure (docker-compose, repo root)
+## 9. Infrastructure (docker-compose)
+
+Local dev stack lives in `backend-dotnet/docker-compose.yml`; one
+`docker compose up -d --build` brings up:
 
 - `sqlserver` (SQL Server 2022) — the transactional store, port 1433.
 - `seq` — structured log viewer at :5342 (UI) with ingestion at `Seq:Url`.
-- `api` — the Salasel image, wired to the above, health-checked on `/health`.
+- `api` — the Salasel image, wired to the above.
+- `redis` — ai_service state store, port 6379.
+- `qdrant` — ai_service vector DB, ports 6333/6334.
+- `ai_service` — the FastAPI service (built from `../ai_service`), port 8000,
+  reached by the API at `AiService__BaseUrl=http://ai_service:8000`.
 
 Environment (`Section__Key` convention): `ConnectionStrings__DefaultConnection`,
-`Jwt__Key` / `Jwt__Issuer` / `Jwt__Audience`, `Seq__Url`. Secrets come from
+`Jwt__Key` / `Jwt__Issuer` / `Jwt__Audience`, `Seq__Url`,
+`AiService__BaseUrl`. Secrets come from
 environment variables injected by docker-compose / CI, never committed.

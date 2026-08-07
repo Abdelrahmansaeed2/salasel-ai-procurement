@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Salasel.Domain.Entities;
 using Salasel.Domain.Enums;
 using Salasel.Infrastructure.Data;
+using Salasel.Infrastructure.Services;
 
 namespace Salasel.API.Controllers;
 
@@ -124,6 +125,21 @@ public class AdminController : ControllerBase
 
         await _context.SaveChangesAsync();
         return Ok(new { Message = "Supplier rejected.", Reason = request?.Reason });
+    }
+
+    // ────────────────────────────── AI catalog sync ──────────────────────────────
+    // Pushes the live product/supplier catalog into the ai_service Qdrant index
+    // (same job the CatalogSyncWorker runs on startup), so the AI retrieval layer
+    // sees current prices/locations/stock.
+
+    [HttpPost("ai/sync-catalog")]
+    public async Task<IActionResult> SyncCatalog([FromServices] IAISyncService sync)
+    {
+        var result = await sync.SyncAllActiveProductsAsync();
+
+        return result.Succeeded
+            ? Ok(new { Message = "Catalog synced to AI service.", result.Attempted })
+            : StatusCode(502, new { Message = "AI sync failed.", result.Attempted, result.Error });
     }
 
     // ────────────────────────────── Analytics ───────────────────────────────
