@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../features/stores/presentation/screens/welcomepage_screen.dart';
-import '../../../../features/home/presentation/screens/home_screen.dart';
+import 'package:get_storage/get_storage.dart';
+import '../../shop_registration/presentation/screens/registration_submitted_screen.dart';
 import '../../../../core/network/api_client.dart';
 import '../screens/register_screen.dart';
 import '../../data/repositories/auth_repository.dart';
@@ -51,22 +52,31 @@ class LoginController extends GetxController {
 
     isLoading.value = true;
     errorMessage.value = '';
-
+    // Check if the merchant has already completed shop registration
+    final storage = GetStorage();
+    final isShopRegistered = storage.read('shopRegistered') == true;
     try {
-      final authResponse = await _authRepository.login(email, password);
-      
-      if (authResponse.isSetupCompleted) {
+      if (isShopRegistered) {
         Get.offAll(
-          () => HomeScreen(),
+          () => const RegistrationSubmittedScreen(),
           transition: Transition.fadeIn,
-          duration: Duration(milliseconds: 350),
+          duration: const Duration(milliseconds: 350),
         );
       } else {
-        Get.offAll(
-          () => StoresScreen(),
-          transition: Transition.fadeIn,
-          duration: Duration(milliseconds: 350),
-        );
+        final authResponse = await _authRepository.login(email, password);
+        if (authResponse.isSetupCompleted) {
+          Get.offAll(
+            () => HomeScreen(),
+            transition: Transition.fadeIn,
+            duration: const Duration(milliseconds: 350),
+          );
+        } else {
+          Get.offAll(
+            () => StoresScreen(),
+            transition: Transition.fadeIn,
+            duration: const Duration(milliseconds: 350),
+          );
+        }
       }
     } catch (e) {
       errorMessage.value = e.toString().replaceAll('Exception: ', '');

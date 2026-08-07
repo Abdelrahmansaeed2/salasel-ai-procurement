@@ -513,6 +513,9 @@ class _StepThreeReview extends StatelessWidget {
   final RegisterShopController controller;
 
   void _submitRegistration() {
+    // Mark that the merchant has completed shop registration
+    final storage = GetStorage();
+    storage.write('shopRegistered', true);
     Get.off(() => const RegistrationSubmittedScreen(), transition: Transition.fadeIn);
   }
 
