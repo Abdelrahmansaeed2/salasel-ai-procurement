@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { SiteFooterComponent } from '../../shared/site-footer/site-footer.component';
 import { SiteHeaderComponent } from '../../shared/site-header/site-header.component';
+import { SupplierService } from '../../core/services/supplier.service';
 
 interface FilterChip {
   id: string;
@@ -45,56 +46,8 @@ export class SupplierDirectoryComponent {
     { id: 'governorate', label: 'المحافظة' },
   ];
 
-  readonly suppliers: Supplier[] = [
-    {
-      id: 1,
-      name: 'فيرتكس للتجارة العامة',
-      city: 'القاهرة، مدينة نصر',
-      reviewsCount: 124,
-      rating: 4.8,
-      isVerified: true,
-      isAvailableNow: true,
-      topProducts: ['معدات تقنية', 'أدوات مكتبية'],
-      deliveryArea: 'التوصيل: جميع أنحاء القاهرة والجيزة',
-      logo: 'assets/images/vertex-trade-logo.png',
-    },
-    {
-      id: 2,
-      name: 'فيرتكس للتجارة العامة',
-      city: 'القاهرة، مدينة نصر',
-      reviewsCount: 124,
-      rating: 4.8,
-      isVerified: true,
-      isAvailableNow: true,
-      topProducts: ['معدات تقنية', 'أدوات مكتبية'],
-      deliveryArea: 'التوصيل: جميع أنحاء القاهرة والجيزة',
-      logo: 'assets/images/vertex-trade-logo.png',
-    },
-    {
-      id: 3,
-      name: 'فيرتكس للتجارة العامة',
-      city: 'القاهرة، مدينة نصر',
-      reviewsCount: 124,
-      rating: 4.8,
-      isVerified: true,
-      isAvailableNow: true,
-      topProducts: ['معدات تقنية', 'أدوات مكتبية'],
-      deliveryArea: 'التوصيل: جميع أنحاء القاهرة والجيزة',
-      logo: 'assets/images/vertex-trade-logo.png',
-    },
-    {
-      id: 4,
-      name: 'فيرتكس للتجارة العامة',
-      city: 'القاهرة، مدينة نصر',
-      reviewsCount: 124,
-      rating: 4.8,
-      isVerified: true,
-      isAvailableNow: true,
-      topProducts: ['معدات تقنية', 'أدوات مكتبية'],
-      deliveryArea: 'التوصيل: جميع أنحاء القاهرة والجيزة',
-      logo: 'assets/images/vertex-trade-logo.png',
-    },
-  ];
+  private readonly supplierService = inject(SupplierService);
+  private readonly suppliers = signal<Supplier[]>([]);
 
   readonly filteredSuppliers = computed(() => {
     const city = this.cityQuery().trim().toLowerCase();
@@ -102,7 +55,7 @@ export class SupplierDirectoryComponent {
     const name = this.supplierNameQuery().trim().toLowerCase();
     const verifiedOnly = this.verifiedOnly();
 
-    return this.suppliers.filter((supplier) => {
+    return this.suppliers().filter((supplier) => {
       if (verifiedOnly && !supplier.isVerified) {
         return false;
       }
@@ -118,6 +71,25 @@ export class SupplierDirectoryComponent {
       return true;
     });
   });
+
+  constructor() {
+    this.supplierService.getSuppliers().subscribe((data) => {
+      // Map SupplierProfileDto to the UI Supplier interface
+      const mapped = data.map(dto => ({
+        id: dto.supplierID,
+        name: dto.companyName || 'مورد مجهول',
+        city: dto.warehouses?.length ? dto.warehouses[0].city : 'غير محدد',
+        reviewsCount: Math.floor(Math.random() * 100) + 10, // Mock for now until reviews API is built
+        rating: dto.reliabilityScore ? +(dto.reliabilityScore / 20).toFixed(1) : 4.0, // Scale 100 to 5
+        isVerified: dto.isSetupCompleted,
+        isAvailableNow: dto.isActiveForRouting,
+        topProducts: ['غير متوفر'], // Would need products included in DTO
+        deliveryArea: `التوصيل: ${dto.warehouses?.length ? dto.warehouses[0].city : 'غير محدد'}`,
+        logo: 'assets/images/vertex-trade-logo.png', // Placeholder
+      }));
+      this.suppliers.set(mapped);
+    });
+  }
 
   toggleVerifiedOnly(): void {
     this.verifiedOnly.update((value) => !value);

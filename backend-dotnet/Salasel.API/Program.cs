@@ -1,19 +1,22 @@
-using Microsoft.EntityFrameworkCore;
-using Serilog;
-
-using Salasel.Application.Interfaces;
-using Salasel.Application.Services;
-using Salasel.Infrastructure.Data;
-using Salasel.Infrastructure.Repositories;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.OpenApi.Models;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using Salasel.Application.Validators;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Salasel.API.Middlewares;
+using Salasel.Application.Interfaces;
+using Salasel.Application.Services;
+using Salasel.Application.Validators;
 using Salasel.Domain.Interfaces;
+using Salasel.Infrastructure.Data;
+using Salasel.Infrastructure.Hubs;
+using Salasel.Infrastructure.Repositories;
+using Salasel.Infrastructure.Services;
+using Serilog;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +61,32 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
     };
+
+    // Enforces logout / change-password revocation: a token is only valid
+    // if the "tokenVersion" claim it was issued with still matches the
+    // user's current TokenVersion in the database.
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async context =>
+        {
+            var userIdStr = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var tokenVersionStr = context.Principal?.FindFirstValue(Salasel.Application.Services.AuthService.TokenVersionClaimType);
+
+            if (!int.TryParse(userIdStr, out var userId) || !int.TryParse(tokenVersionStr, out var tokenVersion))
+            {
+                context.Fail("Invalid token claims.");
+                return;
+            }
+
+            var userRepository = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+            var user = await userRepository.GetByIdAsync(userId);
+
+            if (user == null || !user.IsActive || user.TokenVersion != tokenVersion)
+            {
+                context.Fail("Token has been revoked.");
+            }
+        }
+    };
 });
 
 // Add Repositories
@@ -65,42 +94,66 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMerchantProfileRepository, MerchantProfileRepository>();
 builder.Services.AddScoped<ISupplierProfileRepository, SupplierProfileRepository>();
-builder.Services.AddScoped<IOrderTransactionRepository, OrderTransactionRepository>();
-builder.Services.AddScoped<IOrderSplitRepository, OrderSplitRepository>();
-builder.Services.AddScoped<ISupplierCatalogRepository, SupplierCatalogRepository>();
+builder.Services.AddScoped<IMasterOrderRepository, MasterOrderRepository>();
+builder.Services.AddScoped<ISubOrderRepository, SubOrderRepository>();
+builder.Services.AddScoped<ISupplierProductRepository, SupplierProductRepository>();
 builder.Services.AddScoped<IMerchantInventoryRepository, MerchantInventoryRepository>();
 builder.Services.AddScoped<IVoiceProcurementLogRepository, VoiceProcurementLogRepository>();
-builder.Services.AddScoped<IFraudPreventionLimitRepository, FraudPreventionLimitRepository>();
-builder.Services.AddScoped<ISystemAuditLogRepository, SystemAuditLogRepository>();
+
 
 // Add Services
 builder.Services.AddScoped<IProcurementService, ProcurementService>();
 builder.Services.AddScoped<IOrderExecutionService, OrderExecutionService>();
+builder.Services.AddScoped<IOrderQueryService, OrderQueryService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IMerchantDashboardService, MerchantDashboardService>();
 builder.Services.AddScoped<ICatalogService, CatalogService>();
+builder.Services.AddScoped<IBiddingService, BiddingService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IEmailService, Salasel.Infrastructure.Services.EmailService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+// Voice order pipeline (SignalR + background AI worker)
+builder.Services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
+builder.Services.AddSingleton<IFakeAIService, FakeAIService>();
+builder.Services.AddSingleton<INotificationService, NotificationService>();
+builder.Services.AddScoped<ISupplierAssignmentService, SupplierAssignmentService>();
+builder.Services.AddHostedService<VoiceProcessingWorker>();
+
+// RAG knowledge base indexing pipeline (same shape as the voice pipeline above)
+builder.Services.AddSingleton<IKnowledgeIndexingQueue, KnowledgeIndexingQueue>();
+builder.Services.AddHostedService<KnowledgeIndexingWorker>();
+
+builder.Services.AddSignalR(options =>
+{
+    options.MaximumReceiveMessageSize = 10 * 1024 * 1024;
+})
+.AddJsonProtocol(options =>
+{
+    options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
 
 // Add CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
+        policy.SetIsOriginAllowed(_ => true)
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
 builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestDtoValidator>();
+builder.Services.AddHealthChecks();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Salasel API", Version = "v1" });
-    
+
     // Configure Swagger to send JWT token
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -131,6 +184,31 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+// ── Auto-apply EF Core migrations on startup ────────────────────────────────
+bool migrationSuccess = true;
+string? migrationError = null;
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<SalaselDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        logger.LogInformation("Applying database migrations...");
+        db.Database.Migrate();
+        logger.LogInformation("Database migrations applied successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Failed to apply database migrations.");
+        migrationSuccess = false;
+        migrationError = ex.Message;
+        // We purposely do NOT throw here anymore.
+        // This ensures the API server stays alive even if the DB is down,
+        // allowing Nginx to route traffic and us to see the /api/diagnostics page.
+    }
+}
+
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
@@ -140,7 +218,8 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<LangfuseMiddleware>();
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // Disabled because Nginx handles HTTPS termination
+app.UseStaticFiles();
 
 app.UseSerilogRequestLogging(); // <-- Records HTTP request times extremely fast
 
@@ -150,6 +229,42 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHub<NotificationHub>("/notificationHub");
 app.MapControllers();
+app.MapHealthChecks("/health");
+
+app.MapGet("/api/diagnostics", async (SalaselDbContext db, IConfiguration config) =>
+{
+    bool dbCanConnect = false;
+    string? dbError = null;
+
+    try
+    {
+        dbCanConnect = await db.Database.CanConnectAsync();
+    }
+    catch (Exception ex)
+    {
+        dbError = ex.Message;
+    }
+
+    return Results.Ok(new
+    {
+        status = "API is running and reachable by Nginx!",
+        serverTimeUtc = DateTime.UtcNow,
+        environment = app.Environment.EnvironmentName,
+        database = new
+        {
+            connectionStringConfigured = !string.IsNullOrEmpty(config.GetConnectionString("DefaultConnection")),
+            canConnectNow = dbCanConnect,
+            connectionTestError = dbError,
+            startupMigrationSuccess = migrationSuccess,
+            startupMigrationError = migrationError
+        },
+        jwt = new
+        {
+            keyConfigured = !string.IsNullOrEmpty(config["Jwt:Key"])
+        }
+    });
+});
 
 app.Run();

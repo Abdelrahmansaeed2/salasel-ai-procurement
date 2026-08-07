@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 
 namespace Salasel.Domain.Interfaces
 {
@@ -10,6 +10,12 @@ namespace Salasel.Domain.Interfaces
         Task<T?> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate);
         Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
         Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
+
+        /// <summary>Read-only, no-tracking IQueryable for composing filters/Include/paging
+        /// in Application-layer services without adding a bespoke repository method
+        /// for every query shape.</summary>
+        IQueryable<T> Query();
+
 
         Task AddAsync(T entity);
         Task AddRangeAsync(IEnumerable<T> entities);

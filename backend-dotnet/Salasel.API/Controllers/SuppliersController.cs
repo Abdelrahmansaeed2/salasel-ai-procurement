@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Salasel.Domain.Entities;
 using Salasel.Domain.Interfaces;
@@ -18,16 +18,20 @@ public class SuppliersController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous] // Public directory
     public async Task<ActionResult<IEnumerable<SupplierProfile>>> GetAll()
     {
-        return Ok(await _repository.GetAllAsync());
+        var all = await _repository.GetAllAsync();
+        var approved = all.Where(s => s.IsActiveForRouting).ToList();
+        return Ok(approved);
     }
 
     [HttpGet("{id:int}")]
+    [AllowAnonymous] // Public directory
     public async Task<ActionResult<SupplierProfile>> GetById(int id)
     {
         var supplier = await _repository.GetByIdAsync(id);
-        if (supplier == null) return NotFound();
+        if (supplier == null || !supplier.IsActiveForRouting) return NotFound();
         return Ok(supplier);
     }
 

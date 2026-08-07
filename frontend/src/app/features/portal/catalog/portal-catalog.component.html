@@ -1,0 +1,154 @@
+<div class="catalog-page">
+  <header class="catalog-header">
+    <div class="header-actions">
+      <button type="button" class="btn-primary">
+        <span>إنشاء منتج جديد</span>
+        <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><path d="M7.5 12.5h1.67V9.17H12.5V7.5H9.17V4.17H7.5V7.5H4.17v1.67H7.5V12.5ZM8.33 16.67A8.33 8.33 0 1 1 8.33 0a8.33 8.33 0 0 1 0 16.67Zm0-1.67a6.67 6.67 0 1 0 0-13.33 6.67 6.67 0 0 0 0 13.33Z" fill="white"/></svg>
+      </button>
+      <button type="button" class="btn-outline">
+        <span>رفع ملف CSV</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5.83 10V3.21L3.67 5.38 2.5 4.17 6.67 0l4.16 4.17-1.16 1.21-2.17-2.17V10H5.83ZM1.67 13.33c-.46 0-.85-.16-1.18-.49A1.6 1.6 0 0 1 0 11.67V9.17h1.67v2.5h10v-2.5h1.66v2.5c0 .46-.16.85-.49 1.17-.33.33-.72.49-1.17.49H1.67Z" fill="#004AC6"/></svg>
+      </button>
+    </div>
+    <div class="header-titles">
+      <h1>كتالوج المنتجات</h1>
+      <p>قم بإدارة مخزونك وقوائم منتجاتك عبر شبكة سلاسل</p>
+    </div>
+  </header>
+
+  <section class="stats-row">
+    <div class="stat-block">
+      <span class="stat-label">قيمة المخزون:</span>
+      <span class="stat-value">{{ inventoryValue }}</span>
+      <span class="stat-unit">جنيه</span>
+    </div>
+    <div class="stat-block">
+      <span class="stat-label">نفد المخزون</span>
+      <span class="stat-value stat-value--danger">{{ outOfStockCount }}</span>
+    </div>
+    <div class="stat-block">
+      <span class="stat-label">مخزون منخفض</span>
+      <span class="stat-value stat-value--warning">{{ lowStockCount }}</span>
+    </div>
+    <div class="stat-block">
+      <span class="stat-label">نشط</span>
+      <span class="stat-value stat-value--success">{{ activeCount }}</span>
+    </div>
+  </section>
+
+  <section class="toolbar">
+    <button type="button" class="filter-btn">
+      <span>تصفية</span>
+      <svg width="15" height="10" viewBox="0 0 15 10" fill="none"><path d="M5.83 10V8.33h3.34V10H5.83ZM2.5 5.83V4.17h10v1.66h-10ZM0 1.67V0h15v1.67H0Z" fill="#191B23"/></svg>
+    </button>
+    <label class="search-field">
+      <input type="search" placeholder="البحث عن المنتجات..." [value]="searchTerm()" (input)="updateSearch($any($event.target).value)" />
+      <svg width="18" height="20" viewBox="0 0 18 20" fill="none"><path d="M16.6 18 10.3 11.7c-.5.4-1.08.72-1.73.95a5.7 5.7 0 0 1-1.87.35A6.44 6.44 0 0 1 1.89 11.1 6.35 6.35 0 0 1 0 6.5c0-1.82.63-3.36 1.89-4.61A6.44 6.44 0 0 1 6.5 0c1.82 0 3.35.63 4.61 1.89A6.28 6.28 0 0 1 13 6.5c0 .73-.12 1.42-.35 2.08-.23.65-.55 1.22-.95 1.72L18 16.6 16.6 18ZM6.5 11a4.42 4.42 0 0 0 3.19-1.31A4.42 4.42 0 0 0 11 6.5a4.42 4.42 0 0 0-1.31-3.19A4.42 4.42 0 0 0 6.5 2a4.42 4.42 0 0 0-3.19 1.31A4.42 4.42 0 0 0 2 6.5a4.42 4.42 0 0 0 1.31 3.19A4.42 4.42 0 0 0 6.5 11Z" fill="#737686" fill-opacity="0.5"/></svg>
+    </label>
+  </section>
+
+  <section class="table-section">
+    <div class="table-scroll">
+      <table class="catalog-table">
+        <thead>
+          <tr>
+            <th class="col-actions">إجراءات</th>
+            <th class="col-status">الحالة</th>
+            <th class="col-stock">مستوى المخزون</th>
+            <th class="col-price">السعر</th>
+            <th class="col-sku">رمز المنتج</th>
+            <th class="col-product">المنتج</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of filteredProducts(); track product.sku) {
+            <tr>
+              <td class="col-actions">
+                <button type="button" class="icon-action" aria-label="خيارات">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="1.5" r="1.5" fill="#374957"/><circle cx="9" cy="9" r="1.5" fill="#374957"/><circle cx="9" cy="16.5" r="1.5" fill="#374957"/></svg>
+                </button>
+                <button type="button" class="icon-action" aria-label="تعديل">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M17.2.79a2.71 2.71 0 0 0-3.84 0L0 14.16V18h3.84L17.2 4.64a2.71 2.71 0 0 0 0-3.85ZM3.23 16.5H1.5v-1.73L11.48 4.8l1.73 1.72L3.23 16.5Z" fill="#374957"/></svg>
+                </button>
+              </td>
+              <td class="col-status">
+                <span class="status-pill" [class]="'status-' + product.status">{{ product.statusLabel }}</span>
+              </td>
+              <td class="col-stock">
+                <div class="stock-cell">
+                  <div class="stock-row">
+                    <span class="stock-units" [class.stock-danger]="product.status !== 'available'">{{ product.stockUnits }}</span>
+                    <span class="stock-percent" [class.stock-danger]="product.status !== 'available'">{{ product.stockPercent }}٪</span>
+                  </div>
+                  <div class="stock-bar">
+                    <div
+                      class="stock-bar-fill"
+                      [class.stock-bar-fill--danger]="product.status === 'low'"
+                      [style.width.%]="product.stockPercent"
+                    ></div>
+                  </div>
+                </div>
+              </td>
+              <td class="col-price">
+                <div class="price-cell">
+                  <span class="price-value">{{ product.price }}</span>
+                  <span class="price-note">شامل الضريبة</span>
+                </div>
+              </td>
+              <td class="col-sku">
+                <span class="sku-chip">{{ product.sku }}</span>
+              </td>
+              <td class="col-product">
+                <span class="product-name">{{ product.name }}</span>
+                <span class="product-category">{{ product.category }}</span>
+              </td>
+            </tr>
+          }
+          @if (filteredProducts().length === 0) {
+            <tr>
+              <td colspan="6" class="empty-row">لا توجد منتجات مطابقة للبحث.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <span class="results-label">عرض 1 – {{ filteredProducts().length }} من 25</span>
+      <div class="pagination">
+        <button type="button" class="page-btn" aria-label="السابق">
+          <svg width="6" height="9" viewBox="0 0 6 9" fill="none"><path d="M2.55 4.5 6 7.95 4.95 9 0 4.5 4.95 0 6 1.05 2.55 4.5Z" fill="#737686"/></svg>
+        </button>
+        @for (page of [1, 2, 3]; track page) {
+          <button
+            type="button"
+            class="page-btn"
+            [class.page-btn--active]="currentPage() === page"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+        }
+        <button type="button" class="page-btn" aria-label="التالي">
+          <svg width="6" height="9" viewBox="0 0 6 9" fill="none"><path d="M3.45 4.5 0 1.05 1.05 0 5.55 4.5 1.05 9 0 7.95 3.45 4.5Z" fill="#737686"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="ai-banner">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M18 8 16.75 5.25 14 4l2.75-1.25L18 0l1.25 2.75L22 4l-2.75 1.25L18 8Zm0 14-1.25-2.75L14 18l2.75-1.25L18 14l1.25 2.75L22 18l-2.75 1.25L18 22ZM8 19l-2.5-5.5L0 11l5.5-2.5L8 3l2.5 5.5L16 11l-5.5 2.5L8 19Z" fill="#2563EB"/></svg>
+    <div class="ai-content">
+      <h4>اقتراح المخزون بالذكاء الاصطناعي</h4>
+      <p>بناءً على التوجهات الموسمية، من المتوقع أن تنفذ كمية "قهوة أرابيكا فاخرة" خلال ١٢ يومًا. فكر في زيادة المخزون بنسبة ١٥٪ لتلبية الطلب.</p>
+      <button type="button" class="btn-link">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M2.55 4.67h8.12V6H2.55l3.73 3.73-.95.94L0 5.33 5.33 0l.95.93L2.55 4.67Z" fill="#004AC6"/></svg>
+        <span>اطلب الآن</span>
+      </button>
+    </div>
+  </section>
+
+  <button type="button" class="fab" aria-label="إضافة منتج">
+    <svg width="19" height="19" viewBox="0 0 19 19" fill="none"><path d="M8 10.67H0V8h8V0h2.67v8h8v2.67h-8v8H8V10.67Z" fill="white"/></svg>
+  </button>
+</div>

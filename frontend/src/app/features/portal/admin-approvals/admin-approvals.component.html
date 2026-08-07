@@ -1,0 +1,179 @@
+<div class="page-container fade-in">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-titles">
+      <h1 class="page-title">اعتمادات النظام</h1>
+      <p class="page-subtitle">مراجعة وتوثيق حسابات التجار والموردين الجدد.</p>
+    </div>
+    
+    <!-- Stats Row -->
+    <div class="stats-row reveal-stagger">
+      <div class="stat-card hover-lift reveal">
+        <span class="stat-label">تجار بانتظار الاعتماد</span>
+        <span class="stat-value text-warning">{{ pendingMerchants().length }}</span>
+      </div>
+      <div class="stat-card hover-lift reveal">
+        <span class="stat-label">موردين بانتظار الاعتماد</span>
+        <span class="stat-value text-warning">{{ pendingSuppliers().length }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <div class="tabs-container">
+    <button class="tab-btn" [class.active]="activeTab() === 'merchants'" (click)="setTab('merchants')">
+      التجار الجدد
+    </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'suppliers'" (click)="setTab('suppliers')">
+      الموردين الجدد
+    </button>
+  </div>
+
+  <!-- Table Section -->
+  <div class="table-card reveal fade-in" style="transition-delay: 120ms;">
+    <div class="table-header">
+      <h2 class="table-title">الطلبات الحالية</h2>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>اسم المنشأة</th>
+            <th>رقم السجل التجاري</th>
+            <th>{{ activeTab() === 'merchants' ? 'اسم المالك' : 'جهة الاتصال' }}</th>
+            <th>تاريخ الطلب</th>
+            <th>الحالة</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Merchants Loop -->
+          @if (activeTab() === 'merchants') {
+            @for (merchant of pendingMerchants(); track merchant.merchantID) {
+              <tr class="hover-lift">
+                <td>
+                  <div class="merchant-info">
+                    <div class="avatar-placeholder">
+                      {{ merchant.shopName.charAt(0) }}
+                    </div>
+                    <div class="merchant-details">
+                      <span class="merchant-name">{{ merchant.shopName }}</span>
+                      <span class="merchant-location">
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" class="location-icon">
+                          <path d="M8 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="currentColor"/>
+                          <path d="M8 15s6-4.5 6-9A6 6 0 1 0 2 6c0 4.5 6 9 6 9Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        </svg>
+                        {{ merchant.businessCity }}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+                <td class="mono-text">{{ merchant.crNumber }}</td>
+                <td><span class="category-badge">{{ merchant.ownerName }}</span></td>
+                <td>{{ merchant.createdAt | date:'shortTime' }}</td>
+                <td><span class="status-badge status-pending">قيد المراجعة</span></td>
+                <td>
+                  <button class="btn-action btn-press" (click)="openReviewDrawer(merchant, undefined)">
+                    مراجعة الوثائق
+                  </button>
+                </td>
+              </tr>
+            }
+            @if (pendingMerchants().length === 0) {
+              <tr>
+                <td colspan="6" class="empty-state">
+                  <p>لا توجد طلبات معلقة للتجار حالياً.</p>
+                </td>
+              </tr>
+            }
+          }
+
+          <!-- Suppliers Loop -->
+          @if (activeTab() === 'suppliers') {
+            @for (supplier of pendingSuppliers(); track supplier.supplierID) {
+              <tr class="hover-lift">
+                <td>
+                  <div class="merchant-info">
+                    <div class="avatar-placeholder">
+                      {{ supplier.companyName.charAt(0) }}
+                    </div>
+                    <div class="merchant-details">
+                      <span class="merchant-name">{{ supplier.companyName }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="mono-text">{{ supplier.crNumber }}</td>
+                <td><span class="category-badge">{{ supplier.contactName }}</span></td>
+                <td>{{ supplier.createdAt | date:'shortTime' }}</td>
+                <td><span class="status-badge status-pending">قيد المراجعة</span></td>
+                <td>
+                  <button class="btn-action btn-press" (click)="openReviewDrawer(undefined, supplier)">
+                    مراجعة الوثائق
+                  </button>
+                </td>
+              </tr>
+            }
+            @if (pendingSuppliers().length === 0) {
+              <tr>
+                <td colspan="6" class="empty-state">
+                  <p>لا توجد طلبات معلقة للموردين حالياً.</p>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Review Drawer -->
+  <div class="drawer-overlay" [class.drawer-open]="isDrawerOpen()" (click)="closeDrawer()">
+    <aside class="drawer-panel" (click)="$event.stopPropagation()">
+      <header class="drawer-header">
+        <button class="close-btn btn-press" (click)="closeDrawer()" aria-label="إغلاق">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <h3 class="drawer-title">مراجعة الوثائق</h3>
+      </header>
+
+      <div class="drawer-body">
+        <!-- Summary -->
+        <div class="drawer-summary">
+          @if (selectedMerchant()) {
+            <div class="summary-avatar">{{ selectedMerchant()!.shopName.charAt(0) }}</div>
+            <h4>{{ selectedMerchant()!.shopName }}</h4>
+            <p>{{ selectedMerchant()!.crNumber }}</p>
+          }
+          @if (selectedSupplier()) {
+            <div class="summary-avatar">{{ selectedSupplier()!.companyName.charAt(0) }}</div>
+            <h4>{{ selectedSupplier()!.companyName }}</h4>
+            <p>{{ selectedSupplier()!.crNumber }}</p>
+          }
+        </div>
+
+        <!-- Document Preview Mock -->
+        <div class="document-preview-container">
+          <div class="document-header">
+            <span>شهادة السجل التجاري</span>
+            <span class="doc-badge">PDF</span>
+          </div>
+          <div class="document-mock">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="1">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <p>معاينة الوثيقة</p>
+          </div>
+        </div>
+      </div>
+
+      <footer class="drawer-footer">
+        <button class="btn-reject btn-press" (click)="rejectItem()">رفض الطلب</button>
+        <button class="btn-approve btn-press" (click)="approveItem()">اعتماد الحساب</button>
+      </footer>
+    </aside>
+  </div>
+</div>

@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiClient {
-  static const String baseUrl = 'https://api.salasel.com/v1'; // TODO: Update to real backend URL
+  static const String baseUrl = 'https://salasel.otlob-egy.online/api/v1';
   static const String _tokenKey = 'auth_token';
 
   final Dio _dio;

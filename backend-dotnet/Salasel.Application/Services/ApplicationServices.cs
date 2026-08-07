@@ -19,156 +19,92 @@ public class ProcurementService : IProcurementService
     {
         var log = new VoiceProcurementLog
         {
-            MerchantID = request.MerchantID,
-            RawAudioURL = request.RawAudioURL,
-            TranscribedAmiyaText = request.TranscribedAmiyaText,
-            LLMParsedJSON = request.LLMParsedJSON,
-            NLPConfidenceScore = request.NLPConfidenceScore,
-            ProcessedAt = DateTime.UtcNow
+            MerchantId = request.MerchantID,
+            AudioUrl = request.RawAudioURL,
+            Transcript = request.TranscribedAmiyaText,
+            CreatedAt = DateTime.UtcNow,
+            AIProcessing = new AIProcessing
+            {
+                ParsedJson = request.LLMParsedJSON,
+                Confidence = request.NLPConfidenceScore
+            }
         };
 
         await _voiceLogRepository.AddAsync(log);
         await _voiceLogRepository.SaveChangesAsync();
 
-        return log.LogID;
+        return log.Id;
     }
 }
 
 public class OrderExecutionService : IOrderExecutionService
 {
-    private readonly IRepository<OrderTransaction> _orderRepository;
-    private readonly IFraudPreventionLimitRepository _fraudLimitRepository;
+    private readonly IRepository<MasterOrder> _orderRepository;
+    private readonly IRepository<Product> _productRepository;
 
-    public OrderExecutionService(
-        IRepository<OrderTransaction> orderRepository,
-        IFraudPreventionLimitRepository fraudLimitRepository)
+    public OrderExecutionService(IRepository<MasterOrder> orderRepository, IRepository<Product> productRepository)
     {
         _orderRepository = orderRepository;
-        _fraudLimitRepository = fraudLimitRepository;
+        _productRepository = productRepository;
     }
 
     public async Task<int> ExecuteOrderAsync(OrderExecutionRequestDto request)
     {
-        var approvalStatus = await DetermineApprovalStatusAsync(request);
+        var approvalStatus = ApprovalStatus.AI_Draft;
 
-        var order = new OrderTransaction
+        var order = new MasterOrder
         {
-            MerchantID = request.MerchantID,
+            MerchantId = request.MerchantID,
             VoiceLogID = request.VoiceLogID,
-            TotalOrderCost = request.TotalOrderCost,
-            ApprovalStatus = approvalStatus,
-            CreatedAt = DateTime.UtcNow
+            TotalAmount = request.TotalOrderCost,
+            Status = approvalStatus,
+            OrderDate = DateTime.UtcNow
         };
 
         foreach (var splitDto in request.Splits)
         {
-            order.OrderSplits.Add(new OrderSplit
+            var product = await _productRepository.SingleOrDefaultAsync(p => p.SKU == splitDto.SKU);
+            if (product == null)
+                throw new InvalidOperationException($"No product found for SKU '{splitDto.SKU}'.");
+
+            order.SubOrders.Add(new SubOrder
             {
-                SupplierID = splitDto.SupplierID,
-                SKU = splitDto.SKU,
-                QuantityOrdered = splitDto.QuantityOrdered,
-                SubTotalCost = splitDto.SubTotalCost,
-                FulfillmentStatus = FulfillmentStatus.Pending_Supplier
+                SupplierId = splitDto.SupplierID,
+                ProductId = product.Id,
+                Quantity = splitDto.QuantityOrdered,
+                SubTotalAmount = splitDto.SubTotalCost,
+                Status = FulfillmentStatus.Pending_Supplier
             });
         }
 
         await _orderRepository.AddAsync(order);
         await _orderRepository.SaveChangesAsync();
 
-        return order.OrderID;
-    }
-
-    private async Task<ApprovalStatus> DetermineApprovalStatusAsync(OrderExecutionRequestDto request)
-    {
-        var maxOrderValueRule = await _fraudLimitRepository.GetActiveByTypeAsync(RuleType.MaxOrderValue);
-        if (maxOrderValueRule != null && request.TotalOrderCost > maxOrderValueRule.HardLimitValue)
-        {
-            return ApprovalStatus.Fraud_Flagged;
-        }
-
-        var maxQuantityRule = await _fraudLimitRepository.GetActiveByTypeAsync(RuleType.MaxQuantityPerSKU);
-        if (maxQuantityRule != null && request.Splits.Any(s => s.QuantityOrdered > maxQuantityRule.HardLimitValue))
-        {
-            return ApprovalStatus.Fraud_Flagged;
-        }
-
-        return ApprovalStatus.AI_Draft;
-    }
-}
-
-public class InventoryService : IInventoryService
-{
-    private readonly IRepository<MerchantInventory> _inventoryRepository;
-
-    public InventoryService(IRepository<MerchantInventory> inventoryRepository)
-    {
-        _inventoryRepository = inventoryRepository;
-    }
-
-    public async Task<object> GetInventoryStatusAsync(int merchantId)
-    {
-        var items = await _inventoryRepository.FindAsync(i => i.MerchantID == merchantId);
-
-        return new
-        {
-            MerchantID = merchantId,
-            Items = items.Select(i => new
-            {
-                i.InventoryID,
-                i.SKU,
-                i.CurrentQuantity,
-                i.ReorderThreshold,
-                NeedsReorder = i.CurrentQuantity <= i.ReorderThreshold,
-                i.LastUpdated
-            })
-        };
+        return order.Id;
     }
 }
 
 public class CatalogService : ICatalogService
 {
-    private readonly IRepository<SupplierCatalog> _catalogRepository;
+    private readonly IRepository<SupplierProduct> _catalogRepository;
 
-    public CatalogService(IRepository<SupplierCatalog> catalogRepository)
+    public CatalogService(IRepository<SupplierProduct> catalogRepository)
     {
         _catalogRepository = catalogRepository;
     }
 
     public async Task<int> UploadCatalogAsync(CatalogUploadRequestDto request)
     {
-        var existing = (await _catalogRepository.FindAsync(
-            c => c.SupplierID == request.SupplierID && c.SKU == request.SKU)).SingleOrDefault();
-
-        if (existing != null)
+        var catalogItem = new SupplierProduct
         {
-            existing.ProductName = request.ProductName;
-            existing.UnitPrice = request.UnitPrice;
-            existing.StockAvailable = request.StockAvailable;
-            existing.DeliveryLeadTime_Days = request.DeliveryLeadTime_Days;
-            existing.VectorEmbedding = request.VectorEmbedding;
-            existing.UpdatedAt = DateTime.UtcNow;
-
-            await _catalogRepository.UpdateAsync(existing);
-            await _catalogRepository.SaveChangesAsync();
-
-            return existing.CatalogID;
-        }
-
-        var catalogItem = new SupplierCatalog
-        {
-            SupplierID = request.SupplierID,
-            SKU = request.SKU,
-            ProductName = request.ProductName,
+            SupplierId = request.SupplierID,
             UnitPrice = request.UnitPrice,
-            StockAvailable = request.StockAvailable,
-            DeliveryLeadTime_Days = request.DeliveryLeadTime_Days,
-            VectorEmbedding = request.VectorEmbedding,
-            UpdatedAt = DateTime.UtcNow
+            LastUpdated = DateTime.UtcNow
         };
 
         await _catalogRepository.AddAsync(catalogItem);
         await _catalogRepository.SaveChangesAsync();
 
-        return catalogItem.CatalogID;
+        return catalogItem.Id;
     }
 }

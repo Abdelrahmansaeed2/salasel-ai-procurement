@@ -1,0 +1,102 @@
+<div class="roles-page">
+  <header class="roles-header">
+    <div class="role-select">
+      <button type="button" class="role-trigger" (click)="toggleRoleMenu()">
+        <svg width="9" height="24" viewBox="0 0 9 24" fill="none"><path d="M4.5 17.9 0 13.4l1.45-1.45L4.5 15l3.05-3.05L9 13.4 4.5 17.9ZM1.45 5.95 0 4.5 4.5 0 9 4.5 7.55 5.95 4.5 2.9 1.45 5.95Z" fill="#737686"/></svg>
+        <span>{{ activeRole() }}</span>
+      </button>
+      <span class="role-badge">الدور النشط</span>
+      @if (roleMenuOpen()) {
+        <div class="role-menu">
+          @for (role of roles; track role) {
+            <button type="button" (click)="selectRole(role)">{{ role }}</button>
+          }
+        </div>
+      }
+    </div>
+    <div class="header-titles">
+      <h1>صلاحيات الأدوار</h1>
+      <p>تكوين مستويات التحكم في الوصول لأدوار تنظيمية محددة.</p>
+    </div>
+  </header>
+
+  <section class="filters-bar">
+    <div class="filters">
+      <button type="button" class="select-chip">
+        <span>جميع الأقسام</span>
+        <svg width="14" height="9" viewBox="0 0 14 9" fill="none"><path d="M5.44 9V7.5h3.12V9H5.44ZM2.33 5.25V3.75h9.34v1.5H2.33ZM0 1.5V0h14v1.5H0Z" fill="#737686"/></svg>
+      </button>
+      <button type="button" class="select-chip">
+        <span>جميع الأدوار</span>
+        <svg width="13" height="16" viewBox="0 0 13 16" fill="none"><path d="M6.5 16C4.62 15.53 3.06 14.47 1.84 12.81.61 11.15 0 9.31 0 7.28V2.4L6.5 0 13 2.4v4.88c0 2.03-.61 3.87-1.84 5.53C9.94 14.47 8.38 15.53 6.5 16Z" fill="#737686"/></svg>
+      </button>
+      <button type="button" class="select-chip">
+        <span>جميع الحالات</span>
+        <svg width="18" height="16" viewBox="0 0 18 16" fill="none"><circle cx="8.5" cy="8" r="7.25" stroke="#737686" stroke-width="1.5"/></svg>
+      </button>
+    </div>
+    <button type="button" class="clear-filters">مسح الفلاتر</button>
+  </section>
+
+  <section class="matrix-table">
+    <div class="matrix-head">
+      <span class="col-resource">نوع المورد</span>
+      <span class="col-toggle">قراءة</span>
+      <span class="col-toggle">كتابة</span>
+      <span class="col-toggle">حذف</span>
+      <span class="col-toggle">اعتماد</span>
+    </div>
+    @for (resource of resources(); track resource.key) {
+      <div class="matrix-row">
+        <div class="col-resource">
+          <div class="resource-icon">🗂️</div>
+          <div class="resource-meta">
+            <span class="resource-name">{{ resource.name }}</span>
+            <span class="resource-desc">{{ resource.description }}</span>
+          </div>
+        </div>
+        <div class="col-toggle">
+          <button type="button" class="toggle" [class.on]="resource.read" (click)="togglePermission(resource.key, 'read')" [attr.aria-pressed]="resource.read">
+            <span class="toggle-thumb"></span>
+          </button>
+        </div>
+        <div class="col-toggle">
+          <button type="button" class="toggle" [class.on]="resource.write" (click)="togglePermission(resource.key, 'write')" [attr.aria-pressed]="resource.write">
+            <span class="toggle-thumb"></span>
+          </button>
+        </div>
+        <div class="col-toggle">
+          <button type="button" class="toggle" [class.on]="resource.delete" (click)="togglePermission(resource.key, 'delete')" [attr.aria-pressed]="resource.delete">
+            <span class="toggle-thumb"></span>
+          </button>
+        </div>
+        <div class="col-toggle">
+          <button type="button" class="toggle" [class.on]="resource.approve" (click)="togglePermission(resource.key, 'approve')" [attr.aria-pressed]="resource.approve">
+            <span class="toggle-thumb"></span>
+          </button>
+        </div>
+      </div>
+    }
+    <div class="matrix-footer">
+      <app-pagination [page]="page()" [totalPages]="totalPages" (pageChange)="goToPage($event)" />
+      <span class="matrix-count">عرض ١-١٢ من ٤٨ مستخدم</span>
+    </div>
+  </section>
+
+  <footer class="floating-footer" [class.dirty]="isDirty()">
+    <div class="footer-actions">
+      <button type="button" class="btn-save" [disabled]="!isDirty()" (click)="save()">
+        <span>حفظ الصلاحيات</span>
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M15 3.33v10c0 .46-.16.85-.49 1.18-.33.33-.72.49-1.17.49H1.67c-.46 0-.85-.16-1.18-.49A1.6 1.6 0 0 1 0 13.33V1.67C0 1.2.16.82.49.49.82.16 1.21 0 1.67 0h10L15 3.33Z" fill="white"/></svg>
+      </button>
+      <button type="button" class="btn-discard" [disabled]="!isDirty()" (click)="discard()">تجاهل التغييرات</button>
+    </div>
+    <div class="footer-watchers">
+      <span><strong>٢ من المحررين</strong> يشاهدون هذا الدور</span>
+      <div class="avatar-stack">
+        <span class="avatar avatar--orange">ML</span>
+        <span class="avatar avatar--blue">JD</span>
+      </div>
+    </div>
+  </footer>
+</div>

@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;700&display=swap');
 @import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
 
 
@@ -78,6 +80,7 @@ a {
   opacity: 0;
   transform: translateY(24px);
   transition: opacity 0.6s ease, transform 0.6s ease;
+  transition-delay: var(--reveal-delay, 0ms);
   will-change: opacity, transform;
 }
 
@@ -86,10 +89,91 @@ a {
   transform: none;
 }
 
+/*
+ * Staggered reveal pattern:
+ * Apply `.reveal` together with an inline custom property, e.g.
+ *   <div class="reveal" [style.--reveal-delay.ms]="i * 60">...</div>
+ * or equivalently `style="transition-delay: {{ i * 60 }}ms"` directly on the element.
+ * `.reveal-stagger` is a convenience wrapper you can put on a list container so that
+ * up to the first 12 direct children fan out automatically without any inline styles.
+ */
+.reveal-stagger > * {
+  transition-delay: calc(var(--reveal-delay, 60ms) * var(--reveal-index, 0));
+}
+
+.reveal-stagger > *:nth-child(1) { --reveal-index: 0; }
+.reveal-stagger > *:nth-child(2) { --reveal-index: 1; }
+.reveal-stagger > *:nth-child(3) { --reveal-index: 2; }
+.reveal-stagger > *:nth-child(4) { --reveal-index: 3; }
+.reveal-stagger > *:nth-child(5) { --reveal-index: 4; }
+.reveal-stagger > *:nth-child(6) { --reveal-index: 5; }
+.reveal-stagger > *:nth-child(7) { --reveal-index: 6; }
+.reveal-stagger > *:nth-child(8) { --reveal-index: 7; }
+.reveal-stagger > *:nth-child(9) { --reveal-index: 8; }
+.reveal-stagger > *:nth-child(10) { --reveal-index: 9; }
+.reveal-stagger > *:nth-child(11) { --reveal-index: 10; }
+.reveal-stagger > *:nth-child(12) { --reveal-index: 11; }
+
+/* Press feedback for buttons and clickable controls. */
+.btn-press {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* Subtle lift on hover for cards / interactive surfaces. */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fade-in 0.3s ease;
+}
+
+/*
+ * `.count-up` is intentionally not a pure CSS animation: animating a numeric
+ * text value requires updating the DOM text content over time. Components that
+ * need a "counting up" effect for stats/KPIs should drive it from TypeScript
+ * with requestAnimationFrame (interpolating from 0 -> target and formatting the
+ * text each frame), or rely on CSS `@property` + `counter()` tricks only for
+ * simple, purely-numeric cases. Keep it simple: a short (400-800ms) ease-out
+ * rAF loop is sufficient and avoids the complexity/inconsistency of counter-based
+ * CSS approaches.
+ */
+
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     transition: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  .btn-press,
+  .btn-press:active {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .hover-lift,
+  .hover-lift:hover {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .fade-in {
+    animation: none !important;
+    opacity: 1 !important;
   }
 }

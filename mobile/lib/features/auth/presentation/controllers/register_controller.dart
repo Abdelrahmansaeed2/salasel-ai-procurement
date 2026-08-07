@@ -3,13 +3,14 @@ import 'package:get/get.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../screens/login_screen.dart';
+import '../../data/repositories/auth_repository.dart';
 
 class RegisterController extends GetxController {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  final ApiClient _apiClient = ApiClient();
+  final AuthRepository _authRepository = AuthRepository();
 
   RxBool hasText = false.obs;
   RxBool isLoading = false.obs;
@@ -42,31 +43,32 @@ class RegisterController extends GetxController {
     final email = emailController.text.trim().toLowerCase();
     final password = passwordController.text.trim();
 
+    if (!GetUtils.isEmail(email)) {
+      errorMessage.value = 'الرجاء إدخال بريد إلكتروني صحيح';
+      return;
+    }
+    if (password.length < 6) {
+      errorMessage.value = 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل';
+      return;
+    }
+
     isLoading.value = true;
     errorMessage.value = '';
 
     try {
-      // TODO: Replace with real endpoint
-      /*
-      final response = await _apiClient.dio.post('/auth/register', data: {
-        'name': name,
-        'email': email,
-        'password': password,
-      });
-      final token = response.data['token'];
-      await _apiClient.saveToken(token);
-      */
+      await _authRepository.register(
+        fullName: name,
+        email: email,
+        password: password,
+      );
 
-      await Future.delayed(const Duration(seconds: 1));
-
-      if (!GetUtils.isEmail(email)) {
-        errorMessage.value = 'الرجاء إدخال بريد إلكتروني صحيح';
-        return;
-      }
-      if (password.length < 6) {
-        errorMessage.value = 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل';
-        return;
-      }
+      Get.snackbar(
+        'نجاح',
+        'تم تسجيل الحساب بنجاح. الرجاء تسجيل الدخول.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
 
       debugPrint('Registered: $name <$email>');
       Get.offAll(
@@ -75,7 +77,7 @@ class RegisterController extends GetxController {
         duration: const Duration(milliseconds: 350),
       );
     } catch (e) {
-      errorMessage.value = 'حدث خطأ في الاتصال بالخادم';
+      errorMessage.value = e.toString().replaceAll('Exception: ', '');
     } finally {
       isLoading.value = false;
     }

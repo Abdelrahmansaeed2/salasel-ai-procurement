@@ -1,15 +1,53 @@
+using Salasel.Domain.Enums;
+
 namespace Salasel.Domain.Entities;
 
 public class SupplierProfile
 {
     public int SupplierID { get; set; }
-    public User User { get; set; } = null!;
+
+    public int OwnerUserId { get; set; }
+    public User Owner { get; set; } = null!;
 
     public string CompanyName { get; set; } = string.Empty;
-    public decimal ReliabilityScore { get; set; }
-    public string PaymentTerms { get; set; } = string.Empty;
-    public bool IsActiveForRouting { get; set; }
+    public string ContactPhone { get; set; } = string.Empty;
 
-    public ICollection<OrderSplit> OrderSplits { get; set; } = new List<OrderSplit>();
-    public ICollection<SupplierCatalog> SupplierCatalogs { get; set; } = new List<SupplierCatalog>();
+    // Location - used by AI to find nearest/best supplier
+    public decimal LocationLat { get; set; }
+    public decimal LocationLng { get; set; }
+    public decimal CoverageRadiusKm { get; set; }
+
+    public decimal ReliabilityScore { get; set; }  // 0-100, updated after each delivery
+    public string PaymentTerms { get; set; } = string.Empty;
+
+    // Kept in sync with VerificationStatus == Approved, same pattern as
+    // MerchantsProfile.IsVerified — suppliers can't receive routed orders
+    // until an admin approves them.
+    public bool IsActiveForRouting { get; set; }
+    public MerchantVerificationStatus VerificationStatus { get; set; } = MerchantVerificationStatus.NotSubmitted;
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    // Registration wizard (SupplierSetupDto)
+    public string CrNumber { get; set; } = string.Empty;
+    public string TaxNumber { get; set; } = string.Empty;
+    public string BankName { get; set; } = string.Empty;
+    public string Iban { get; set; } = string.Empty;
+
+    // New expanded fields from the frontend wizard
+    public string BusinessType { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+    public string JobTitle { get; set; } = string.Empty;
+    public string VatNumber { get; set; } = string.Empty;
+    public bool IsVatExempt { get; set; }
+
+    // How far through the wizard the supplier has gotten. Set to
+    // SuppliersMeController.TotalRegistrationSteps once POST /register
+    // succeeds — there's no per-step save endpoint, the wizard is submitted
+    // as one consolidated request, same as the merchant shop wizard.
+    public int RegistrationStep { get; set; } = 0;
+
+    public ICollection<SubOrder> SubOrders { get; set; } = new List<SubOrder>();
+    public ICollection<SupplierProduct> SupplierProducts { get; set; } = new List<SupplierProduct>();
+    public ICollection<SupplierWarehouse> Warehouses { get; set; } = new List<SupplierWarehouse>();
 }

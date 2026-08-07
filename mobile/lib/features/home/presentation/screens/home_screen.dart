@@ -7,6 +7,7 @@ import '../../../../core/widgets/animated_entrance.dart';
 import '../../../../core/widgets/animated_pressable.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../voice_order/presentation/screens/voice_recording_screen.dart';
+import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../controllers/home_controller.dart';
 import '../theme/home_colors.dart';
 import '../widgets/quick_stat_card.dart';
@@ -36,28 +37,33 @@ class HomeScreen extends StatelessWidget {
                 child: _buildHeader(),
               ),
               Expanded(
-                child: SingleChildScrollView(
-                  physics: BouncingScrollPhysics(),
-                  child: Column(
-                    children: [
-                      AnimatedEntrance(
-                        delay: Duration(milliseconds: 60),
-                        child: _MicSection(),
-                      ),
-                      SizedBox(height: 34.h),
-                      AnimatedEntrance(
-                        delay: Duration(milliseconds: 160),
-                        child: _buildQuickStats(controller),
-                      ),
-                      SizedBox(height: 10.h),
-                      AnimatedEntrance(
-                        delay: Duration(milliseconds: 260),
-                        child: _buildRecentOrders(controller),
-                      ),
-                      SizedBox(height: 24.h),
-                    ],
-                  ),
-                ),
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return Center(child: CircularProgressIndicator(color: HomeColors.micGradientStart));
+                  }
+                  return SingleChildScrollView(
+                    physics: BouncingScrollPhysics(),
+                    child: Column(
+                      children: [
+                        AnimatedEntrance(
+                          delay: Duration(milliseconds: 60),
+                          child: _MicSection(),
+                        ),
+                        SizedBox(height: 34.h),
+                        AnimatedEntrance(
+                          delay: Duration(milliseconds: 160),
+                          child: _buildQuickStats(controller),
+                        ),
+                        SizedBox(height: 10.h),
+                        AnimatedEntrance(
+                          delay: Duration(milliseconds: 260),
+                          child: _buildRecentOrders(controller),
+                        ),
+                        SizedBox(height: 24.h),
+                      ],
+                    ),
+                  );
+                }),
               ),
             ],
           ),
@@ -83,7 +89,11 @@ class HomeScreen extends StatelessWidget {
         children: [
           AnimatedPressable(
             borderRadius: BorderRadius.circular(20.r),
-            onTap: () => Get.snackbar('الإشعارات', 'لا توجد إشعارات جديدة حالياً'),
+            onTap: () => Get.to(
+              () => const NotificationsScreen(),
+              transition: Transition.fadeIn,
+              duration: const Duration(milliseconds: 200),
+            ),
             child: SizedBox(
               width: 40.w,
               height: 40.h,

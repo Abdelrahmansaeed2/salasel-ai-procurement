@@ -17,7 +17,7 @@ export class RegistrationSuccessComponent {
   constructor(private router: Router) {}
 
   goToDashboard(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/login']);
   }
 
   downloadPDF(): void {

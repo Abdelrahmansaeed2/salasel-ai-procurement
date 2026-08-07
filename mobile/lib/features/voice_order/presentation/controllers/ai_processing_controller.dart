@@ -23,8 +23,8 @@ class AiProcessingController extends GetxController {
   Timer? _timer;
   VoidCallback? onFinished;
 
-  void start(VoidCallback onFinishedCallback) {
-    onFinished = onFinishedCallback;
+  void start(void Function(bool needsClarification) onFinishedCallback) {
+    onFinished = () => onFinishedCallback(true);
     _timer = Timer.periodic(Duration(milliseconds: 900), (timer) {
       if (activeStep.value < steps.length - 1) {
         activeStep.value++;
