@@ -44,10 +44,11 @@ class RegisterShopController extends GetxController {
   String get displayOwnerName =>
       ownerNameController.text.isNotEmpty ? ownerNameController.text : 'أحمد بن فهد بن محمد';
   String get displayOwnerId => '109XXXX882';
+  String get displayGovernorate => governorate.value ?? 'الجيزة';
+  String get displayBusinessCity => businessCity.value ?? 'مصر';
+  String get displayStoreSize => storeSize.value;
   String get displayOwnerPhone =>
       phoneController.text.isNotEmpty ? '+966 ${phoneController.text}' : '+966 5X XXX XXXX';
-
-  void selectStoreSize(String size) => storeSize.value = size;
 
   @override
   void onClose() {

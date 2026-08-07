@@ -25,7 +25,10 @@ class RegisterShopScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(RegisterShopController());
+    // Ensure a single persistent controller instance for the wizard
+    final RegisterShopController controller = Get.isRegistered<RegisterShopController>()
+        ? Get.find<RegisterShopController>()
+        : Get.put(RegisterShopController(), permanent: true);
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -533,7 +536,7 @@ class _StepThreeReview extends StatelessWidget {
               ),
               Spacer(),
               Text(
-                '4 من 4',
+                '3 من 3',
                 style: GoogleFonts.cairo(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
@@ -640,6 +643,9 @@ class _StepThreeReview extends StatelessWidget {
                 ),
                 rows: [
                   _ReviewRow(value: controller.displayAddress, label: 'العنوان'),
+                  _ReviewRow(value: controller.displayGovernorate, label: 'المحافظة'),
+                  _ReviewRow(value: controller.displayBusinessCity, label: 'المدينة'),
+                  _ReviewRow(value: controller.displayStoreSize, label: 'حجم المتجر'),
                 ],
               ),
           SizedBox(height: 16.h),
