@@ -12,6 +12,7 @@ venv/
 __pycache__/
 *.pyc
 .env
+.env.example
 !.env.example
 
 # Flutter
@@ -73,6 +74,8 @@ appsettings.*.json
 *.env
 .env
 .env.local
+.env.example
+ai_service/.env.example
 
 # Rider IDEs
 .idea/
@@ -148,4 +151,17 @@ yarn.lock
 *~
 
 .antigravity/mcp.json
+frontend/src/environments/environment.ts
+
+# Python AI Service
+.venv/
+*.egg-info/
+.pytest_cache/
+.Python
+*.pyo
+*.cover
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
 frontend/src/environments/environment.ts
