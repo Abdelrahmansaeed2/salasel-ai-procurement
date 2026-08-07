@@ -143,7 +143,7 @@ Copy `.env.example` to `.env` and set the required values:
 | `STT_MAX_AUDIO_BYTES` | Max upload size in bytes | `26214400` (25 MB) |
 | `QDRANT_URL` | Qdrant endpoint | `http://localhost:6333` |
 | `EMBEDDING_MODEL` | fastembed model | `BAAI/bge-small-en-v1.5` |
-| `RESOLVE_MIN_SIMILARITY` | Min top-1 similarity to assign a product category | `0.6` |
+| `RESOLVE_MIN_SIMILARITY` | Min Qdrant cosine similarity to accept a catalog hit (chat resolution and order line matching); below this, out-of-catalog terms land in `unresolved` | `0.6` |
 | `DEFAULT_RADIUS_KM` | Default geo search radius | `50` |
 | `DEFAULT_QUALITY_THRESHOLD` | Min quality score | `0.0` |
 | `RANK_WEIGHT_SIMILARITY` | Blend weight: similarity | `1.0` |

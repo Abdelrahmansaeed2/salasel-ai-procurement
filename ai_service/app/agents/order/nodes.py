@@ -4,6 +4,7 @@ from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 from app.agents.order.state import ExtractedOrders, OrderLine, OrderState, ProductMatch
+from app.core.config import get_settings
 from app.core.llm import get_llm
 from app.schemas.order import OrderResponse, OrderSplit
 from app.services.embedding_service import embed_sync
@@ -74,6 +75,18 @@ def _match_from_payload(hit: dict) -> ProductMatch | None:
     )
 
 
+def _confident_matches(matches: list[ProductMatch]) -> list[ProductMatch]:
+    """Keep only catalog hits that clear the similarity threshold.
+
+    Out-of-catalog terms (e.g. "coca-cola" against a PPE-only catalog) still
+    return their nearest vector from Qdrant; anything below
+    ``resolve_min_similarity`` is treated as a miss so the line ends up in
+    ``unresolved`` instead of silently force-matching an unrelated product.
+    """
+    min_similarity = get_settings().resolve_min_similarity
+    return [m for m in matches if m.similarity_score >= min_similarity]
+
+
 def enrich_metadata_node(state: OrderState) -> dict:
     new_lines: list[OrderLine] = []
     for line in state["lines"]:
@@ -88,7 +101,9 @@ def enrich_metadata_node(state: OrderState) -> dict:
             continue
         query_vec = embed_sync(query_text)
         hits = vector_search(query_vec, limit=5)
-        line.matches = [m for m in (_match_from_payload(h) for h in hits) if m is not None]
+        line.matches = _confident_matches(
+            [m for m in (_match_from_payload(h) for h in hits) if m is not None]
+        )
         new_lines.append(line)
     return {"lines": new_lines}
 
@@ -133,7 +148,9 @@ def match_best_node(state: OrderState) -> dict:
             price_max=line.price_bound_max,
             limit=10,
         )
-        matches = [m for m in (_match_from_payload(h) for h in hits) if m is not None]
+        matches = _confident_matches(
+            [m for m in (_match_from_payload(h) for h in hits) if m is not None]
+        )
         if not matches:
             line.error = f"No in-stock product matched {line.product_name!r}"
             new_lines.append(line)

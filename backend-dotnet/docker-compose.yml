@@ -69,8 +69,68 @@ services:
 
       Seq__Url: "http://seq:80"
 
+      AiService__BaseUrl: "${AI_SERVICE_URL:-http://ai_service:8000}"
+      AiService__TimeoutSeconds: "${AI_SERVICE_TIMEOUT:-120}"
+
+  # ─────────────────────────────────────────────────────────────────
+  #  Redis  (ai_service state store / ephemeral cache)
+  # ─────────────────────────────────────────────────────────────────
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: salasel-dev-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ─────────────────────────────────────────────────────────────────
+  #  Qdrant  (ai_service vector DB — UI/API on :6333)
+  # ─────────────────────────────────────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: salasel-dev-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/localhost/6333 && echo -e 'GET /healthz HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 && grep -q 200 <&3"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ─────────────────────────────────────────────────────────────────
+  #  AI service  (FastAPI + LangGraph, built from ../ai_service)
+  # ─────────────────────────────────────────────────────────────────
+  ai_service:
+    build:
+      context: ../ai_service
+      dockerfile: infra/docker/Dockerfile
+    container_name: salasel-dev-ai
+    restart: unless-stopped
+    env_file:
+      - ../ai_service/.env.example
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      QDRANT_URL: http://qdrant:6333
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+
 volumes:
   sqlserver_data:
     name: salasel_dev_sqlserver_data
   seq_data:
     name: salasel_dev_seq_data
+  qdrant_data:
+    name: salasel_dev_qdrant_data

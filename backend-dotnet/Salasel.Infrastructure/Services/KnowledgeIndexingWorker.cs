@@ -10,7 +10,7 @@ namespace Salasel.Infrastructure.Services;
 // Mirrors VoiceProcessingWorker's shape: drain the queue, do fake work with a
 // realistic delay, write the result back. There's no real chunking/embedding
 // pipeline here — this simulates one so the upload → status → ready flow is
-// demoable end-to-end, same spirit as IFakeAIService for voice orders.
+// demoable end-to-end.
 public class KnowledgeIndexingWorker : BackgroundService
 {
     private readonly IKnowledgeIndexingQueue _queue;
