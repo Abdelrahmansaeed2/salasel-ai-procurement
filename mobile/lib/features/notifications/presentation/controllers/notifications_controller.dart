@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/navigation/app_navigator.dart';
+import '../../../../core/network/api_client.dart';
 import '../data/models/notification_model.dart';
 
 class NotificationsController extends GetxController {
@@ -23,6 +24,8 @@ class NotificationsController extends GetxController {
 
   final RxString selectedFilter = 'الكل'.obs;
 
+  final ApiClient _apiClient = ApiClient();
+
   @override
   void onInit() {
     super.onInit();
@@ -32,19 +35,10 @@ class NotificationsController extends GetxController {
   Future<void> fetchNotifications() async {
     try {
       isLoading.value = true;
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? '';
-
-      final response = await http.get(
-        Uri.parse('https://salasel.otlob-egy.online/api/v1/notifications'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
+      final response = await _apiClient.dio.get('/notifications');
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
+        final List<dynamic> data = response.data;
         notifications.value =
             data.map((json) => NotificationModel.fromJson(json)).toList();
       } else {
@@ -57,15 +51,33 @@ class NotificationsController extends GetxController {
     }
   }
 
+  Future<void> markAsRead(int id) async {
+    try {
+      await _apiClient.dio.put('/notifications/$id/read');
+      final index = notifications.indexWhere((n) => n.id == id);
+      if (index != -1) {
+        final updated = notifications[index];
+        // Modify isRead if it's not final, or replace the object
+        // Depending on NotificationModel implementation
+        fetchNotifications(); // Reload to be safe
+      }
+    } catch (e) {
+      // Ignore error for marking read
+    }
+  }
+
   void setFilter(String filter) {
     selectedFilter.value = filter;
   }
 
   List<NotificationModel> get filteredNotifications {
     if (selectedFilter.value == 'الكل') return notifications;
-    // Map filters to backend event names if needed, for now just filter roughly by text
-    // We can expand this logic based on EventName later.
-    return notifications;
+    // Basic filter by Title/Message text from payload
+    return notifications.where((n) {
+      final title = n.payload['title']?.toString() ?? '';
+      final message = n.payload['message']?.toString() ?? '';
+      return title.contains(selectedFilter.value) || message.contains(selectedFilter.value);
+    }).toList();
   }
 
   void changeTab(int index) {

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../../core/widgets/animated_pressable.dart';
 import '../theme/order_colors.dart';
 import 'delivery_tracking_screen.dart';
+import '../controllers/checkout_controller.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final String orderId;
@@ -21,7 +22,7 @@ class CheckoutScreen extends StatefulWidget {
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
-  String _selectedPaymentMethod = 'credit_card';
+  final CheckoutController _controller = Get.put(CheckoutController());
 
   @override
   Widget build(BuildContext context) {
@@ -504,19 +505,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
         ],
       ),
-      child: AnimatedPressable(
+      child: Obx(() => AnimatedPressable(
         borderRadius: BorderRadius.circular(12.r),
-        onTap: () {
-          Get.snackbar(
-            'تم الدفع بنجاح',
-            'تم تأكيد طلبك بنجاح',
-            backgroundColor: OrderColors.successBg,
-            colorText: OrderColors.success,
-            margin: EdgeInsets.all(16.w),
-          );
-          Future.delayed(const Duration(seconds: 1), () {
-            Get.off(() => DeliveryTrackingScreen(orderId: widget.orderId));
-          });
+        onTap: _controller.isProcessing.value ? null : () {
+          _controller.processPayment(widget.orderId);
         },
         child: Container(
           height: 52.h,
@@ -525,17 +517,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             color: OrderColors.primaryDark,
             borderRadius: BorderRadius.circular(10.r),
           ),
-          child: Text(
-            'تأكيد ودفع',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
-              fontFamily: 'Cairo',
-            ),
-          ),
+          child: _controller.isProcessing.value 
+              ? const CircularProgressIndicator(color: Colors.white)
+              : Text(
+                  'تأكيد ودفع',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Cairo',
+                  ),
+                ),
         ),
-      ),
+      )),
     );
   }
 }

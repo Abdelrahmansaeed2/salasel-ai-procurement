@@ -96,4 +96,9 @@ export class AdminService {
   deleteKnowledgeBaseArticle(id: number) {
     return this.http.delete(`${this.apiUrl}/knowledge-base/${id}`);
   }
+
+  // AI Sync
+  forceSyncCatalogToAi() {
+    return this.http.post<{ message: string; attempted: number }>(`${this.apiUrl}/ai/sync-catalog`, {});
+  }
 }

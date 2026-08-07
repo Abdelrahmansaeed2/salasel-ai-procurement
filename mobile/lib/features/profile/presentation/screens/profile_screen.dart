@@ -189,7 +189,7 @@ class _ProfileSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.find<ProfileController>();
-    return Column(
+    return Obx(() => Column(
       children: [
         Stack(
           clipBehavior: Clip.none,
@@ -236,7 +236,7 @@ class _ProfileSummary extends StatelessWidget {
             ),
             SizedBox(width: 8.w),
             Text(
-              c.storeName,
+              c.storeName.value,
               style: TextStyle(
                 color: _kTextPrimary,
                 fontFamily: 'Cairo',
@@ -251,7 +251,7 @@ class _ProfileSummary extends StatelessWidget {
         Padding(
           padding: EdgeInsets.only(bottom: 4.h),
           child: Text(
-            c.storeLocation,
+            c.storeLocation.value,
             style: TextStyle(
               color: _kTextSecondary,
               fontFamily: 'FreeSerif',
@@ -262,7 +262,7 @@ class _ProfileSummary extends StatelessWidget {
           ),
         ),
       ],
-    );
+    ));
   }
 }
 
@@ -626,7 +626,7 @@ class _BusinessInfoSection extends StatelessWidget {
       children: [
         const _SectionHeading('إعدادات المنشأة'),
         SizedBox(height: 16.h),
-        Container(
+        Obx(() => Container(
           padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -636,7 +636,7 @@ class _BusinessInfoSection extends StatelessWidget {
             children: [
               _InfoRow(
                 label: 'اسم المتجر',
-                value: c.storeName,
+                value: c.storeName.value,
                 iconPath:
                     'M19.0469 8.05V16C19.0469 16.55 18.8511 17.0208 18.4594 17.4125C18.0678 17.8042 17.5969 18 17.0469 18H3.04694C2.49694 18 2.02611 17.8042 1.63444 17.4125C1.24277 17.0208 1.04694 16.55 1.04694 16V8.05C0.663605 7.7 0.367772 7.25 0.159439 6.7C-0.0488946 6.15 -0.0530612 5.55 0.146939 4.9L1.19694 1.5C1.33027 1.06667 1.56777 0.708333 1.90944 0.425C2.25111 0.141667 2.64694 0 3.09694 0H16.9969C17.4469 0 17.8386 0.1375 18.1719 0.4125C18.5053 0.6875 18.7469 1.05 18.8969 1.5L19.9469 4.9C20.1469 5.55 20.1428 6.14167 19.9344 6.675C19.7261 7.20833 19.4303 7.66667 19.0469 8.05ZM12.2469 7C12.6969 7 13.0386 6.84583 13.2719 6.5375C13.5053 6.22917 13.5969 5.88333 13.5469 5.5L12.9969 2H11.0469V5.7C11.0469 6.05 11.1636 6.35417 11.3969 6.6125C11.6303 6.87083 11.9136 7 12.2469 7ZM7.74694 7C8.13027 7 8.44277 6.87083 8.68444 6.6125C8.92611 6.35417 9.04694 6.05 9.04694 5.7V2H7.09694L6.54694 5.5C6.48027 5.9 6.56777 6.25 6.80944 6.55C7.05111 6.85 7.36361 7 7.74694 7ZM3.29694 7C3.59694 7 3.85944 6.89167 4.08444 6.675C4.30944 6.45833 4.44694 6.18333 4.49694 5.85L5.04694 2H3.09694L2.09694 5.35C1.99694 5.68333 2.05111 6.04167 2.25944 6.425C2.46777 6.80833 2.81361 7 3.29694 7ZM16.7969 7C17.2803 7 17.6303 6.80833 17.8469 6.425C18.0636 6.04167 18.1136 5.68333 17.9969 5.35L16.9469 2H15.0469L15.5969 5.85C15.6469 6.18333 15.7844 6.45833 16.0094 6.675C16.2344 6.89167 16.4969 7 16.7969 7ZM3.04694 16H17.0469V8.95C16.9636 8.98333 16.9094 9 16.8844 9C16.8594 9 16.8303 9 16.7969 9C16.3469 9 15.9511 8.925 15.6094 8.775C15.2678 8.625 14.9303 8.38333 14.5969 8.05C14.2969 8.35 13.9553 8.58333 13.5719 8.75C13.1886 8.91667 12.7803 9 12.3469 9C11.8969 9 11.4761 8.91667 11.0844 8.75C10.6928 8.58333 10.3469 8.35 10.0469 8.05C9.76361 8.35 9.43444 8.58333 9.05944 8.75C8.68444 8.91667 8.28027 9 7.84694 9C7.36361 9 6.92611 8.91667 6.53444 8.75C6.14277 8.58333 5.79694 8.35 5.49694 8.05C5.14694 8.4 4.80111 8.64583 4.45944 8.7875C4.11777 8.92917 3.73027 9 3.29694 9C3.26361 9 3.22611 9 3.18444 9C3.14277 9 3.09694 8.98333 3.04694 8.95V16Z',
                 vbW: 21,
@@ -645,7 +645,7 @@ class _BusinessInfoSection extends StatelessWidget {
               SizedBox(height: 12.h),
               _InfoRow(
                 label: 'التصنيف',
-                value: c.storeCategory,
+                value: c.storeCategory.value,
                 iconPath:
                     'M3.5 9L9 0L14.5 9H3.5ZM14.5 20C13.25 20 12.1875 19.5625 11.3125 18.6875C10.4375 17.8125 10 16.75 10 15.5C10 14.25 10.4375 13.1875 11.3125 12.3125C12.1875 11.4375 13.25 11 14.5 11C15.75 11 16.8125 11.4375 17.6875 12.3125C18.5625 13.1875 19 14.25 19 15.5C19 16.75 18.5625 17.8125 17.6875 18.6875C16.8125 19.5625 15.75 20 14.5 20ZM0 19.5V11.5H8V19.5H0ZM14.5 18C15.2 18 15.7917 17.7583 16.275 17.275C16.7583 16.7917 17 16.2 17 15.5C17 14.8 16.7583 14.2083 16.275 13.725C15.7917 13.2417 15.2 13 14.5 13C13.8 13 13.2083 13.2417 12.725 13.725C12.2417 14.2083 12 14.8 12 15.5C12 16.2 12.2417 16.7917 12.725 17.275C13.2083 17.7583 13.8 18 14.5 18ZM2 17.5H6V13.5H2V17.5ZM7.05 7H10.95L9 3.85L7.05 7Z',
                 vbW: 19,
@@ -654,7 +654,7 @@ class _BusinessInfoSection extends StatelessWidget {
               SizedBox(height: 12.h),
               _InfoRow(
                 label: 'رقم السجل التجاري',
-                value: c.commercialRegisterNumber,
+                value: c.commercialRegisterNumber.value,
                 valueIsLtr: true,
                 showBorder: false,
                 iconPath:
@@ -664,7 +664,7 @@ class _BusinessInfoSection extends StatelessWidget {
               ),
             ],
           ),
-        ),
+        )),
         SizedBox(height: 16.h),
         _MapCard(),
       ],
@@ -741,8 +741,8 @@ class _MapCard extends StatelessWidget {
                         height: 1.43,
                       ),
                     ),
-                    Text(
-                      c.storeAddress,
+                    Obx(() => Text(
+                      c.storeAddress.value,
                       style: TextStyle(
                         color: _kTextSecondary,
                         fontFamily: 'Cairo',
@@ -750,7 +750,7 @@ class _MapCard extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                         height: 1.33,
                       ),
-                    ),
+                    )),
                   ],
                 ),
               ],
@@ -775,7 +775,7 @@ class _ContactSection extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(8.r),
           ),
-          child: Column(
+          child: Obx(() => Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
@@ -797,7 +797,7 @@ class _ContactSection extends StatelessWidget {
               ),
               SizedBox(height: 16.h),
               _ContactRow(
-                value: c.phoneNumber,
+                value: c.phoneNumber.value,
                 iconPath:
                     'M16.95 18C14.8667 18 12.8083 17.5458 10.775 16.6375C8.74167 15.7292 6.89167 14.4417 5.225 12.775C3.55833 11.1083 2.27083 9.25833 1.3625 7.225C0.454167 5.19167 0 3.13333 0 1.05C0 0.75 0.1 0.5 0.3 0.3C0.5 0.1 0.75 0 1.05 0H5.1C5.33333 0 5.54167 0.0791667 5.725 0.2375C5.90833 0.395833 6.01667 0.583333 6.05 0.8L6.7 4.3C6.73333 4.56667 6.725 4.79167 6.675 4.975C6.625 5.15833 6.53333 5.31667 6.4 5.45L3.975 7.9C4.30833 8.51667 4.70417 9.1125 5.1625 9.6875C5.62083 10.2625 6.125 10.8167 6.675 11.35C7.19167 11.8667 7.73333 12.3458 8.3 12.7875C8.86667 13.2292 9.46667 13.6333 10.1 14L12.45 11.65C12.6 11.5 12.7958 11.3875 13.0375 11.3125C13.2792 11.2375 13.5167 11.2167 13.75 11.25L17.2 11.95C17.4333 12.0167 17.625 12.1375 17.775 12.3125C17.925 12.4875 18 12.6833 18 12.9V16.95C18 17.25 17.9 17.5 17.7 17.7C17.5 17.9 17.25 18 16.95 18ZM3.025 6L4.675 4.35L4.25 2H2.025C2.10833 2.68333 2.225 3.35833 2.375 4.025C2.525 4.69167 2.74167 5.35 3.025 6ZM11.975 14.95C12.625 15.2333 13.2875 15.4583 13.9625 15.625C14.6375 15.7917 15.3167 15.9 16 15.95V13.75L13.65 13.275L11.975 14.95Z',
                 vbW: 18,
@@ -805,14 +805,14 @@ class _ContactSection extends StatelessWidget {
               ),
               SizedBox(height: 16.h),
               _ContactRow(
-                value: c.email,
+                value: c.email.value,
                 iconPath:
                     'M2 16C1.45 16 0.979167 15.8042 0.5875 15.4125C0.195833 15.0208 0 14.55 0 14V2C0 1.45 0.195833 0.979167 0.5875 0.5875C0.979167 0.195833 1.45 0 2 0H18C18.55 0 19.0208 0.195833 19.4125 0.5875C19.8042 0.979167 20 1.45 20 2V14C20 14.55 19.8042 15.0208 19.4125 15.4125C19.0208 15.8042 18.55 16 18 16H2ZM10 9L2 4V14H18V4L10 9ZM10 7L18 2H2L10 7ZM2 4V2V4V14V4Z',
                 vbW: 20,
                 vbH: 16,
               ),
             ],
-          ),
+          )),
         ),
         SizedBox(height: 16.h),
         Obx(() => _BusinessHoursToggle(

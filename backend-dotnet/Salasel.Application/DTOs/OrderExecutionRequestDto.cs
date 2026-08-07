@@ -15,3 +15,9 @@ public class SubOrderDto
     public int QuantityOrdered { get; set; }
     public decimal SubTotalCost { get; set; }
 }
+
+public class PaymentRequestDto
+{
+    public Salasel.Domain.Enums.PaymentMethod PaymentMethod { get; set; }
+    public string? PaymentReference { get; set; }
+}

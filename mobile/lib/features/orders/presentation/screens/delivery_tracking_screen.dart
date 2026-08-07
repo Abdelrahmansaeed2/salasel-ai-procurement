@@ -6,6 +6,8 @@ import '../../../../core/widgets/animated_pressable.dart';
 import '../theme/order_colors.dart';
 import 'receipt_success_screen.dart';
 
+import '../controllers/delivery_tracking_controller.dart';
+
 class DeliveryTrackingScreen extends StatelessWidget {
   final String orderId;
 
@@ -16,27 +18,34 @@ class DeliveryTrackingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(DeliveryTrackingController(orderId: orderId));
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: const Color(0xFFF9FAFC),
         appBar: _buildAppBar(),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(height: 24.h),
-              _buildStatusHeader(),
-              SizedBox(height: 24.h),
-              _buildMapCard(),
-              SizedBox(height: 32.h),
-              _buildTimelineSection(),
-              SizedBox(height: 32.h),
-              _buildSuppliersSection(),
-              SizedBox(height: 32.h),
-            ],
-          ),
-        ),
-        bottomNavigationBar: _buildBottomContent(),
+        body: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator(color: OrderColors.primary));
+          }
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(height: 24.h),
+                _buildStatusHeader(controller),
+                SizedBox(height: 24.h),
+                _buildMapCard(controller),
+                SizedBox(height: 32.h),
+                _buildTimelineSection(controller),
+                SizedBox(height: 32.h),
+                _buildSuppliersSection(controller),
+                SizedBox(height: 32.h),
+              ],
+            ),
+          );
+        }),
+        bottomNavigationBar: _buildBottomContent(controller),
       ),
     );
   }
@@ -76,7 +85,13 @@ class DeliveryTrackingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusHeader() {
+  Widget _buildStatusHeader(DeliveryTrackingController controller) {
+    int step = controller.currentStep;
+    String statusText = 'قيد الانتظار';
+    if (step == 1) statusText = 'قيد التجهيز';
+    if (step == 2) statusText = 'جاري التوصيل';
+    if (step == 3) statusText = 'تم التوصيل';
+
     return Column(
       children: [
         Container(
@@ -92,28 +107,29 @@ class DeliveryTrackingScreen extends StatelessWidget {
         ),
         SizedBox(height: 16.h),
         Text(
-          'جاري التوصيل',
+          statusText,
           style: TextStyle(color: OrderColors.textTitle, fontSize: 20.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
         ),
         SizedBox(height: 4.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'الوقت المقدر للوصول: ',
-              style: TextStyle(color: OrderColors.textMuted, fontSize: 14.sp, fontFamily: 'Cairo'),
-            ),
-            Text(
-              '14:30',
-              style: TextStyle(color: OrderColors.primary, fontSize: 14.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
-            ),
-          ],
-        ),
+        if (step < 3)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'الوقت المقدر للوصول: ',
+                style: TextStyle(color: OrderColors.textMuted, fontSize: 14.sp, fontFamily: 'Cairo'),
+              ),
+              Text(
+                '14:30', // Dummy time for now since it's not from backend directly
+                style: TextStyle(color: OrderColors.primary, fontSize: 14.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
+              ),
+            ],
+          ),
       ],
     );
   }
 
-  Widget _buildMapCard() {
+  Widget _buildMapCard(DeliveryTrackingController controller) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Container(
@@ -175,7 +191,7 @@ class DeliveryTrackingScreen extends StatelessWidget {
                       ),
                       child: Center(
                         child: Text(
-                          'ع',
+                          controller.driverName.value.isNotEmpty ? controller.driverName.value[0] : 'ع',
                           style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
                         ),
                       ),
@@ -188,11 +204,11 @@ class DeliveryTrackingScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'عصام محمد',
+                            controller.driverName.value,
                             style: TextStyle(color: OrderColors.textTitle, fontSize: 14.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
                           ),
                           Text(
-                            'Nissan Van • دقائق 10',
+                            controller.driverPhone.value,
                             style: TextStyle(color: OrderColors.textMuted, fontSize: 12.sp, fontFamily: 'Cairo'),
                           ),
                         ],
@@ -228,7 +244,9 @@ class DeliveryTrackingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTimelineSection() {
+  Widget _buildTimelineSection(DeliveryTrackingController controller) {
+    int step = controller.currentStep;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
@@ -241,24 +259,19 @@ class DeliveryTrackingScreen extends StatelessWidget {
           SizedBox(height: 16.h),
           _buildTimelineStep(
             label: 'تم تأكيد الطلب',
-            time: '09:15 ص',
-            status: _StepStatus.completed,
+            time: controller.acceptedAt.value != null ? '${controller.acceptedAt.value!.hour}:${controller.acceptedAt.value!.minute}' : '',
+            status: step >= 1 ? _StepStatus.completed : (step == 0 ? _StepStatus.active : _StepStatus.pending),
             isFirst: true,
           ),
           _buildTimelineStep(
-            label: 'تم التجهيز والتغليف',
-            time: '11:30 ص',
-            status: _StepStatus.completed,
+            label: 'تم الشحن',
+            time: controller.shippedAt.value != null ? '${controller.shippedAt.value!.hour}:${controller.shippedAt.value!.minute}' : '',
+            status: step >= 2 ? _StepStatus.completed : (step == 1 ? _StepStatus.active : _StepStatus.pending),
           ),
           _buildTimelineStep(
-            label: 'جاري التوصيل',
-            time: 'الآن',
-            status: _StepStatus.active,
-          ),
-          _buildTimelineStep(
-            label: 'تم التسليم',
-            time: '',
-            status: _StepStatus.pending,
+            label: 'تم التوصيل',
+            time: controller.deliveredAt.value != null ? '${controller.deliveredAt.value!.hour}:${controller.deliveredAt.value!.minute}' : '',
+            status: step >= 3 ? _StepStatus.completed : (step == 2 ? _StepStatus.active : _StepStatus.pending),
             isLast: true,
           ),
         ],
@@ -387,7 +400,7 @@ class DeliveryTrackingScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildSuppliersSection() {
+  Widget _buildSuppliersSection(DeliveryTrackingController controller) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
@@ -399,19 +412,12 @@ class DeliveryTrackingScreen extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
           _buildSupplierCard(
-            storeName: 'أغذية النيل',
+            storeName: 'المورد الافتراضي',
             isActive: true,
-            statusLabel: 'جاري التوصيل',
-            driverName: 'عصام محمد',
-            timeRemaining: '15 دقائق',
+            statusLabel: controller.currentStep == 3 ? 'تم التوصيل' : 'جاري التوصيل',
+            driverName: controller.driverName.value,
+            timeRemaining: 'غير محدد',
             hasTrackAction: true,
-          ),
-          SizedBox(height: 12.h),
-          _buildSupplierCard(
-            storeName: 'دلتا للتجارة',
-            isActive: false,
-            statusLabel: 'قيد التجهيز',
-            timeRemaining: '45 دقيقة', 
           ),
         ],
       ),
@@ -516,7 +522,7 @@ class DeliveryTrackingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomContent() {
+  Widget _buildBottomContent(DeliveryTrackingController controller) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -537,31 +543,29 @@ class DeliveryTrackingScreen extends StatelessWidget {
             children: [
               AnimatedPressable(
                 borderRadius: BorderRadius.circular(8.r),
-                onTap: () {
-                  Get.off(
-                    () => ReceiptSuccessScreen(orderId: orderId),
-                    transition: Transition.fadeIn,
-                    duration: const Duration(milliseconds: 400),
-                  );
+                onTap: controller.isConfirming.value || controller.currentStep >= 3 ? null : () {
+                  controller.confirmReceipt();
                 },
                 child: Container(
                   height: 48.h,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: OrderColors.primaryDark,
+                    color: controller.currentStep >= 3 ? Colors.grey : OrderColors.primaryDark,
                     borderRadius: BorderRadius.circular(8.r),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'تأكيد الاستلام',
-                        style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
-                      ),
-                      SizedBox(width: 8.w),
-                      Icon(Icons.verified, color: Colors.white, size: 20.w), 
-                    ],
-                  ),
+                  child: controller.isConfirming.value 
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              controller.currentStep >= 3 ? 'تم الاستلام' : 'تأكيد الاستلام',
+                              style: TextStyle(color: Colors.white, fontSize: 16.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
+                            ),
+                            SizedBox(width: 8.w),
+                            Icon(Icons.verified, color: Colors.white, size: 20.w), 
+                          ],
+                        ),
                 ),
               ),
               SizedBox(height: 12.h),

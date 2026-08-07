@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Salasel.Application.DTOs;
 using Salasel.Application.Interfaces;
 using Salasel.Domain.Entities;
@@ -212,6 +213,89 @@ public class OrdersController : ControllerBase
         {
             return BadRequest(new { Message = ex.Message });
         }
+    }
+
+    [HttpPost("{id:int}/payment")]
+    [Authorize(Roles = "Merchant,Admin")]
+    public async Task<IActionResult> ProcessPayment(int id, [FromBody] PaymentRequestDto request)
+    {
+        if (!await CanAccessOrderAsMerchantAsync(id)) return Forbid();
+
+        var order = await _masterOrderRepository.GetByIdAsync(id);
+        if (order == null) return NotFound(new { Message = "Order not found." });
+
+        if (order.PaymentStatus == PaymentStatus.Paid)
+            return BadRequest(new { Message = "Order is already paid." });
+
+        order.PaymentMethod = request.PaymentMethod;
+        order.PaymentStatus = PaymentStatus.Paid;
+        order.PaidAt = DateTime.UtcNow;
+        order.PaymentReference = request.PaymentReference;
+
+        await _masterOrderRepository.UpdateAsync(order);
+        await _masterOrderRepository.SaveChangesAsync();
+
+        return Ok(new { Message = "Payment processed successfully.", OrderId = order.Id });
+    }
+
+    [HttpGet("{id:int}/tracking")]
+    [Authorize(Roles = "Merchant,Admin")]
+    public async Task<IActionResult> GetOrderTracking(int id)
+    {
+        if (!await CanAccessOrderAsMerchantAsync(id)) return Forbid();
+
+        var order = await _masterOrderRepository.Query()
+            .Include(o => o.SubOrders)
+            .FirstOrDefaultAsync(o => o.Id == id);
+            
+        if (order == null) return NotFound(new { Message = "Order not found." });
+
+        var subOrders = order.SubOrders.ToList();
+        var driverSubOrder = subOrders.FirstOrDefault(s => !string.IsNullOrEmpty(s.DriverName));
+
+        return Ok(new {
+            OrderId = order.Id,
+            AcceptedAt = subOrders.Any() ? subOrders.Min(s => s.AcceptedAt) : null,
+            ShippedAt = subOrders.Any() ? subOrders.Min(s => s.ShippedAt) : null,
+            DeliveredAt = subOrders.Any() ? subOrders.Min(s => s.DeliveredAt) : null,
+            ReceiptConfirmedAt = subOrders.Any() ? subOrders.Min(s => s.ReceiptConfirmedAt) : null,
+            DriverName = driverSubOrder?.DriverName,
+            DriverPhone = driverSubOrder?.DriverPhone
+        });
+    }
+
+    [HttpPost("{id:int}/confirm-receipt")]
+    [Authorize(Roles = "Merchant,Admin")]
+    public async Task<IActionResult> ConfirmReceipt(int id)
+    {
+        if (!await CanAccessOrderAsMerchantAsync(id)) return Forbid();
+
+        var order = await _masterOrderRepository.Query()
+            .Include(o => o.SubOrders)
+            .FirstOrDefaultAsync(o => o.Id == id);
+            
+        if (order == null) return NotFound(new { Message = "Order not found." });
+
+        bool updated = false;
+        foreach (var sub in order.SubOrders)
+        {
+            if (sub.Status != FulfillmentStatus.ReceiptConfirmed)
+            {
+                sub.Status = FulfillmentStatus.ReceiptConfirmed;
+                sub.ReceiptConfirmedAt = DateTime.UtcNow;
+                updated = true;
+            }
+        }
+        
+        if (updated)
+        {
+            order.Status = ApprovalStatus.Completed;
+            order.UpdatedAt = DateTime.UtcNow;
+            await _masterOrderRepository.UpdateAsync(order);
+            await _masterOrderRepository.SaveChangesAsync();
+        }
+
+        return Ok(new { Message = "Receipt confirmed successfully." });
     }
 
     // ───────────────────────────── Helpers ─────────────────────────────────
