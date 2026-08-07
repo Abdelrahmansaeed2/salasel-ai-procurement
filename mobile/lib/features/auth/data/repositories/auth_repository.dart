@@ -41,10 +41,29 @@ class AuthRepository {
         'role': 1, // Merchant
       });
     } on DioException catch (e) {
-      if (e.response?.statusCode == 400) {
-        throw Exception(e.response?.data['message'] ?? 'بيانات غير صالحة');
+      // Attempt to extract a meaningful error message from the backend response
+      String serverMessage = '';
+      if (e.response?.data != null) {
+        final data = e.response!.data;
+        if (data is Map) {
+          if (data.containsKey('message') && data['message'] != null) {
+            serverMessage = data['message'] as String;
+          } else if (data.containsKey('errors') && data['errors'] != null) {
+            // Concatenate validation error messages if provided as a map of lists
+            if (data['errors'] is Map) {
+              serverMessage = (data['errors'] as Map)
+                  .values
+                  .expand((v) => v as List)
+                  .join('؛ ');
+            }
+          }
+        }
       }
-      throw Exception('حدث خطأ في الاتصال بالخادم: ${e.message}');
+      if (serverMessage.isEmpty) {
+        serverMessage = e.response?.statusCode == 400 ? 'بيانات غير صالحة' : 'حدث خطأ في الاتصال بالخادم';
+      }
+      throw Exception(serverMessage);
+    }
     } catch (e) {
       throw Exception('حدث خطأ غير متوقع');
     }
