@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../../../core/network/api_client.dart';
-import '../../orders/data/repositories/ai_repository.dart';
-import '../../orders/domain/ai_order_response.dart';
+import '../../../orders/data/repositories/ai_repository.dart';
+import '../../../orders/domain/ai_order_response.dart';
 
 enum ProcessingStepState { completed, active, pending }
 

@@ -101,4 +101,11 @@ export class PortalAnalyticsComponent implements OnInit {
   goToPage(page: number) {
     this.page.set(page);
   }
+
+  syncCatalogToAi() {
+    this.adminService.forceSyncCatalogToAi().subscribe({
+      next: (res) => alert(res.message || 'تمت المزامنة بنجاح'),
+      error: (err) => alert('خطأ في المزامنة: ' + (err.error?.Message || err.message))
+    });
+  }
 }

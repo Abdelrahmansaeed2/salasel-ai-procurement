@@ -23,6 +23,7 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final CheckoutController _controller = Get.put(CheckoutController());
+  String _selectedPaymentMethod = 'wallet';
 
   @override
   Widget build(BuildContext context) {

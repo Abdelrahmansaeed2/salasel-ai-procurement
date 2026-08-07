@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/controllers/settings_controller.dart';
 import 'core/localization/app_translations.dart';
 import 'core/theme/app_theme.dart';
+import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/orders/presentation/screens/checkout_screen.dart';
 import 'features/splash/presentation/screens/splash_screen.dart';
 
@@ -75,7 +76,7 @@ class _AppEntry extends StatelessWidget {
       displayDuration: Duration(seconds: 3),
       onTimeout: () {
         // Changed temporarily to show the CheckoutScreen directly for testing
-               Get.off(() => const LoginScreen(),
+               Get.off(() => LoginScreen(),
             transition: Transition.fadeIn,
             duration: Duration(milliseconds: 400));
       },

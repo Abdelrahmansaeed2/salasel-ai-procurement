@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../orders/data/repositories/ai_repository.dart';
+import '../../../orders/domain/ai_order_response.dart';
 import '../../../orders/presentation/screens/order_review_screen.dart';
 
 /// A single confirmed/missing line inside the AI analysis card.

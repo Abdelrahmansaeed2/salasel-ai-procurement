@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import '../../../../core/navigation/app_navigator.dart';
 import '../../../../core/network/api_client.dart';
-import '../data/models/home_models.dart';
+import '../../data/models/home_models.dart';
 
 class QuickStat {
   final String label;

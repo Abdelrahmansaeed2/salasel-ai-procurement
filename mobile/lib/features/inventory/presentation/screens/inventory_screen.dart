@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
+import '../../data/models/inventory_models.dart';
 import '../controllers/inventory_controller.dart';
 import '../widgets/ai_insights_card.dart';
 
@@ -338,7 +339,7 @@ class InventoryScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        '${product.currentStock} / ${product.maxStock}',
+                        '${product.currentQty} / ${product.maxQty}',
                         style: TextStyle(
                           color: color,
                           fontSize: 12.sp,

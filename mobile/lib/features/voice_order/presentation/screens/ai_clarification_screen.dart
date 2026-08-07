@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import '../../../../core/widgets/animated_entrance.dart';
 import '../../../../core/widgets/animated_pressable.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
-import '../../orders/domain/ai_order_response.dart';
+import '../../../orders/domain/ai_order_response.dart';
 import '../controllers/ai_clarification_controller.dart';
 
 class _Icons {

@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/navigation/app_navigator.dart';
 import '../../../../core/network/api_client.dart';
-import '../data/models/notification_model.dart';
+import '../../data/models/notification_model.dart';
 
 class NotificationsController extends GetxController {
   final RxInt bottomNavIndex = 3.obs;
