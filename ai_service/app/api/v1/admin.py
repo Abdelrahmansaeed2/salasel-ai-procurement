@@ -3,8 +3,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, status
 
-from app.schemas.product import ProductUpsertBatch, QualityMetricsBatch
-from app.services.ingestion_service import ingest_products
+from app.schemas.product import ProductUpsert, ProductUpsertBatch, QualityMetricsBatch
+from app.services.ingestion_service import ingest_products, update_product
 from app.services.quality_score_service import compute_scores
 from app.services.vector_store import (
     collection_info,
@@ -13,6 +13,9 @@ from app.services.vector_store import (
     get_product,
     scroll_products,
     update_payloads_by_supplier,
+)
+from app.services.vector_store import (
+    delete_product as delete_product_point,
 )
 
 logger = logging.getLogger(__name__)
@@ -71,6 +74,27 @@ async def admin_get_product(
     if point is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
     return point
+
+
+@router.put("/admin/products/{product_id}")
+async def admin_update_product(product_id: int, product: ProductUpsert) -> dict:
+    if product.product_id != product_id:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="product_id in body must match the URL",
+        )
+    result = await update_product(product_id, product)
+    if result is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
+    return {"status": "ok", "product_id": product_id, **result}
+
+
+@router.delete("/admin/products/{product_id}")
+async def admin_delete_product(product_id: int) -> dict:
+    if get_product(product_id) is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product not found")
+    delete_product_point(product_id)
+    return {"status": "ok", "product_id": product_id}
 
 
 @router.get("/admin/collection")

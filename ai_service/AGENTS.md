@@ -19,10 +19,14 @@ the backend. SQL Server has been removed from this service; the backend (.NET)
 is the source of truth and drives Qdrant via `/api/v1/admin/products`.
 
 **File:** `app/services/vector_store.py` (Qdrant client wrapper) +
-`app/services/ingestion_service.py` (ingest path).
+`app/services/ingestion_service.py` (ingest, single-product update, delete path).
 
 **Trigger:** the backend pushes product create/update via
-`POST /api/v1/admin/products`.
+`POST /api/v1/admin/products` (idempotent batch upsert). Single-product updates
+use `PUT /api/v1/admin/products/{id}` (404 on missing; re-embeds only when a
+descriptive field — name/sku/category/description/attributes — changes, otherwise
+payload-only `set_payload`; `quality_score` is always preserved) and removals use
+`DELETE /api/v1/admin/products/{id}`.
 
 **Logic:**
 
@@ -49,9 +53,43 @@ issues a payload-only update to every affected product's Qdrant point — it
 does not re-embed, since the vector itself doesn't change when a review comes
 in.
 
+**Single-product update logic:** `update_product` is update-only (not upsert) —
+it 404s on missing products and always preserves `quality_score` from the
+existing point.
+
+```python
+_TEXT_FIELDS = ("product_name", "sku", "category", "description", "attributes")
+
+async def update_product(product_id: int, product: ProductUpsert) -> dict | None:
+    existing = get_product(int(product_id))            # None → 404
+    if existing is None:
+        return None
+    payload = product_payload(product)
+    payload["quality_score"] = existing.get("quality_score")   # never reset
+    needs_embed = any(existing.get(f) != getattr(product, f) for f in _TEXT_FIELDS)
+    if needs_embed:
+        vector = await embed(build_product_text(product.product_name, product.sku,
+                                                product.category, product.description,
+                                                product.attributes))
+        vector_upsert(point_id=str(product_id), vector=vector, payload=payload)
+    else:
+        update_payloads([(str(product_id), payload)])  # payload-only, keeps vector
+    return {"re_embedded": needs_embed}
+```
+
+Rule of thumb: any change to name/sku/category/description/attributes re-embeds;
+price/geo/stock/supplier-only edits are payload-only `set_payload` (no embedding
+cost). The endpoint returns `{"status": "ok", "product_id": ..., "re_embedded": ...}`.
+
+**Delete:** `DELETE /api/v1/admin/products/{id}` maps Qdrant
+`UpdateStatus.COMPLETED` to an HTTP 200 and anything else (missing point) to 404.
+
 **Testing:** unit test with a fake Qdrant client asserting idempotent
 upsert (same `product_id` twice → one point, not two); integration test
 verifying a real Qdrant query returns the expected payload after sync.
+Also unit-test `update_product` (missing → `None`; descriptive change →
+re-embeds and preserves `quality_score`; price-only change → payload-only,
+no embed) and `delete_product` status mapping.
 
 ---
 

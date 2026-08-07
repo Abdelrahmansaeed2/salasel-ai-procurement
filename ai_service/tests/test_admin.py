@@ -208,6 +208,90 @@ def test_admin_get_product_non_int_path(admin_module) -> None:
     assert response.status_code == 422
 
 
+def test_admin_update_product(admin_module, monkeypatch: pytest.MonkeyPatch) -> None:
+    import app.api.v1.admin as admin_module
+
+    captured: dict = {}
+
+    async def fake_update(pid: int, product) -> dict | None:
+        captured["pid"] = pid
+        captured["product"] = product
+        return {"re_embedded": True}
+
+    monkeypatch.setattr(admin_module, "update_product", fake_update)
+
+    body = {
+        "product_id": 1,
+        "supplier_id": 1,
+        "product_name": "Nitrile Gloves",
+        "sku": "NG",
+        "category": "PPE",
+        "price": 4.25,
+    }
+    response = TestClient(app).put("/api/v1/admin/products/1", json=body)
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok", "product_id": 1, "re_embedded": True}
+    assert captured["pid"] == 1
+    assert captured["product"].product_name == "Nitrile Gloves"
+    assert captured["product"].price == 4.25
+
+
+def test_admin_update_product_body_id_mismatch(admin_module) -> None:
+    body = {
+        "product_id": 2,
+        "supplier_id": 1,
+        "product_name": "Nitrile Gloves",
+    }
+    response = TestClient(app).put("/api/v1/admin/products/1", json=body)
+
+    assert response.status_code == 422
+
+
+def test_admin_update_product_missing(admin_module, monkeypatch: pytest.MonkeyPatch) -> None:
+    async def fake_update(pid: int, product) -> dict | None:
+        return None
+
+    monkeypatch.setattr(admin_module, "update_product", fake_update)
+
+    body = {
+        "product_id": 999,
+        "supplier_id": 1,
+        "product_name": "Nitrile Gloves",
+    }
+    response = TestClient(app).put("/api/v1/admin/products/999", json=body)
+
+    assert response.status_code == 404
+
+
+def test_admin_delete_product(admin_module, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(admin_module, "get_product", lambda pid, with_vectors=False: {"id": pid})
+    monkeypatch.setattr(admin_module, "delete_product_point", lambda pid: True)
+
+    response = TestClient(app).delete("/api/v1/admin/products/42")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok", "product_id": 42}
+
+
+def test_admin_delete_product_missing(admin_module, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(admin_module, "get_product", lambda pid, with_vectors=False: None)
+
+    def fail_if_called(pid):
+        raise AssertionError("delete should not run for a missing product")
+
+    monkeypatch.setattr(admin_module, "delete_product_point", fail_if_called)
+
+    response = TestClient(app).delete("/api/v1/admin/products/999")
+
+    assert response.status_code == 404
+
+
+def test_admin_delete_product_non_int_path(admin_module) -> None:
+    response = TestClient(app).delete("/api/v1/admin/products/abc")
+    assert response.status_code == 422
+
+
 def test_admin_collection_info(admin_module, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         admin_module,

@@ -1,14 +1,18 @@
 from unittest.mock import MagicMock, patch
 
+from qdrant_client.http.models import UpdateStatus
+
 from app.services.vector_store import (
     build_explore_filter,
     collection_info,
     count_products,
+    delete_product,
     ensure_collection,
     fetch_all_products,
     get_product,
     list_by_category,
     scroll_products,
+    update_payloads,
     update_payloads_by_supplier,
     upsert,
 )
@@ -121,6 +125,50 @@ def test_update_payloads_by_supplier_skips_empty(mock_get_client) -> None:
 def test_update_payloads_by_supplier_noop_for_empty_scores(mock_get_client) -> None:
     update_payloads_by_supplier([])
     mock_get_client.assert_not_called()
+
+
+@patch("app.services.vector_store.get_client")
+def test_update_payloads_sets_payload_for_points(mock_get_client) -> None:
+    mock_client = MagicMock()
+    mock_get_client.return_value = mock_client
+
+    update_payloads([("5", {"price": 9.99}), ("9", {"in_stock": False})])
+
+    assert mock_client.set_payload.call_count == 2
+    first = mock_client.set_payload.call_args_list[0][1]
+    assert first["payload"] == {"price": 9.99}
+    assert first["points"] == [5]
+    second = mock_client.set_payload.call_args_list[1][1]
+    assert second["points"] == [9]
+
+
+@patch("app.services.vector_store.get_client")
+def test_update_payloads_noop_for_empty(mock_get_client) -> None:
+    update_payloads([])
+    mock_get_client.assert_not_called()
+
+
+@patch("app.services.vector_store.get_client")
+def test_delete_product_deletes_by_int_id(mock_get_client) -> None:
+    mock_client = MagicMock()
+    mock_get_client.return_value = mock_client
+    mock_client.delete.return_value.status = UpdateStatus.COMPLETED
+
+    assert delete_product("42") is True
+
+    call = mock_client.delete.call_args[1]
+    assert call["collection_name"] == "products"
+    assert call["points_selector"] == [42]
+    assert call["wait"] is True
+
+
+@patch("app.services.vector_store.get_client")
+def test_delete_product_reports_incomplete(mock_get_client) -> None:
+    mock_client = MagicMock()
+    mock_get_client.return_value = mock_client
+    mock_client.delete.return_value.status = UpdateStatus.ACKNOWLEDGED
+
+    assert delete_product(42) is False
 
 
 def test_build_explore_filter_none_for_no_constraints() -> None:

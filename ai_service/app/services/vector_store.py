@@ -9,6 +9,7 @@ from qdrant_client.http.models import (
     MatchValue,
     PointStruct,
     Range,
+    UpdateStatus,
     VectorParams,
 )
 
@@ -169,6 +170,20 @@ def get_product(point_id: int, *, with_vectors: bool = False) -> dict | None:
     if not records:
         return None
     return _point_record(records[0], with_vectors)
+
+
+def delete_product(point_id: str | int) -> bool:
+    """Delete a single product point by id.
+
+    Returns True when Qdrant reports the delete completed, False otherwise.
+    """
+    client = get_client()
+    result = client.delete(
+        collection_name=_COLLECTION_NAME,
+        points_selector=[int(point_id)],
+        wait=True,
+    )
+    return result.status == UpdateStatus.COMPLETED
 
 
 def collection_info() -> dict:
