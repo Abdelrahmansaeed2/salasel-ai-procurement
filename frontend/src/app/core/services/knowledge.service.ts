@@ -13,6 +13,10 @@ export interface KnowledgeDocument {
   errorMessage: string | null;
   uploadedAt: string;
   indexedAt: string | null;
+  size?: string;
+  progress?: number;
+  statusLabel?: string;
+  updatedAt?: string;
 }
 
 @Injectable({

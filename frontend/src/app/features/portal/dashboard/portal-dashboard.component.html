@@ -87,7 +87,7 @@
         </div>
       </div>
       <div class="chart-card-body">
-        <app-area-line-chart [points]="revenueByPeriod[period()]" [labels]="revenueLabelsByPeriod[period()]" color="#004AC6" />
+        <app-area-line-chart [points]="revenueByPeriod()[period()]" [labels]="revenueLabelsByPeriod()[period()]" color="#004AC6" />
       </div>
     </article>
 
@@ -98,7 +98,7 @@
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10 13.33V7.5h3.33v5.83H10ZM5 13.33V0h3.33v13.33H5ZM0 13.33V4.17h3.33v9.16H0Z" fill="#004AC6"/></svg>
         </div>
         <div class="weekly-bars">
-          @for (v of weeklyOrders; track $index) {
+          @for (v of weeklyOrders(); track $index) {
             <div class="weekly-bar" [style.height.%]="(v / 91) * 100" [class.peak]="v === 91"></div>
           }
         </div>
@@ -109,10 +109,10 @@
         <h3 class="align-end">مبيعات الفئات</h3>
         <div class="donut-row">
           <div class="donut-wrap">
-            <app-donut-chart [segments]="categorySegments" />
+            <app-donut-chart [segments]="categorySegments()" />
           </div>
           <ul class="donut-legend">
-            @for (seg of categorySegments; track seg.label) {
+            @for (seg of categorySegments(); track seg.label) {
               <li>
                 <span class="legend-dot" [style.background]="seg.color"></span>
                 <span class="legend-label">{{ seg.label }}</span>
@@ -135,7 +135,7 @@
         <h3>أفضل المنتجات</h3>
       </div>
       <ul class="product-list">
-        @for (p of topProducts; track p.name) {
+        @for (p of topProducts(); track p.name) {
           <li>
             <div class="product-row">
               <div class="product-trend">
@@ -206,14 +206,14 @@
         <span>حالة</span>
         <span>الوقت</span>
       </div>
-      @for (row of recentOrders; track row.orderId) {
+      @for (row of recentOrders(); track row.orderId) {
         <div class="orders-table-row">
           <span class="mono">{{ row.orderId }}</span>
           <span>{{ row.vendor }}</span>
           <span>{{ row.category }}</span>
           <span>{{ row.items }}</span>
           <span class="strong">{{ row.total }}</span>
-          <span class="status-pill" [class]="statusStyles[row.status]">{{ row.status }}</span>
+          <span class="status-pill" [class]="$any(statusStyles)[$any(row).status]">{{ row.status }}</span>
           <span class="muted">{{ row.time }}</span>
         </div>
       }

@@ -8,8 +8,8 @@
       <span class="role-badge">الدور النشط</span>
       @if (roleMenuOpen()) {
         <div class="role-menu">
-          @for (role of roles; track role) {
-            <button type="button" (click)="selectRole(role)">{{ role }}</button>
+          @for (role of roles(); track role.roleName) {
+            <button type="button" (click)="selectRole(role.roleName)">{{ role.roleName }}</button>
           }
         </div>
       }
