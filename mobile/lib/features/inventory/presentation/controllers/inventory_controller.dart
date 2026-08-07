@@ -1,31 +1,7 @@
 import 'package:get/get.dart';
 import '../../../../../core/navigation/app_navigator.dart';
-
-class InventoryProduct {
-  final String id;
-  final String name;
-  final String category;
-  final String sku;
-  final String unit;
-  final int currentStock;
-  final int maxStock;
-  final String status;
-  final String imageUrl;
-
-  InventoryProduct({
-    required this.id,
-    required this.name,
-    required this.category,
-    required this.sku,
-    required this.unit,
-    required this.currentStock,
-    required this.maxStock,
-    required this.status,
-    required this.imageUrl,
-  });
-
-  double get stockPercentage => currentStock / maxStock;
-}
+import '../../../../../core/network/api_client.dart';
+import '../data/models/inventory_models.dart';
 
 class InventoryController extends GetxController {
   final RxInt bottomNavIndex = 1.obs;
@@ -35,61 +11,104 @@ class InventoryController extends GetxController {
 
   final RxBool showAiInsights = false.obs;
   final RxString searchText = ''.obs;
+  final RxBool isLoading = true.obs;
 
-  final List<InventoryProduct> products = [
-    InventoryProduct(
-      id: '1',
-      name: 'أرز الشعلان 10 كجم',
-      category: 'حبوب', 
-      sku: 'WTR-001',
-      unit: 'كرتون',
-      currentStock: 8,
-      maxStock: 100,
-      status: 'منخفض جداً',
-      imageUrl: 'assets/images/rice.jpg',
-    ),
-    InventoryProduct(
-      id: '2',
-      name: 'سكر الأسرة 5 كجم',
-      category: 'بقالة',
-      sku: 'SGR-004',
-      unit: 'طرد',
-      currentStock: 5,
-      maxStock: 40,
-      status: 'منخفض',
-      imageUrl: 'assets/images/sugar.jpg',
-    ),
-    InventoryProduct(
-      id: '3',
-      name: 'حليب نادك',
-      category: 'ألبان',
-      sku: 'MLK-005',
-      unit: 'علبة',
-      currentStock: 45,
-      maxStock: 80,
-      status: 'متوفر',
-      imageUrl: 'assets/images/milk.jpg',
-    ),
-    InventoryProduct(
-      id: '4',
-      name: 'مسحوق غسيل تايد',
-      category: 'منظفات',
-      sku: 'SOP-011',
-      unit: 'علبة',
-      currentStock: 130,
-      maxStock: 150,
-      status: 'مرتفع',
-      imageUrl: 'assets/images/tide.jpg',
-    ),
-  ];
+  final RxList<InventoryItemModel> products = <InventoryItemModel>[].obs;
+  final RxList<AiRecommendationModel> aiRecommendations = <AiRecommendationModel>[].obs;
+  final ApiClient _apiClient = ApiClient();
 
   @override
   void onInit() {
     super.onInit();
-    // Show AI insights after a short delay to simulate it popping up
-    Future.delayed(const Duration(milliseconds: 600), () {
-      showAiInsights.value = true;
-    });
+    fetchInventory();
+  }
+
+  Future<void> fetchInventory() async {
+    try {
+      isLoading.value = true;
+      
+      // 1. Fetch User's Primary Shop to get the merchantId
+      final shopsResponse = await _apiClient.dio.get('/merchants/me/shops');
+      int? merchantId;
+      if (shopsResponse.statusCode == 200) {
+        final List<dynamic> shops = shopsResponse.data;
+        if (shops.isNotEmpty) {
+          merchantId = shops.first['merchantID'];
+        }
+      }
+
+      if (merchantId == null) {
+        throw Exception('No shop found');
+      }
+
+      // 2. Fetch Inventory
+      final invResponse = await _apiClient.dio.get(
+        '/inventory',
+        queryParameters: {'merchantId': merchantId},
+      );
+
+      if (invResponse.statusCode == 200) {
+        final List<dynamic> data = invResponse.data;
+        products.value = data.map((json) => InventoryItemModel.fromJson(json)).toList();
+      }
+
+      // 3. Fetch AI Recommendations
+      final aiResponse = await _apiClient.dio.get(
+        '/ai/recommendations',
+        queryParameters: {'merchantId': merchantId},
+      );
+
+      if (aiResponse.statusCode == 200) {
+        final List<dynamic> data = aiResponse.data;
+        aiRecommendations.value = data.map((json) => AiRecommendationModel.fromJson(json)).toList();
+        
+        if (aiRecommendations.isNotEmpty) {
+          Future.delayed(const Duration(milliseconds: 600), () {
+            showAiInsights.value = true;
+          });
+        }
+      }
+
+    } catch (e) {
+      Get.snackbar('خطأ', 'فشل في تحميل المخزون');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> updateQuantity(int inventoryId, int currentQty, int delta) async {
+    final newQty = currentQty + delta;
+    if (newQty < 0) return;
+
+    try {
+      final response = await _apiClient.dio.put(
+        '/inventory/$inventoryId/quantity',
+        data: {'newQuantity': newQty},
+      );
+
+      if (response.statusCode == 200) {
+        // Optimistically update UI
+        final index = products.indexWhere((p) => p.inventoryId == inventoryId);
+        if (index != -1) {
+          final p = products[index];
+          products[index] = InventoryItemModel(
+            inventoryId: p.inventoryId,
+            productId: p.productId,
+            productName: p.productName,
+            sku: p.sku,
+            category: p.category,
+            currentQty: newQty,
+            maxQty: p.maxQty,
+            reorderThreshold: p.reorderThreshold,
+            status: p.status,
+            unitOfMeasure: p.unitOfMeasure,
+            imageUrl: p.imageUrl,
+          );
+        }
+      }
+    } catch (e) {
+      Get.snackbar('خطأ', 'فشل في تحديث الكمية');
+    }
   }
 
   void changeTab(int index) {
@@ -104,14 +123,14 @@ class InventoryController extends GetxController {
     searchText.value = text;
   }
 
-  List<InventoryProduct> get filteredProducts {
+  List<InventoryItemModel> get filteredProducts {
     final query = searchText.value.trim().toLowerCase();
     final filter = selectedFilter.value;
 
     return products.where((p) {
       final matchesFilter = filter == 'الكل' || p.category == filter;
       final matchesSearch = query.isEmpty ||
-          p.name.toLowerCase().contains(query) ||
+          p.productName.toLowerCase().contains(query) ||
           p.sku.toLowerCase().contains(query) ||
           p.category.toLowerCase().contains(query);
       return matchesFilter && matchesSearch;

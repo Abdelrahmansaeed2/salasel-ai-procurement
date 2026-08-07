@@ -12,6 +12,19 @@ export interface PendingMerchant {
   verificationStatus: string;
 }
 
+export interface PendingSupplier {
+  supplierID: number;
+  companyName: string;
+  contactName: string;
+  crNumber: string;
+  createdAt: string;
+  verificationStatus: string;
+}
+
+export interface AdminRejectRequest {
+  reason: string;
+}
+
 export interface AdminAnalytics {
   totalMerchants: number;
   totalSuppliers: number;
@@ -36,14 +49,33 @@ export class AdminService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/admin`;
 
+  // Merchants
   getPendingMerchants() {
-    return this.http.get<PendingMerchant[]>(`${this.apiUrl}/merchants/pending`);
+    return this.http.get<PendingMerchant[]>(`${this.apiUrl}/pending-merchants`);
   }
 
   approveMerchant(merchantId: number) {
     return this.http.put<{ message: string }>(`${this.apiUrl}/merchants/${merchantId}/approve`, {});
   }
 
+  rejectMerchant(merchantId: number, reason: string) {
+    return this.http.put<{ message: string }>(`${this.apiUrl}/merchants/${merchantId}/reject`, { reason } as AdminRejectRequest);
+  }
+
+  // Suppliers
+  getPendingSuppliers() {
+    return this.http.get<PendingSupplier[]>(`${this.apiUrl}/pending-suppliers`);
+  }
+
+  approveSupplier(supplierId: number) {
+    return this.http.put<{ message: string }>(`${this.apiUrl}/suppliers/${supplierId}/approve`, {});
+  }
+
+  rejectSupplier(supplierId: number, reason: string) {
+    return this.http.put<{ message: string }>(`${this.apiUrl}/suppliers/${supplierId}/reject`, { reason } as AdminRejectRequest);
+  }
+
+  // Analytics
   getAnalytics() {
     return this.http.get<AdminAnalytics>(`${this.apiUrl}/analytics`);
   }

@@ -37,28 +37,33 @@ class HomeScreen extends StatelessWidget {
                 child: _buildHeader(),
               ),
               Expanded(
-                child: SingleChildScrollView(
-                  physics: BouncingScrollPhysics(),
-                  child: Column(
-                    children: [
-                      AnimatedEntrance(
-                        delay: Duration(milliseconds: 60),
-                        child: _MicSection(),
-                      ),
-                      SizedBox(height: 34.h),
-                      AnimatedEntrance(
-                        delay: Duration(milliseconds: 160),
-                        child: _buildQuickStats(controller),
-                      ),
-                      SizedBox(height: 10.h),
-                      AnimatedEntrance(
-                        delay: Duration(milliseconds: 260),
-                        child: _buildRecentOrders(controller),
-                      ),
-                      SizedBox(height: 24.h),
-                    ],
-                  ),
-                ),
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return Center(child: CircularProgressIndicator(color: HomeColors.micGradientStart));
+                  }
+                  return SingleChildScrollView(
+                    physics: BouncingScrollPhysics(),
+                    child: Column(
+                      children: [
+                        AnimatedEntrance(
+                          delay: Duration(milliseconds: 60),
+                          child: _MicSection(),
+                        ),
+                        SizedBox(height: 34.h),
+                        AnimatedEntrance(
+                          delay: Duration(milliseconds: 160),
+                          child: _buildQuickStats(controller),
+                        ),
+                        SizedBox(height: 10.h),
+                        AnimatedEntrance(
+                          delay: Duration(milliseconds: 260),
+                          child: _buildRecentOrders(controller),
+                        ),
+                        SizedBox(height: 24.h),
+                      ],
+                    ),
+                  );
+                }),
               ),
             ],
           ),

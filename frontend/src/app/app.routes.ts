@@ -66,6 +66,13 @@ export const routes: Routes = [
           import('./features/portal/catalog/portal-catalog.component').then((m) => m.PortalCatalogComponent),
       },
       {
+        path: 'supplier-knowledge',
+        loadComponent: () =>
+          import('./features/portal/knowledge-base/portal-knowledge-base.component').then(
+            (m) => m.PortalKnowledgeBaseComponent,
+          ),
+      },
+      {
         path: 'approvals',
         canActivate: [roleGuard],
         data: { roles: ['Admin'] },
@@ -80,10 +87,19 @@ export const routes: Routes = [
           import('./features/portal/roles/portal-roles.component').then((m) => m.PortalRolesComponent),
       },
       {
+        path: 'help-center-editor',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin'] },
+        loadComponent: () =>
+          import('./features/portal/help-center-editor/admin-help-center-editor.component').then(
+            (m) => m.AdminHelpCenterEditorComponent,
+          ),
+      },
+      {
         path: 'settings',
         loadComponent: () =>
-          import('./features/portal/knowledge-base/portal-knowledge-base.component').then(
-            (m) => m.PortalKnowledgeBaseComponent,
+          import('./features/portal/settings/portal-settings.component').then(
+            (m) => m.PortalSettingsComponent,
           ),
       },
       { path: '**', redirectTo: 'dashboard' },

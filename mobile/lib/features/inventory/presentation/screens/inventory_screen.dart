@@ -61,6 +61,9 @@ class InventoryScreen extends StatelessWidget {
               SizedBox(height: 16.h),
               Expanded(
                 child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
                   final list = controller.filteredProducts;
                   if (list.isEmpty) {
                     return Center(
@@ -232,7 +235,7 @@ class InventoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProductCard(InventoryProduct product) {
+  Widget _buildProductCard(InventoryItemModel product) {
     Color getStatusColor(String status) {
       if (status == 'منخفض جداً') return const Color(0xFFEF4444);
       if (status == 'منخفض') return const Color(0xFFF59E0B);
@@ -282,7 +285,7 @@ class InventoryScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    product.name,
+                    product.productName,
                     style: TextStyle(
                       color: const Color(0xFF1E293B),
                       fontSize: 16.sp,
@@ -323,7 +326,7 @@ class InventoryScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    product.unit,
+                    product.unitOfMeasure,
                     style: TextStyle(
                       color: const Color(0xFF94A3B8),
                       fontSize: 12.sp,
@@ -359,38 +362,60 @@ class InventoryScreen extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 12.h),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: product.status == 'منخفض جداً' ? const Color(0xFF2563EB) : Colors.white,
-                  foregroundColor: product.status == 'منخفض جداً' ? Colors.white : const Color(0xFF475569),
-                  elevation: 0,
-                  side: BorderSide(
-                    color: product.status == 'منخفض جداً' ? Colors.transparent : const Color(0xFFCBD5E1),
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  minimumSize: Size(100.w, 36.h),
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (product.status == 'منخفض جداً') ...[
-                      Icon(Icons.shopping_cart_outlined, size: 16.w),
-                      SizedBox(width: 6.w),
-                    ],
-                    Text(
-                      product.status == 'منخفض جداً' ? 'إعادة طلب' : 'تعديل الكمية',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'Cairo',
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (product.status == 'منخفض جداً')
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        minimumSize: Size(100.w, 36.h),
+                        padding: EdgeInsets.symmetric(horizontal: 16.w),
                       ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.shopping_cart_outlined, size: 16.w),
+                          SizedBox(width: 6.w),
+                          Text(
+                            'إعادة طلب',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'Cairo',
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => Get.find<InventoryController>().updateQuantity(product.inventoryId, product.currentQty, 1),
+                          icon: Icon(Icons.add_circle_outline, color: const Color(0xFF475569)),
+                        ),
+                        Text(
+                          product.currentQty.toString(),
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Cairo',
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Get.find<InventoryController>().updateQuantity(product.inventoryId, product.currentQty, -1),
+                          icon: Icon(Icons.remove_circle_outline, color: const Color(0xFF475569)),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                ],
               ),
               SizedBox(height: 8.h),
               Divider(color: const Color(0xFFF1F5F9), height: 1),

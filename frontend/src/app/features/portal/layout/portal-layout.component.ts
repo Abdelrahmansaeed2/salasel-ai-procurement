@@ -62,6 +62,7 @@ export class PortalLayoutComponent {
         { label: 'التحليلات', route: '/portal/analytics', icon: 'analytics' },
         { label: 'اعتمادات النظام', route: '/portal/approvals', icon: 'audit', badge: 2 },
         { label: 'مصفوفة الأدوار', route: '/portal/roles', icon: 'roles' },
+        { label: 'إدارة مركز المساعدة', route: '/portal/help-center-editor', icon: 'settings' },
         { label: 'الإعدادات', route: '/portal/settings', icon: 'settings' },
       ];
     } else {
@@ -69,7 +70,7 @@ export class PortalLayoutComponent {
       return [
         { label: 'لوحة التحكم', route: '/portal/dashboard', icon: 'dashboard' },
         { label: 'الطلبات', route: '/portal/orders', icon: 'orders', badge: 7 },
-        { label: 'الكتالوج', route: '/portal/catalog', icon: 'catalog' },
+        { label: 'الكتالوج (قاعدة المعرفة)', route: '/portal/supplier-knowledge', icon: 'catalog' },
         { label: 'الإعدادات', route: '/portal/settings', icon: 'settings' },
       ];
     }

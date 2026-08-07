@@ -56,7 +56,7 @@ export class SupplierRegistration {
     'سيتم مطابقة المعلومات المقدمة هنا مع السجلات التجارية المحلية. تأكد من أن الاسم يطابق رخصتك التجارية تماماً لتجنب التأخير في التحقق.'
   );
 
-  private registrationData: Record<string, any> = {};
+  private registrationData: any = {};
 
   private router = inject(Router);
   private supplierService = inject(SupplierService);

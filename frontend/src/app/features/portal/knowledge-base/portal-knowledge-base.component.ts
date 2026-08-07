@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild, ElementRef, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaginationComponent } from '../ui/pagination.component';
-import { KnowledgeService, KnowledgeDocument } from '../../core/services/knowledge.service';
+import { KnowledgeService, KnowledgeDocument } from '../../../core/services/knowledge.service';
 
 @Component({
   selector: 'app-portal-knowledge-base',

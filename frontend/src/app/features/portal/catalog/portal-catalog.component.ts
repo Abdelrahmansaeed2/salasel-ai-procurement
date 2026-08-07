@@ -1,17 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal, inject, OnInit } from '@angular/core';
+import { CatalogService, CatalogProduct, StockStatus } from '../../../core/services/catalog.service';
 
-type StockStatus = 'available' | 'low' | 'out';
 
-interface CatalogProduct {
-  sku: string;
-  name: string;
-  category: string;
-  price: string;
-  status: StockStatus;
-  statusLabel: string;
-  stockUnits: string;
-  stockPercent: number;
-}
 
 @Component({
   selector: 'app-portal-catalog',
@@ -20,53 +10,21 @@ interface CatalogProduct {
   styleUrl: './portal-catalog.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PortalCatalogComponent {
+export class PortalCatalogComponent implements OnInit {
   readonly searchTerm = signal('');
   readonly currentPage = signal(1);
   readonly pageSize = 4;
 
-  readonly products = signal<CatalogProduct[]>([
-    {
-      sku: 'COF-AR-500',
-      name: 'قهوة أرابيكا فاخرة',
-      category: 'مشروبات',
-      price: '45.00 جنيه',
-      status: 'available',
-      statusLabel: 'متوفر',
-      stockUnits: '1,240 وحدة',
-      stockPercent: 82,
-    },
-    {
-      sku: 'OIL-EV-1000',
-      name: 'زيت زيتون عضوي',
-      category: 'بقالة',
-      price: '82.50 جنيه',
-      status: 'low',
-      statusLabel: 'مخزون منخفض',
-      stockUnits: '42 وحدة',
-      stockPercent: 8,
-    },
-    {
-      sku: 'SLT-HM-250',
-      name: 'ملح الهيمالايا',
-      category: 'بقالة',
-      price: '18.00 جنيه',
-      status: 'available',
-      statusLabel: 'متوفر',
-      stockUnits: '560 وحدة',
-      stockPercent: 45,
-    },
-    {
-      sku: 'SPF-SAF-005',
-      name: 'زعفران فاخر',
-      category: 'توابل',
-      price: '120.00 جنيه',
-      status: 'out',
-      statusLabel: 'نفذت الكمية',
-      stockUnits: '0 وحدة',
-      stockPercent: 0,
-    },
-  ]);
+  private catalogService = inject(CatalogService);
+  
+  readonly products = signal<CatalogProduct[]>([]);
+  
+  ngOnInit() {
+    this.catalogService.getCatalogs().subscribe({
+      next: (res) => this.products.set(res),
+      error: (err) => console.error('Error fetching catalog', err)
+    });
+  }
 
   readonly filteredProducts = computed(() => {
     const term = this.searchTerm().trim();
