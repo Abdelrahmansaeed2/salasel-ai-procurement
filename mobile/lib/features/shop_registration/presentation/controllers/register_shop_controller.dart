@@ -17,6 +17,7 @@ class RegisterShopController extends GetxController {
   final Rx<String?> selectedCity = Rx<String?>(null);
   final Rx<String?> selectedCategory = Rx<String?>(null);
   final RxString storeSize = 'صغير'.obs;
+  void selectStoreSize(String size) => storeSize.value = size;
 
   final Rx<String?> governorate = Rx<String?>('الجيزة');
   final Rx<String?> businessCity = Rx<String?>('مصر');

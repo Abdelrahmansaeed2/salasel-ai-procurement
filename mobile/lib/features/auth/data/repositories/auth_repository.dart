@@ -63,7 +63,6 @@ class AuthRepository {
         serverMessage = e.response?.statusCode == 400 ? 'بيانات غير صالحة' : 'حدث خطأ في الاتصال بالخادم';
       }
       throw Exception(serverMessage);
-    }
     } catch (e) {
       throw Exception('حدث خطأ غير متوقع');
     }
