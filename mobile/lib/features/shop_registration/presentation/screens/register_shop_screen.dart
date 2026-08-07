@@ -414,6 +414,9 @@ class _MapPickerSectionState extends State<_MapPickerSection> {
       setState(() {
         _center = newLoc;
       });
+      final controller = Get.find<RegisterShopController>();
+      controller.locationLat.value = _center.latitude;
+      controller.locationLng.value = _center.longitude;
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -441,8 +444,11 @@ class _MapPickerSectionState extends State<_MapPickerSection> {
                   initialCenter: _center,
                   initialZoom: 13.0,
                   onPositionChanged: (position, hasGesture) {
-                    if (hasGesture) {
-                      _center = position.center;
+                    if (hasGesture && position.center != null) {
+                      _center = position.center!;
+                      final controller = Get.find<RegisterShopController>();
+                      controller.locationLat.value = _center.latitude;
+                      controller.locationLng.value = _center.longitude;
                     }
                   },
                 ),
@@ -513,7 +519,10 @@ class _StepThreeReview extends StatelessWidget {
 
   final RegisterShopController controller;
 
-  void _submitRegistration() {
+  void _submitRegistration() async {
+    final success = await controller.submitRegistration();
+    if (!success) return;
+
     // Mark that the merchant has completed shop registration
     final storage = GetStorage();
     storage.write('shopRegistered', true);

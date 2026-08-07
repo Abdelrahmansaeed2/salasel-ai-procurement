@@ -202,7 +202,7 @@ public class MerchantsController : ControllerBase
             LocationLat = request.LocationLat,
             LocationLng = request.LocationLng,
             IsVerified = false,
-            VerificationStatus = MerchantVerificationStatus.NotSubmitted,
+            VerificationStatus = MerchantVerificationStatus.UnderReview,
             CreatedAt = DateTime.UtcNow
         };
 
