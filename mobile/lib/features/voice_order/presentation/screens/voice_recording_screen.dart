@@ -364,13 +364,15 @@ class _RecordingActions extends StatelessWidget {
           textColor: Color(0xFF22C55E),
           iconPath:
               'M8.08073 13.7538L14.8038 7.03073L13.75 5.97691L8.08073 11.6461L5.23073 8.79614L4.17691 9.84996L8.08073 13.7538Z',
-          onTap: () {
-            controller.stopRecording();
-            Get.off(
-              () => AiProcessingScreen(),
-              transition: Transition.rightToLeftWithFade,
-              duration: Duration(milliseconds: 350),
-            );
+          onTap: () async {
+            final path = await controller.stopRecording();
+            if (path != null) {
+              Get.off(
+                () => AiProcessingScreen(audioPath: path),
+                transition: Transition.rightToLeftWithFade,
+                duration: Duration(milliseconds: 350),
+              );
+            }
           },
         ),
         _StopButton(controller: controller),

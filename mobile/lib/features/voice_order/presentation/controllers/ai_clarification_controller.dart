@@ -65,83 +65,121 @@ class OrderSummaryLine {
 class AiClarificationController extends GetxController {
   final textController = TextEditingController();
 
-  final messages = <ChatEntry>[
-    const VoiceMessageEntry(
-      duration: '0:04',
-      transcript: '"محتاج لبن، وسكر، وشاي"',
-    ),
-    const AiAnalysisEntry(
-      title: 'لقد حددت معظم طلبك.',
-      items: [
-        OrderLineItem(quantity: '20 كرتون', name: 'حليب المراعي'),
-        OrderLineItem(quantity: '5 علب', name: 'شاي ليبتون'),
-        OrderLineItem(quantity: 'الكمية مطلوبة', name: 'سكر الأسرة', isMissing: true),
-      ],
-    ),
-    const ClarificationEntry(
-      'لقد طلبت السكر، لكن لم أتمكن من تحديد الكمية. كم كيس سكر تود أن تطلب؟',
-    ),
-  ].obs;
-
-  final quickReplies = <String>['5 أكياس', '20 كيس', '10 أكياس'].obs;
+  final messages = <ChatEntry>[].obs;
+  final quickReplies = <String>[].obs;
   final awaitingClarification = true.obs;
+  final summary = <OrderSummaryLine>[].obs;
+  
+  final AiRepository _aiRepository = AiRepository();
+  AiOrderResponse? currentResponse;
+  bool isProcessing = false;
 
-  final summary = <OrderSummaryLine>[
-    const OrderSummaryLine(label: 'سكر:', value: '؟؟؟', missing: true),
-    const OrderSummaryLine(label: 'شاي:', value: '5'),
-    const OrderSummaryLine(label: 'حليب:', value: '20'),
-  ].obs;
-
-  void selectSugarQuantity(String option) {
-    if (!awaitingClarification.value) return;
-    _resolveSugar(
-      summaryValue: option,
-      confirmationMessage: 'تم تحديد كمية السكر: $option.',
-    );
+  void setInitialData(AiOrderResponse response) {
+    currentResponse = response;
+    _buildUiFromResponse(response, initial: true);
   }
 
-  void skipSugarQuantity() {
-    if (!awaitingClarification.value) return;
-    _resolveSugar(
-      summaryValue: 'لم تُحدد',
-      confirmationMessage: 'تم تخطي تحديد كمية السكر، سنتواصل معك لاحقاً لتأكيدها.',
-      stillMissing: true,
-    );
-  }
+  void _buildUiFromResponse(AiOrderResponse response, {bool initial = false}) {
+    // 1. Build summary
+    summary.clear();
+    for (final split in response.splits) {
+      for (final item in split.items) {
+        summary.add(OrderSummaryLine(
+          label: '${item.name}:', 
+          value: item.quantity.toString()
+        ));
+      }
+    }
+    for (final missing in response.unresolved) {
+      summary.add(OrderSummaryLine(
+        label: '$missing:', 
+        value: '؟؟؟', 
+        missing: true
+      ));
+    }
 
-  void sendMessage() {
-    final text = textController.text.trim();
-    if (text.isEmpty) return;
-    textController.clear();
+    // 2. Build analysis items for the message
+    List<OrderLineItem> lineItems = [];
+    for (final split in response.splits) {
+      for (final item in split.items) {
+        lineItems.add(OrderLineItem(
+          quantity: '${item.quantity} ${item.unit}', 
+          name: item.name
+        ));
+      }
+    }
+    for (final missing in response.unresolved) {
+      lineItems.add(OrderLineItem(
+        quantity: 'مطلوب توضيح', 
+        name: missing, 
+        isMissing: true
+      ));
+    }
 
-    if (awaitingClarification.value) {
-      selectSugarQuantity(text);
+    if (initial) {
+      messages.add(const VoiceMessageEntry(
+        duration: '...',
+        transcript: 'مقطع صوتي',
+      ));
+    }
+
+    if (lineItems.isNotEmpty) {
+      messages.add(AiAnalysisEntry(
+        title: 'لقد حددت معظم طلبك.',
+        items: lineItems,
+      ));
+    }
+
+    if (response.unresolved.isNotEmpty) {
+      messages.add(ClarificationEntry(
+        'لم أتمكن من تحديد تفاصيل بعض العناصر (${response.unresolved.join(", ")}). هل يمكنك توضيح الكميات المطلوبة؟',
+      ));
+      awaitingClarification.value = true;
+    } else {
+      awaitingClarification.value = false;
+      messages.add(const ConfirmationEntry('تم تأكيد جميع الطلبات بنجاح.'));
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        Get.off(
+          () => OrderReviewScreen(initialResponse: currentResponse),
+          transition: Transition.rightToLeftWithFade,
+          duration: const Duration(milliseconds: 350),
+        );
+      });
     }
   }
 
-  void _resolveSugar({
-    required String summaryValue,
-    required String confirmationMessage,
-    bool stillMissing = false,
-  }) {
-    awaitingClarification.value = false;
-    quickReplies.clear();
+  void skipSugarQuantity() {
+    // Currently dummy skip, real implementation depends on AI handling "skip"
+    sendMessage(textOverride: "تخطي");
+  }
+  
+  void selectSugarQuantity(String option) {
+    sendMessage(textOverride: option);
+  }
 
-    summary[0] = OrderSummaryLine(
-      label: 'سكر:',
-      value: summaryValue,
-      missing: stillMissing,
-    );
+  Future<void> sendMessage({String? textOverride}) async {
+    final text = textOverride ?? textController.text.trim();
+    if (text.isEmpty || isProcessing) return;
+    textController.clear();
+    
+    if (currentResponse?.sessionId == null) return;
 
-    messages.add(ConfirmationEntry(confirmationMessage));
-
-    Future.delayed(const Duration(milliseconds: 900), () {
-      Get.off(
-        () => const OrderReviewScreen(),
-        transition: Transition.rightToLeftWithFade,
-        duration: const Duration(milliseconds: 350),
+    isProcessing = true;
+    messages.add(ConfirmationEntry(text)); // show user message
+    
+    try {
+      final newResponse = await _aiRepository.sendChatMessage(
+        currentResponse!.sessionId!,
+        text,
+        1, // fallback merchant ID, assuming AI service handles the session
       );
-    });
+      currentResponse = newResponse;
+      _buildUiFromResponse(newResponse);
+    } catch (e) {
+      Get.snackbar('خطأ', 'فشل في إرسال الرسالة.');
+    } finally {
+      isProcessing = false;
+    }
   }
 
   @override

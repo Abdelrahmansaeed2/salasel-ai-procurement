@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/navigation/app_navigator.dart';
+import '../../../../../core/network/api_client.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
@@ -43,6 +44,7 @@ class OrdersController extends GetxController {
   final RxString selectedFilter = 'الكل'.obs;
   final RxString searchText = ''.obs;
   final RxBool showAiInsights = true.obs;
+  final RxBool isLoading = true.obs;
 
   final List<String> filters = [
     'الكل',
@@ -52,58 +54,50 @@ class OrdersController extends GetxController {
     'في الطريق',
   ];
 
-  final List<OrderModel> allOrders = [
-    OrderModel(
-      id: '1',
-      orderNumber: 'ORD-4828',
-      supplierName: 'شركة البدر',
-      supplierLogo: '',
-      date: DateTime(2023, 10, 23),
-      status: OrderStatus.accepted,
-      items: [
-        OrderItem(name: 'مياه معدنية 500مل', quantity: 20, unit: 'كرتون'),
-        OrderItem(name: 'عصير برتقال', quantity: 12, unit: 'كرتون'),
-      ],
-      total: 612.00,
-    ),
-    OrderModel(
-      id: '2',
-      orderNumber: 'ORD-82941',
-      supplierName: 'شركة المراعي',
-      supplierLogo: '',
-      date: DateTime(2023, 10, 24),
-      status: OrderStatus.shipped,
-      items: [
-        OrderItem(name: 'حليب كامل الدسم', quantity: 30, unit: 'كرتون'),
-      ],
-      total: 318.00,
-    ),
-    OrderModel(
-      id: '3',
-      orderNumber: 'ORD-31045',
-      supplierName: 'مؤسسة النور',
-      supplierLogo: '',
-      date: DateTime(2023, 10, 20),
-      status: OrderStatus.pending,
-      items: [
-        OrderItem(name: 'سكر أبيض 1 كجم', quantity: 50, unit: 'كيس'),
-        OrderItem(name: 'أرز بسمتي', quantity: 10, unit: 'كيس'),
-      ],
-      total: 450.00,
-    ),
-    OrderModel(
-      id: '4',
-      orderNumber: 'ORD-29100',
-      supplierName: 'التوزيع الذهبي',
-      supplierLogo: '',
-      date: DateTime(2023, 10, 15),
-      status: OrderStatus.delivered,
-      items: [
-        OrderItem(name: 'مسحوق غسيل تايد', quantity: 24, unit: 'علبة'),
-      ],
-      total: 840.00,
-    ),
-  ];
+  final RxList<OrderModel> allOrders = <OrderModel>[].obs;
+  final ApiClient _apiClient = ApiClient();
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchOrders();
+  }
+
+  Future<void> fetchOrders() async {
+    try {
+      isLoading.value = true;
+      final response = await _apiClient.dio.get('/merchants/me/recent-orders', queryParameters: {'take': 50});
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        allOrders.value = data.map((json) {
+          // Map backend status to local OrderStatus
+          OrderStatus status = OrderStatus.pending;
+          final String statusStr = json['status'] ?? 'Pending';
+          if (statusStr == 'Pending') status = OrderStatus.pending;
+          else if (statusStr == 'Accepted') status = OrderStatus.accepted;
+          else if (statusStr == 'Shipped') status = OrderStatus.shipped;
+          else if (statusStr == 'Completed') status = OrderStatus.delivered;
+
+          return OrderModel(
+            id: json['orderId']?.toString() ?? '',
+            orderNumber: 'ORD-${json['orderId']}',
+            supplierName: json['supplierName'] ?? 'مورد',
+            supplierLogo: '', // Need real logo if provided
+            date: DateTime.parse(json['orderDate'] ?? DateTime.now().toIso8601String()),
+            status: status,
+            items: [
+              OrderItem(name: 'عناصر الطلب', quantity: 1, unit: 'مجموعة'), // The endpoint might just give a summary
+            ],
+            total: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
+          );
+        }).toList();
+      }
+    } catch (e) {
+      debugPrint('Failed to load orders: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   List<OrderModel> get activeOrders =>
       allOrders.where((o) => o.status != OrderStatus.delivered).toList();
@@ -167,7 +161,6 @@ class OrdersController extends GetxController {
     }
   }
 
-  /// Returns the active step index (0-based) for the progress stepper.
   int stepIndex(OrderStatus s) {
     switch (s) {
       case OrderStatus.pending:

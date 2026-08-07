@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../../../core/widgets/animated_entrance.dart';
 import '../../../../core/widgets/animated_pressable.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
+import '../../orders/domain/ai_order_response.dart';
 import '../controllers/ai_clarification_controller.dart';
 
 class _Icons {
@@ -43,11 +44,15 @@ class _Icons {
 }
 
 class AiClarificationScreen extends StatelessWidget {
-  const AiClarificationScreen({super.key});
+  final AiOrderResponse? initialResponse;
+  const AiClarificationScreen({super.key, this.initialResponse});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(AiClarificationController());
+    if (initialResponse != null) {
+      controller.setInitialData(initialResponse!);
+    }
 
     return Directionality(
       textDirection: TextDirection.ltr,

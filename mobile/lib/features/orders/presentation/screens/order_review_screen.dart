@@ -11,6 +11,7 @@ import '../controllers/order_review_controller.dart';
 import '../theme/order_colors.dart';
 import 'order_success_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../domain/ai_order_response.dart';
 
 const String _avatarUrl =
     'https://api.builder.io/api/v1/image/assets/TEMP/c7070914a8d0a025b8aab03d2f42684260d4b530?width=72';
@@ -95,11 +96,15 @@ class _Icons {
 }
 
 class OrderReviewScreen extends StatelessWidget {
-  const OrderReviewScreen({super.key});
+  final AiOrderResponse? initialResponse;
+  const OrderReviewScreen({super.key, this.initialResponse});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(OrderReviewController());
+    if (initialResponse != null) {
+      controller.setInitialData(initialResponse!);
+    }
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -1188,15 +1193,18 @@ class _ConfirmButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedPressable(
         borderRadius: BorderRadius.circular(8.r),
-        onTap: () {
-          Get.off(
-            () => OrderSuccessScreen(
-              totalAmount: controller.totalAmount,
-              itemCount: controller.products.length,
-            ),
-            transition: Transition.rightToLeftWithFade,
-            duration: Duration(milliseconds: 350),
-          );
+        onTap: () async {
+          final success = await controller.submitOrder();
+          if (success) {
+            Get.off(
+              () => OrderSuccessScreen(
+                totalAmount: controller.totalAmount,
+                itemCount: controller.products.length,
+              ),
+              transition: Transition.rightToLeftWithFade,
+              duration: Duration(milliseconds: 350),
+            );
+          }
         },
         child: Container(
           height: 56.h,
@@ -1205,14 +1213,21 @@ class _ConfirmButton extends StatelessWidget {
             color: OrderColors.primary,
             borderRadius: BorderRadius.circular(8.r),
           ),
-          child: Text(
-            'تأكيد الطلب ✓',
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'Cairo',
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w700,
-            ),
+          child: Obx(() => controller.isSubmitting.value
+              ? SizedBox(
+                  width: 24.w,
+                  height: 24.h,
+                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                )
+              : Text(
+                  'تأكيد الطلب ✓',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Cairo',
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
           ),
         ),
     );

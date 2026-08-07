@@ -143,21 +143,26 @@ class _MascotLoadingPlaceholderState extends State<_MascotLoadingPlaceholder>
 }
 
 class AiProcessingScreen extends StatelessWidget {
-  const AiProcessingScreen({super.key});
+  final String audioPath;
+  const AiProcessingScreen({super.key, required this.audioPath});
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(AiProcessingController());
-    controller.start((bool needsClarification) {
+    controller.start(audioPath, (bool needsClarification) {
       if (needsClarification) {
         Get.off(
-          () => const AiClarificationScreen(),
+          () => AiClarificationScreen(
+            initialResponse: controller.currentResponse,
+          ),
           transition: Transition.rightToLeftWithFade,
           duration: const Duration(milliseconds: 350),
         );
       } else {
         Get.off(
-          () => const OrderReviewScreen(),
+          () => OrderReviewScreen(
+            initialResponse: controller.currentResponse,
+          ),
           transition: Transition.rightToLeftWithFade,
           duration: const Duration(milliseconds: 350),
         );
