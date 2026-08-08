@@ -143,5 +143,52 @@ public static class DatabaseSeeder
         db.SupplierProducts.AddRange(products);
 
         await db.SaveChangesAsync();
+
+        // Seed Merchant Inventory
+        var inventories = new List<MerchantInventory>
+        {
+            new MerchantInventory { MerchantID = mProfile.MerchantID, ProductId = pSugar.Id, CurrentQty = 50, ReorderThreshold = 10 },
+            new MerchantInventory { MerchantID = mProfile.MerchantID, ProductId = pMilk.Id, CurrentQty = 5, ReorderThreshold = 10 }, // Low stock!
+        };
+        db.MerchantInventories.AddRange(inventories);
+
+        // Seed an Order
+        var order = new MasterOrder
+        {
+            MerchantId = mProfile.MerchantID,
+            TotalAmount = 145.00m,
+            Status = ApprovalStatus.Completed,
+            Source = OrderSource.Voice,
+            OrderDate = DateTime.UtcNow.AddDays(-2),
+            PaymentMethod = PaymentMethod.CashOnDelivery,
+            PaymentStatus = PaymentStatus.Paid,
+            SubOrders = new List<SubOrder>
+            {
+                new SubOrder
+                {
+                    SupplierId = sProfile1.SupplierID,
+                    ProductId = pSugar.Id,
+                    Quantity = 10,
+                    SubTotalAmount = 55.00m,
+                    Status = FulfillmentStatus.Delivered,
+                    AcceptedAt = DateTime.UtcNow.AddDays(-2).AddHours(1),
+                    ShippedAt = DateTime.UtcNow.AddDays(-2).AddHours(5),
+                    DeliveredAt = DateTime.UtcNow.AddDays(-1)
+                },
+                new SubOrder
+                {
+                    SupplierId = sProfile2.SupplierID,
+                    ProductId = pCoffee.Id,
+                    Quantity = 2,
+                    SubTotalAmount = 50.00m,
+                    Status = FulfillmentStatus.Shipped, // Still shipped
+                    AcceptedAt = DateTime.UtcNow.AddDays(-2).AddHours(2),
+                    ShippedAt = DateTime.UtcNow.AddDays(-1)
+                }
+            }
+        };
+        db.MasterOrders.Add(order);
+
+        await db.SaveChangesAsync();
     }
 }
