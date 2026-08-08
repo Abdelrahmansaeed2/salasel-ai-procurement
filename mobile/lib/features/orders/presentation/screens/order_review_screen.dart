@@ -1220,12 +1220,14 @@ class _ConfirmButton extends StatelessWidget {
     return AnimatedPressable(
         borderRadius: BorderRadius.circular(8.r),
         onTap: () async {
-          final success = await controller.submitOrder();
-          if (success) {
+          final orderId = await controller.submitOrder();
+          if (orderId != null) {
             Get.off(
               () => OrderSuccessScreen(
                 totalAmount: controller.totalAmount,
                 itemCount: controller.products.length,
+                orderId: 'ORD-2024-${orderId.toString().padLeft(5, '0')}',
+                supplierName: controller.recommendedSupplier.value?.companyName ?? 'الجوهرة للتوزيع',
               ),
               transition: Transition.rightToLeftWithFade,
               duration: Duration(milliseconds: 350),

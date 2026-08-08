@@ -96,8 +96,8 @@ class OrderReviewController extends GetxController {
     products[index] = current.copyWith(quantity: current.quantity - 1);
   }
 
-  Future<bool> submitOrder() async {
-    if (currentResponse == null) return false;
+  Future<int?> submitOrder() async {
+    if (currentResponse == null) return null;
     isSubmitting.value = true;
     try {
       final ApiClient apiClient = ApiClient();
@@ -127,10 +127,13 @@ class OrderReviewController extends GetxController {
       }
 
       final response = await apiClient.dio.post('/orders/execute', data: payload);
-      return response.statusCode == 200 || response.statusCode == 201;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return response.data['id'] as int?; // Ensure .NET returns { Id: ... } and Dio parses it
+      }
+      return null;
     } catch (e) {
       Get.snackbar('خطأ', 'فشل في تأكيد الطلب.');
-      return false;
+      return null;
     } finally {
       isSubmitting.value = false;
     }

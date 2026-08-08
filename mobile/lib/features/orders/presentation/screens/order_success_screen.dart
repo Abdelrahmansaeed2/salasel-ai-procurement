@@ -81,11 +81,15 @@ class TimelineEvent {
 class OrderSuccessScreen extends StatelessWidget {
   final double totalAmount;
   final int itemCount;
+  final String orderId;
+  final String supplierName;
 
   const OrderSuccessScreen({
     super.key,
-    this.totalAmount = 530.45,
-    this.itemCount = 2,
+    required this.totalAmount,
+    required this.itemCount,
+    required this.orderId,
+    required this.supplierName,
   });
 
   static final List<TimelineEvent> _events = [
@@ -221,7 +225,7 @@ class OrderSuccessScreen extends StatelessWidget {
   }
 
   Widget _buildOrderIdChip() {
-    return const _CopyableOrderId();
+    return _CopyableOrderId(orderId: orderId);
   }
 
   Widget _buildSummaryBar() {
@@ -320,7 +324,7 @@ class OrderSuccessScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        'الجوهرة للتوزيع',
+                        supplierName,
                         style: TextStyle(
                           color: Color(0xFF0F172B),
                           fontFamily: 'Cairo',
@@ -541,7 +545,8 @@ class OrderSuccessScreen extends StatelessWidget {
 }
 
 class _CopyableOrderId extends StatefulWidget {
-  const _CopyableOrderId();
+  final String orderId;
+  const _CopyableOrderId({required this.orderId});
 
   @override
   State<_CopyableOrderId> createState() => _CopyableOrderIdState();
@@ -551,7 +556,7 @@ class _CopyableOrderIdState extends State<_CopyableOrderId> {
   bool _copied = false;
 
   void _copy() {
-    Clipboard.setData(ClipboardData(text: 'ORD-2024-48291'));
+    Clipboard.setData(ClipboardData(text: widget.orderId));
     setState(() => _copied = true);
     Get.snackbar('تم النسخ', 'تم نسخ رقم الطلب');
     Future.delayed(Duration(seconds: 2), () {
@@ -583,7 +588,7 @@ class _CopyableOrderIdState extends State<_CopyableOrderId> {
             ),
             SizedBox(width: 8.w),
             Text(
-              'ORD-2024-48291',
+              widget.orderId,
               style: TextStyle(
                 color: OrderColors.textMuted,
                 fontFamily: 'Inter',
