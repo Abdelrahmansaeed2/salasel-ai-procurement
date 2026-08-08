@@ -54,6 +54,7 @@ class GroqSttClient:
             "model": self._settings.stt_model,
             "temperature": 0.0,
             "response_format": "json",
+            "prompt": "Egyptian Arabic dialect. انا عايز كرتونة لبن",
             "timeout": self._settings.stt_timeout,
         }
         if self._settings.stt_language:
