@@ -26,11 +26,10 @@ export interface AdminRejectRequest {
 }
 
 export interface AdminAnalytics {
-  totalMerchants: number;
-  totalSuppliers: number;
-  totalOrders: number;
+  activeMerchants: number;
+  activeSuppliers: number;
   totalGmv: number;
-  totalRfqs: number;
+  averageAiLatency: string;
 }
 
 export interface KnowledgeBaseArticle {

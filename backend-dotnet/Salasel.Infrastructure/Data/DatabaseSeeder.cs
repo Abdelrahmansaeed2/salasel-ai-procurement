@@ -8,9 +8,9 @@ public static class DatabaseSeeder
 {
     public static async Task SeedAsync(SalaselDbContext db)
     {
-        if (await db.Users.AnyAsync())
+        if (await db.Users.AnyAsync(u => u.Email == "admin@salasel.com"))
         {
-            return; // DB has been seeded
+            return; // DB has already been seeded with the demo admin
         }
 
         var passwordHash = BCrypt.Net.BCrypt.HashPassword("Password123!");
