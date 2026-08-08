@@ -25,7 +25,7 @@ class InventoryScreen extends StatelessWidget {
               textDirection: TextDirection.rtl,
               child: AiInsightsCard(
                 productName: controller.aiRecommendations.isNotEmpty ? controller.aiRecommendations.first.productName : 'منتج',
-                days: controller.aiRecommendations.isNotEmpty ? controller.aiRecommendations.first.daysUntilDepletion.toString() : '2',
+                days: controller.aiRecommendations.isNotEmpty ? controller.aiRecommendations.first.recommendedLeadTimeDays.toString() : '2',
                 onAdd: () {
                   final productName = controller.aiRecommendations.isNotEmpty ? controller.aiRecommendations.first.productName : 'المنتج';
                   controller.dismissAiInsights();
@@ -57,7 +57,7 @@ class InventoryScreen extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              _buildStatsRow(),
+              _buildStatsRow(controller),
               SizedBox(height: 16.h),
               _buildSearchBar(controller),
               SizedBox(height: 16.h),
@@ -155,7 +155,7 @@ class InventoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(InventoryController controller) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       child: Row(

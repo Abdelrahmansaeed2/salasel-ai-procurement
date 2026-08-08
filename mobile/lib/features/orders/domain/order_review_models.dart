@@ -47,4 +47,4 @@ class RiskAlert {
   });
 }
 
-enum RiskAlertLevel { safe, warning }
+enum RiskAlertLevel { safe, warning, danger }
