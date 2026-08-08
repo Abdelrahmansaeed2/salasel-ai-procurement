@@ -15,6 +15,7 @@ public interface IOrderExecutionService
 public interface IOrderQueryService
 {
     Task<OrderSummaryDto> GetOrderSummaryAsync(int merchantId);
+    Task<OrderDetailDto> GetOrderByIdAsync(int orderId);
 }
 
 public interface IInventoryService

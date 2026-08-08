@@ -666,7 +666,7 @@ class _OrderCard extends StatelessWidget {
                 onPressed: () {
                   if (activeStep == 0 || activeStep == 3) {
                     Get.to(() => VoiceOrderDetailScreen(
-                      orderNumber: '#${order.orderNumber}',
+                      orderId: int.parse(order.id),
                     ));
                   } else if (activeStep == 1) {
                     Get.to(() => CheckoutScreen(

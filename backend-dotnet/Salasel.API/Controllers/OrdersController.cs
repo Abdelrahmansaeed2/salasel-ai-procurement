@@ -66,6 +66,23 @@ public class OrdersController : ControllerBase
         return Ok(summary);
     }
 
+    [HttpGet("{id:int}")]
+    [Authorize(Roles = "Merchant,Admin")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        if (!await CanAccessOrderAsMerchantAsync(id)) return Forbid();
+
+        try
+        {
+            var order = await _orderQueryService.GetOrderByIdAsync(id);
+            return Ok(order);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { Message = ex.Message });
+        }
+    }
+
     // ──────────────────────────── Bidding / RFQ ────────────────────────────
 
     // POST /api/v1/orders/rfqs — merchant asks multiple suppliers to quote on

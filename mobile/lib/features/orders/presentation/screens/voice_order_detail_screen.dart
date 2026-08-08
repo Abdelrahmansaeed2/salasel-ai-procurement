@@ -4,60 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
-class VoiceOrderProduct {
-  final String supplier;
-  final String name;
-  final String detectedQuantity;
-  final String requestedQuantity;
-
-  const VoiceOrderProduct({
-    required this.supplier,
-    required this.name,
-    required this.detectedQuantity,
-    required this.requestedQuantity,
-  });
-}
+import '../controllers/voice_order_detail_controller.dart';
+import '../../data/models/order_detail_model.dart';
 
 class VoiceOrderDetailScreen extends StatefulWidget {
-  final String orderNumber;
-  final String deliveryDate;
-  final String statusLabel;
-  final String transcript;
-  final List<VoiceOrderProduct> products;
-  final double subtotal;
-  final double deliveryFee;
-  final double tax;
+  final int orderId;
 
   const VoiceOrderDetailScreen({
     super.key,
-    this.orderNumber = '#SL-94821',
-    this.deliveryDate = 'اليوم، 14:30',
-    this.statusLabel = 'مكتمل',
-    this.transcript = 'محتاج 20 كرتونة حليب، 10 أكياس سكر، و 5 كراتين شاي.',
-    this.products = const [
-      VoiceOrderProduct(
-        supplier: 'Nile Foods',
-        name: 'حليب المراعي',
-        detectedQuantity: '20 Cartons',
-        requestedQuantity: '20 كرتونة',
-      ),
-      VoiceOrderProduct(
-        supplier: 'Delta Trade',
-        name: 'سكر الأسرة',
-        detectedQuantity: '10 Bags (5kg)',
-        requestedQuantity: '10 أكياس',
-      ),
-      VoiceOrderProduct(
-        supplier: 'Nile Foods',
-        name: 'شاي ليبتون',
-        detectedQuantity: '5 Boxes (100 bags)',
-        requestedQuantity: '5 كراتين',
-      ),
-    ],
-    this.subtotal = 650,
-    this.deliveryFee = 35,
-    this.tax = 0,
+    required this.orderId,
   });
 
   @override
@@ -68,8 +25,19 @@ class VoiceOrderDetailScreen extends StatefulWidget {
 class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
   bool _isPlaying = false;
   bool _showWhySelected = false;
+  late VoiceOrderDetailController controller;
 
-  double get _total => widget.subtotal + widget.deliveryFee + widget.tax;
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(VoiceOrderDetailController(orderId: widget.orderId));
+  }
+
+  @override
+  void dispose() {
+    Get.delete<VoiceOrderDetailController>();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,47 +46,67 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF7F9FB),
         body: SafeArea(
-          child: Stack(
-            children: [
-              Column(
-                children: [
-                  _buildHeader(),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 128.h),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildStatusSummary(),
-                          SizedBox(height: 24.h),
-                          _buildVoiceSection(),
-                          SizedBox(height: 24.h),
-                          _buildAiInsight(),
-                          SizedBox(height: 24.h),
-                          _buildOrderBreakdown(),
-                          SizedBox(height: 24.h),
-                          _buildPaymentSummary(),
-                        ],
+          child: Obx(() {
+            if (controller.isLoading.value) {
+              return const Center(child: CircularProgressIndicator(color: Color(0xFF2563EB)));
+            }
+
+            if (controller.error.value.isNotEmpty) {
+              return Center(
+                child: Text(
+                  controller.error.value,
+                  style: TextStyle(fontFamily: 'Cairo', fontSize: 16.sp, color: Colors.red),
+                ),
+              );
+            }
+
+            final order = controller.order.value;
+            if (order == null) return const SizedBox.shrink();
+
+            return Stack(
+              children: [
+                Column(
+                  children: [
+                    _buildHeader(order),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 128.h),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildStatusSummary(order),
+                            SizedBox(height: 24.h),
+                            _buildVoiceSection(order),
+                            SizedBox(height: 24.h),
+                            if (order.aiInsights != null) ...[
+                              _buildAiInsight(order),
+                              SizedBox(height: 24.h),
+                            ],
+                            _buildOrderBreakdown(order),
+                            SizedBox(height: 24.h),
+                            _buildPaymentSummary(order),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: _buildFixedActionBar(),
-              ),
-            ],
-          ),
+                  ],
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _buildFixedActionBar(),
+                ),
+              ],
+            );
+          }),
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(OrderDetailModel order) {
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -151,7 +139,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
                         ),
                       ),
                       Text(
-                        widget.orderNumber,
+                        order.orderNumber,
                         style: TextStyle(
                           color: const Color(0xFF505F76),
                           fontFamily: 'Inter',
@@ -180,7 +168,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
     );
   }
 
-  Widget _buildStatusSummary() {
+  Widget _buildStatusSummary(OrderDetailModel order) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
       child: Row(
@@ -190,7 +178,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'تاريخ التوصيل',
+                'تاريخ الطلب',
                 style: TextStyle(
                   color: const Color(0xFF505F76),
                   fontFamily: 'Cairo',
@@ -201,7 +189,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
               ),
               SizedBox(height: 4.h),
               Text(
-                widget.deliveryDate,
+                DateFormat('dd MMM yyyy, HH:mm').format(order.orderDate),
                 style: TextStyle(
                   color: const Color(0xFF191C1E),
                   fontFamily: 'Cairo',
@@ -237,7 +225,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      widget.statusLabel,
+                      order.status,
                       style: TextStyle(
                         color: const Color(0xFF166534),
                         fontFamily: 'Cairo',
@@ -263,7 +251,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
     );
   }
 
-  Widget _buildVoiceSection() {
+  Widget _buildVoiceSection(OrderDetailModel order) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.w),
@@ -386,7 +374,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '"${widget.transcript}"',
+                  '"${order.transcript}"',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     color: const Color(0xFF434655),
@@ -404,7 +392,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
     );
   }
 
-  Widget _buildAiInsight() {
+  Widget _buildAiInsight(OrderDetailModel order) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
@@ -438,17 +426,17 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: _AiStatCard(label: 'اللغة', value: 'عربي مصري'),
+                child: _AiStatCard(label: 'اللغة', value: order.aiInsights!.language),
               ),
               SizedBox(width: 12.w),
               Expanded(
-                child: _AiStatCard(label: 'زمن المعالجة', value: '1.2s'),
+                child: _AiStatCard(label: 'زمن المعالجة', value: order.aiInsights!.processingTime),
               ),
               SizedBox(width: 12.w),
               Expanded(
                 child: _AiStatCard(
                   label: 'الثقة',
-                  value: '98%',
+                  value: order.aiInsights!.confidence,
                   valueColor: const Color(0xFF16A34A),
                 ),
               ),
@@ -459,7 +447,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
     );
   }
 
-  Widget _buildOrderBreakdown() {
+  Widget _buildOrderBreakdown(OrderDetailModel order) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.w),
@@ -492,7 +480,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (final product in widget.products) ...[
+              for (final product in order.products) ...[
                 _ProductItemCard(product: product),
                 SizedBox(height: 12.h),
               ],
@@ -550,7 +538,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
     );
   }
 
-  Widget _buildPaymentSummary() {
+  Widget _buildPaymentSummary(OrderDetailModel order) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.w),
@@ -574,17 +562,17 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
           SizedBox(height: 16.h),
           _SummaryRow(
             label: 'المجموع الفرعي',
-            value: '${widget.subtotal.toStringAsFixed(0)} EGP',
+            value: '${order.totalAmount.toStringAsFixed(0)} EGP',
           ),
           SizedBox(height: 8.h),
           _SummaryRow(
             label: 'التوصيل',
-            value: '${widget.deliveryFee.toStringAsFixed(0)} EGP',
+            value: '${order.deliveryFee.toStringAsFixed(0)} EGP',
           ),
           SizedBox(height: 8.h),
           _SummaryRow(
             label: 'الضرائب',
-            value: '${widget.tax.toStringAsFixed(0)} EGP',
+            value: '${order.tax.toStringAsFixed(0)} EGP',
           ),
           SizedBox(height: 8.h),
           Container(
@@ -599,7 +587,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${_total.toStringAsFixed(0)} EGP',
+                  '${(order.totalAmount + order.deliveryFee + order.tax).toStringAsFixed(0)} EGP',
                   style: TextStyle(
                     color: const Color(0xFF191C1E),
                     fontFamily: 'Cairo',
@@ -611,6 +599,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
                 Text(
                   'الإجمالي',
                   style: TextStyle(
+
                     color: const Color(0xFF191C1E),
                     fontFamily: 'Cairo',
                     fontSize: 18.sp,
@@ -851,7 +840,7 @@ class _AiStatCard extends StatelessWidget {
 }
 
 class _ProductItemCard extends StatelessWidget {
-  final VoiceOrderProduct product;
+  final OrderDetailProductModel product;
 
   const _ProductItemCard({required this.product});
 
@@ -871,7 +860,7 @@ class _ProductItemCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                product.name,
+                product.productName,
                 style: TextStyle(
                   color: const Color(0xFF191C1E),
                   fontFamily: 'Cairo',
@@ -887,7 +876,7 @@ class _ProductItemCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: Text(
-                  product.supplier,
+                  product.supplierName,
                   style: TextStyle(
                     color: const Color(0xFF505F76),
                     fontFamily: 'Cairo',

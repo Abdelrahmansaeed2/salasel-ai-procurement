@@ -1,8 +1,9 @@
-﻿using Salasel.Application.DTOs;
+using Salasel.Application.DTOs;
 using Salasel.Application.Interfaces;
 using Salasel.Domain.Entities;
 using Salasel.Domain.Enums;
 using Salasel.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Salasel.Application.Services;
 
@@ -49,6 +50,54 @@ public class OrderQueryService : IOrderQueryService
         {
             ActiveTotal = thisMonthTotal,
             PercentChangeVsLastMonth = percentChange
+        };
+    }
+
+    public async Task<OrderDetailDto> GetOrderByIdAsync(int orderId)
+    {
+        var order = await _masterOrderRepository.Query()
+            .Include(o => o.SubOrders).ThenInclude(s => s.Supplier)
+            .Include(o => o.SubOrders).ThenInclude(s => s.Product)
+            .Include(o => o.VoiceLog).ThenInclude(v => v!.AIProcessing)
+            .FirstOrDefaultAsync(o => o.Id == orderId);
+
+        if (order == null)
+        {
+            throw new KeyNotFoundException($"Order {orderId} not found.");
+        }
+
+        OrderDetailAiInsightsDto? insights = null;
+        if (order.VoiceLog?.AIProcessing != null)
+        {
+            insights = new OrderDetailAiInsightsDto
+            {
+                Language = "Arabic", // Stub as not captured in schema
+                ProcessingTime = $"{Math.Round((order.VoiceLog.AIProcessing.ProcessingDurationMs ?? 0) / 1000.0, 1)}s",
+                Confidence = $"{Math.Round(order.VoiceLog.AIProcessing.Confidence * 100)}%"
+            };
+        }
+
+        var products = order.SubOrders.Select(s => new OrderDetailProductDto
+        {
+            SupplierName = s.Supplier?.CompanyName ?? "Unknown",
+            ProductName = s.Product?.Name ?? "Unknown Product",
+            RequestedQuantity = $"{s.Quantity} {(s.Product?.Unit ?? "")}".Trim(),
+            DetectedQuantity = $"{s.Quantity} {(s.Product?.Unit ?? "")}".Trim(),
+            UnitPrice = s.Quantity > 0 ? (s.SubTotalAmount / s.Quantity) : 0m
+        }).ToList();
+
+        return new OrderDetailDto
+        {
+            Id = order.Id,
+            OrderNumber = $"#ORD-2024-{order.Id.ToString().PadLeft(5, '0')}", // Simple formatter
+            TotalAmount = (double)order.TotalAmount,
+            DeliveryFee = 0.0, // Stub
+            Tax = 0.0,         // Stub
+            OrderDate = order.OrderDate,
+            Status = order.Status.ToString(),
+            Transcript = order.VoiceLog?.Transcript ?? string.Empty,
+            AiInsights = insights,
+            Products = products
         };
     }
 }
