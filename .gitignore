@@ -151,7 +151,6 @@ yarn.lock
 *~
 
 .antigravity/mcp.json
-frontend/src/environments/environment.ts
 
 # Python AI Service
 .venv/
@@ -164,4 +163,3 @@ frontend/src/environments/environment.ts
 htmlcov/
 .mypy_cache/
 .ruff_cache/
-frontend/src/environments/environment.ts
