@@ -27,8 +27,8 @@ public class SubOrderDtoValidator : AbstractValidator<SubOrderDto>
         RuleFor(x => x.SupplierID)
             .GreaterThan(0).WithMessage("SupplierID must be a valid positive integer.");
 
-        RuleFor(x => x.SKU)
-            .NotEmpty().WithMessage("SKU is required.");
+        RuleFor(x => x.ProductId)
+            .GreaterThan(0).WithMessage("ProductId is required.");
 
         RuleFor(x => x.QuantityOrdered)
             .GreaterThan(0).WithMessage("Quantity ordered must be greater than 0.");
