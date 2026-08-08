@@ -42,6 +42,8 @@ class ProfileController extends GetxController {
     fetchProfileData();
   }
 
+  int? currentShopId;
+
   Future<void> fetchProfileData() async {
     try {
       isLoading.value = true;
@@ -56,6 +58,7 @@ class ProfileController extends GetxController {
       final shopsResp = await _apiClient.dio.get('/merchants/me/shops');
       if (shopsResp.statusCode == 200 && (shopsResp.data as List).isNotEmpty) {
         final shop = shopsResp.data[0];
+        currentShopId = shop['merchantID'];
         storeName.value = shop['shopName'] ?? '';
         storeLocation.value = '${shop['businessCity'] ?? ''}، ${shop['governorate'] ?? ''}';
         storeCategory.value = shop['category'] ?? '';
@@ -85,6 +88,34 @@ class ProfileController extends GetxController {
       }
     } catch (e) {
       debugPrint('Error fetching profile: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> updateProfile({
+    String? newShopName,
+    String? newAddress,
+    String? newPhone,
+  }) async {
+    if (currentShopId == null) return false;
+    try {
+      isLoading.value = true;
+      final response = await _apiClient.dio.put('/merchants/me/shops/$currentShopId', data: {
+        'shopName': newShopName ?? storeName.value,
+        'address': newAddress ?? storeAddress.value,
+        'contactPhone': newPhone ?? phoneNumber.value,
+      });
+
+      if (response.statusCode == 200) {
+        // Refresh local data
+        await fetchProfileData();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('Error updating profile: $e');
+      return false;
     } finally {
       isLoading.value = false;
     }

@@ -151,8 +151,7 @@ class AiClarificationController extends GetxController {
   }
 
   void skipSugarQuantity() {
-    // Currently dummy skip, real implementation depends on AI handling "skip"
-    sendMessage(textOverride: "تخطي");
+    sendMessage(textOverride: "تخطي هذا العنصر");
   }
   
   void selectSugarQuantity(String option) {
