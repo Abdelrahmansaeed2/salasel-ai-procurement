@@ -143,7 +143,6 @@ def match_best_node(state: OrderState) -> dict:
         query_vec = embed_sync(query_text)
         hits = vector_search(
             query_vec,
-            category=line.category,
             price_min=line.price_bound_min,
             price_max=line.price_bound_max,
             limit=10,
