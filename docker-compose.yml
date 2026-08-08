@@ -111,6 +111,7 @@ services:
     restart: unless-stopped
     environment:
       APP_ENV: production
+      SEED_ON_STARTUP: "true"
       REDIS_URL: redis://redis:6379/0
       QDRANT_URL: http://qdrant:6333
       LLM_PROVIDER: groq
