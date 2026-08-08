@@ -195,8 +195,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildSummaryItem('المورد', supplierName),
-              _buildSummaryItem('المنتجات', itemsSummary.isNotEmpty ? itemsSummary.split(',').length.toString() : '١'),
+              _buildSummaryItem('المورد', widget.supplierName),
+              _buildSummaryItem('المنتجات', widget.itemsSummary.isNotEmpty ? widget.itemsSummary.split(',').length.toString() : '١'),
             ],
           ),
         ],
@@ -257,7 +257,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      supplierName,
+                      widget.supplierName,
                       style: TextStyle(color: OrderColors.textTitle, fontSize: 15.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
                     ),
                     Text(
@@ -268,7 +268,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
               ),
               Text(
-                totalAmount,
+                widget.totalAmount,
                 style: TextStyle(color: OrderColors.primary, fontSize: 15.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
               ),
             ],
@@ -303,7 +303,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      itemsSummary,
+                      widget.itemsSummary,
                       style: TextStyle(color: OrderColors.textTitle, fontSize: 14.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
                     ),
                     Text(
@@ -314,7 +314,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
               ),
               Text(
-                totalAmount,
+                widget.totalAmount,
                 style: TextStyle(color: OrderColors.textTitle, fontSize: 14.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
               ),
             ],
@@ -455,7 +455,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           SizedBox(height: 12.h),
           Divider(color: OrderColors.divider, height: 1.h),
           SizedBox(height: 12.h),
-          _buildSummaryRow('المجموع الفرعي', totalAmount),
+          _buildSummaryRow('المجموع الفرعي', widget.totalAmount),
           SizedBox(height: 12.h),
           _buildSummaryRow('ضريبة القيمة المضافة', 'شامل'),
           SizedBox(height: 12.h),
@@ -471,7 +471,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 style: TextStyle(color: OrderColors.primary, fontSize: 16.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
               ),
               Text(
-                totalAmount,
+                widget.totalAmount,
                 style: TextStyle(color: OrderColors.primary, fontSize: 16.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
               ),
             ],
