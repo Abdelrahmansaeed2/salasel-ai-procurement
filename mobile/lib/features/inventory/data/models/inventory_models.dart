@@ -31,12 +31,12 @@ class InventoryItemModel {
       productId: json['productId'] ?? 0,
       productName: json['productName'] ?? '',
       sku: json['sku'] ?? '',
-      category: json['category'] ?? 'عام',
+      category: json['categoryName'] ?? json['category'] ?? 'عام',
       currentQty: json['currentQty'] ?? 0,
       maxQty: json['maxQty'] ?? 100,
       reorderThreshold: json['reorderThreshold'] ?? 10,
       status: json['status'] ?? 'متوفر',
-      unitOfMeasure: json['unitOfMeasure'] ?? 'قطعة',
+      unitOfMeasure: json['unit'] ?? json['unitOfMeasure'] ?? 'قطعة',
       imageUrl: json['imageUrl'] ?? '',
     );
   }

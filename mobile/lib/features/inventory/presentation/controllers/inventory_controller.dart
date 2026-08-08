@@ -48,8 +48,9 @@ class InventoryController extends GetxController {
       );
 
       if (invResponse.statusCode == 200) {
-        final List<dynamic> data = invResponse.data;
-        products.value = data.map((json) => InventoryItemModel.fromJson(json)).toList();
+        final Map<String, dynamic> data = invResponse.data;
+        final List<dynamic> items = data['items'] ?? [];
+        products.value = items.map((json) => InventoryItemModel.fromJson(json)).toList();
       }
 
       // 3. Fetch AI Recommendations
