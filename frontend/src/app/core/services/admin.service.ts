@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
 export interface PendingMerchant {
-  merchantId: number;
+  merchantID: number;
   shopName: string;
   ownerName: string;
   crNumber: string;
@@ -13,7 +13,7 @@ export interface PendingMerchant {
 }
 
 export interface PendingSupplier {
-  supplierId: number;
+  supplierID: number;
   companyName: string;
   crNumber: string;
   registrationStep: number;

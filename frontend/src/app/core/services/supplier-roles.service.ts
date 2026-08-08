@@ -23,7 +23,7 @@ export interface SupplierRoleDto {
 })
 export class SupplierRolesService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/v1/suppliers/roles`;
+  private apiUrl = `${environment.apiUrl}/suppliers/roles`;
 
   getRoles(): Observable<SupplierRoleDto[]> {
     return this.http.get<SupplierRoleDto[]>(this.apiUrl);

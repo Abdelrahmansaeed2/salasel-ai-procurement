@@ -7,12 +7,12 @@
     </div>
     
     <!-- Stats Row -->
-    <div class="stats-row reveal-stagger">
-      <div class="stat-card hover-lift reveal">
+    <div class="stats-row">
+      <div class="stat-card hover-lift">
         <span class="stat-label">تجار بانتظار الاعتماد</span>
         <span class="stat-value text-warning">{{ pendingMerchants().length }}</span>
       </div>
-      <div class="stat-card hover-lift reveal">
+      <div class="stat-card hover-lift">
         <span class="stat-label">موردين بانتظار الاعتماد</span>
         <span class="stat-value text-warning">{{ pendingSuppliers().length }}</span>
       </div>
@@ -30,7 +30,7 @@
   </div>
 
   <!-- Table Section -->
-  <div class="table-card reveal fade-in" style="transition-delay: 120ms;">
+  <div class="table-card fade-in">
     <div class="table-header">
       <h2 class="table-title">الطلبات الحالية</h2>
     </div>
@@ -50,7 +50,7 @@
         <tbody>
           <!-- Merchants Loop -->
           @if (activeTab() === 'merchants') {
-            @for (merchant of pendingMerchants(); track merchant.merchantId) {
+            @for (merchant of pendingMerchants(); track merchant.merchantID) {
               <tr class="hover-lift">
                 <td>
                   <div class="merchant-info">
@@ -91,7 +91,7 @@
 
           <!-- Suppliers Loop -->
           @if (activeTab() === 'suppliers') {
-            @for (supplier of pendingSuppliers(); track supplier.supplierId) {
+            @for (supplier of pendingSuppliers(); track supplier.supplierID) {
               <tr class="hover-lift">
                 <td>
                   <div class="merchant-info">
