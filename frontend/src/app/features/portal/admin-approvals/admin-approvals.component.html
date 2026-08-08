@@ -50,7 +50,7 @@
         <tbody>
           <!-- Merchants Loop -->
           @if (activeTab() === 'merchants') {
-            @for (merchant of pendingMerchants(); track merchant.merchantID) {
+            @for (merchant of pendingMerchants(); track merchant.merchantId) {
               <tr class="hover-lift">
                 <td>
                   <div class="merchant-info">
@@ -91,7 +91,7 @@
 
           <!-- Suppliers Loop -->
           @if (activeTab() === 'suppliers') {
-            @for (supplier of pendingSuppliers(); track supplier.supplierID) {
+            @for (supplier of pendingSuppliers(); track supplier.supplierId) {
               <tr class="hover-lift">
                 <td>
                   <div class="merchant-info">
@@ -104,7 +104,7 @@
                   </div>
                 </td>
                 <td class="mono-text">{{ supplier.crNumber }}</td>
-                <td><span class="category-badge">{{ supplier.contactName }}</span></td>
+                <td><span class="category-badge">{{ supplier.companyName }}</span></td>
                 <td>{{ supplier.createdAt | date:'shortTime' }}</td>
                 <td><span class="status-badge status-pending">قيد المراجعة</span></td>
                 <td>

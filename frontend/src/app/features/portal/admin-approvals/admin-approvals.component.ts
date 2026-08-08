@@ -70,17 +70,17 @@ export class AdminApprovalsComponent implements OnInit {
     const supplier = this.selectedSupplier();
 
     if (merchant) {
-      this.adminService.approveMerchant(merchant.merchantID).subscribe({
+      this.adminService.approveMerchant(merchant.merchantId).subscribe({
         next: () => {
-          this.pendingMerchants.update((items) => items.filter((m) => m.merchantID !== merchant.merchantID));
+          this.pendingMerchants.update((items) => items.filter((m) => m.merchantId !== merchant.merchantId));
           this.closeDrawer();
         },
         error: (err) => console.error('Failed to approve merchant', err)
       });
     } else if (supplier) {
-      this.adminService.approveSupplier(supplier.supplierID).subscribe({
+      this.adminService.approveSupplier(supplier.supplierId).subscribe({
         next: () => {
-          this.pendingSuppliers.update((items) => items.filter((s) => s.supplierID !== supplier.supplierID));
+          this.pendingSuppliers.update((items) => items.filter((s) => s.supplierId !== supplier.supplierId));
           this.closeDrawer();
         },
         error: (err) => console.error('Failed to approve supplier', err)
@@ -98,17 +98,17 @@ export class AdminApprovalsComponent implements OnInit {
     }
 
     if (merchant) {
-      this.adminService.rejectMerchant(merchant.merchantID, reason).subscribe({
+      this.adminService.rejectMerchant(merchant.merchantId, reason).subscribe({
         next: () => {
-          this.pendingMerchants.update((items) => items.filter((m) => m.merchantID !== merchant.merchantID));
+          this.pendingMerchants.update((items) => items.filter((m) => m.merchantId !== merchant.merchantId));
           this.closeDrawer();
         },
         error: (err) => console.error('Failed to reject merchant', err)
       });
     } else if (supplier) {
-      this.adminService.rejectSupplier(supplier.supplierID, reason).subscribe({
+      this.adminService.rejectSupplier(supplier.supplierId, reason).subscribe({
         next: () => {
-          this.pendingSuppliers.update((items) => items.filter((s) => s.supplierID !== supplier.supplierID));
+          this.pendingSuppliers.update((items) => items.filter((s) => s.supplierId !== supplier.supplierId));
           this.closeDrawer();
         },
         error: (err) => console.error('Failed to reject supplier', err)
