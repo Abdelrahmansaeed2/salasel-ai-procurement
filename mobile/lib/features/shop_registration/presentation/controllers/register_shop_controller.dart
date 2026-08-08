@@ -40,20 +40,20 @@ class RegisterShopController extends GetxController {
   }
 
   String get displayShopName =>
-      shopNameController.text.isNotEmpty ? shopNameController.text : 'متجر الأناقة الحديثة';
-  String get displayCategory => selectedCategory.value ?? 'تجارة التجزئة';
+      shopNameController.text.isNotEmpty ? shopNameController.text : 'اسم المتجر';
+  String get displayCategory => selectedCategory.value ?? 'غير محدد';
   String get displayCrNumber =>
-      crNumberController.text.isNotEmpty ? crNumberController.text : '1010XXXX99';
+      crNumberController.text.isNotEmpty ? crNumberController.text : 'غير متوفر';
   String get displayAddress =>
-      addressController.text.isNotEmpty ? addressController.text : 'الرياض، حي الملقا';
+      addressController.text.isNotEmpty ? addressController.text : 'العنوان غير محدد';
   String get displayOwnerName =>
-      ownerNameController.text.isNotEmpty ? ownerNameController.text : 'أحمد بن فهد بن محمد';
-  String get displayOwnerId => '109XXXX882';
-  String get displayGovernorate => governorate.value ?? 'الجيزة';
-  String get displayBusinessCity => businessCity.value ?? 'مصر';
+      ownerNameController.text.isNotEmpty ? ownerNameController.text : 'اسم المالك';
+  String get displayOwnerId => 'غير متوفر';
+  String get displayGovernorate => governorate.value ?? 'غير محدد';
+  String get displayBusinessCity => businessCity.value ?? 'غير محدد';
   String get displayStoreSize => storeSize.value;
   String get displayOwnerPhone =>
-      phoneController.text.isNotEmpty ? '+966 ${phoneController.text}' : '+966 5X XXX XXXX';
+      phoneController.text.isNotEmpty ? '+966 ${phoneController.text}' : 'رقم الجوال';
 
   @override
   void onClose() {

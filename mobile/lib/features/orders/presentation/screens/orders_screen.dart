@@ -667,7 +667,9 @@ class _OrderCard extends StatelessWidget {
                   if (activeStep == 1) {
                     Get.to(() => CheckoutScreen(
                       orderId: order.orderNumber, 
-                      totalAmount: '${order.total.toStringAsFixed(0)} جنيه'
+                      totalAmount: '${order.total.toStringAsFixed(0)} جنيه',
+                      supplierName: order.supplierName,
+                      itemsSummary: order.items.isNotEmpty ? order.items[0].name : '',
                     ));
                   } else if (activeStep == 2) {
                     Get.to(() => DeliveryTrackingScreen(orderId: order.orderNumber));

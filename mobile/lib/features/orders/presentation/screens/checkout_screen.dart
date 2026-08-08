@@ -10,11 +10,15 @@ import '../controllers/checkout_controller.dart';
 class CheckoutScreen extends StatefulWidget {
   final String orderId;
   final String totalAmount;
+  final String supplierName;
+  final String itemsSummary;
 
   const CheckoutScreen({
     super.key,
-    this.orderId = '١٢٣٤٥',
-    this.totalAmount = '٧,٩٢٠ ر.س',
+    required this.orderId,
+    required this.totalAmount,
+    required this.supplierName,
+    required this.itemsSummary,
   });
 
   @override
@@ -191,8 +195,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildSummaryItem('الموردين', '٢'),
-              _buildSummaryItem('المنتجات', '١٤'),
+              _buildSummaryItem('المورد', supplierName),
+              _buildSummaryItem('المنتجات', itemsSummary.isNotEmpty ? itemsSummary.split(',').length.toString() : '١'),
             ],
           ),
         ],
@@ -253,7 +257,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'أغذية النيل',
+                      supplierName,
                       style: TextStyle(color: OrderColors.textTitle, fontSize: 15.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
                     ),
                     Text(
@@ -264,7 +268,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
               ),
               Text(
-                '٤,٥٠٠ ر.س',
+                totalAmount,
                 style: TextStyle(color: OrderColors.primary, fontSize: 15.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
               ),
             ],
@@ -299,18 +303,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'دقيق فاخر ٥٠ كجم',
+                      itemsSummary,
                       style: TextStyle(color: OrderColors.textTitle, fontSize: 14.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
                     ),
                     Text(
-                      'الكمية: ١٠',
+                      'الكمية: الإجمالي',
                       style: TextStyle(color: OrderColors.textMuted, fontSize: 11.sp, fontFamily: 'Cairo'),
                     ),
                   ],
                 ),
               ),
               Text(
-                '١,٢٠٠ ر.س',
+                totalAmount,
                 style: TextStyle(color: OrderColors.textTitle, fontSize: 14.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
               ),
             ],
@@ -451,11 +455,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           SizedBox(height: 12.h),
           Divider(color: OrderColors.divider, height: 1.h),
           SizedBox(height: 12.h),
-          _buildSummaryRow('المجموع الفرعي', '٦,٨٠٠ ر.س'),
+          _buildSummaryRow('المجموع الفرعي', totalAmount),
           SizedBox(height: 12.h),
-          _buildSummaryRow('ضريبة القيمة المضافة (١٥٪)', '١,٠٢٠ ر.س'),
+          _buildSummaryRow('ضريبة القيمة المضافة', 'شامل'),
           SizedBox(height: 12.h),
-          _buildSummaryRow('رسوم التوصيل', '١٠٠ ر.س'),
+          _buildSummaryRow('رسوم التوصيل', 'مجاني'),
           SizedBox(height: 16.h),
           Divider(color: OrderColors.divider, height: 1.h),
           SizedBox(height: 16.h),
@@ -467,7 +471,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 style: TextStyle(color: OrderColors.primary, fontSize: 16.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
               ),
               Text(
-                '٧,٩٢٠ ر.س',
+                totalAmount,
                 style: TextStyle(color: OrderColors.primary, fontSize: 16.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
               ),
             ],

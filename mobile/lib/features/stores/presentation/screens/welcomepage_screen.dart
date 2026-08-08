@@ -27,10 +27,10 @@ class StoresScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'مرحبًا أحمد',
+                Obx(() => Text(
+                  'مرحبًا ${controller.userName.value}',
                   style: AppTextStyles.welcomeTitle.copyWith(fontSize: 24.sp),
-                ),
+                )),
                 SizedBox(height: 4.h),
                 Text(
                   'اختر متجرك للمتابعة أو قم بإنشاء متجر جديد.',
@@ -53,36 +53,36 @@ class StoresScreen extends StatelessWidget {
                         color: Color(0xFFEFF6FF),
                         borderRadius: BorderRadius.circular(20.r),
                       ),
-                      child: Text(
-                        '2 متاجر',
+                      child: Obx(() => Text(
+                        '${controller.shops.length} متاجر',
                         style: AppTextStyles.fieldValue.copyWith(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF2563EB),
                         ),
-                      ),
+                      )),
                     ),
                   ],
                 ),
                 SizedBox(height: 16.h),
-                const _StoreCard(
-                  title: 'بقالة أحمد',
-                  category: 'مواد غذائية',
-                  location: 'القاهرة',
-                  lastActive: 'منذ ساعتين',
-                  isActive: true,
-                  icon: Icons.storefront_outlined,
-                ),
-                SizedBox(height: 16.h),
-                const _StoreCard(
-                  title: 'مخبوزات الصباح',
-                  category: 'مطاعم ومقاهي',
-                  location: 'الإسكندرية',
-                  lastActive: 'يوم أمس',
-                  isActive: true,
-                  icon: Icons.restaurant_menu_outlined,
-                ),
-                SizedBox(height: 16.h),
+                Obx(() {
+                  if (controller.isLoading.value) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  return Column(
+                    children: controller.shops.map((shop) => Padding(
+                      padding: EdgeInsets.only(bottom: 16.h),
+                      child: _StoreCard(
+                        title: shop.name,
+                        category: shop.category,
+                        location: shop.city,
+                        lastActive: 'منذ التسجيل',
+                        isActive: shop.isVerified,
+                        icon: Icons.storefront_outlined,
+                      ),
+                    )).toList(),
+                  );
+                }),
                 const _AddStoreCard(),
                 SizedBox(height: 32.h),
               ],
