@@ -3,6 +3,7 @@ class AiOrderResponse {
   final double totalOrderCost;
   final List<AiOrderSplit> splits;
   final List<String> unresolved;
+  final List<RiskAlertModel> riskAlerts;
   final String? sessionId;
 
   AiOrderResponse({
@@ -10,6 +11,7 @@ class AiOrderResponse {
     required this.totalOrderCost,
     required this.splits,
     required this.unresolved,
+    this.riskAlerts = const [],
     this.sessionId,
   });
 
@@ -25,6 +27,10 @@ class AiOrderResponse {
               ?.map((e) => e.toString())
               .toList() ??
           [],
+      riskAlerts: (json['risk_alerts'] as List<dynamic>?)
+              ?.map((e) => RiskAlertModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       sessionId: json['session_id'],
     );
   }
@@ -35,7 +41,36 @@ class AiOrderResponse {
       'total_order_cost': totalOrderCost,
       'splits': splits.map((e) => e.toJson()).toList(),
       'unresolved': unresolved,
+      'risk_alerts': riskAlerts.map((e) => e.toJson()).toList(),
       'session_id': sessionId,
+    };
+  }
+}
+
+class RiskAlertModel {
+  final String title;
+  final String subtitle;
+  final String level;
+
+  RiskAlertModel({
+    required this.title,
+    required this.subtitle,
+    required this.level,
+  });
+
+  factory RiskAlertModel.fromJson(Map<String, dynamic> json) {
+    return RiskAlertModel(
+      title: json['title'] ?? '',
+      subtitle: json['subtitle'] ?? '',
+      level: json['level'] ?? 'safe',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'subtitle': subtitle,
+      'level': level,
     };
   }
 }
@@ -96,7 +131,7 @@ class AiOrderItem {
 
   factory AiOrderItem.fromJson(Map<String, dynamic> json) {
     return AiOrderItem(
-      productId: json['product_id'] ?? '',
+      productId: json['product_id']?.toString() ?? '',
       name: json['name'] ?? '',
       category: json['category'] ?? '',
       quantity: json['quantity'] ?? 1,

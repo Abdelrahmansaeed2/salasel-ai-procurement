@@ -17,6 +17,7 @@ class OrderReviewController extends GetxController {
     for (final split in response.splits) {
       for (final item in split.items) {
         products.add(ExtractedProduct(
+          productId: int.tryParse(item.productId),
           name: item.name,
           quantity: item.quantity,
           unitLabel: item.unit,
@@ -25,14 +26,26 @@ class OrderReviewController extends GetxController {
       }
     }
     
-    // Setup some generic risk alerts for now since it's an AI-chosen supplier
-    riskAlerts.value = [
-      RiskAlert(
-        title: 'لا تهديدات موجودة',
-        subtitle: 'المورد الذي اقترحه الذكاء الاصطناعي موثوق',
-        level: RiskAlertLevel.safe,
-      ),
-    ];
+    // Map dynamic risk alerts from backend
+    if (response.riskAlerts.isNotEmpty) {
+      riskAlerts.value = response.riskAlerts.map((ra) {
+        RiskAlertLevel level;
+        if (ra.level.toLowerCase() == 'warning') {
+          level = RiskAlertLevel.warning;
+        } else if (ra.level.toLowerCase() == 'danger') {
+          level = RiskAlertLevel.danger;
+        } else {
+          level = RiskAlertLevel.safe;
+        }
+        return RiskAlert(
+          title: ra.title,
+          subtitle: ra.subtitle,
+          level: level,
+        );
+      }).toList();
+    } else {
+      riskAlerts.value = [];
+    }
   }
 
   double get totalAmount =>
@@ -67,7 +80,7 @@ class OrderReviewController extends GetxController {
         'merchantId': int.tryParse(currentResponse!.merchantId) ?? 1,
         'expectedDeliveryDate': DateTime.now().add(Duration(days: 1)).toIso8601String(),
         'items': products.map((p) => {
-          'productId': 1, // Fallback since we only have names
+          'productId': p.productId ?? 1, // Use actual retrieved productId, fallback to 1 only if null
           'quantity': p.quantity,
           'targetPrice': p.unitPrice,
         }).toList(),

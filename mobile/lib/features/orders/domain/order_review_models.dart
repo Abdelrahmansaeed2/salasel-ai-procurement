@@ -1,4 +1,5 @@
 class ExtractedProduct {
+  final int? productId;
   final String name;
   final int quantity;
   final String unitLabel;
@@ -6,6 +7,7 @@ class ExtractedProduct {
   final String? note;
 
   ExtractedProduct({
+    this.productId,
     required this.name,
     required this.quantity,
     required this.unitLabel,
@@ -15,12 +17,21 @@ class ExtractedProduct {
 
   double get total => quantity * unitPrice;
 
-  ExtractedProduct copyWith({int? quantity}) => ExtractedProduct(
-        name: name,
+  ExtractedProduct copyWith({
+    int? productId,
+    String? name,
+    int? quantity,
+    String? unitLabel,
+    double? unitPrice,
+    String? note,
+  }) =>
+      ExtractedProduct(
+        productId: productId ?? this.productId,
+        name: name ?? this.name,
         quantity: quantity ?? this.quantity,
-        unitLabel: unitLabel,
-        unitPrice: unitPrice,
-        note: note,
+        unitLabel: unitLabel ?? this.unitLabel,
+        unitPrice: unitPrice ?? this.unitPrice,
+        note: note ?? this.note,
       );
 }
 

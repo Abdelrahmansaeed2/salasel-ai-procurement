@@ -6,7 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from app.agents.order.state import ExtractedOrders, OrderLine, OrderState, ProductMatch
 from app.core.config import get_settings
 from app.core.llm import get_llm
-from app.schemas.order import OrderResponse, OrderSplit
+from app.schemas.order import OrderResponse, OrderSplit, OrderItem
 from app.services.embedding_service import embed_sync
 from app.services.ranking_service import blend_and_rank
 from app.services.vector_store import search as vector_search
@@ -175,27 +175,65 @@ def match_best_node(state: OrderState) -> dict:
 
 
 def generate_order_node(state: OrderState) -> dict:
-    splits: list[OrderSplit] = []
+    from collections import defaultdict
+    
+    supplier_items = defaultdict(list)
     unresolved: list[str] = []
     total = 0.0
+    
     for line in state["lines"]:
         best = line.matched
         if best is None or line.error:
             unresolved.append(line.product_name)
             continue
+        
         qty = max(int(line.resolved_quantity or 1), 1)
-        splits.append(OrderSplit(
-            supplier_id=best.supplier_id,
-            sku=best.sku,
-            quantity_ordered=qty,
-            sub_total_cost=round(line.subtotal, 2),
-        ))
+        unit_label = best.attributes.get("unit", "piece") if best.attributes else "piece"
+        
+        item = OrderItem(
+            product_id=best.product_id,
+            name=line.product_name,
+            category=best.category or line.category or "",
+            quantity=qty,
+            unit=unit_label,
+            unit_price=round(best.unit_price, 2),
+            sub_total=round(line.subtotal, 2)
+        )
+        
+        supplier_items[best.supplier_id].append(item)
         total += line.subtotal
+
+    splits: list[OrderSplit] = []
+    for supplier_id, items in supplier_items.items():
+        sub_total_cost = sum(item.sub_total for item in items)
+        splits.append(OrderSplit(
+            supplier_id=supplier_id,
+            items=items,
+            sub_total_cost=round(sub_total_cost, 2),
+            delivery_time_days=1  # Default logic
+        ))
+        
+    # Generate generic risk alerts for now based on resolution
+    risk_alerts = []
+    if not unresolved:
+        risk_alerts.append({
+            "title": "لا تهديدات موجودة",
+            "subtitle": "المورد الذي اقترحه الذكاء الاصطناعي موثوق ومخزونه متوفر",
+            "level": "safe"
+        })
+    else:
+        risk_alerts.append({
+            "title": "انتباه",
+            "subtitle": "بعض المنتجات غير متوفرة في الكتالوج الحالي",
+            "level": "warning"
+        })
+
     order = OrderResponse(
         merchant_id=state["merchant_id"],
         total_order_cost=round(total, 2),
         splits=splits,
         unresolved=unresolved,
+        risk_alerts=risk_alerts,
     )
     logger.info("order generated splits=%d unresolved=%d", len(splits), len(unresolved))
     return {"order": order}
