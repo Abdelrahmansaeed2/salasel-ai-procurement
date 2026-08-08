@@ -44,16 +44,58 @@ public class DemoSeederService : IDemoSeederService
             {
                 MerchantId = merchantId,
                 TotalAmount = 178.00m,
-                Status = ApprovalStatus.Manually_Approved, // Or appropriate status
+                Status = ApprovalStatus.Manually_Approved,
                 OrderDate = DateTime.UtcNow.AddHours(-2),
                 SubOrders = new List<SubOrder>
                 {
                     new SubOrder { SupplierId = sProfile1.SupplierID, ProductId = pSugar.Id, Quantity = 20, SubTotalAmount = 110.00m, Status = FulfillmentStatus.Bidding },
                     new SubOrder { SupplierId = sProfile1.SupplierID, ProductId = pFlour.Id, Quantity = 15, SubTotalAmount = 48.00m, Status = FulfillmentStatus.Accepted, AcceptedAt = DateTime.UtcNow.AddMinutes(-30) },
-                    new SubOrder { SupplierId = sProfile2.SupplierID, ProductId = pMilk.Id, Quantity = 5, SubTotalAmount = 20.00m, Status = FulfillmentStatus.Shipped, AcceptedAt = DateTime.UtcNow.AddHours(-1), ShippedAt = DateTime.UtcNow.AddMinutes(-10) }
+                    new SubOrder { 
+                        SupplierId = sProfile2.SupplierID, 
+                        ProductId = pMilk.Id, Quantity = 5, SubTotalAmount = 20.00m, 
+                        Status = FulfillmentStatus.Shipped, 
+                        AcceptedAt = DateTime.UtcNow.AddHours(-1), 
+                        ShippedAt = DateTime.UtcNow.AddMinutes(-10),
+                        DriverName = "Ahmed Ali",
+                        DriverPhone = "+201234567890"
+                    }
                 }
             };
-            _db.MasterOrders.Add(activeOrder);
+
+            var completedOrder = new MasterOrder
+            {
+                MerchantId = merchantId,
+                TotalAmount = 450.00m,
+                Status = ApprovalStatus.Completed,
+                OrderDate = DateTime.UtcNow.AddDays(-3),
+                PaidAt = DateTime.UtcNow.AddDays(-2),
+                PaymentStatus = PaymentStatus.Paid,
+                PaymentMethod = PaymentMethod.CreditCard,
+                SubOrders = new List<SubOrder>
+                {
+                    new SubOrder { 
+                        SupplierId = sProfile1.SupplierID, ProductId = pSugar.Id, Quantity = 50, SubTotalAmount = 450.00m, 
+                        Status = FulfillmentStatus.ReceiptConfirmed, 
+                        AcceptedAt = DateTime.UtcNow.AddDays(-3).AddHours(1),
+                        ShippedAt = DateTime.UtcNow.AddDays(-2),
+                        DeliveredAt = DateTime.UtcNow.AddDays(-2).AddHours(5),
+                        ReceiptConfirmedAt = DateTime.UtcNow.AddDays(-2).AddHours(6),
+                        DriverName = "Mahmoud Hassan",
+                        DriverPhone = "+201098765432"
+                    }
+                }
+            };
+
+            var draftOrder = new MasterOrder
+            {
+                MerchantId = merchantId,
+                TotalAmount = 0m,
+                Status = ApprovalStatus.AI_Draft,
+                OrderDate = DateTime.UtcNow.AddMinutes(-5),
+                Source = OrderSource.Voice
+            };
+
+            _db.MasterOrders.AddRange(activeOrder, completedOrder, draftOrder);
             await _db.SaveChangesAsync();
 
             // Seed Bids for the active bidding order
@@ -67,6 +109,18 @@ public class DemoSeederService : IDemoSeederService
                 });
                 await _db.SaveChangesAsync();
             }
+        }
+
+        // 2b. Seed Merchant Inventory (Low stock for dashboard)
+        if (!await _db.MerchantInventories.AnyAsync(i => i.MerchantID == merchantId))
+        {
+            _db.MerchantInventories.AddRange(new List<MerchantInventory>
+            {
+                new MerchantInventory { MerchantID = merchantId, ProductId = pSugar.Id, CurrentQty = 100, ReorderThreshold = 20, LastUpdated = DateTime.UtcNow },
+                new MerchantInventory { MerchantID = merchantId, ProductId = pFlour.Id, CurrentQty = 5, ReorderThreshold = 10, LastUpdated = DateTime.UtcNow }, // Low stock!
+                new MerchantInventory { MerchantID = merchantId, ProductId = pMilk.Id, CurrentQty = 0, ReorderThreshold = 5, LastUpdated = DateTime.UtcNow }  // Out of stock!
+            });
+            await _db.SaveChangesAsync();
         }
 
         // 3. Seed Voice Procurement Logs & AI Processing for Analytics
