@@ -165,7 +165,7 @@ class AiClarificationController extends GetxController {
     
     if (currentResponse?.sessionId == null) return;
 
-    isProcessing = true;
+    isProcessing = true; 
     messages.add(ConfirmationEntry(text)); // show user message
     
     try {

@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Salasel.Application.DTOs;
 using Salasel.Application.Interfaces;
@@ -86,7 +86,9 @@ public class MerchantDashboardService : IMerchantDashboardService
             Id = order.Id,
             Supplier = supplier,
             Status = MapStatusLabel(order.Status),
-            ItemsSummary = BuildItemsSummary(order)
+            ItemsSummary = BuildItemsSummary(order),
+            OrderDate = order.OrderDate,
+            TotalAmount = (double)order.TotalAmount
         };
     }
 

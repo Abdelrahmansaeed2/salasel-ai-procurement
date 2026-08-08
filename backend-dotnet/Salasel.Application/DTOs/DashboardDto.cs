@@ -1,4 +1,4 @@
-﻿namespace Salasel.Application.DTOs;
+namespace Salasel.Application.DTOs;
 
 // GET /api/v1/merchants/me/dashboard
 public class MerchantDashboardDto
@@ -24,6 +24,9 @@ public class RecentOrderDto
     // Best-effort "ProductName × Qty, ProductName × Qty" built from the
     // order's SubOrders (each now carries a ProductId — see SubOrder.cs).
     public string ItemsSummary { get; set; } = string.Empty;
+
+    public DateTime OrderDate { get; set; }
+    public double TotalAmount { get; set; }
 }
 
 // GET /api/v1/orders/summary?merchantId=

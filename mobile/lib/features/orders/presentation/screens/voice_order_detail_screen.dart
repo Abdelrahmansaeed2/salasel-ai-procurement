@@ -435,7 +435,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
           ),
           SizedBox(height: 16.h),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: _AiStatCard(label: 'اللغة', value: 'عربي مصري'),
