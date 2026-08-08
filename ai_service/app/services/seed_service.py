@@ -16,7 +16,7 @@ DEFAULT_VECTOR_SIZE = 384
 SEED_PRODUCTS = [
     ProductUpsert(
         product_id=1,
-        supplier_id=1,
+        supplier_id=3,
         product_name="Sugar 1kg",
         sku="SUG-1KG",
         category="Food",
@@ -29,7 +29,7 @@ SEED_PRODUCTS = [
     ),
     ProductUpsert(
         product_id=2,
-        supplier_id=1,
+        supplier_id=3,
         product_name="Flour 1kg",
         sku="FLR-1KG",
         category="Food",
@@ -42,7 +42,7 @@ SEED_PRODUCTS = [
     ),
     ProductUpsert(
         product_id=3,
-        supplier_id=2,
+        supplier_id=4,
         product_name="Coffee Beans 500g",
         sku="COF-500G",
         category="Beverages",
@@ -55,7 +55,7 @@ SEED_PRODUCTS = [
     ),
     ProductUpsert(
         product_id=4,
-        supplier_id=2,
+        supplier_id=4,
         product_name="Milk 1L",
         sku="MLK-1L",
         category="Dairy",
@@ -70,14 +70,14 @@ SEED_PRODUCTS = [
 
 SEED_SUPPLIER_METRICS = [
     SupplierQualityMetrics(
-        supplier_id=1,
+        supplier_id=3,
         review_count=48,
         average_rating=4.4,
         on_time_delivery_rate=0.93,
         defect_rate=0.02,
     ),
     SupplierQualityMetrics(
-        supplier_id=2,
+        supplier_id=4,
         review_count=36,
         average_rating=4.1,
         on_time_delivery_rate=0.89,
