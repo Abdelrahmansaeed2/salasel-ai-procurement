@@ -30,14 +30,22 @@ export class AdminApprovalsComponent implements OnInit {
   }
 
   loadMerchants() {
-    this.adminService.getPendingMerchants().pipe(take(1)).subscribe((merchants) => {
-      this.pendingMerchants.set(merchants);
+    this.adminService.getPendingMerchants().pipe(take(1)).subscribe({
+      next: (merchants) => {
+        console.log('Loaded merchants:', merchants);
+        this.pendingMerchants.set(merchants);
+      },
+      error: (err) => console.error('Error loading merchants:', err)
     });
   }
 
   loadSuppliers() {
-    this.adminService.getPendingSuppliers().pipe(take(1)).subscribe((suppliers) => {
-      this.pendingSuppliers.set(suppliers);
+    this.adminService.getPendingSuppliers().pipe(take(1)).subscribe({
+      next: (suppliers) => {
+        console.log('Loaded suppliers:', suppliers);
+        this.pendingSuppliers.set(suppliers);
+      },
+      error: (err) => console.error('Error loading suppliers:', err)
     });
   }
 
