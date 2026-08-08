@@ -49,8 +49,8 @@ SEED_PRODUCTS = [
         description="Premium roasted coffee beans 500g.",
         attributes={"unit": "bag"},
         price=25.00,
-        lat=21.4858,
-        lon=39.1925,
+        lat=24.7136,
+        lon=46.6753,
         in_stock=True,
     ),
     ProductUpsert(
@@ -62,8 +62,8 @@ SEED_PRODUCTS = [
         description="Fresh whole milk 1L carton (كرتونة لبن).",
         attributes={"unit": "bottle", "packaging": "carton"},
         price=4.00,
-        lat=21.4858,
-        lon=39.1925,
+        lat=24.7136,
+        lon=46.6753,
         in_stock=True,
     ),
 ]

@@ -6,6 +6,8 @@ def cosine_sim(a, b):
 
 model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
 vec1 = list(model.embed(["لبن packaging: كرتونه"]))[0]
-vec2 = list(model.embed(["Milk 1L MLK-1L Dairy Fresh whole milk 1L carton (كرتونة لبن). unit: bottle packaging: carton"]))[0]
+vec2 = list(model.embed(["Sugar 1kg SUG-1KG Food Fine white sugar 1kg bag. unit: kg"]))[0]
+vec3 = list(model.embed(["Milk 1L MLK-1L Dairy Fresh whole milk 1L carton (كرتونة لبن). unit: bottle packaging: carton"]))[0]
 
-print("Sim:", cosine_sim(vec1, vec2))
+print("Sim Sugar:", cosine_sim(vec1, vec2))
+print("Sim Milk:", cosine_sim(vec1, vec3))
