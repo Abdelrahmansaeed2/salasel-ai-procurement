@@ -900,10 +900,10 @@ class _ProductItemCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 8.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
             children: [
-              Row(
+              Wrap(
                 children: [
                   Text(
                     product.requestedQuantity,
@@ -927,7 +927,7 @@ class _ProductItemCard extends StatelessWidget {
                   ),
                 ],
               ),
-              Row(
+              Wrap(
                 children: [
                   Text(
                     product.detectedQuantity,

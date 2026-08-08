@@ -664,19 +664,18 @@ class _OrderCard extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  if (activeStep == 1) {
+                  if (activeStep == 0 || activeStep == 3) {
+                    Get.to(() => VoiceOrderDetailScreen(
+                      orderNumber: '#${order.orderNumber}',
+                    ));
+                  } else if (activeStep == 1) {
                     Get.to(() => CheckoutScreen(
-                      orderId: order.orderNumber, 
                       totalAmount: '${order.total.toStringAsFixed(0)} جنيه',
                       supplierName: order.supplierName,
                       itemsSummary: order.items.isNotEmpty ? order.items[0].name : '',
                     ));
                   } else if (activeStep == 2) {
                     Get.to(() => DeliveryTrackingScreen(orderId: order.orderNumber));
-                  } else if (activeStep == 3) {
-                    Get.to(() => VoiceOrderDetailScreen(
-                      orderNumber: '#${order.orderNumber}',
-                    ));
                   }
                 },
                 style: ElevatedButton.styleFrom(
