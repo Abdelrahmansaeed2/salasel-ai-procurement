@@ -21,17 +21,20 @@ public class AuthService : IAuthService
     private readonly IMerchantProfileRepository _merchantRepository;
     private readonly ISupplierProfileRepository _supplierRepository;
     private readonly IConfiguration _configuration;
+    private readonly IDemoSeederService _demoSeederService;
 
     public AuthService(
         IUserRepository userRepository,
         IMerchantProfileRepository merchantRepository,
         ISupplierProfileRepository supplierRepository,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IDemoSeederService demoSeederService)
     {
         _userRepository = userRepository;
         _merchantRepository = merchantRepository;
         _supplierRepository = supplierRepository;
         _configuration = configuration;
+        _demoSeederService = demoSeederService;
     }
 
     public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request)
@@ -57,9 +60,11 @@ public class AuthService : IAuthService
         await _userRepository.AddAsync(user);
         await _userRepository.SaveChangesAsync();
 
+        MerchantsProfile? merchantProfile = null;
+
         if (user.Role == UserRole.Merchant)
         {
-            await _merchantRepository.AddAsync(new MerchantsProfile
+            merchantProfile = new MerchantsProfile
             {
                 OwnerUserId = user.UserID,
                 ShopName = $"{user.FullName}'s Store",
@@ -67,7 +72,8 @@ public class AuthService : IAuthService
                 LocationLng = 0m,
                 ContactPhone = "N/A",
                 IsVerified = false
-            });
+            };
+            await _merchantRepository.AddAsync(merchantProfile);
         }
         else if (user.Role == UserRole.Supplier)
         {
@@ -82,6 +88,12 @@ public class AuthService : IAuthService
         }
 
         await _userRepository.SaveChangesAsync();
+
+        if (user.Role == UserRole.Merchant && merchantProfile != null)
+        {
+            // Inject demo data for video recording purposes
+            await _demoSeederService.SeedMerchantDemoDataAsync(user.UserID, merchantProfile.MerchantID);
+        }
 
         return BuildAuthResponse(user);
     }

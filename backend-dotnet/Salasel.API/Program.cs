@@ -111,6 +111,7 @@ builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddScoped<IBiddingService, BiddingService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IDemoSeederService, DemoSeederService>();
 
 // Voice order pipeline (SignalR + background AI worker)
 builder.Services.AddSingleton<IBackgroundQueue, BackgroundQueue>();
