@@ -63,9 +63,9 @@ public class OrderExecutionService : IOrderExecutionService
 
         foreach (var splitDto in request.Splits)
         {
-            var product = await _productRepository.SingleOrDefaultAsync(p => p.SKU == splitDto.SKU);
+            var product = await _productRepository.SingleOrDefaultAsync(p => p.Id == splitDto.ProductId);
             if (product == null)
-                throw new InvalidOperationException($"No product found for SKU '{splitDto.SKU}'.");
+                throw new InvalidOperationException($"No product found for ID '{splitDto.ProductId}'.");
 
             order.SubOrders.Add(new SubOrder
             {

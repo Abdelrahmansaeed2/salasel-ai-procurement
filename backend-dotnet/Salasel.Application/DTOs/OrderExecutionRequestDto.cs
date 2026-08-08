@@ -11,7 +11,7 @@ public class OrderExecutionRequestDto
 public class SubOrderDto
 {
     public int SupplierID { get; set; }
-    public string SKU { get; set; } = string.Empty;
+    public int ProductId { get; set; }
     public int QuantityOrdered { get; set; }
     public decimal SubTotalCost { get; set; }
 }

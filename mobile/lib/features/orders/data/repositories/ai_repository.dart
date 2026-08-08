@@ -69,14 +69,14 @@ class AiRepository {
     final position = await getCurrentLocation();
     
     final payload = {
-      'session_id': sessionId,
-      'message': message,
-      'customer_location': position != null ? [position.latitude, position.longitude] : null,
+      'transcript': message,
+      'lat': position?.latitude,
+      'lon': position?.longitude,
     };
 
     try {
       final response = await _apiClient.dio.post(
-        '/ai/chat',
+        '/ai/order/$merchantId',
         data: payload,
       );
 

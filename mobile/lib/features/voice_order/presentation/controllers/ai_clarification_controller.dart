@@ -169,10 +169,11 @@ class AiClarificationController extends GetxController {
     messages.add(ConfirmationEntry(text)); // show user message
     
     try {
+      final combinedTranscript = "الطلب الأصلي للعميل كان: ${currentResponse!.transcript ?? ''}\nالعميل يوضح أو يضيف الآن: $text";
       final newResponse = await _aiRepository.sendChatMessage(
-        currentResponse!.sessionId!,
-        text,
-        1, // fallback merchant ID, assuming AI service handles the session
+        currentResponse!.sessionId ?? '',
+        combinedTranscript,
+        int.tryParse(currentResponse!.merchantId) ?? 1, 
       );
       currentResponse = newResponse;
       _buildUiFromResponse(newResponse);

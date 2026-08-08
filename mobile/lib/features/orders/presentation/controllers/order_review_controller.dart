@@ -102,20 +102,31 @@ class OrderReviewController extends GetxController {
     try {
       final ApiClient apiClient = ApiClient();
       
-      // Submit the RFQ (this creates the draft/RFQ in the real backend)
-      // Map the current modified products back into the payload
-      // For now we will just submit a standard RFQ structure or assume the AI handles the draft
+      // Submit the Order (this creates the AI_Draft in the real backend)
       final payload = {
         'merchantId': int.tryParse(currentResponse!.merchantId) ?? 1,
-        'expectedDeliveryDate': DateTime.now().add(Duration(days: 1)).toIso8601String(),
-        'items': products.map((p) => {
-          'productId': p.productId ?? 1, // Use actual retrieved productId, fallback to 1 only if null
-          'quantity': p.quantity,
-          'targetPrice': p.unitPrice,
-        }).toList(),
+        'voiceLogId': null,
+        'totalOrderCost': currentResponse!.totalOrderCost,
+        'splits': [
+          {
+            'supplierId': int.tryParse(currentResponse!.splits.first.supplierId) ?? 0,
+            'productId': products.first.productId ?? 1,
+            'quantityOrdered': products.first.quantity,
+            'subTotalCost': products.first.total,
+          }
+        ],
       };
+      // Map all products to splits correctly for the demo
+      if (products.length > 1) {
+        payload['splits'] = products.map((p) => {
+          'supplierId': int.tryParse(currentResponse!.splits.first.supplierId) ?? 0, // Fallback to first supplier
+          'productId': p.productId ?? 1,
+          'quantityOrdered': p.quantity,
+          'subTotalCost': p.total,
+        }).toList();
+      }
 
-      final response = await apiClient.dio.post('/orders/rfqs', data: payload);
+      final response = await apiClient.dio.post('/orders/execute', data: payload);
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
       Get.snackbar('خطأ', 'فشل في تأكيد الطلب.');

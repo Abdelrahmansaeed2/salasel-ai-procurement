@@ -66,6 +66,32 @@ SEED_PRODUCTS = [
         lon=46.6753,
         in_stock=True,
     ),
+    ProductUpsert(
+        product_id=5,
+        supplier_id=3,
+        product_name="Egyptian Rice 5kg",
+        sku="RCE-5KG",
+        category="Food",
+        description="Premium Egyptian Rice 5kg bag (أرز مصري).",
+        attributes={"unit": "bag"},
+        price=12.50,
+        lat=24.7136,
+        lon=46.6753,
+        in_stock=True,
+    ),
+    ProductUpsert(
+        product_id=6,
+        supplier_id=4,
+        product_name="Sunflower Oil 1L",
+        sku="OIL-1L",
+        category="Food",
+        description="Pure sunflower oil 1L bottle (زيت عباد الشمس).",
+        attributes={"unit": "bottle"},
+        price=8.00,
+        lat=24.7136,
+        lon=46.6753,
+        in_stock=True,
+    ),
 ]
 
 SEED_SUPPLIER_METRICS = [

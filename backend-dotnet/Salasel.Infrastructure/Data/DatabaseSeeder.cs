@@ -99,6 +99,13 @@ public static class DatabaseSeeder
 
         var pMilk = await db.Products.FirstOrDefaultAsync(p => p.SKU == "MLK-1L");
         if (pMilk == null) { pMilk = new Product { CategoryId = catDairy.Id, Name = "Milk 1L", SKU = "MLK-1L", Unit = "bottle", IsActive = true }; db.Products.Add(pMilk); }
+
+        var pRice = await db.Products.FirstOrDefaultAsync(p => p.SKU == "RCE-5KG");
+        if (pRice == null) { pRice = new Product { CategoryId = catFood.Id, Name = "Egyptian Rice 5kg", SKU = "RCE-5KG", Unit = "bag", IsActive = true }; db.Products.Add(pRice); }
+
+        var pOil = await db.Products.FirstOrDefaultAsync(p => p.SKU == "OIL-1L");
+        if (pOil == null) { pOil = new Product { CategoryId = catFood.Id, Name = "Sunflower Oil 1L", SKU = "OIL-1L", Unit = "bottle", IsActive = true }; db.Products.Add(pOil); }
+
         await db.SaveChangesAsync();
 
         // Seed Products for Suppliers
@@ -108,8 +115,10 @@ public static class DatabaseSeeder
             {
                 new SupplierProduct { SupplierId = sProfile1.SupplierID, ProductId = pSugar.Id, UnitPrice = 5.50m, AvailableQty = 1000, MinOrderQty = 10, LeadTimeDays = 1, IsActive = true },
                 new SupplierProduct { SupplierId = sProfile1.SupplierID, ProductId = pFlour.Id, UnitPrice = 3.20m, AvailableQty = 800, MinOrderQty = 10, LeadTimeDays = 1, IsActive = true },
+                new SupplierProduct { SupplierId = sProfile1.SupplierID, ProductId = pRice.Id, UnitPrice = 12.50m, AvailableQty = 500, MinOrderQty = 5, LeadTimeDays = 1, IsActive = true },
                 new SupplierProduct { SupplierId = sProfile2.SupplierID, ProductId = pCoffee.Id, UnitPrice = 25.00m, AvailableQty = 200, MinOrderQty = 5, LeadTimeDays = 2, IsActive = true },
                 new SupplierProduct { SupplierId = sProfile2.SupplierID, ProductId = pMilk.Id, UnitPrice = 4.00m, AvailableQty = 500, MinOrderQty = 20, LeadTimeDays = 1, IsActive = true },
+                new SupplierProduct { SupplierId = sProfile2.SupplierID, ProductId = pOil.Id, UnitPrice = 8.00m, AvailableQty = 600, MinOrderQty = 10, LeadTimeDays = 1, IsActive = true },
             });
             await db.SaveChangesAsync();
         }
