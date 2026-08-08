@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth.service';
 
 import { RegistrationHeaderComponent } from './components/registration-header/registration-header.component';
 import { RegistrationStepperComponent } from './components/registration-stepper/registration-stepper.component';
@@ -56,9 +57,10 @@ export class SupplierRegistration {
     'سيتم مطابقة المعلومات المقدمة هنا مع السجلات التجارية المحلية. تأكد من أن الاسم يطابق رخصتك التجارية تماماً لتجنب التأخير في التحقق.'
   );
 
-  private registrationData: any = {};
+  registrationData: any = {};
 
   private router = inject(Router);
+  private auth = inject(AuthService);
   private supplierService = inject(SupplierService);
 
   nextStep(formData?: any): void {
@@ -89,66 +91,85 @@ export class SupplierRegistration {
 
   onSaveAndExit(): void {
     console.log('Save and Exit clicked. Current data:', this.registrationData);
-    alert('تم حفظ تقدمك بنجاح. سنقوم بإعادتك إلى لوحة التحكم.');
-    this.router.navigate(['/dashboard']);
+    alert('تم حفظ تقدمك بنجاح. سنقوم بإعادتك إلى الصفحة الرئيسية.');
+    this.router.navigate(['/']);
   }
 
   onFinish(): void {
     if (this.isSubmitting()) return;
     this.isSubmitting.set(true);
 
+    const email = this.registrationData.email || `supplier_${Date.now()}@example.com`;
+    const fullName = this.registrationData.fullName || 'New Supplier';
+    
     const dto: SupplierSetupDto = {
       facilityInfo: {
-        legalName: this.registrationData.facilityInfo?.legalName || '',
-        businessType: this.registrationData.facilityInfo?.businessType || '',
-        registrationNumber: this.registrationData.facilityInfo?.registrationNumber || '',
-        address: this.registrationData.facilityInfo?.address || ''
+        legalName: this.registrationData.legalName || '',
+        businessType: this.registrationData.businessType || '',
+        registrationNumber: this.registrationData.registrationNumber || '',
+        address: this.registrationData.address || ''
       },
       contactInfo: {
-        fullName: this.registrationData.contactInfo?.fullName || '',
-        jobTitle: this.registrationData.contactInfo?.jobTitle || '',
-        email: this.registrationData.contactInfo?.email || '',
-        phoneNumber: this.registrationData.contactInfo?.phoneNumber || ''
+        fullName: fullName,
+        jobTitle: this.registrationData.jobTitle || '',
+        email: email,
+        phoneNumber: this.registrationData.phoneNumber || ''
       },
       taxInfo: {
-        vatNumber: this.registrationData.taxInfo?.vatNumber || '',
-        taxId: this.registrationData.taxInfo?.taxId || '',
-        isVatExempt: this.registrationData.taxInfo?.isVatExempt || false
+        vatNumber: this.registrationData.vatNumber || '',
+        taxId: this.registrationData.taxId || '',
+        isVatExempt: this.registrationData.isVatExempt || false
       },
       warehouses: [
         {
-          warehouseName: this.registrationData.warehouseInfo?.warehouseName || '',
-          capacity: this.registrationData.warehouseInfo?.capacity || '',
-          lat: this.registrationData.warehouseInfo?.lat || 24.7136,
-          lng: this.registrationData.warehouseInfo?.lng || 46.6753,
-          city: this.registrationData.warehouseInfo?.city || ''
+          warehouseName: this.registrationData.warehouseName || '',
+          capacity: this.registrationData.capacity ? this.registrationData.capacity.toString() : '',
+          lat: this.registrationData.coordinates?.lat || 24.7136,
+          lng: this.registrationData.coordinates?.lng || 46.6753,
+          city: this.registrationData.city || 'الرياض'
         }
       ]
     };
 
+    if (this.auth.isAuthenticated()) {
+      this.submitSupplierProfile(dto);
+    } else {
+      // 1. Create Auth Account
+      this.auth.register({
+        fullName: fullName,
+        email: email,
+        password: 'Password123!',
+        role: 1
+      }).subscribe({
+        next: () => {
+          // 2. Submit Supplier Profile Details
+          this.submitSupplierProfile(dto);
+        },
+        error: (err) => {
+          this.isSubmitting.set(false);
+          alert('حدث خطأ أثناء إنشاء الحساب. قد يكون البريد الإلكتروني مستخدماً مسبقاً.');
+          console.error(err);
+        }
+      });
+    }
+  }
+
+  private submitSupplierProfile(dto: SupplierSetupDto): void {
     this.supplierService.registerSupplier(dto).subscribe({
       next: () => {
         const filesToUpload: File[] = [];
 
         // Collect files from license step
-        if (this.registrationData.licenseInfo?.tradeLicense?.rawFile) {
-          filesToUpload.push(this.registrationData.licenseInfo.tradeLicense.rawFile);
+        if (this.registrationData.files && this.registrationData.files.length > 0) {
+          filesToUpload.push(this.registrationData.files[0].rawFile);
         }
 
         // Collect files from tax step
-        if (this.registrationData.taxInfo?.taxCertificate?.rawFile) {
-          filesToUpload.push(this.registrationData.taxInfo.taxCertificate.rawFile);
+        if (this.registrationData.taxCertificate?.rawFile) {
+          filesToUpload.push(this.registrationData.taxCertificate.rawFile);
         }
 
-        // Collect files from additional documents step
-        if (this.registrationData.documents) {
-          const docs = this.registrationData.documents;
-          if (docs.bankStatement?.rawFile) filesToUpload.push(docs.bankStatement.rawFile);
-          if (docs.articleOfAssociation?.rawFile) filesToUpload.push(docs.articleOfAssociation.rawFile);
-          if (docs.managerId?.rawFile) filesToUpload.push(docs.managerId.rawFile);
-        }
-
-        if (filesToUpload.length > 0) {
+        if (filesToUpload.length > 0 && filesToUpload.every(f => f !== undefined)) {
           this.supplierService.uploadDocuments(filesToUpload).subscribe({
             next: () => {
               this.isSubmitting.set(false);
@@ -167,7 +188,7 @@ export class SupplierRegistration {
       },
       error: (err) => {
         this.isSubmitting.set(false);
-        alert('حدث خطأ أثناء التسجيل. يرجى المحاولة لاحقاً.');
+        alert('حدث خطأ أثناء تسجيل بيانات المورد. يرجى المحاولة لاحقاً.');
         console.error(err);
       }
     });

@@ -40,6 +40,17 @@ export class AuthService {
     );
   }
 
+  register(data: any): Observable<AuthResponseDto> {
+    return this.http.post<AuthResponseDto>(`${environment.apiUrl}/auth/register`, data).pipe(
+      tap((res) => {
+        const session: PortalSession = { name: res.fullName, email: res.email, role: res.role };
+        this.session.set(session);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+        localStorage.setItem(TOKEN_KEY, res.token);
+      })
+    );
+  }
+
   forgotPassword(email: string): Observable<void> {
     return this.http.post<void>(`${environment.apiUrl}/auth/forgot-password`, { email });
   }

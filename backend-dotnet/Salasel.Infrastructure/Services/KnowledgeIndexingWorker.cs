@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Salasel.Domain.Enums;
 using Salasel.Infrastructure.Data;
+using System.IO;
 
 namespace Salasel.Infrastructure.Services;
 
@@ -47,6 +48,7 @@ public class KnowledgeIndexingWorker : BackgroundService
     {
         using var scope = _services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<SalaselDbContext>();
+        var aiService = scope.ServiceProvider.GetRequiredService<IAIService>();
 
         var doc = await db.SupplierKnowledgeDocuments.FirstOrDefaultAsync(d => d.Id == job.DocumentId, ct);
         if (doc is null)
@@ -57,23 +59,41 @@ public class KnowledgeIndexingWorker : BackgroundService
 
         _logger.LogInformation("Indexing knowledge document {DocumentId} ({FileName})", doc.Id, doc.FileName);
 
-        var delayMs = 2000 + _rng.Next(3000);
-        await Task.Delay(delayMs, ct);
+        var webRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        var filePath = Path.Combine(webRoot, doc.FileUrl.TrimStart('/', '\\'));
 
-        // ~90% success rate, so the Failed state / reindex flow is reachable in a demo.
-        if (_rng.Next(10) == 0)
+        if (!File.Exists(filePath))
         {
             doc.Status = KnowledgeDocumentStatus.Failed;
-            doc.ErrorMessage = "Simulated parsing failure — file could not be chunked.";
-            doc.ChunkCount = null;
-            doc.IndexedAt = null;
+            doc.ErrorMessage = "File not found on disk.";
+            await db.SaveChangesAsync(ct);
+            return;
         }
-        else
+
+        try
         {
-            doc.Status = KnowledgeDocumentStatus.Indexed;
-            doc.ChunkCount = 5 + _rng.Next(40);
-            doc.ErrorMessage = null;
-            doc.IndexedAt = DateTime.UtcNow;
+            var warehouse = await db.SupplierWarehouses.FirstOrDefaultAsync(w => w.SupplierId == doc.SupplierId, ct);
+            double lat = warehouse != null ? (double)warehouse.Lat : 0;
+            double lon = warehouse != null ? (double)warehouse.Lng : 0;
+
+            var response = await aiService.IngestKnowledgeAsync(doc.SupplierId, filePath, doc.FileName, lat, lon, ct);
+            if (response.IsSuccess)
+            {
+                doc.Status = KnowledgeDocumentStatus.Indexed;
+                doc.ChunkCount = 50; // default for demo
+                doc.ErrorMessage = null;
+                doc.IndexedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                doc.Status = KnowledgeDocumentStatus.Failed;
+                doc.ErrorMessage = $"AI service returned {response.StatusCode}: {response.Body}";
+            }
+        }
+        catch (Exception ex)
+        {
+            doc.Status = KnowledgeDocumentStatus.Failed;
+            doc.ErrorMessage = $"Error calling AI service: {ex.Message}";
         }
 
         await db.SaveChangesAsync(ct);

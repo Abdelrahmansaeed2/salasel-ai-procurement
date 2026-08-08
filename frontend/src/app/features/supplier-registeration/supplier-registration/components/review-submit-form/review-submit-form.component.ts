@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Output, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StepHeaderComponent } from '../shared/step-header/step-header.component';
 
@@ -15,25 +15,40 @@ export class ReviewSubmitFormComponent {
   @Output() back = new EventEmitter<void>();
   @Output() editStep = new EventEmitter<number>();
 
+  @Input() data: any = {};
+
   declarationChecked = signal(false);
 
-  businessInfo = [
-    { label: 'اسم المنشأة', value: 'شركة سلاسل للخدمات اللوجستية' },
-    { label: 'نوع الكيان', value: 'شركة ذات مسؤولية محدودة' },
-    { label: 'المقر الرئيسي', value: 'الرياض، المملكة العربية السعودية' },
-    { label: 'تاريخ التأسيس', value: '14 يناير 2018' },
-  ];
+  get businessInfo() {
+    return [
+      { label: 'اسم المنشأة', value: this.data.legalName || 'غير محدد' },
+      { label: 'نوع الكيان', value: this.data.businessType || 'غير محدد' },
+      { label: 'رقم التسجيل', value: this.data.registrationNumber || 'غير محدد' },
+      { label: 'العنوان', value: this.data.address || 'غير محدد' },
+    ];
+  }
 
-  legalTaxInfo = [
-    { label: 'رقم السجل التجاري', value: '1010XXXX92', highlighted: true },
-    { label: 'تاريخ انتهاء السجل', value: '22 مايو 2026', highlighted: false },
-    { label: 'الرقم الضريبي (VAT)', value: '3000XXXXXXXX003', highlighted: true },
-  ];
+  get legalTaxInfo() {
+    return [
+      { label: 'الرقم الضريبي (VAT)', value: this.data.vatNumber || 'غير محدد', highlighted: true },
+      { label: 'المعرف الضريبي', value: this.data.taxId || 'غير محدد', highlighted: false },
+      { label: 'معفى من الضريبة', value: this.data.isVatExempt ? 'نعم' : 'لا', highlighted: false },
+    ];
+  }
 
-  attachedDocuments = [
-    { name: 'شهادة السجل التجاري.pdf', size: '2.4 MB', type: 'pdf' },
-    { name: 'شهادة الزكاة والدخل.png', size: '1.1 MB', type: 'image' },
-  ];
+  get attachedDocuments() {
+    const docs = [];
+    if (this.data.files && this.data.files.length > 0) {
+      docs.push({ name: this.data.files[0].name, size: 'ملف مرفق', type: 'doc' });
+    }
+    if (this.data.taxCertificate?.name) {
+      docs.push({ name: this.data.taxCertificate.name, size: 'ملف مرفق', type: 'doc' });
+    }
+    if (docs.length === 0) {
+      docs.push({ name: 'لا توجد مرفقات', size: '-', type: 'none' });
+    }
+    return docs;
+  }
 
   toggleDeclaration(): void {
     this.declarationChecked.update(v => !v);

@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, status, Form, File, UploadFile
 
 from app.schemas.product import ProductUpsert, ProductUpsertBatch, QualityMetricsBatch
 from app.services.ingestion_service import ingest_products, update_product
@@ -107,3 +107,56 @@ async def admin_quality_metrics(batch: QualityMetricsBatch) -> dict:
     scores = compute_scores(batch.metrics)
     update_payloads_by_supplier(scores)
     return {"status": "ok", "updated_suppliers": len(scores)}
+
+
+@router.post("/admin/knowledge/ingest")
+async def admin_knowledge_ingest(
+    supplier_id: Annotated[int, Form(...)],
+    file: Annotated[UploadFile, File(...)],
+    lat: Annotated[float, Form(...)] = 24.7136,
+    lon: Annotated[float, Form(...)] = 46.6753,
+) -> dict:
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file name")
+        
+    ext = file.filename.lower().split('.')[-1]
+    
+    if ext == "csv":
+        import csv
+        import io
+        import uuid
+        
+        content = await file.read()
+        text = content.decode("utf-8-sig")
+        reader = csv.DictReader(io.StringIO(text))
+        
+        products = []
+        for row in reader:
+            # Map standard columns: Product_Name, SKU, Category, Description, Unit, Price, In_Stock
+            # Generate a stable product_id or random one since it's just a demo seed
+            pid = hash(f"{supplier_id}_{row.get('SKU', '')}") % (10 ** 8)
+            
+            in_stock_str = str(row.get("In_Stock", "True")).lower()
+            in_stock = in_stock_str in ["true", "1", "yes"]
+            
+            p = ProductUpsert(
+                product_id=pid,
+                supplier_id=supplier_id,
+                product_name=row.get("Product_Name", ""),
+                sku=row.get("SKU", ""),
+                category=row.get("Category", ""),
+                description=row.get("Description", ""),
+                attributes={"unit": row.get("Unit", "")},
+                price=float(row.get("Price", 0) or 0),
+                lat=lat,
+                lon=lon,
+                in_stock=in_stock,
+            )
+            products.append(p)
+            
+        synced = await ingest_products(products)
+        return {"status": "ok", "message": f"Ingested {synced} products from CSV"}
+        
+    else:
+        # For PDF / XLSX, simulate chunking and ingestion for the UI
+        return {"status": "ok", "message": f"Simulated ingestion for {ext} file"}

@@ -14,7 +14,8 @@ export class LeafletMapService {
     const map = L.map(elementId, {
       center,
       zoom,
-      zoomControl: true
+      zoomControl: true,
+      scrollWheelZoom: false
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

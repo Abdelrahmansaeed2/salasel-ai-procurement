@@ -119,9 +119,8 @@
   <!-- Actions -->
   <app-form-actions 
     [submitText]="'حفظ ومتابعة'" 
-    [backText]="'العودة لـ لوحة التحكم'" 
-    (submit)="onSubmit()" 
-    (back)="onBack()">
+    [showBack]="false"
+    (submit)="onSubmit()">
   </app-form-actions>
 
 </form>

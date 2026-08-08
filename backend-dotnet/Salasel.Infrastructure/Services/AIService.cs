@@ -38,6 +38,15 @@ public interface IAIService
         double merchantLat,
         double merchantLng,
         CancellationToken ct = default);
+
+    /// <summary>Uploads a knowledge document to <c>POST /api/v1/admin/knowledge/ingest</c> for RAG/Seeding.</summary>
+    Task<AiProxyResponse> IngestKnowledgeAsync(
+        int supplierId,
+        string filePath,
+        string fileName,
+        double lat,
+        double lon,
+        CancellationToken ct = default);
 }
 
 public class AIService : IAIService
@@ -139,6 +148,34 @@ public class AIService : IAIService
         _logger.LogInformation(
             "AIService: forwarding voice order {FileName} for merchant {MerchantId}",
             fileName, merchantId);
+
+        return await SendRawAsync(() => _http.PostAsync(url, content, ct), ct);
+    }
+
+    public async Task<AiProxyResponse> IngestKnowledgeAsync(
+        int supplierId,
+        string filePath,
+        string fileName,
+        double lat,
+        double lon,
+        CancellationToken ct = default)
+    {
+        byte[] data = await File.ReadAllBytesAsync(filePath, ct);
+
+        using var content = new MultipartFormDataContent();
+        var fileContent = new ByteArrayContent(data);
+        fileContent.Headers.ContentType =
+            new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+        
+        content.Add(fileContent, "file", fileName);
+        content.Add(new StringContent(supplierId.ToString()), "supplier_id");
+        content.Add(new StringContent(lat.ToString(System.Globalization.CultureInfo.InvariantCulture)), "lat");
+        content.Add(new StringContent(lon.ToString(System.Globalization.CultureInfo.InvariantCulture)), "lon");
+
+        var url = "/api/v1/admin/knowledge/ingest";
+        _logger.LogInformation(
+            "AIService: uploading knowledge document {FileName} for supplier {SupplierId} at lat={Lat}, lon={Lon}",
+            fileName, supplierId, lat, lon);
 
         return await SendRawAsync(() => _http.PostAsync(url, content, ct), ct);
     }

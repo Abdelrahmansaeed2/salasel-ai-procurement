@@ -64,7 +64,8 @@
           ></app-additional-documents-form>
         } @else if (currentStep() === 7) {
           <app-review-submit-form
-            (next)="nextStep()"
+            [data]="registrationData"
+            (next)="onFinish()"
             (back)="prevStep()"
             (editStep)="goToStep($event)"
           ></app-review-submit-form>
