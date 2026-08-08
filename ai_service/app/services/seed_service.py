@@ -95,6 +95,14 @@ SEED_SUPPLIER_METRICS = [
 
 async def seed_dev_data() -> bool:
     """Seed a deterministic dev/test catalog into Qdrant."""
+    from app.services.vector_store import get_client, _COLLECTION_NAME
+    client = get_client()
+    try:
+        client.delete_collection(_COLLECTION_NAME)
+        logger.info("Deleted existing Qdrant collection to wipe old data.")
+    except Exception as e:
+        logger.info(f"Could not delete collection (might not exist): {e}")
+        
     ensure_collection(DEFAULT_VECTOR_SIZE)
 
     synced = await ingest_products(SEED_PRODUCTS)
