@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     app_name: str = "Salasel AI Service"
     app_env: str = "local"
     api_v1_prefix: str = "/api/v1"
-    seed_on_startup: bool = False
+    seed_on_startup: bool = True
 
     redis_url: AnyUrl = Field(default="redis://localhost:6379/0")
     health_timeout_seconds: int = 3
