@@ -53,7 +53,7 @@ class InventoryScreen extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: _buildAppBar(),
+        appBar: _buildAppBar(controller),
         body: SafeArea(
           child: Column(
             children: [
@@ -111,7 +111,7 @@ class InventoryScreen extends StatelessWidget {
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(InventoryController controller) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
