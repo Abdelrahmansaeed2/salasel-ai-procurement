@@ -670,6 +670,7 @@ class _OrderCard extends StatelessWidget {
                     ));
                   } else if (activeStep == 1) {
                     Get.to(() => CheckoutScreen(
+                      orderId: order.orderNumber,
                       totalAmount: '${order.total.toStringAsFixed(0)} جنيه',
                       supplierName: order.supplierName,
                       itemsSummary: order.items.isNotEmpty ? order.items[0].name : '',
