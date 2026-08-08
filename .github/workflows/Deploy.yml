@@ -191,6 +191,8 @@ jobs:
               echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
             fi
 
+            # Clean up old images to free up disk space on the VPS
+            sudo docker system prune -af --volumes || true
 
             sudo docker compose pull api ai_service
             sudo docker compose up -d --remove-orphans
@@ -198,8 +200,16 @@ jobs:
             # Wait for API to be healthy
             echo "Waiting for API to be healthy..."
             timeout 180 bash -c 'until sudo docker inspect salasel-api --format "{{.State.Health.Status}}" | grep -q "healthy"; do sleep 5; done' || {
-              echo "Health check timed out! Container logs:"
+              echo "API Health check timed out! Container logs:"
               sudo docker compose logs api
+              exit 1
+            }
+
+            # Wait for AI Service to be healthy
+            echo "Waiting for AI Service to be healthy..."
+            timeout 120 bash -c 'until sudo docker inspect salasel-ai --format "{{.State.Health.Status}}" | grep -q "healthy" || sudo docker inspect salasel-ai --format "{{.State.Status}}" | grep -q "running"; do sleep 5; done' || {
+              echo "AI Service Health check timed out! Container logs:"
+              sudo docker compose logs ai_service
               exit 1
             }
 
