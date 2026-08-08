@@ -120,7 +120,9 @@ class DeliveryTrackingScreen extends StatelessWidget {
                 style: TextStyle(color: OrderColors.textMuted, fontSize: 14.sp, fontFamily: 'Cairo'),
               ),
               Text(
-                '14:30', // Dummy time for now since it's not from backend directly
+                controller.acceptedAt.value != null 
+                    ? '${controller.acceptedAt.value!.add(const Duration(hours: 1)).hour.toString().padLeft(2, '0')}:${controller.acceptedAt.value!.add(const Duration(hours: 1)).minute.toString().padLeft(2, '0')}'
+                    : '--:--',
                 style: TextStyle(color: OrderColors.primary, fontSize: 14.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
               ),
             ],
