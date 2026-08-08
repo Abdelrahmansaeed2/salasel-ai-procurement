@@ -65,6 +65,8 @@ services:
       Jwt__Audience: "Salasel.App"
 
       Seq__Url: "http://seq:5341"
+      AiService__BaseUrl: "http://ai_service:8000"
+      AiService__TimeoutSeconds: "120"
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:80/health || exit 1"]
       interval: 30s
@@ -72,8 +74,67 @@ services:
       retries: 5
       start_period: 30s
 
+  # ─────────────────────────────────────────────────────────────────
+  #  Redis  (ai_service state store / ephemeral cache)
+  # ─────────────────────────────────────────────────────────────────
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: salasel-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ─────────────────────────────────────────────────────────────────
+  #  Qdrant  (ai_service vector DB)
+  # ─────────────────────────────────────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: salasel-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/localhost/6333 && echo -e 'GET /healthz HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 && grep -q 200 <&3"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ─────────────────────────────────────────────────────────────────
+  #  AI service  (FastAPI + LangGraph)
+  # ─────────────────────────────────────────────────────────────────
+  ai_service:
+    image: ${AI_DOCKER_IMAGE:-abdelrahmansaeed369/salasel-ai-service}:${IMAGE_TAG:-latest}
+    container_name: salasel-ai
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      REDIS_URL: redis://redis:6379/0
+      QDRANT_URL: http://qdrant:6333
+      LLM_PROVIDER: groq
+      STT_PROVIDER: groq
+      LLM_GROQ_API_KEY: "${LLM_GROQ_API_KEY}"
+      LLM_ANTHROPIC_API_KEY: "${LLM_ANTHROPIC_API_KEY}"
+      STT_API_KEY: "${STT_API_KEY}"
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+
 volumes:
   sqlserver_data:
     name: salasel_sqlserver_data
   seq_data:
     name: salasel_seq_data
+  qdrant_data:
+    name: salasel_qdrant_data

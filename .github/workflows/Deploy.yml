@@ -7,6 +7,7 @@ on:
 
 env:
   DOCKER_IMAGE: abdelrahmansaeed369/salasel-api
+  AI_DOCKER_IMAGE: abdelrahmansaeed369/salasel-ai-service
 
 jobs:
   # ── Build & Push Docker Image ───────────────────────────────────────
@@ -80,6 +81,26 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Extract AI image metadata
+        id: meta_ai
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.AI_DOCKER_IMAGE }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=sha-,format=short
+
+      - name: Build and push AI Service
+        uses: docker/build-push-action@v6
+        with:
+          context: ./ai_service
+          dockerfile: ./ai_service/infra/docker/Dockerfile
+          push: true
+          tags: ${{ steps.meta_ai.outputs.tags }}
+          labels: ${{ steps.meta_ai.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   # ── Deploy on VPS via docker compose ───────────────────────────────
   deploy:
     name: Deploy to VPS
@@ -143,6 +164,15 @@ jobs:
             if ! grep -q "^SEQ_PASSWORD=" .env; then
               echo "SEQ_PASSWORD='${{ secrets.SEQ_PASSWORD }}'" | sudo tee -a .env
             fi
+            if ! grep -q "^LLM_GROQ_API_KEY=" .env; then
+              echo "LLM_GROQ_API_KEY='${{ secrets.LLM_GROQ_API_KEY }}'" | sudo tee -a .env
+            fi
+            if ! grep -q "^LLM_ANTHROPIC_API_KEY=" .env; then
+              echo "LLM_ANTHROPIC_API_KEY='${{ secrets.LLM_ANTHROPIC_API_KEY }}'" | sudo tee -a .env
+            fi
+            if ! grep -q "^STT_API_KEY=" .env; then
+              echo "STT_API_KEY='${{ secrets.STT_API_KEY }}'" | sudo tee -a .env
+            fi
 
             # Update or append IMAGE_TAG in .env securely
             IMAGE_TAG=sha-$(echo ${{ github.sha }} | cut -c1-7)
@@ -153,7 +183,7 @@ jobs:
             fi
 
 
-            sudo docker compose pull api
+            sudo docker compose pull api ai_service
             sudo docker compose up -d --remove-orphans
 
             # Wait for API to be healthy
