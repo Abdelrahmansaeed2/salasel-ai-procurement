@@ -24,12 +24,15 @@ class InventoryScreen extends StatelessWidget {
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: AiInsightsCard(
+                productName: controller.aiRecommendations.isNotEmpty ? controller.aiRecommendations.first.productName : 'منتج',
+                days: controller.aiRecommendations.isNotEmpty ? controller.aiRecommendations.first.daysUntilDepletion.toString() : '2',
                 onAdd: () {
+                  final productName = controller.aiRecommendations.isNotEmpty ? controller.aiRecommendations.first.productName : 'المنتج';
                   controller.dismissAiInsights();
                   Get.back();
                   Get.snackbar(
                     'تمت الإضافة', 
-                    'تمت إضافة سكر الأسرة لقائمة الطلبات',
+                    'تمت إضافة $productName لقائمة الطلبات',
                     backgroundColor: Colors.green.withValues(alpha: 0.1),
                     colorText: Colors.green,
                   );
@@ -128,15 +131,15 @@ class InventoryScreen extends StatelessWidget {
               fontFamily: 'Cairo',
             ),
           ),
-          Text(
-            '12 منتج • آخر تحديث: الآن',
+          Obx(() => Text(
+            '${controller.products.length} منتج • آخر تحديث: الآن',
             style: TextStyle(
               color: const Color(0xFF94A3B8),
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
               fontFamily: 'Cairo',
             ),
-          ),
+          )),
         ],
       ),
       actions: [
@@ -158,10 +161,10 @@ class InventoryScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _StatBox(label: 'مرتفع', count: '1', color: const Color(0xFF3B82F6), bgColor: const Color(0xFFEFF6FF)),
-          _StatBox(label: 'جيد', count: '5', color: const Color(0xFF10B981), bgColor: const Color(0xFFECFDF5)),
-          _StatBox(label: 'منخفض', count: '2', color: const Color(0xFFF59E0B), bgColor: const Color(0xFFFFFBEB)),
-          _StatBox(label: 'حرج', count: '4', color: const Color(0xFFEF4444), bgColor: const Color(0xFFFEF2F2)),
+          Obx(() => _StatBox(label: 'مرتفع', count: controller.highStockCount.toString(), color: const Color(0xFF3B82F6), bgColor: const Color(0xFFEFF6FF))),
+          Obx(() => _StatBox(label: 'متوفر', count: controller.goodStockCount.toString(), color: const Color(0xFF10B981), bgColor: const Color(0xFFECFDF5))),
+          Obx(() => _StatBox(label: 'منخفض', count: controller.lowStockCount.toString(), color: const Color(0xFFF59E0B), bgColor: const Color(0xFFFFFBEB))),
+          Obx(() => _StatBox(label: 'حرج', count: controller.criticalStockCount.toString(), color: const Color(0xFFEF4444), bgColor: const Color(0xFFFEF2F2))),
         ],
       ),
     );

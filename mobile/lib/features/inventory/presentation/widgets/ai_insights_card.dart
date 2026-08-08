@@ -4,11 +4,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class AiInsightsCard extends StatelessWidget {
   final VoidCallback onAdd;
   final VoidCallback onDismiss;
+  final String productName;
+  final String days;
 
   const AiInsightsCard({
     super.key,
     required this.onAdd,
     required this.onDismiss,
+    required this.productName,
+    required this.days,
   });
 
   @override
@@ -55,16 +59,16 @@ class AiInsightsCard extends StatelessWidget {
                           height: 1.6,
                           fontFamily: 'Cairo',
                         ),
-                        children: const [
+                        children: [
                           TextSpan(text: 'بناءً على مبيعات الأسبوع الماضي، من\nالمتوقع نفاذ منتج '),
                           TextSpan(
-                            text: 'سكر الأسرة',
+                            text: productName,
                             style: TextStyle(
                               color: Color(0xFF2563EB),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          TextSpan(text: ' خلال يومين.\nهل ترغب في إضافته لقائمة الطلبات؟'),
+                          TextSpan(text: ' خلال $days يوم.\nهل ترغب في إضافته لقائمة الطلبات؟'),
                         ],
                       ),
                     ),

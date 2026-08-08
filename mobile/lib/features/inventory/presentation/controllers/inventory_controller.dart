@@ -140,4 +140,9 @@ class InventoryController extends GetxController {
   void dismissAiInsights() {
     showAiInsights.value = false;
   }
+
+  int get highStockCount => products.where((p) => p.status != 'منخفض جداً' && p.status != 'منخفض' && p.status != 'متوفر').length;
+  int get goodStockCount => products.where((p) => p.status == 'متوفر').length;
+  int get lowStockCount => products.where((p) => p.status == 'منخفض').length;
+  int get criticalStockCount => products.where((p) => p.status == 'منخفض جداً').length;
 }

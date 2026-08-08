@@ -414,7 +414,7 @@ class DeliveryTrackingScreen extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
           _buildSupplierCard(
-            storeName: 'المورد الافتراضي',
+            storeName: 'المورد',
             isActive: true,
             statusLabel: controller.currentStep == 3 ? 'تم التوصيل' : 'جاري التوصيل',
             driverName: controller.driverName.value,
@@ -602,8 +602,8 @@ class DeliveryTrackingScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildNavItem(icon: Icons.person_outline, label: 'حسابي', isActive: true),
-              _buildNavItem(icon: Icons.receipt_long_outlined, label: 'الطلبات', badge: '4'),
-              _buildNavItem(icon: Icons.inventory_2_outlined, label: 'المخزون', badge: '7'),
+              _buildNavItem(icon: Icons.receipt_long_outlined, label: 'الطلبات'),
+              _buildNavItem(icon: Icons.inventory_2_outlined, label: 'المخزون'),
               _buildNavItem(icon: Icons.home_outlined, label: 'الرئيسية'),
             ],
           ),
