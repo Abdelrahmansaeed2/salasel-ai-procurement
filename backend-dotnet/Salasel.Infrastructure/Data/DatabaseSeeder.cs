@@ -139,6 +139,33 @@ public static class DatabaseSeeder
             };
             db.MasterOrders.Add(order);
             await db.SaveChangesAsync();
+        // Seed an Active Order for Kanban (Bidding & Preparing)
+        if (!await db.MasterOrders.AnyAsync(o => o.MerchantId == mProfile.MerchantID && o.TotalAmount == 320.50m))
+        {
+            var activeOrder = new MasterOrder
+            {
+                MerchantId = mProfile.MerchantID, TotalAmount = 320.50m, Status = ApprovalStatus.Pending, Source = OrderSource.Voice, OrderDate = DateTime.UtcNow, PaymentMethod = PaymentMethod.BankTransfer, PaymentStatus = PaymentStatus.Pending,
+                SubOrders = new List<SubOrder>
+                {
+                    new SubOrder { SupplierId = sProfile1.SupplierID, ProductId = pSugar.Id, Quantity = 20, SubTotalAmount = 110.00m, Status = FulfillmentStatus.Bidding },
+                    new SubOrder { SupplierId = sProfile1.SupplierID, ProductId = pFlour.Id, Quantity = 15, SubTotalAmount = 48.00m, Status = FulfillmentStatus.Preparing, AcceptedAt = DateTime.UtcNow.AddMinutes(-30) },
+                    new SubOrder { SupplierId = sProfile2.SupplierID, ProductId = pMilk.Id, Quantity = 5, SubTotalAmount = 20.00m, Status = FulfillmentStatus.Shipped, AcceptedAt = DateTime.UtcNow.AddHours(-1), ShippedAt = DateTime.UtcNow.AddMinutes(-10) }
+                }
+            };
+            db.MasterOrders.Add(activeOrder);
+            await db.SaveChangesAsync();
+        }
+
+        // Seed Supplier Knowledge Documents
+        if (!await db.SupplierKnowledgeDocuments.AnyAsync(d => d.SupplierId == sProfile1.SupplierID))
+        {
+            db.SupplierKnowledgeDocuments.AddRange(new List<SupplierKnowledgeDocument>
+            {
+                new SupplierKnowledgeDocument { SupplierId = sProfile1.SupplierID, FileName = "Q3_Pricing_Catalog.pdf", FileType = "PDF", FileUrl = "https://example.com/docs/Q3_Pricing.pdf", Status = KnowledgeDocumentStatus.Completed, ChunkCount = 120, UploadedAt = DateTime.UtcNow.AddDays(-2), IndexedAt = DateTime.UtcNow.AddDays(-2) },
+                new SupplierKnowledgeDocument { SupplierId = sProfile1.SupplierID, FileName = "Inventory_Stock_Export.csv", FileType = "CSV", FileUrl = "https://example.com/docs/Inventory_Export.csv", Status = KnowledgeDocumentStatus.Completed, ChunkCount = 45, UploadedAt = DateTime.UtcNow.AddDays(-1), IndexedAt = DateTime.UtcNow.AddDays(-1) },
+                new SupplierKnowledgeDocument { SupplierId = sProfile1.SupplierID, FileName = "Supplier_Agreement_Terms.pdf", FileType = "PDF", FileUrl = "https://example.com/docs/Contract.pdf", Status = KnowledgeDocumentStatus.Failed, ErrorMessage = "PDF text extraction failed due to encryption.", UploadedAt = DateTime.UtcNow, IndexedAt = null }
+            });
+            await db.SaveChangesAsync();
         }
     }
 }

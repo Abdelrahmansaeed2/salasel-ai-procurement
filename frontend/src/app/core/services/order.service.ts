@@ -12,14 +12,14 @@ export interface SubmitBidDto {
 })
 export class OrderService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/v1/orders`;
+  private apiUrl = `${environment.apiUrl}/orders`;
 
   getKanban(supplierId: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/rfqs/kanban?supplierId=${supplierId}`);
   }
 
   submitBid(id: number, amount: number): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/v1/voice-orders/${id}/bids`, { amount });
+    return this.http.post(`${environment.apiUrl}/voice-orders/${id}/bids`, { amount });
   }
 
   dispatchOrder(id: number): Observable<any> {

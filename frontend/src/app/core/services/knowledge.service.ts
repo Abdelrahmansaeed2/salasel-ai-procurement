@@ -24,7 +24,7 @@ export interface KnowledgeDocument {
 })
 export class KnowledgeService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/api/v1/suppliers/me/knowledge`;
+  private apiUrl = `${environment.apiUrl}/suppliers/me/knowledge`;
 
   uploadDocument(file: File): Observable<{ documentId: number; message: string }> {
     const formData = new FormData();
