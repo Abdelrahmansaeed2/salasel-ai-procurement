@@ -83,10 +83,10 @@ class HomeController extends GetxController {
         final List<dynamic> ordersData = ordersResponse.data;
         recentOrders.value = ordersData.map((json) => RecentOrder(
           emoji: '📦',
-          supplier: json['supplierName'] ?? 'مورد',
-          items: 'طلب رقم #${json['orderId'] ?? ''}',
+          supplier: json['supplier'] ?? 'مورد',
+          items: json['itemsSummary']?.isNotEmpty == true ? json['itemsSummary'] : 'طلب رقم #${json['id'] ?? ''}',
           status: json['status'] ?? 'جديد',
-          isDelivered: json['status'] == 'Completed',
+          isDelivered: json['status'] == 'Approved',
           time: 'الآن',
         )).toList();
       }

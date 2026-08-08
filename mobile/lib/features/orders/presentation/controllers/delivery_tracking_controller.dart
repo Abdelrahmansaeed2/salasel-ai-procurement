@@ -38,8 +38,8 @@ class DeliveryTrackingController extends GetxController {
         if (data['deliveredAt'] != null) deliveredAt.value = DateTime.parse(data['deliveredAt']);
         if (data['receiptConfirmedAt'] != null) receiptConfirmedAt.value = DateTime.parse(data['receiptConfirmedAt']);
 
-        driverName.value = data['driverName'] ?? 'محمد العبدالله';
-        driverPhone.value = data['driverPhone'] ?? '٠٥٥١٢٣٤٥٦٧';
+        driverName.value = data['driverName'] ?? 'في انتظار المندوب';
+        driverPhone.value = data['driverPhone'] ?? 'غير متاح';
       }
     } catch (e) {
       debugPrint('Error fetching tracking: $e');

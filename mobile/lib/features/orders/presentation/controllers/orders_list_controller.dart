@@ -79,14 +79,17 @@ class OrdersController extends GetxController {
           else if (statusStr == 'Completed') status = OrderStatus.delivered;
 
           return OrderModel(
-            id: json['orderId']?.toString() ?? '',
-            orderNumber: 'ORD-${json['orderId']}',
-            supplierName: json['supplierName'] ?? 'مورد',
+            id: json['id']?.toString() ?? '',
+            orderNumber: 'ORD-${json['id']}',
+            supplierName: json['supplier'] ?? 'مورد',
             supplierLogo: '', // Need real logo if provided
             date: DateTime.parse(json['orderDate'] ?? DateTime.now().toIso8601String()),
             status: status,
             items: [
-              OrderItem(name: 'عناصر الطلب', quantity: 1, unit: 'مجموعة'), // The endpoint might just give a summary
+              OrderItem(
+                  name: json['itemsSummary']?.isNotEmpty == true ? json['itemsSummary'] : 'عناصر الطلب', 
+                  quantity: 1, 
+                  unit: ''), // We combine them in one line for the summary UI
             ],
             total: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
           );

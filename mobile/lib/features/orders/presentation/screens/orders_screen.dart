@@ -623,7 +623,7 @@ class _OrderCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'أمس، 4:10م',
+                  '${order.date.day}/${order.date.month}/${order.date.year}',
                   style: TextStyle(
                     color: const Color(0xFF94A3B8),
                     fontSize: 12.sp,
