@@ -67,6 +67,13 @@ class OrderReviewController extends GetxController {
       }
     } catch (e) {
       Get.log('Failed to fetch supplier details: $e');
+      // Fallback for missing supplier in database (e.g. out of sync with vector DB)
+      recommendedSupplier.value = SupplierModel(
+        supplierId: int.tryParse(supplierId) ?? 0,
+        companyName: 'مورد غير معروف (ID: $supplierId)',
+        reliabilityScore: 0.85,
+        paymentTerms: '',
+      );
     }
   }
 
