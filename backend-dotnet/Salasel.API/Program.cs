@@ -207,6 +207,10 @@ using (var scope = app.Services.CreateScope())
         logger.LogInformation("Applying database migrations...");
         db.Database.Migrate();
         logger.LogInformation("Database migrations applied successfully.");
+
+        logger.LogInformation("Seeding database...");
+        await Salasel.Infrastructure.Data.DatabaseSeeder.SeedAsync(db);
+        logger.LogInformation("Database seeding applied successfully.");
     }
     catch (Exception ex)
     {
