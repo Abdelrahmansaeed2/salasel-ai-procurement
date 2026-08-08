@@ -32,6 +32,7 @@ class OrderSplit(BaseModel):
 
 class OrderResponse(BaseModel):
     merchant_id: int | None = None
+    transcript: str | None = None
     total_order_cost: float = 0.0
     splits: list[OrderSplit] = Field(default_factory=list)
     unresolved: list[str] = Field(default_factory=list)

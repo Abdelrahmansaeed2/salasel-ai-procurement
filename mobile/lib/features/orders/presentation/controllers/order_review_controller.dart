@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import '../../../../core/network/api_client.dart';
 import '../../domain/ai_order_response.dart';
 import '../../domain/order_review_models.dart';
+import '../../domain/supplier_model.dart';
 
 class OrderReviewController extends GetxController {
   final RxList<ExtractedProduct> products = <ExtractedProduct>[].obs;
@@ -11,9 +12,14 @@ class OrderReviewController extends GetxController {
 
   AiOrderResponse? currentResponse;
 
+  final RxString transcript = ''.obs;
+  final Rxn<SupplierModel> recommendedSupplier = Rxn<SupplierModel>();
+
   void setInitialData(AiOrderResponse response) {
     currentResponse = response;
     products.clear();
+    transcript.value = response.transcript ?? 'لا يوجد نص متاح';
+    
     for (final split in response.splits) {
       for (final item in split.items) {
         products.add(ExtractedProduct(
@@ -26,6 +32,10 @@ class OrderReviewController extends GetxController {
       }
     }
     
+    if (response.splits.isNotEmpty) {
+      _fetchSupplierDetails(response.splits.first.supplierId);
+    }
+
     // Map dynamic risk alerts from backend
     if (response.riskAlerts.isNotEmpty) {
       riskAlerts.value = response.riskAlerts.map((ra) {
@@ -45,6 +55,18 @@ class OrderReviewController extends GetxController {
       }).toList();
     } else {
       riskAlerts.value = [];
+    }
+  }
+
+  Future<void> _fetchSupplierDetails(String supplierId) async {
+    try {
+      final ApiClient apiClient = ApiClient();
+      final response = await apiClient.dio.get('https://salasel.otlob-egy.online/api/Suppliers/$supplierId');
+      if (response.statusCode == 200) {
+        recommendedSupplier.value = SupplierModel.fromJson(response.data);
+      }
+    } catch (e) {
+      Get.log('Failed to fetch supplier details: $e');
     }
   }
 

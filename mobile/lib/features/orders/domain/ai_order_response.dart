@@ -1,5 +1,6 @@
 class AiOrderResponse {
   final String merchantId;
+  final String? transcript;
   final double totalOrderCost;
   final List<AiOrderSplit> splits;
   final List<String> unresolved;
@@ -8,6 +9,7 @@ class AiOrderResponse {
 
   AiOrderResponse({
     required this.merchantId,
+    this.transcript,
     required this.totalOrderCost,
     required this.splits,
     required this.unresolved,
@@ -17,7 +19,8 @@ class AiOrderResponse {
 
   factory AiOrderResponse.fromJson(Map<String, dynamic> json) {
     return AiOrderResponse(
-      merchantId: json['merchant_id'] ?? '',
+      merchantId: json['merchant_id']?.toString() ?? '',
+      transcript: json['transcript'] as String?,
       totalOrderCost: (json['total_order_cost'] as num?)?.toDouble() ?? 0.0,
       splits: (json['splits'] as List<dynamic>?)
               ?.map((e) => AiOrderSplit.fromJson(e as Map<String, dynamic>))
@@ -38,6 +41,7 @@ class AiOrderResponse {
   Map<String, dynamic> toJson() {
     return {
       'merchant_id': merchantId,
+      'transcript': transcript,
       'total_order_cost': totalOrderCost,
       'splits': splits.map((e) => e.toJson()).toList(),
       'unresolved': unresolved,
@@ -90,7 +94,7 @@ class AiOrderSplit {
 
   factory AiOrderSplit.fromJson(Map<String, dynamic> json) {
     return AiOrderSplit(
-      supplierId: json['supplier_id'] ?? '',
+      supplierId: json['supplier_id']?.toString() ?? '',
       items: (json['items'] as List<dynamic>?)
               ?.map((e) => AiOrderItem.fromJson(e as Map<String, dynamic>))
               .toList() ??

@@ -131,7 +131,7 @@ class OrderReviewScreen extends StatelessWidget {
                       SizedBox(height: 12.h),
                       AnimatedEntrance(
                         delay: Duration(milliseconds: 60),
-                        child: _TranscriptCard(),
+                        child: _TranscriptCard(controller: controller),
                       ),
                       SizedBox(height: 24.h),
                       AnimatedEntrance(
@@ -176,7 +176,7 @@ class OrderReviewScreen extends StatelessWidget {
                       AnimatedEntrance(
                         delay: Duration(milliseconds: 350),
                         beginOffset: Offset(0, 0.12),
-                        child: _SupplierRecommendationCard(),
+                        child: _SupplierRecommendationCard(controller: controller),
                       ),
                       SizedBox(height: 24.h),
                       AnimatedEntrance(
@@ -340,7 +340,8 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _TranscriptCard extends StatelessWidget {
-  const _TranscriptCard();
+  final OrderReviewController controller;
+  const _TranscriptCard({required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -384,8 +385,10 @@ class _TranscriptCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      'أطلب عشرين كرتون مياه معدنية... واثنا عشر كرتون عصير...',
+                    Obx(() => Text(
+                      controller.transcript.value.length > 50 
+                          ? '${controller.transcript.value.substring(0, 50)}...' 
+                          : controller.transcript.value,
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         color: OrderColors.textBody,
@@ -394,7 +397,7 @@ class _TranscriptCard extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                         height: 1.6.h,
                       ),
-                    ),
+                    )),
                     SizedBox(height: 6.h),
                     TextButton(
                       style: TextButton.styleFrom(
@@ -406,9 +409,7 @@ class _TranscriptCard extends StatelessWidget {
                         Get.dialog(
                           AlertDialog(
                             title: Text('النص الكامل'),
-                            content: Text(
-                              'أطلب عشرين كرتون مياه معدنية سعة نصف لتر، واثنا عشر كرتون عصير برتقال طبيعي بنكهة طبيعية.',
-                            ),
+                            content: Obx(() => Text(controller.transcript.value)),
                             actions: [
                               TextButton(
                                 onPressed: () => Get.back(),
@@ -788,7 +789,8 @@ class DottedBorderButton extends StatelessWidget {
 }
 
 class _SupplierRecommendationCard extends StatelessWidget {
-  const _SupplierRecommendationCard();
+  final OrderReviewController controller;
+  const _SupplierRecommendationCard({required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -850,29 +852,53 @@ class _SupplierRecommendationCard extends StatelessWidget {
                     ),
                     SizedBox(width: 12.w),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'الجوهرة للتوزيع',
-                            style: TextStyle(
-                              color: Color(0xFF0F172B),
-                              fontFamily: 'Cairo',
-                              fontSize: 17.sp,
-                              fontWeight: FontWeight.w700,
+                      child: Obx(() {
+                        final supplier = controller.recommendedSupplier.value;
+                        if (supplier == null) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                width: 16.w,
+                                height: 16.h,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: OrderColors.primary),
+                              ),
+                              SizedBox(height: 8.h),
+                              Text(
+                                'جاري إحضار بيانات المورد...',
+                                style: TextStyle(color: OrderColors.textMuted, fontSize: 12.sp, fontFamily: 'Cairo'),
+                              ),
+                            ],
+                          );
+                        }
+                        
+                        // Parse reliability to an int or display default
+                        final reliability = (supplier.reliabilityScore * 100).toInt();
+                        
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              supplier.companyName.isEmpty ? 'مورد غير معروف' : supplier.companyName,
+                              style: TextStyle(
+                                color: Color(0xFF0F172B),
+                                fontFamily: 'Cairo',
+                                fontSize: 17.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 2.h),
-                          Text(
-                            '٤٢ طلب سابق • موثوق ٩٧٪',
-                            style: TextStyle(
-                              color: OrderColors.textMuted,
-                              fontFamily: 'Cairo',
-                              fontSize: 12.sp,
+                            SizedBox(height: 2.h),
+                            Text(
+                              '٤٢ طلب سابق • موثوق ${reliability > 0 ? reliability : 97}٪',
+                              style: TextStyle(
+                                color: OrderColors.textMuted,
+                                fontFamily: 'Cairo',
+                                fontSize: 12.sp,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        );
+                      }),
                     ),
                   ],
                 ),
@@ -896,12 +922,12 @@ class _SupplierRecommendationCard extends StatelessWidget {
                     ),
                     SizedBox(width: 8.w),
                     Expanded(
-                      child: _StatChip(
-                        value: '٤٦١ ر.س',
+                      child: Obx(() => _StatChip(
+                        value: '${controller.totalAmount.toStringAsFixed(2)} ر.س',
                         label: 'السعر الإجمالي',
                         color: OrderColors.success,
                         footnote: 'أقل بـ ١١٪',
-                      ),
+                      )),
                     ),
                   ],
                 ),

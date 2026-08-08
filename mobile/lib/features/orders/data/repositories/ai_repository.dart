@@ -27,7 +27,13 @@ class AiRepository {
       return null;
     }
 
-    return await Geolocator.getCurrentPosition();
+    try {
+      return await Geolocator.getCurrentPosition(
+        timeLimit: const Duration(seconds: 5),
+      );
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<AiOrderResponse> uploadVoiceOrder(String audioPath, int merchantId) async {

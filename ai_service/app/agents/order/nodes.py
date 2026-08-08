@@ -230,6 +230,7 @@ def generate_order_node(state: OrderState) -> dict:
 
     order = OrderResponse(
         merchant_id=state["merchant_id"],
+        transcript=state.get("transcript"),
         total_order_cost=round(total, 2),
         splits=splits,
         unresolved=unresolved,
