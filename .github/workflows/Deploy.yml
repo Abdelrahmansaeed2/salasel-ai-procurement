@@ -164,14 +164,23 @@ jobs:
             if ! grep -q "^SEQ_PASSWORD=" .env; then
               echo "SEQ_PASSWORD='${{ secrets.SEQ_PASSWORD }}'" | sudo tee -a .env
             fi
-            if ! grep -q "^LLM_GROQ_API_KEY=" .env; then
-              echo "LLM_GROQ_API_KEY='${{ secrets.LLM_GROQ_API_KEY }}'" | sudo tee -a .env
+            # Inject or update AI secrets securely
+            if grep -q "^LLM_GROQ_API_KEY=" .env; then
+              sed -i "s|^LLM_GROQ_API_KEY=.*|LLM_GROQ_API_KEY='${{ secrets.LLM_GROQ_API_KEY }}'|" .env
+            else
+              echo "LLM_GROQ_API_KEY='${{ secrets.LLM_GROQ_API_KEY }}'" >> .env
             fi
-            if ! grep -q "^LLM_ANTHROPIC_API_KEY=" .env; then
-              echo "LLM_ANTHROPIC_API_KEY='${{ secrets.LLM_ANTHROPIC_API_KEY }}'" | sudo tee -a .env
+            
+            if grep -q "^LLM_ANTHROPIC_API_KEY=" .env; then
+              sed -i "s|^LLM_ANTHROPIC_API_KEY=.*|LLM_ANTHROPIC_API_KEY='${{ secrets.LLM_ANTHROPIC_API_KEY }}'|" .env
+            else
+              echo "LLM_ANTHROPIC_API_KEY='${{ secrets.LLM_ANTHROPIC_API_KEY }}'" >> .env
             fi
-            if ! grep -q "^STT_API_KEY=" .env; then
-              echo "STT_API_KEY='${{ secrets.STT_API_KEY }}'" | sudo tee -a .env
+            
+            if grep -q "^STT_API_KEY=" .env; then
+              sed -i "s|^STT_API_KEY=.*|STT_API_KEY='${{ secrets.STT_API_KEY }}'|" .env
+            else
+              echo "STT_API_KEY='${{ secrets.STT_API_KEY }}'" >> .env
             fi
 
             # Update or append IMAGE_TAG in .env securely
