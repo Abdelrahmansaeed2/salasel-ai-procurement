@@ -22,4 +22,5 @@ RUN python -c "from fastembed import TextEmbedding; TextEmbedding(model_name='BA
 
 EXPOSE 8000
 
+RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
