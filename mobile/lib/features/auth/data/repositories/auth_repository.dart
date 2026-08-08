@@ -38,7 +38,7 @@ class AuthRepository {
         'fullName': fullName,
         'email': email,
         'password': password,
-        'role': 1, // Merchant
+        'role': 0, // Merchant (0 in UserRole enum)
       });
     } on DioException catch (e) {
       // Attempt to extract a meaningful error message from the backend response
