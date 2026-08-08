@@ -26,6 +26,11 @@ export interface TopProduct {
 }
 
 export interface SupplierDashboardStats {
+  activeRfqs: number;
+  submittedBids: number;
+  supplierRating: number;
+  isSetupCompleted: boolean;
+  registrationStep: number;
   revenueByPeriod: Record<'6m' | '3m' | '1y', number[]>;
   revenueLabelsByPeriod: Record<'6m' | '3m' | '1y', string[]>;
   weeklyOrders: number[];
@@ -47,6 +52,11 @@ export class SupplierDashboardService {
         // The backend only returns { activeRfqs, submittedBids, supplierRating }
         // We mock the complex chart arrays so the UI looks beautiful
         return {
+          activeRfqs: backendData.activeRfqs || 0,
+          submittedBids: backendData.submittedBids || 0,
+          supplierRating: backendData.supplierRating || 0,
+          isSetupCompleted: backendData.isSetupCompleted || false,
+          registrationStep: backendData.registrationStep || 1,
           revenueByPeriod: {
             '6m': [15, 22, 18, 30, 28, 42],
             '3m': [28, 42, 35],

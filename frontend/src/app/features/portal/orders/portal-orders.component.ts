@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal, inject, OnInit } from '@angular/core';
 import { OrderService } from '../../../core/services/order.service';
 import { AuthService } from '../../../core/auth/auth.service';
 type OrderPriority = 'review' | 'urgent' | 'scheduled';
@@ -59,7 +59,7 @@ interface BoardColumn {
   styleUrl: './portal-orders.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PortalOrdersComponent {
+export class PortalOrdersComponent implements OnInit {
   readonly activeFilter = signal<QuickFilter | null>('high-priority');
   readonly detailOrderId = signal<string | null>(null);
   readonly viewMode = signal<ViewMode>('feed');
@@ -128,90 +128,43 @@ export class PortalOrdersComponent {
   ];
 
   readonly boardColumns = signal<BoardColumn[]>([
-    {
-      key: 'rejected',
-      label: 'مرفوض',
-      count: 2,
-      color: '#7F1D1D',
-      cards: [
-        {
-          id: '#ORD-8655',
-          merchant: 'بقالة المدينة',
-          subtitle: 'السبب: عدم توفر المخزون',
-          total: '1,200.00 جنيه',
-          metaLeft: '24 منتج',
-        },
-      ],
-    },
-    {
-      key: 'shipped',
-      label: 'تم الشحن',
-      count: 42,
-      color: '#14532D',
-      cards: [
-        {
-          id: '#ORD-8791',
-          merchant: 'الواحة للتجزئة',
-          subtitle: 'متجر #44 - الرياض',
-          avatarInitials: 'MS',
-          badgeLabel: 'تم التوصيل',
-          badgeVariant: 'success',
-          total: '9,800.00 جنيه',
-          metaLeft: '24 منتج',
-          metaRight: 'تم التسليم',
-        },
-      ],
-    },
-    {
-      key: 'accepted',
-      label: 'مقبول',
-      count: 8,
-      color: '#1E40AF',
-      cards: [
-        {
-          id: '#ORD-8790',
-          merchant: 'كويك مارت إكسبريس',
-          subtitle: 'مركز الدمام',
-          avatarInitials: 'QM',
-          badgeLabel: 'منخفض',
-          badgeVariant: 'neutral',
-          total: '2,150.00 جنيه',
-          metaLeft: '45 منتج',
-          metaRight: 'مجدول',
-        },
-      ],
-    },
-    {
-      key: 'pending',
-      label: 'قيد الانتظار',
-      count: 12,
-      color: '#92400E',
-      cards: [
-        {
-          id: '#ORD-8821',
-          merchant: 'سوبر ماركت المدينة',
-          subtitle: 'متجر #44 - الرياض',
-          avatarInitials: 'MS',
-          badgeLabel: 'أولوية عالية',
-          badgeVariant: 'danger',
-          total: '12,450.00 جنيه',
-          metaLeft: '24 منتج',
-          metaRight: 'منذ 14 دقيقة',
-        },
-        {
-          id: '#ORD-8819',
-          merchant: 'زاوية الذواقة',
-          subtitle: 'جدة الرئيسي',
-          avatarInitials: 'GC',
-          badgeLabel: 'متوسط',
-          badgeVariant: 'neutral',
-          total: '4,200.00 جنيه',
-          metaLeft: '8 منتجات',
-          metaRight: 'منذ ساعتين',
-        },
-      ],
-    },
+    { key: 'rejected', label: 'مرفوض', count: 0, color: '#7F1D1D', cards: [] },
+    { key: 'shipped', label: 'تم الشحن', count: 0, color: '#14532D', cards: [] },
+    { key: 'accepted', label: 'مقبول', count: 0, color: '#1E40AF', cards: [] },
+    { key: 'pending', label: 'قيد الانتظار', count: 0, color: '#92400E', cards: [] }
   ]);
+
+  private readonly orderService = inject(OrderService);
+  private readonly authService = inject(AuthService);
+
+  ngOnInit() {
+    this.orderService.getKanban(1).subscribe({
+      next: (data) => {
+        const columns: BoardColumn[] = [
+          { key: 'pending', label: 'قيد الانتظار (Bidding)', count: data.bidding?.length || 0, color: '#92400E', cards: this.mapCards(data.bidding, 'أولوية', 'danger') },
+          { key: 'accepted', label: 'مقبول (Accepted)', count: data.accepted?.length || 0, color: '#1E40AF', cards: this.mapCards(data.accepted, 'مقبول', 'success') },
+          { key: 'shipped', label: 'تم الشحن (Shipped)', count: data.shipped?.length || 0, color: '#14532D', cards: this.mapCards(data.shipped, 'في الطريق', 'success') },
+          { key: 'rejected', label: 'مرفوض (Rejected)', count: data.rejected?.length || 0, color: '#7F1D1D', cards: this.mapCards(data.rejected, 'مرفوض', 'neutral') },
+        ];
+        this.boardColumns.set(columns);
+      },
+      error: (err) => console.error('Error fetching Kanban:', err)
+    });
+  }
+
+  private mapCards(items: any[], badgeLabel: string, badgeVariant: any): BoardCard[] {
+    if (!items) return [];
+    return items.map(item => ({
+      id: `#ORD-${item.subOrderId}`,
+      merchant: item.merchantName || 'مشتري',
+      subtitle: item.productName || 'منتج',
+      badgeLabel: badgeLabel,
+      badgeVariant: badgeVariant,
+      total: `${item.subTotalAmount} ر.س`,
+      metaLeft: `الكمية: ${item.quantity}`,
+      metaRight: item.status
+    }));
+  }
 
   setViewMode(mode: ViewMode) {
     this.viewMode.set(mode);
@@ -252,8 +205,7 @@ export class PortalOrdersComponent {
     this.biddingOrderId.set(null);
   }
 
-  private readonly orderService = inject(OrderService);
-  private readonly authService = inject(AuthService);
+  // Injectors moved to top
 
   submitBid() {
     this.isSubmittingBid.set(true);
@@ -268,6 +220,9 @@ export class PortalOrdersComponent {
           this.moveCard(orderIdStr, 'pending', 'accepted');
           this.isSubmittingBid.set(false);
           this.closeBiddingDrawer();
+          
+          // Re-fetch to ensure sync with backend
+          this.ngOnInit();
         },
         error: (err) => {
           console.error(err);
@@ -284,6 +239,7 @@ export class PortalOrdersComponent {
     this.orderService.dispatchOrder(id).subscribe({
       next: () => {
         this.moveCard(orderIdStr, 'accepted', 'shipped');
+        this.ngOnInit();
       },
       error: (err) => {
         console.error(err);

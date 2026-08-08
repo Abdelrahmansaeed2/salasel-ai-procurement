@@ -19,7 +19,7 @@ export class OrderService {
   }
 
   submitBid(id: number, amount: number): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/voice-orders/${id}/bids`, { amount });
+    return this.http.put(`${this.apiUrl}/rfqs/${id}/bid`, { amount });
   }
 
   dispatchOrder(id: number): Observable<any> {

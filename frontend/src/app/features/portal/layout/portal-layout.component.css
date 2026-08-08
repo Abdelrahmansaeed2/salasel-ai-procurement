@@ -507,8 +507,9 @@
 .notif-dropdown {
   position: absolute;
   top: calc(100% + 12px);
-  inset-inline-start: -100px;
+  right: 0; /* Align right edge in LTR, left edge in RTL */
   width: 320px;
+  max-width: 90vw;
   background: var(--portal-surface);
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
@@ -516,6 +517,21 @@
   z-index: 50;
   display: flex;
   flex-direction: column;
+}
+
+[dir='rtl'] .notif-dropdown {
+  right: auto;
+  left: 0; /* Align left edge of dropdown to left edge of button in RTL */
+}
+
+@media (max-width: 768px) {
+  .notif-dropdown {
+    position: absolute;
+    left: -10px !important;
+    right: auto !important;
+    width: 280px;
+    max-width: 100vw;
+  }
 }
 
 .notif-header {
@@ -527,14 +543,20 @@
 }
 
 .notif-header h3 {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
 }
 
 .mark-read-btn {
   font-size: 12px;
   color: var(--portal-blue);
   font-weight: 600;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 
 .notif-body {

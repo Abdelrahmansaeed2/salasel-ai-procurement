@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SiteHeaderComponent } from '../../shared/site-header/site-header.component';
 import { SiteFooterComponent } from '../../shared/site-footer/site-footer.component';
+import { SupplierDashboardService } from '../../core/services/supplier-dashboard.service';
 
 interface StatCard {
   title: string;
@@ -36,39 +37,86 @@ interface ActivityItem {
   templateUrl: './supplier-dashboard.component.html',
   styleUrl: './supplier-dashboard.component.css',
 })
-export class SupplierDashboardComponent {
+export class SupplierDashboardComponent implements OnInit {
   readonly activeTab = signal<'overview' | 'documents' | 'rfqs'>('overview');
+
+  private readonly dashboardService = inject(SupplierDashboardService);
 
   readonly stats = signal<StatCard[]>([
     {
       title: 'حالة طلب التسجيل',
-      value: 'قيد المراجعة',
-      change: 'مكتمل بنسبة 87%',
+      value: 'جاري التحميل...',
+      change: '',
       isPositive: true,
       icon: 'status-check',
     },
     {
       title: 'طلب عروض أسعار (RFQ)',
-      value: '12 طلب نشط',
-      change: '+3 هذا الأسبوع',
+      value: '...',
+      change: '',
       isPositive: true,
       icon: 'rfq-bag',
     },
     {
       title: 'العروض المقدمة',
-      value: '5 عروض',
-      change: '2 في انتظار الترسية',
+      value: '...',
+      change: '',
       isPositive: true,
       icon: 'bids',
     },
     {
       title: 'تقييم المورد المبدئي',
-      value: 'ممتاز (4.8/5)',
-      change: 'اعتماد آلي مبدئي',
+      value: '...',
+      change: '',
       isPositive: true,
       icon: 'star-badge',
     },
   ]);
+
+  ngOnInit() {
+    this.dashboardService.getDashboardStats().subscribe({
+      next: (data) => {
+        let registrationStatus = 'قيد المراجعة';
+        let registrationChange = `مكتمل بنسبة ${Math.round((data.registrationStep / 7) * 100)}%`;
+        if (data.isSetupCompleted) {
+          registrationStatus = 'مكتمل ومعتمد';
+          registrationChange = 'حساب نشط';
+        }
+
+        this.stats.set([
+          {
+            title: 'حالة طلب التسجيل',
+            value: registrationStatus,
+            change: registrationChange,
+            isPositive: data.isSetupCompleted,
+            icon: 'status-check',
+          },
+          {
+            title: 'طلب عروض أسعار (RFQ)',
+            value: `${data.activeRfqs} طلب نشط`,
+            change: 'متاحة للرد',
+            isPositive: data.activeRfqs > 0,
+            icon: 'rfq-bag',
+          },
+          {
+            title: 'العروض المقدمة',
+            value: `${data.submittedBids} عروض`,
+            change: 'قيد المراجعة من المشتري',
+            isPositive: data.submittedBids > 0,
+            icon: 'bids',
+          },
+          {
+            title: 'تقييم المورد المبدئي',
+            value: `(${data.supplierRating}/5)`,
+            change: 'اعتماد آلي مبدئي',
+            isPositive: data.supplierRating >= 4.0,
+            icon: 'star-badge',
+          },
+        ]);
+      },
+      error: (err) => console.error('Failed to load dashboard stats', err)
+    });
+  }
 
   readonly quickActions = signal<ActionTile[]>([
     {
