@@ -169,5 +169,59 @@ public static class DatabaseSeeder
             });
             await db.SaveChangesAsync();
         }
+
+        // Seed Supplier Warehouses
+        if (!await db.SupplierWarehouses.AnyAsync(w => w.SupplierId == sProfile1.SupplierID))
+        {
+            db.SupplierWarehouses.AddRange(new List<SupplierWarehouse>
+            {
+                new SupplierWarehouse { SupplierId = sProfile1.SupplierID, WarehouseName = "Main Riyadh Hub", City = "الرياض", Capacity = "High", Lat = 24.7136m, Lng = 46.6753m },
+                new SupplierWarehouse { SupplierId = sProfile2.SupplierID, WarehouseName = "Jeddah Distribution Center", City = "جدة", Capacity = "Medium", Lat = 21.4858m, Lng = 39.1925m }
+            });
+            await db.SaveChangesAsync();
+        }
+
+        // Seed Bids for the active bidding order
+        var biddingSubOrder = await db.SubOrders.FirstOrDefaultAsync(s => s.Status == FulfillmentStatus.Bidding);
+        if (biddingSubOrder != null && !await db.Bids.AnyAsync(b => b.SubOrderId == biddingSubOrder.Id))
+        {
+            db.Bids.AddRange(new List<Bid>
+            {
+                new Bid { SubOrderId = biddingSubOrder.Id, SupplierId = sProfile1.SupplierID, Price = 115.50m, Status = BidStatus.Submitted, SubmittedAt = DateTime.UtcNow.AddMinutes(-50) },
+                new Bid { SubOrderId = biddingSubOrder.Id, SupplierId = sProfile2.SupplierID, Price = 108.00m, Status = BidStatus.Submitted, SubmittedAt = DateTime.UtcNow.AddMinutes(-10) }
+            });
+            await db.SaveChangesAsync();
+        }
+
+        // Seed Voice Procurement Logs & AI Processing for Analytics
+        if (!await db.VoiceProcurementLogs.AnyAsync(v => v.MerchantId == mProfile.MerchantID))
+        {
+            db.VoiceProcurementLogs.AddRange(new List<VoiceProcurementLog>
+            {
+                new VoiceProcurementLog 
+                { 
+                    MerchantId = mProfile.MerchantID, AudioUrl = "https://example.com/audio/req1.wav", Transcript = "أحتاج 10 كيلو سكر", CreatedAt = DateTime.UtcNow.AddDays(-2),
+                    AIProcessing = new AIProcessing { ModelUsed = "gemini-2.0-flash", Prompt = "Extract intent", ParsedJson = "{}", Confidence = 0.98m, ProcessingDurationMs = 1250 }
+                },
+                new VoiceProcurementLog 
+                { 
+                    MerchantId = mProfile.MerchantID, AudioUrl = "https://example.com/audio/req2.wav", Transcript = "ممكن قهوة و حليب", CreatedAt = DateTime.UtcNow.AddHours(-1),
+                    AIProcessing = new AIProcessing { ModelUsed = "gemini-2.0-flash", Prompt = "Extract intent", ParsedJson = "{}", Confidence = 0.95m, ProcessingDurationMs = 1840 }
+                }
+            });
+            await db.SaveChangesAsync();
+        }
+
+        // Seed Notifications for Admin/Merchant
+        if (!await db.Notifications.AnyAsync(n => n.UserId == admin.UserID))
+        {
+            db.Notifications.AddRange(new List<Notification>
+            {
+                new Notification { UserId = admin.UserID, EventName = "NewMerchantRegistered", PayloadJson = "{\"MerchantId\": 1}", IsRead = false, CreatedAt = DateTime.UtcNow.AddHours(-3) },
+                new Notification { UserId = merchant.UserID, EventName = "OrderShipped", PayloadJson = "{\"OrderId\": 1}", IsRead = false, CreatedAt = DateTime.UtcNow.AddMinutes(-15) },
+                new Notification { UserId = supplier1.UserID, EventName = "NewRFQ", PayloadJson = "{\"RfqId\": 1}", IsRead = true, CreatedAt = DateTime.UtcNow.AddHours(-1) }
+            });
+            await db.SaveChangesAsync();
+        }
     }
 }
