@@ -74,7 +74,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./backend-dotnet
-          dockerfile: ./backend-dotnet/Dockerfile
+          file: ./backend-dotnet/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -94,7 +94,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./ai_service
-          dockerfile: ./ai_service/infra/docker/Dockerfile
+          file: ./ai_service/infra/docker/Dockerfile
           push: true
           tags: ${{ steps.meta_ai.outputs.tags }}
           labels: ${{ steps.meta_ai.outputs.labels }}
