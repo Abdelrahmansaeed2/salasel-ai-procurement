@@ -22,6 +22,10 @@ export class OrderService {
     return this.http.get<any>(`${this.apiUrl}/rfqs`);
   }
 
+  approveOrder(masterOrderId: number): Observable<any> {
+    return this.http.put(`${environment.apiUrl}/voice-orders/${masterOrderId}/approve`, {});
+  }
+
   submitBid(id: number, amount: number): Observable<any> {
     return this.http.put(`${this.apiUrl}/rfqs/${id}/bid`, { amount });
   }

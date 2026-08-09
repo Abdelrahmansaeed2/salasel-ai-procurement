@@ -155,7 +155,22 @@ export class PortalOrdersComponent implements OnInit {
   }
 
   accept(orderId: string) {
-    this.orders.update((list) => list.filter((o) => o.id !== orderId));
+    // Extract masterOrderId from format "ORD-{masterId}-{subId}"
+    const parts = orderId.replace('ORD-', '').split('-');
+    const masterOrderId = parseInt(parts[0]);
+    if (!masterOrderId) return;
+
+    this.orderService.approveOrder(masterOrderId).subscribe({
+      next: () => {
+        // Refresh both views from backend to reflect the real state
+        this.ngOnInit();
+      },
+      error: (err) => {
+        console.error('Failed to approve order:', err);
+        // Still refresh to show real state
+        this.ngOnInit();
+      }
+    });
   }
 
   reject(orderId: string) {
