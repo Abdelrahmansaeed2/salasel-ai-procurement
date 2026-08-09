@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:dio/dio.dart';
 import '../../../../../core/network/api_client.dart';
 import '../../data/models/order_detail_model.dart';
 
@@ -44,7 +45,12 @@ class VoiceOrderDetailController extends GetxController {
     if (isConfirming.value) return;
     try {
       isConfirming.value = true;
-      final response = await _apiClient.dio.put('/voice-orders/$orderId/confirm');
+      // VoiceOrdersController is at /api/voice-orders (no /v1 prefix)
+      final baseWithoutV1 = ApiClient.baseUrl.replaceAll('/v1', '');
+      final response = await _apiClient.dio.put(
+        '$baseWithoutV1/voice-orders/$orderId/confirm',
+        options: Options(headers: _apiClient.dio.options.headers),
+      );
       if (response.statusCode == 200) {
         Get.snackbar(
           'تم التأكيد',
@@ -69,7 +75,12 @@ class VoiceOrderDetailController extends GetxController {
     if (isCancelling.value) return;
     try {
       isCancelling.value = true;
-      final response = await _apiClient.dio.put('/voice-orders/$orderId/cancel');
+      // VoiceOrdersController is at /api/voice-orders (no /v1 prefix)
+      final baseWithoutV1 = ApiClient.baseUrl.replaceAll('/v1', '');
+      final response = await _apiClient.dio.put(
+        '$baseWithoutV1/voice-orders/$orderId/cancel',
+        options: Options(headers: _apiClient.dio.options.headers),
+      );
       if (response.statusCode == 200) {
         Get.snackbar(
           'تم الإلغاء',
