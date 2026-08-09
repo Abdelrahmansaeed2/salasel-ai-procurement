@@ -193,7 +193,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
                 style: TextStyle(
                   color: const Color(0xFF191C1E),
                   fontFamily: 'Cairo',
-                  fontSize: 16.sp,
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
                   height: 24 / 16,
                 ),
