@@ -68,46 +68,7 @@ export class PortalOrdersComponent implements OnInit {
   readonly bidAmount = signal<string>('');
   readonly isSubmittingBid = signal(false);
 
-  readonly orders = signal<OperationsOrder[]>([
-    {
-      id: '#ORD-9776',
-      merchant: 'نيو سيتي إكسبريس',
-      priority: 'review',
-      priorityLabel: 'مراجعة يدوية مطلوبة',
-      confidence: 45,
-      confidenceColor: '#BA1A1A',
-      warning: 'تم اكتشاف غموض في العنوان.',
-      items: [{ label: '15x صناديق عصير مشكل', price: '450 جنيه' }],
-      total: '3,950.00 ر.س',
-      currency: 'ر.س',
-    },
-    {
-      id: '#ORD-9921',
-      merchant: 'سوبر ماركت المدينة',
-      priority: 'urgent',
-      priorityLabel: 'إرسالية عاجلة',
-      confidence: 98,
-      confidenceColor: '#2563EB',
-      items: [
-        { label: '50x حليب (كامل الدسم، 1 لتر)', price: '2,500 جنيه' },
-        { label: '20x سكر (ناعم، 5 كجم)', price: '1,750 جنيه' },
-      ],
-      total: '4,250 جنيه',
-      currency: 'جنيه',
-    },
-    {
-      id: '#ORD-9912',
-      merchant: 'محامص قهوة السلطان',
-      priority: 'scheduled',
-      priorityLabel: 'مجدول',
-      confidence: 82,
-      confidenceColor: '#505F76',
-      aiNote: 'ملاحظة الذكاء الاصطناعي: مشترٍ متميز متكرر. يوصى بالقبول الفوري.',
-      items: [{ label: '40x بن قهوة (أرابيكا)', price: '8,200 جنيه' }],
-      total: '8,200 جنيه',
-      currency: 'جنيه',
-    },
-  ]);
+  readonly orders = signal<OperationsOrder[]>([]);
 
   readonly activeOrdersCount = computed(() => this.orders().length);
 
@@ -128,35 +89,54 @@ export class PortalOrdersComponent implements OnInit {
   ];
 
   readonly boardColumns = signal<BoardColumn[]>([
-    { key: 'rejected', label: 'مرفوض', count: 0, color: '#7F1D1D', cards: [] },
-    { key: 'shipped', label: 'تم الشحن', count: 0, color: '#14532D', cards: [] },
-    { key: 'accepted', label: 'مقبول', count: 0, color: '#1E40AF', cards: [] },
-    { key: 'pending', label: 'قيد الانتظار', count: 0, color: '#92400E', cards: [] }
+    { key: 'pending', label: 'طلبات جديدة', count: 0, color: '#92400E', cards: [] },
+    { key: 'accepted', label: 'قيد التنفيذ', count: 0, color: '#1E40AF', cards: [] },
+    { key: 'shipped', label: 'تم التسليم', count: 0, color: '#14532D', cards: [] },
+    { key: 'rejected', label: 'مرفوض', count: 0, color: '#7F1D1D', cards: [] }
   ]);
 
   private readonly orderService = inject(OrderService);
   private readonly authService = inject(AuthService);
 
   ngOnInit() {
-    this.orderService.getKanban(1).subscribe({
+    this.orderService.getKanban().subscribe({
       next: (data) => {
-        const columns: BoardColumn[] = [
-          { key: 'pending', label: 'قيد الانتظار (Bidding)', count: data.bidding?.length || 0, color: '#92400E', cards: this.mapCards(data.bidding, 'أولوية', 'danger') },
-          { key: 'accepted', label: 'مقبول (Accepted)', count: data.accepted?.length || 0, color: '#1E40AF', cards: this.mapCards(data.accepted, 'مقبول', 'success') },
-          { key: 'shipped', label: 'تم الشحن (Shipped)', count: data.shipped?.length || 0, color: '#14532D', cards: this.mapCards(data.shipped, 'في الطريق', 'success') },
-          { key: 'rejected', label: 'مرفوض (Rejected)', count: data.rejected?.length || 0, color: '#7F1D1D', cards: this.mapCards(data.rejected, 'مرفوض', 'neutral') },
-        ];
-        this.boardColumns.set(columns);
+        // Map the columns from backend
+        if (data && data.columns) {
+          const cols: BoardColumn[] = data.columns.map((col: any) => {
+            let color = '#191B23';
+            if (col.key === 'Pending') color = '#92400E';
+            if (col.key === 'Accepted' || col.key === 'Bidding') color = '#1E40AF';
+            if (col.key === 'Delivered') color = '#14532D';
+            if (col.key === 'Rejected') color = '#7F1D1D';
+
+            return {
+              key: col.key.toLowerCase(),
+              label: col.label,
+              count: col.cards?.length || 0,
+              color: color,
+              cards: this.mapCards(col.cards || [], col.label, 'neutral')
+            };
+          });
+          this.boardColumns.set(cols);
+        }
       },
       error: (err) => console.error('Error fetching Kanban:', err)
+    });
+
+    this.orderService.getOrdersFeed().subscribe({
+      next: (feedData) => {
+        this.orders.set(feedData || []);
+      },
+      error: (err) => console.error('Error fetching Orders Feed:', err)
     });
   }
 
   private mapCards(items: any[], badgeLabel: string, badgeVariant: any): BoardCard[] {
     if (!items) return [];
     return items.map(item => ({
-      id: `#ORD-${item.subOrderId}`,
-      merchant: item.merchantName || 'مشتري',
+      id: item.id,
+      merchant: item.merchant || 'مشتري',
       subtitle: item.productName || 'منتج',
       badgeLabel: badgeLabel,
       badgeVariant: badgeVariant,

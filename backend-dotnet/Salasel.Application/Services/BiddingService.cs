@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore; // Include()/ThenInclude() on IQueryable
+using Microsoft.EntityFrameworkCore; // Include()/ThenInclude() on IQueryable
 using Salasel.Application.DTOs;
 using Salasel.Application.Interfaces;
 using Salasel.Domain.Entities;
@@ -135,6 +135,31 @@ public class BiddingService : IBiddingService
                 new() { Key = "Rejected", Label = "مرفوض", Cards = rejected }
             }
         };
+    }
+
+    public async Task<List<SupplierOrderFeedDto>> GetSupplierOrdersFeedAsync(int supplierId)
+    {
+        var relevant = await _subOrderRepository.Query()
+            .Include(s => s.MasterOrder).ThenInclude(m => m.Merchant)
+            .Include(s => s.Product)
+            .Where(s => s.SupplierId == supplierId || (s.Status == FulfillmentStatus.Bidding && s.SupplierId == null))
+            .OrderByDescending(s => s.CreatedAt)
+            .ToListAsync();
+
+        return relevant.Select(s => new SupplierOrderFeedDto
+        {
+            Id = $"ORD-{s.MasterId}-{s.Id}",
+            Merchant = s.MasterOrder.Merchant?.ShopName ?? "Unknown",
+            Priority = s.Status == FulfillmentStatus.Bidding ? "urgent" : "review",
+            PriorityLabel = s.Status == FulfillmentStatus.Bidding ? "عاجل" : "للمراجعة",
+            Confidence = 95,
+            ConfidenceColor = s.Status == FulfillmentStatus.Bidding ? "#2563EB" : "#10B981",
+            Total = s.SubTotalAmount.ToString("F2"),
+            Items = new List<SupplierOrderFeedItemDto>
+            {
+                new() { Label = $"{s.Quantity}x {s.Product?.Name ?? "Product"}", Price = s.SubTotalAmount.ToString("F2") }
+            }
+        }).ToList();
     }
 
     private static KanbanCardDto MapCard(SubOrder s, decimal? myBidPrice)

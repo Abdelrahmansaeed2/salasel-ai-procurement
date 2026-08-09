@@ -109,13 +109,26 @@ public class OrdersController : ControllerBase
     // GET /api/v1/orders/rfqs/kanban?supplierId= — supplier's kanban board
     [HttpGet("rfqs/kanban")]
     [Authorize(Roles = "Supplier,Admin")]
-    public async Task<IActionResult> GetKanban([FromQuery] int supplierId)
+    public async Task<IActionResult> GetKanban([FromQuery] int? supplierId)
     {
-        if (supplierId <= 0) return BadRequest(new { Message = "A valid supplierId is required." });
-        if (!await CanAccessSupplierAsync(supplierId)) return Forbid();
+        int? targetId = supplierId ?? await CurrentSupplierIdAsync();
+        if (targetId == null) return Forbid();
+        if (!await CanAccessSupplierAsync(targetId.Value)) return Forbid();
 
-        var kanban = await _biddingService.GetKanbanAsync(supplierId);
+        var kanban = await _biddingService.GetKanbanAsync(targetId.Value);
         return Ok(kanban);
+    }
+
+    [HttpGet("rfqs")]
+    [Authorize(Roles = "Supplier,Admin")]
+    public async Task<IActionResult> GetSupplierOrdersFeed([FromQuery] int? supplierId)
+    {
+        int? targetId = supplierId ?? await CurrentSupplierIdAsync();
+        if (targetId == null) return Forbid();
+        if (!await CanAccessSupplierAsync(targetId.Value)) return Forbid();
+
+        var ordersFeed = await _biddingService.GetSupplierOrdersFeedAsync(targetId.Value);
+        return Ok(ordersFeed);
     }
 
     // PUT /api/v1/orders/rfqs/{id}/bid — id = SubOrderId (the "SUB-xx" card).

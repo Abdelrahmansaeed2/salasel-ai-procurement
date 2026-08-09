@@ -14,8 +14,12 @@ export class OrderService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/orders`;
 
-  getKanban(supplierId: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/rfqs/kanban?supplierId=${supplierId}`);
+  getKanban(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/rfqs/kanban`);
+  }
+
+  getOrdersFeed(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/rfqs`);
   }
 
   submitBid(id: number, amount: number): Observable<any> {

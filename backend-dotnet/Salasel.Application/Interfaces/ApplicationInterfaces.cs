@@ -48,6 +48,7 @@ public interface IBiddingService
     Task<int> CreateRfqAsync(CreateRfqDto request);
 
     Task<KanbanResponseDto> GetKanbanAsync(int supplierId);
+    Task<List<SupplierOrderFeedDto>> GetSupplierOrdersFeedAsync(int supplierId);
     Task<BidDto> SubmitBidAsync(int subOrderId, int supplierId, SubmitBidDto request);
     Task<List<BidDto>> GetBidsAsync(int masterOrderId);
     Task<BidDto> AcceptBidAsync(int masterOrderId, int bidId);

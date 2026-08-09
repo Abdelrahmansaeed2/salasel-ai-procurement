@@ -1,4 +1,4 @@
-﻿namespace Salasel.Application.DTOs;
+namespace Salasel.Application.DTOs;
 
 // GET /api/v1/orders/rfqs/kanban?supplierId=
 public class KanbanResponseDto
@@ -61,4 +61,25 @@ public class CreateRfqDto
     public int ProductId { get; set; }
     public int Quantity { get; set; }
     public string? Notes { get; set; }
+}
+
+public class SupplierOrderFeedDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Merchant { get; set; } = string.Empty;
+    public string Priority { get; set; } = string.Empty;
+    public string PriorityLabel { get; set; } = string.Empty;
+    public int Confidence { get; set; }
+    public string ConfidenceColor { get; set; } = string.Empty;
+    public string? Warning { get; set; }
+    public string? AiNote { get; set; }
+    public List<SupplierOrderFeedItemDto> Items { get; set; } = new();
+    public string Total { get; set; } = "0.00";
+    public string Currency { get; set; } = "ر.س";
+}
+
+public class SupplierOrderFeedItemDto
+{
+    public string Label { get; set; } = string.Empty;
+    public string Price { get; set; } = string.Empty;
 }
