@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/inventory/presentation/screens/inventory_screen.dart';
 import '../../features/orders/presentation/screens/orders_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
@@ -14,13 +14,14 @@ class AppNavigator {
   /// index 2 → الطلبات
   /// index 3 → حسابي
   static void changeTab(int index, {required int currentTabIndex}) {
-    // لو نفس الشاشة — مفيش حاجة
-    if (index == currentTabIndex) return;
+    if (index == currentTabIndex) {
+      Get.until((route) => route.isFirst);
+      if (index == 0) return;
+    } else {
+      Get.until((route) => route.isFirst);
+    }
 
-    if (index == 0) {
-      // الرئيسية — ارجع للخلف لأن كل الشاشات مفتوحة فوق HomeScreen
-      Get.back();
-    } else if (index == 1) {
+    if (index == 1) {
       Get.to(
         () => const InventoryScreen(),
         transition: Transition.fadeIn,
