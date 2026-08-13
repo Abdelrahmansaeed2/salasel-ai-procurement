@@ -155,9 +155,16 @@ export class PortalOrdersComponent implements OnInit {
   }
 
   accept(orderId: string) {
-    // Extract masterOrderId from format "ORD-{masterId}-{subId}"
-    const parts = orderId.replace('ORD-', '').split('-');
-    const masterOrderId = parseInt(parts[0]);
+    let masterOrderId: number;
+    if (orderId.startsWith('ORD-')) {
+      // Extract masterOrderId from format "ORD-{masterId}-{subId}"
+      const parts = orderId.split('-');
+      masterOrderId = parseInt(parts[1], 10);
+    } else {
+      console.error('Cannot accept order from kanban directly as master ID is missing in SUB format.');
+      return;
+    }
+
     if (!masterOrderId) return;
 
     this.orderService.approveOrder(masterOrderId).subscribe({
@@ -206,8 +213,15 @@ export class PortalOrdersComponent implements OnInit {
     this.isSubmittingBid.set(true);
     const orderIdStr = this.biddingOrderId();
     if (orderIdStr) {
-      // Clean '#ORD-' string prefix if any, assuming backend expects int id
-      const id = parseInt(orderIdStr.replace(/[^0-9]/g, ''));
+      let id: number;
+      if (orderIdStr.startsWith('ORD-')) {
+        // Format: ORD-{masterId}-{subId} -> we need subId
+        const parts = orderIdStr.split('-');
+        id = parseInt(parts[2], 10);
+      } else {
+        // Format: SUB-{id}
+        id = parseInt(orderIdStr.replace(/[^0-9]/g, ''), 10);
+      }
       const amount = parseFloat(this.bidAmount());
       
       this.orderService.submitBid(id, amount).subscribe({
@@ -229,7 +243,13 @@ export class PortalOrdersComponent implements OnInit {
 
   markAsOutForDelivery(orderIdStr: string, event: Event) {
     event.stopPropagation();
-    const id = parseInt(orderIdStr.replace(/[^0-9]/g, ''));
+    let id: number;
+    if (orderIdStr.startsWith('ORD-')) {
+      const parts = orderIdStr.split('-');
+      id = parseInt(parts[2], 10);
+    } else {
+      id = parseInt(orderIdStr.replace(/[^0-9]/g, ''), 10);
+    }
     
     this.orderService.dispatchOrder(id).subscribe({
       next: () => {
