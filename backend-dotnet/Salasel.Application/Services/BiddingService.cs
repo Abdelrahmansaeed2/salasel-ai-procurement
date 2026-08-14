@@ -310,7 +310,10 @@ public class BiddingService : IBiddingService
 
     public async Task UpdateRfqStatusAsync(int subOrderId, int supplierId, string status)
     {
-        var subOrder = await _subOrderRepository.GetByIdAsync(subOrderId);
+        var subOrder = await _subOrderRepository.Query()
+            .Include(s => s.MasterOrder)
+            .FirstOrDefaultAsync(s => s.Id == subOrderId);
+
         if (subOrder == null)
             throw new KeyNotFoundException($"RFQ {subOrderId} not found.");
 
@@ -339,6 +342,13 @@ public class BiddingService : IBiddingService
         subOrder.UpdatedAt = now;
         if (target == FulfillmentStatus.Shipped) subOrder.ShippedAt = now;
         if (target == FulfillmentStatus.Delivered) subOrder.DeliveredAt = now;
+
+        // Sync MasterOrder status to show in Merchant Mobile app
+        if (target == FulfillmentStatus.Accepted && subOrder.MasterOrder != null && subOrder.MasterOrder.Status == ApprovalStatus.Pending_Approval)
+        {
+            subOrder.MasterOrder.Status = ApprovalStatus.Manually_Approved;
+            subOrder.MasterOrder.UpdatedAt = now;
+        }
 
         await _subOrderRepository.UpdateAsync(subOrder);
         await _subOrderRepository.SaveChangesAsync();
