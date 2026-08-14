@@ -37,6 +37,8 @@ class ProfileController extends GetxController {
   final RxDouble lat = 0.0.obs;
   final RxDouble lng = 0.0.obs;
 
+  final RxString verificationStatus = 'NotSubmitted'.obs;
+
   final RxList<VerificationStep> verificationSteps = <VerificationStep>[].obs;
 
   @override
@@ -77,6 +79,8 @@ class ProfileController extends GetxController {
         if (lngStr != null && lngStr.toString().isNotEmpty) {
           lng.value = double.tryParse(lngStr.toString()) ?? 0.0;
         }
+
+        verificationStatus.value = shop['verificationStatus'] ?? 'NotSubmitted';
 
         final isVerified = shop['isVerified'] == true;
         

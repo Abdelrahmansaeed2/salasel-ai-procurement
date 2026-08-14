@@ -11,6 +11,9 @@ import '../../../../core/controllers/settings_controller.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../controllers/profile_controller.dart';
+import 'terms_screen.dart';
+import 'chat_screen.dart';
+import 'faq_screen.dart';
 
 const _kTextPrimary = Color(0xFF191C1E);
 const _kTextSecondary = Color(0xFF54647A);
@@ -347,114 +350,142 @@ class _ProfileSummary extends StatelessWidget {
 class _VoiceOrderStatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 24.h),
-      decoration: BoxDecoration(
-        color: _kAccentBlue,
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned(
-            left: -40.w,
-            bottom: -40.h,
-            child: Container(
-              width: 160.w,
-              height: 160.h,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.05),
+    final c = Get.find<ProfileController>();
+    
+    return Obx(() {
+      final status = c.verificationStatus.value;
+      
+      String statusTitle;
+      String statusSubtitle;
+      Color indicatorColor;
+      Color bgColor;
+      
+      if (status == 'Approved') {
+        statusTitle = 'مفعل';
+        statusSubtitle = 'الخدمة متاحة الآن';
+        indicatorColor = const Color(0xFF10B981); // Green
+        bgColor = const Color(0xFF004AC6); // Deep Blue
+      } else if (status == 'UnderReview') {
+        statusTitle = 'قيد المراجعة';
+        statusSubtitle = 'سيتم التفعيل قريباً';
+        indicatorColor = const Color(0xFFFBBF24); // Yellow
+        bgColor = _kAccentBlue;
+      } else {
+        statusTitle = 'غير مفعل';
+        statusSubtitle = 'الرجاء توثيق المنشأة';
+        indicatorColor = const Color(0xFFEF4444); // Red
+        bgColor = const Color(0xFF64748B); // Slate
+      }
+
+      return Container(
+        padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 24.h),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned(
+              left: -40.w,
+              bottom: -40.h,
+              child: Container(
+                width: 160.w,
+                height: 160.h,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.05),
+                ),
               ),
             ),
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 64.w,
-                height: 64.h,
-                child: Center(
-                  child: _pathIcon(
-                    'M14.5 24C12.7738 24 11.3065 23.4167 10.0982 22.25C8.88988 21.0833 8.28571 19.6667 8.28571 18V6C8.28571 4.33333 8.88988 2.91667 10.0982 1.75C11.3065 0.583333 12.7738 0 14.5 0C16.2262 0 17.6935 0.583333 18.9018 1.75C20.1101 2.91667 20.7143 4.33333 20.7143 6V18C20.7143 19.6667 20.1101 21.0833 18.9018 22.25C17.6935 23.4167 16.2262 24 14.5 24ZM12.4286 38V31.85C8.8381 31.3833 5.86905 29.8333 3.52143 27.2C1.17381 24.5667 0 21.5 0 18H4.14286C4.14286 20.7667 5.15268 23.125 7.17232 25.075C9.19196 27.025 11.6345 28 14.5 28C17.3655 28 19.808 27.025 21.8277 25.075C23.8473 23.125 24.8571 20.7667 24.8571 18H29C29 21.5 27.8262 24.5667 25.4786 27.2C23.131 29.8333 20.1619 31.3833 16.5714 31.85V38H12.4286Z',
-                    vbW: 29,
-                    vbH: 38,
-                    w: 29.w,
-                    h: 38.h,
-                    color: const Color(0xFFEEEFFF),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 64.w,
+                  height: 64.h,
+                  child: Center(
+                    child: _pathIcon(
+                      'M14.5 24C12.7738 24 11.3065 23.4167 10.0982 22.25C8.88988 21.0833 8.28571 19.6667 8.28571 18V6C8.28571 4.33333 8.88988 2.91667 10.0982 1.75C11.3065 0.583333 12.7738 0 14.5 0C16.2262 0 17.6935 0.583333 18.9018 1.75C20.1101 2.91667 20.7143 4.33333 20.7143 6V18C20.7143 19.6667 20.1101 21.0833 18.9018 22.25C17.6935 23.4167 16.2262 24 14.5 24ZM12.4286 38V31.85C8.8381 31.3833 5.86905 29.8333 3.52143 27.2C1.17381 24.5667 0 21.5 0 18H4.14286C4.14286 20.7667 5.15268 23.125 7.17232 25.075C9.19196 27.025 11.6345 28 14.5 28C17.3655 28 19.808 27.025 21.8277 25.075C23.8473 23.125 24.8571 20.7667 24.8571 18H29C29 21.5 27.8262 24.5667 25.4786 27.2C23.131 29.8333 20.1619 31.3833 16.5714 31.85V38H12.4286Z',
+                      vbW: 29,
+                      vbH: 38,
+                      w: 29.w,
+                      h: 38.h,
+                      color: const Color(0xFFEEEFFF),
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Opacity(
-                      opacity: 0.9,
-                      child: Text(
-                        'الطلب الصوتي',
-                        style: TextStyle(
-                          color: const Color(0xFFEEEFFF),
-                          fontFamily: 'Cairo',
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                          height: 1.43,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Opacity(
+                        opacity: 0.9,
+                        child: Text(
+                          'الطلب الصوتي',
+                          style: TextStyle(
+                            color: const Color(0xFFEEEFFF),
+                            fontFamily: 'Cairo',
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                            height: 1.43,
+                          ),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 8.h),
-                      child: Text(
-                        'قيد المراجعة',
-                        style: TextStyle(
-                          color: const Color(0xFFEEEFFF),
-                          fontFamily: 'Cairo',
-                          fontSize: 24.sp,
-                          fontWeight: FontWeight.w700,
-                          height: 1.33,
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 8.h),
+                        child: Text(
+                          statusTitle,
+                          style: TextStyle(
+                            color: const Color(0xFFEEEFFF),
+                            fontFamily: 'Cairo',
+                            fontSize: 24.sp,
+                            fontWeight: FontWeight.w700,
+                            height: 1.33,
+                          ),
                         ),
                       ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(999.r),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'سيتم التفعيل قريباً',
-                            style: TextStyle(
-                              color: const Color(0xFFEEEFFF),
-                              fontFamily: 'Cairo',
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w400,
-                              height: 1.33,
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(999.r),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              statusSubtitle,
+                              style: TextStyle(
+                                color: const Color(0xFFEEEFFF),
+                                fontFamily: 'Cairo',
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w400,
+                                height: 1.33,
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 8.w),
-                          Container(
-                            width: 8.w,
-                            height: 8.h,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Color(0xFFFBBF24),
+                            SizedBox(width: 8.w),
+                            Container(
+                              width: 8.w,
+                              height: 8.h,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: indicatorColor,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+              ],
+            ),
+          ],
+        ),
+      );
+    });
   }
 }
 
@@ -1229,24 +1260,7 @@ class _HelpSupportSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.only(bottom: 8.h),
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: _kBorder, width: 1)),
-            ),
-            child: Text(
-              'الدعم الفني',
-              style: TextStyle(
-                color: _kTextPrimary,
-                fontFamily: 'Cairo',
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w700,
-                height: 1.43,
-              ),
-            ),
-          ),
-          SizedBox(height: 16.h),
+
           Row(
             children: [
               Expanded(
@@ -1256,16 +1270,7 @@ class _HelpSupportSection extends StatelessWidget {
                       'M8 20C5.68333 19.4167 3.77083 18.0875 2.2625 16.0125C0.754167 13.9375 0 11.6333 0 9.1V3L8 0L16 3V9.1C16 10.5167 15.7583 11.8792 15.275 13.1875C14.7917 14.4958 14.1 15.65 13.2 16.65L10 13.45C9.7 13.6333 9.37917 13.7708 9.0375 13.8625C8.69583 13.9542 8.35 14 8 14C6.9 14 5.95833 13.6083 5.175 12.825C4.39167 12.0417 4 11.1 4 10C4 8.9 4.39167 7.95833 5.175 7.175C5.95833 6.39167 6.9 6 8 6C9.1 6 10.0417 6.39167 10.825 7.175C11.6083 7.95833 12 8.9 12 10C12 10.3667 11.9542 10.7208 11.8625 11.0625C11.7708 11.4042 11.6333 11.7333 11.45 12.05L12.95 13.55C13.2833 12.8667 13.5417 12.15 13.725 11.4C13.9083 10.65 14 9.88333 14 9.1V4.375L8 2.125L2 4.375V9.1C2 11.1167 2.56667 12.95 3.7 14.6C4.83333 16.25 6.26667 17.35 8 17.9C8.43333 17.7667 8.84583 17.5958 9.2375 17.3875C9.62917 17.1792 10.0167 16.9333 10.4 16.65L11.8 18.05C11.25 18.5 10.6542 18.8917 10.0125 19.225C9.37083 19.5583 8.7 19.8167 8 20ZM8 12C8.55 12 9.02083 11.8042 9.4125 11.4125C9.80417 11.0208 10 10.55 10 10C10 9.45 9.80417 8.97917 9.4125 8.5875C9.02083 8.19583 8.55 8 8 8C7.45 8 6.97917 8.19583 6.5875 8.5875C6.19583 8.97917 6 9.45 6 10C6 10.55 6.19583 11.0208 6.5875 11.4125C6.97917 11.8042 7.45 12 8 12Z',
                   vbW: 16,
                   vbH: 20,
-                ),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: _HelpButton(
-                  label: 'محادثة',
-                  iconPath:
-                      'M4 12H12V10H4V12ZM4 9H16V7H4V9ZM4 6H16V4H4V6ZM0 20V2C0 1.45 0.195833 0.979167 0.5875 0.5875C0.979167 0.195833 1.45 0 2 0H18C18.55 0 19.0208 0.195833 19.4125 0.5875C19.8042 0.979167 20 1.45 20 2V14C20 14.55 19.8042 15.0208 19.4125 15.4125C19.0208 15.8042 18.55 16 18 16H4L0 20ZM3.15 14H18V2H2V15.125L3.15 14ZM2 14V2V14Z',
-                  vbW: 20,
-                  vbH: 20,
+                  onTap: () => Get.to(() => const TermsScreen()),
                 ),
               ),
               SizedBox(width: 12.w),
@@ -1276,6 +1281,7 @@ class _HelpSupportSection extends StatelessWidget {
                       'M12 13C12.2833 13 12.5292 12.8958 12.7375 12.6875C12.9458 12.4792 13.05 12.2333 13.05 11.95C13.05 11.6667 12.9458 11.4208 12.7375 11.2125C12.5292 11.0042 12.2833 10.9 12 10.9C11.7167 10.9 11.4708 11.0042 11.2625 11.2125C11.0542 11.4208 10.95 11.6667 10.95 11.95C10.95 12.2333 11.0542 12.4792 11.2625 12.6875C11.4708 12.8958 11.7167 13 12 13ZM11.25 9.8H12.75C12.75 9.31667 12.8 8.9625 12.9 8.7375C13 8.5125 13.2333 8.21667 13.6 7.85C14.1 7.35 14.4333 6.94583 14.6 6.6375C14.7667 6.32917 14.85 5.96667 14.85 5.55C14.85 4.8 14.5875 4.1875 14.0625 3.7125C13.5375 3.2375 12.85 3 12 3C11.3167 3 10.7208 3.19167 10.2125 3.575C9.70417 3.95833 9.35 4.46667 9.15 5.1L10.5 5.65C10.65 5.23333 10.8542 4.92083 11.1125 4.7125C11.3708 4.50417 11.6667 4.4 12 4.4C12.4 4.4 12.725 4.5125 12.975 4.7375C13.225 4.9625 13.35 5.26667 13.35 5.65C13.35 5.88333 13.2833 6.10417 13.15 6.3125C13.0167 6.52083 12.7833 6.78333 12.45 7.1C11.9 7.58333 11.5625 7.9625 11.4375 8.2375C11.3125 8.5125 11.25 9.03333 11.25 9.8ZM6 16C5.45 16 4.97917 15.8042 4.5875 15.4125C4.19583 15.0208 4 14.55 4 14V2C4 1.45 4.19583 0.979167 4.5875 0.5875C4.97917 0.195833 5.45 0 6 0H18C18.55 0 19.0208 0.195833 19.4125 0.5875C19.8042 0.979167 20 1.45 20 2V14C20 14.55 19.8042 15.0208 19.4125 15.4125C19.0208 15.8042 18.55 16 18 16H6ZM6 14H18V2H6V14ZM2 20C1.45 20 0.979167 19.8042 0.5875 19.4125C0.195833 19.0208 0 18.55 0 18V4H2V18H16V20H2ZM6 2V14V2Z',
                   vbW: 20,
                   vbH: 20,
+                  onTap: () => Get.to(() => const FaqScreen()),
                 ),
               ),
             ],
@@ -1291,18 +1297,20 @@ class _HelpButton extends StatelessWidget {
   final String iconPath;
   final double vbW;
   final double vbH;
+  final VoidCallback onTap;
 
   const _HelpButton({
     required this.label,
     required this.iconPath,
     required this.vbW,
     required this.vbH,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
       borderRadius: BorderRadius.circular(16.r),
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 12.h),

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Salasel.Application.DTOs;
@@ -14,13 +14,33 @@ public class PublicController : ControllerBase
 {
     private readonly IRepository<SupplierProfile> _supplierRepository;
     private readonly IRepository<ContactMessage> _contactRepository;
+    private readonly IRepository<KnowledgeBaseArticle> _kbRepository;
 
     public PublicController(
         IRepository<SupplierProfile> supplierRepository,
-        IRepository<ContactMessage> contactRepository)
+        IRepository<ContactMessage> contactRepository,
+        IRepository<KnowledgeBaseArticle> kbRepository)
     {
         _supplierRepository = supplierRepository;
         _contactRepository = contactRepository;
+        _kbRepository = kbRepository;
+    }
+
+    [HttpGet("knowledge-base/{category}")]
+    public async Task<IActionResult> GetKnowledgeBaseArticles(string category)
+    {
+        var categoryLower = category.Trim().ToLower();
+        var articles = await _kbRepository.Query()
+            .Where(a => a.Category.ToLower() == categoryLower)
+            .OrderByDescending(a => a.CreatedAt)
+            .ToListAsync();
+
+        return Ok(articles.Select(a => new {
+            Id = a.Id,
+            Title = a.Title,
+            Content = a.Content,
+            Category = a.Category
+        }));
     }
 
     // GET /api/v1/public/suppliers?q=&city= — directory. Only shows suppliers

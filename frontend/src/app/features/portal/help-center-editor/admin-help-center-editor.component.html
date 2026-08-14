@@ -12,6 +12,20 @@
 
   <div class="editor-card">
     <div class="form-group">
+      <label for="category">التصنيف (مهم جداً)</label>
+      <select 
+        id="category" 
+        class="form-control" 
+        [ngModel]="articleCategory()"
+        (ngModelChange)="articleCategory.set($event)"
+      >
+        <option value="faq">أسئلة شائعة (FAQ)</option>
+        <option value="terms">الشروط والأحكام (Terms)</option>
+        <option value="general">عام (General)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
       <label for="title">عنوان المقال</label>
       <input 
         id="title" 

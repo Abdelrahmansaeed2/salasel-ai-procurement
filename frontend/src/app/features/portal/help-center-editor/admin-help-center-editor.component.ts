@@ -16,6 +16,7 @@ export class AdminHelpCenterEditorComponent {
 
   articleTitle = signal('');
   articleContent = signal('');
+  articleCategory = signal('faq');
   isSaving = signal(false);
 
   saveArticle() {
@@ -26,12 +27,13 @@ export class AdminHelpCenterEditorComponent {
     this.adminService.createKnowledgeBaseArticle({
       title: this.articleTitle(),
       content: this.articleContent(),
-      category: 'General'
+      category: this.articleCategory()
     }).subscribe({
       next: () => {
         this.isSaving.set(false);
         this.articleTitle.set('');
         this.articleContent.set('');
+        this.articleCategory.set('faq');
         window.alert('تم حفظ المقال بنجاح ونشره في مركز المساعدة.');
       },
       error: (err) => {
