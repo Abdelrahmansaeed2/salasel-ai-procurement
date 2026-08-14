@@ -293,8 +293,9 @@ class _ReceiptSuccessScreenState extends State<ReceiptSuccessScreen>
                 setState(() => _ratingsSubmitted = true);
                 
                 try {
+                  final numericId = widget.orderId.replaceAll(RegExp(r'[^\d]'), '');
                   await ApiClient().dio.post(
-                    '/orders/${widget.orderId}/ratings',
+                    '/orders/$numericId/ratings',
                     data: { 'ratings': _ratings },
                   );
                   Get.snackbar('نجاح', 'تم إرسال تقييمك بنجاح، شكراً لك!',
