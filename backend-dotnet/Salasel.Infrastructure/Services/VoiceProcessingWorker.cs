@@ -113,7 +113,21 @@ public class VoiceProcessingWorker : BackgroundService
             };
             db.AIProcessings.Add(aiProcessing);
 
-            // Master order (draft) + one sub-order for nearest supplier
+            var subOrders = new List<SubOrder>();
+            foreach (var item in aiResult.Items)
+            {
+                subOrders.Add(new SubOrder
+                {
+                    SupplierId = supplierId,
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity,
+                    SubTotalAmount = item.Quantity * item.Price,
+                    Status = FulfillmentStatus.Pending_Supplier,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+            // Master order (draft)
             var master = new MasterOrder
             {
                 MerchantId = aiResult.MerchantId,
@@ -123,7 +137,7 @@ public class VoiceProcessingWorker : BackgroundService
                 Source = OrderSource.Voice,
                 Notes = $"Voice draft from log #{voiceLog.Id}",
                 OrderDate = DateTime.UtcNow,
-                SubOrders = new List<SubOrder>
+                SubOrders = subOrders.Count > 0 ? subOrders : new List<SubOrder>
                 {
                     new SubOrder
                     {
@@ -180,16 +194,19 @@ public class VoiceProcessingWorker : BackgroundService
         if (skus.Count == 0)
             return aiResult;
 
-        var skuToName = await db.Products
+        var skuToProduct = await db.Products
             .AsNoTracking()
             .Where(p => skus.Contains(p.SKU))
-            .Select(p => new { p.SKU, p.Name })
-            .ToDictionaryAsync(x => x.SKU, x => x.Name, ct);
+            .Select(p => new { p.SKU, p.Name, p.Id })
+            .ToDictionaryAsync(x => x.SKU, x => x, ct);
 
         foreach (var item in aiResult.Items)
         {
-            if (skuToName.TryGetValue(item.ProductName, out var name))
-                item.ProductName = name;
+            if (skuToProduct.TryGetValue(item.ProductName, out var prod))
+            {
+                item.ProductName = prod.Name;
+                item.ProductId = prod.Id;
+            }
         }
 
         return aiResult;

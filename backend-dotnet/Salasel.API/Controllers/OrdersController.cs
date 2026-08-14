@@ -99,6 +99,86 @@ public class OrdersController : ControllerBase
 
     // ──────────────────────────── Bidding / RFQ ────────────────────────────
 
+    // POST /api/v1/orders/sync-historical-inventory
+    // One-off endpoint to rebuild inventory quantities from all completed orders
+    [HttpPost("sync-historical-inventory")]
+    [Authorize(Roles = "Merchant")]
+    public async Task<IActionResult> SyncHistoricalInventory()
+    {
+        var userIdStr = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+        var merchantShops = await _merchantRepository.FindAsync(m => m.OwnerUserId == userId);
+        var merchantIds = merchantShops.Select(m => m.MerchantID).ToList();
+
+        if (merchantIds.Count == 0) return NotFound(new { Message = "No shops found for merchant." });
+
+        int totalItemsSynced = 0;
+
+        foreach (var mId in merchantIds)
+        {
+            var existingInventory = (await _inventoryRepository.FindAsync(i => i.MerchantID == mId)).ToList();
+            
+            foreach (var item in existingInventory)
+            {
+                item.CurrentQty = 0;
+                await _inventoryRepository.UpdateAsync(item);
+            }
+
+            var completedOrders = await _masterOrderRepository.Query()
+                .Include(o => o.SubOrders)
+                .Where(o => o.MerchantId == mId && o.Status == ApprovalStatus.Completed)
+                .ToListAsync();
+
+            var qtyMap = new Dictionary<int, int>();
+            foreach (var order in completedOrders)
+            {
+                if (order.SubOrders == null) continue;
+                foreach (var sub in order.SubOrders)
+                {
+                    if (sub.Status == FulfillmentStatus.ReceiptConfirmed && sub.ProductId.HasValue)
+                    {
+                        if (!qtyMap.ContainsKey(sub.ProductId.Value))
+                            qtyMap[sub.ProductId.Value] = 0;
+                        qtyMap[sub.ProductId.Value] += sub.Quantity;
+                    }
+                }
+            }
+
+            foreach (var kvp in qtyMap)
+            {
+                var productId = kvp.Key;
+                var qty = kvp.Value;
+
+                var existingItem = existingInventory.FirstOrDefault(i => i.ProductId == productId);
+                if (existingItem != null)
+                {
+                    existingItem.CurrentQty = qty;
+                    existingItem.LastUpdated = DateTime.UtcNow;
+                    await _inventoryRepository.UpdateAsync(existingItem);
+                }
+                else
+                {
+                    var newItem = new MerchantInventory
+                    {
+                        MerchantID = mId,
+                        ProductId = productId,
+                        CurrentQty = qty,
+                        ReorderThreshold = 10,
+                        LastUpdated = DateTime.UtcNow
+                    };
+                    await _inventoryRepository.AddAsync(newItem);
+                    existingInventory.Add(newItem);
+                }
+                totalItemsSynced++;
+            }
+        }
+
+        await _masterOrderRepository.SaveChangesAsync();
+
+        return Ok(new { Message = $"Successfully synced {totalItemsSynced} products based on historical completed orders." });
+    }
+
     // POST /api/v1/orders/rfqs — merchant asks multiple suppliers to quote on
     // a product. Nothing else in the pipeline opens a line up to bidding
     // (voice orders auto-assign one supplier immediately), so this had to be
