@@ -22,6 +22,7 @@ public class OrdersController : ControllerBase
     private readonly IMerchantProfileRepository _merchantRepository;
     private readonly ISupplierProfileRepository _supplierRepository;
     private readonly IRepository<MasterOrder> _masterOrderRepository;
+    private readonly IRepository<MerchantInventory> _inventoryRepository;
     private readonly INotificationService _notifications;
     private readonly IPaymentService _paymentService;
 
@@ -32,6 +33,7 @@ public class OrdersController : ControllerBase
         IMerchantProfileRepository merchantRepository,
         ISupplierProfileRepository supplierRepository,
         IRepository<MasterOrder> masterOrderRepository,
+        IRepository<MerchantInventory> inventoryRepository,
         INotificationService notifications,
         IPaymentService paymentService)
     {
@@ -41,6 +43,7 @@ public class OrdersController : ControllerBase
         _merchantRepository = merchantRepository;
         _supplierRepository = supplierRepository;
         _masterOrderRepository = masterOrderRepository;
+        _inventoryRepository = inventoryRepository;
         _notifications = notifications;
         _paymentService = paymentService;
     }
@@ -351,8 +354,36 @@ public class OrdersController : ControllerBase
         {
             order.Status = ApprovalStatus.Completed;
             order.UpdatedAt = DateTime.UtcNow;
+
+            // Increment Merchant Inventory for each received product
+            foreach (var sub in order.SubOrders)
+            {
+                var inventoryItem = await _inventoryRepository.Query()
+                    .FirstOrDefaultAsync(i => i.MerchantID == order.MerchantId && i.ProductId == sub.ProductId);
+
+                if (inventoryItem != null)
+                {
+                    inventoryItem.CurrentQty += sub.Quantity;
+                    inventoryItem.LastUpdated = DateTime.UtcNow;
+                    await _inventoryRepository.UpdateAsync(inventoryItem);
+                }
+                else
+                {
+                    // Create new inventory item if merchant didn't have it
+                    var newItem = new MerchantInventory
+                    {
+                        MerchantID = order.MerchantId,
+                        ProductId = sub.ProductId,
+                        CurrentQty = sub.Quantity,
+                        ReorderThreshold = 10, // default
+                        LastUpdated = DateTime.UtcNow
+                    };
+                    await _inventoryRepository.AddAsync(newItem);
+                }
+            }
+
             await _masterOrderRepository.UpdateAsync(order);
-            await _masterOrderRepository.SaveChangesAsync();
+            await _masterOrderRepository.SaveChangesAsync(); // also saves inventory due to scoped context
         }
 
         return Ok(new { Message = "Receipt confirmed successfully." });
