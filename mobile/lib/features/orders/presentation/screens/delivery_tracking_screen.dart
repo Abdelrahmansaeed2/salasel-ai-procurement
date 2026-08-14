@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/widgets/animated_pressable.dart';
+import '../../../../core/widgets/app_bottom_nav_bar.dart';
+import '../../../../core/navigation/app_navigator.dart';
 import '../theme/order_colors.dart';
 import 'receipt_success_screen.dart';
 
@@ -41,11 +43,16 @@ class DeliveryTrackingScreen extends StatelessWidget {
                 SizedBox(height: 32.h),
                 _buildSuppliersSection(controller),
                 SizedBox(height: 32.h),
+                _buildBottomContent(controller),
+                SizedBox(height: 16.h),
               ],
             ),
           );
         }),
-        bottomNavigationBar: _buildBottomContent(controller),
+        bottomNavigationBar: AppBottomNavBar(
+          currentIndex: 2, // Orders tab index
+          onTap: (index) => AppNavigator.changeTab(index, currentTabIndex: 2),
+        ),
       ),
     );
   }

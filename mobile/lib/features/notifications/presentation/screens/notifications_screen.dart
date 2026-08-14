@@ -161,18 +161,18 @@ class NotificationsScreen extends StatelessWidget {
   Widget _buildFilterChips(NotificationsController c) {
     return SizedBox(
       height: 36.h,
-      child: Obx(
-        () => ListView.separated(
-          scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          itemCount: c.filters.length,
-          separatorBuilder: (_, __) => SizedBox(width: 8.w),
-          itemBuilder: (_, i) {
-            final f = c.filters[i];
-            final selected = c.selectedFilter.value == f;
-            return GestureDetector(
-              onTap: () => c.setFilter(f),
-              child: AnimatedContainer(
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        itemCount: c.filters.length,
+        separatorBuilder: (_, __) => SizedBox(width: 8.w),
+        itemBuilder: (_, i) {
+          final f = c.filters[i];
+          return GestureDetector(
+            onTap: () => c.setFilter(f),
+            child: Obx(() {
+              final selected = c.selectedFilter.value == f;
+              return AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
                 alignment: Alignment.center,
@@ -192,10 +192,10 @@ class NotificationsScreen extends StatelessWidget {
                     height: 20 / 14,
                   ),
                 ),
-              ),
-            );
-          },
-        ),
+              );
+            }),
+          );
+        },
       ),
     );
   }
