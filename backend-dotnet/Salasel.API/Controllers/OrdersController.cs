@@ -401,10 +401,16 @@ public class OrdersController : ControllerBase
         var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userIdStr, out var userId)) return false;
 
-        var order = await _masterOrderRepository.GetByIdAsync(masterOrderId);
+        var order = await _masterOrderRepository.Query()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(o => o.Id == masterOrderId);
+            
         if (order == null) return false;
 
-        var shop = await _merchantRepository.SingleOrDefaultAsync(m => m.MerchantID == order.MerchantId && m.OwnerUserId == userId);
+        var shop = await _merchantRepository.Query()
+            .AsNoTracking()
+            .SingleOrDefaultAsync(m => m.MerchantID == order.MerchantId && m.OwnerUserId == userId);
+            
         return shop != null;
     }
 
