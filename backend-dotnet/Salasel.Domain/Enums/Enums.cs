@@ -60,7 +60,8 @@ public enum PaymentMethod : byte
 {
     CashOnDelivery,
     BankTransfer,
-    CreditCard
+    CreditCard,
+    Stripe
 }
 
 public enum PaymentStatus : byte
@@ -68,7 +69,9 @@ public enum PaymentStatus : byte
     Unpaid,
     Pending,   // payment method chosen, awaiting settlement (e.g. cash on delivery)
     Paid,
-    Failed
+    Failed,
+    RefundRequested,
+    Refunded
 }
 
 public enum KnowledgeDocumentStatus : byte
