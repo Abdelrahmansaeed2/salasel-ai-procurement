@@ -1,6 +1,8 @@
 using Salasel.Application.Interfaces;
 using Salasel.Domain.Entities;
 using Stripe;
+using Salasel.Domain.Enums;
+using Stripe.Checkout;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -94,6 +96,11 @@ public class StripePaymentService : IPaymentService
         var subOrder = await _subOrderRepository.GetByIdAsync(subOrderId);
         if (subOrder == null) throw new Exception("SubOrder not found");
         if (subOrder.SupplierId == null) throw new Exception("SubOrder has no assigned supplier");
+        if (!string.IsNullOrEmpty(subOrder.StripeTransferId)) throw new Exception("Funds have already been transferred for this sub-order.");
+
+        // CRITICAL SECURITY PATCH: Prevent premature payouts
+        if (subOrder.Status != FulfillmentStatus.Delivered && subOrder.Status != FulfillmentStatus.ReceiptConfirmed)
+            throw new Exception("Cannot transfer funds until the order is delivered or receipt is confirmed.");
 
         var supplier = await _supplierRepository.GetByIdAsync(subOrder.SupplierId.Value);
         if (string.IsNullOrEmpty(supplier?.StripeAccountId))
@@ -130,6 +137,10 @@ public class StripePaymentService : IPaymentService
         if (masterOrder == null) throw new Exception("Order not found");
         if (string.IsNullOrEmpty(masterOrder.StripePaymentIntentId))
             throw new Exception("No Stripe payment intent linked to this order");
+
+        // CRITICAL SECURITY PATCH: Prevent double refunds
+        if (masterOrder.PaymentStatus == PaymentStatus.Refunded || !string.IsNullOrEmpty(masterOrder.StripeRefundId))
+            throw new Exception("Order has already been refunded.");
 
         // 1. Reverse transfers to suppliers if any were already paid
         var subOrders = await _subOrderRepository.GetAllAsync();

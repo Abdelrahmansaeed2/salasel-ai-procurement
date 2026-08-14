@@ -5,6 +5,7 @@ using Salasel.Domain.Enums;
 using Stripe;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Salasel.API.Controllers;
@@ -16,17 +17,20 @@ public class PaymentsController : ControllerBase
     private readonly IPaymentService _paymentService;
     private readonly IMasterOrderRepository _orderRepository;
     private readonly ISupplierProfileRepository _supplierRepository;
+    private readonly IMerchantProfileRepository _merchantRepository;
     private readonly IConfiguration _configuration;
 
     public PaymentsController(
         IPaymentService paymentService, 
         IMasterOrderRepository orderRepository,
         ISupplierProfileRepository supplierRepository,
+        IMerchantProfileRepository merchantRepository,
         IConfiguration configuration)
     {
         _paymentService = paymentService;
         _orderRepository = orderRepository;
         _supplierRepository = supplierRepository;
+        _merchantRepository = merchantRepository;
         _configuration = configuration;
     }
 
@@ -34,6 +38,8 @@ public class PaymentsController : ControllerBase
     [HttpPost("create-intent/{orderId}")]
     public async Task<IActionResult> CreateIntent(int orderId)
     {
+        if (!await CanAccessOrderAsMerchantAsync(orderId)) return Forbid();
+
         var order = await _orderRepository.GetByIdAsync(orderId);
         if (order == null) return NotFound("Order not found");
 
@@ -65,8 +71,16 @@ public class PaymentsController : ControllerBase
                     if (int.TryParse(orderIdStr, out var orderId))
                     {
                         var order = await _orderRepository.GetByIdAsync(orderId);
-                        if (order != null)
+                        if (order != null && order.PaymentStatus != PaymentStatus.Paid)
                         {
+                            // CRITICAL SECURITY PATCH: Verify amount matches to prevent checkout manipulation
+                            long expectedAmountCents = (long)(order.TotalAmount * 100);
+                            if (paymentIntent.Amount != expectedAmountCents)
+                            {
+                                // Log suspicious activity here in a real app
+                                return BadRequest("Payment amount does not match order total.");
+                            }
+
                             order.PaymentStatus = PaymentStatus.Paid;
                             order.PaymentMethod = Salasel.Domain.Enums.PaymentMethod.Stripe;
                             order.StripePaymentIntentId = paymentIntent.Id;
@@ -94,7 +108,7 @@ public class PaymentsController : ControllerBase
 
             return Ok();
         }
-        catch (StripeException e)
+        catch (StripeException)
         {
             return BadRequest();
         }
@@ -104,6 +118,8 @@ public class PaymentsController : ControllerBase
     [HttpPost("request-refund/{orderId}")]
     public async Task<IActionResult> RequestRefund(int orderId)
     {
+        if (!await CanAccessOrderAsMerchantAsync(orderId)) return Forbid();
+
         var order = await _orderRepository.GetByIdAsync(orderId);
         if (order == null) return NotFound("Order not found");
 
@@ -138,6 +154,8 @@ public class PaymentsController : ControllerBase
     [HttpPost("supplier/{supplierId}/account-session")]
     public async Task<IActionResult> CreateSupplierAccountSession(int supplierId)
     {
+        if (!await CanAccessSupplierAsync(supplierId)) return Forbid();
+
         try
         {
             var clientSecret = await _paymentService.CreateSupplierAccountSessionAsync(supplierId);
@@ -162,5 +180,32 @@ public class PaymentsController : ControllerBase
         {
             return BadRequest(new { error = ex.Message });
         }
+    }
+
+    // ───────────────────────────── Security Helpers ─────────────────────────────────
+
+    private async Task<bool> CanAccessOrderAsMerchantAsync(int masterOrderId)
+    {
+        if (User.IsInRole("Admin")) return true;
+
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdStr, out var userId)) return false;
+
+        var order = await _orderRepository.GetByIdAsync(masterOrderId);
+        if (order == null) return false;
+
+        var shop = await _merchantRepository.SingleOrDefaultAsync(m => m.MerchantID == order.MerchantId && m.OwnerUserId == userId);
+        return shop != null;
+    }
+
+    private async Task<bool> CanAccessSupplierAsync(int supplierId)
+    {
+        if (User.IsInRole("Admin")) return true;
+
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdStr, out var userId)) return false;
+
+        var supplier = await _supplierRepository.SingleOrDefaultAsync(s => s.SupplierID == supplierId && s.OwnerUserId == userId);
+        return supplier != null;
     }
 }
