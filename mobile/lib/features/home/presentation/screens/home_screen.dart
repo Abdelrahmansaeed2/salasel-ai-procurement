@@ -106,8 +106,8 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           Spacer(),
-          Text(
-            'متجر سارة',
+          Obx(() => Text(
+            controller.storeName.value.isEmpty ? 'جاري التحميل...' : controller.storeName.value,
             style: TextStyle(
               color: Color(0xFF333333),
               fontFamily: 'Cairo',
@@ -115,7 +115,7 @@ class HomeScreen extends StatelessWidget {
               fontWeight: FontWeight.w700,
               height: 1.73.h,
             ),
-          ),
+          )),
           SizedBox(width: 12.w),
           AnimatedPressable(
             borderRadius: BorderRadius.circular(20.r),

@@ -32,6 +32,7 @@ class HomeController extends GetxController {
   final Rx<DashboardStatsModel?> dashboardStats = Rx<DashboardStatsModel?>(null);
   final RxList<AiAlertModel> aiAlerts = <AiAlertModel>[].obs;
   final RxList<RecentOrder> recentOrders = <RecentOrder>[].obs;
+  final RxString storeName = ''.obs;
   
   final RxBool isLoading = true.obs;
   final ApiClient _apiClient = ApiClient();
@@ -52,13 +53,14 @@ class HomeController extends GetxController {
         dashboardStats.value = DashboardStatsModel.fromJson(statsResponse.data);
       }
 
-      // 2. Fetch User's Primary Shop to get the merchantId
+      // 2. Fetch User's Primary Shop to get the merchantId and shopName
       final shopsResponse = await _apiClient.dio.get('/merchants/me/shops');
       int? merchantId;
       if (shopsResponse.statusCode == 200) {
         final List<dynamic> shops = shopsResponse.data;
         if (shops.isNotEmpty) {
           merchantId = shops.first['merchantID'];
+          storeName.value = shops.first['shopName'] ?? 'متجر';
         }
       }
 
