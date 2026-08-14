@@ -8,6 +8,7 @@ import 'package:intl/intl.dart' hide TextDirection;
 
 import '../controllers/voice_order_detail_controller.dart';
 import '../../data/models/order_detail_model.dart';
+import 'checkout_screen.dart';
 
 class VoiceOrderDetailScreen extends StatefulWidget {
   final int orderId;
@@ -701,6 +702,34 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
                       ),
                     ),
                   ],
+                );
+              }
+
+              final isApproved = status == 'Manually_Approved';
+              if (isApproved) {
+                return SizedBox(
+                  width: double.infinity,
+                  height: 56.h,
+                  child: ElevatedButton(
+                    onPressed: () => Get.to(() => CheckoutScreen(orderId: order.id)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                    ),
+                    child: Text(
+                      'الدفع الآن',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Cairo',
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        height: 24 / 16,
+                      ),
+                    ),
+                  ),
                 );
               }
 
