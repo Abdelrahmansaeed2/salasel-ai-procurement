@@ -89,10 +89,9 @@ class OrderDetailModel {
       merchantAddress: json['merchantAddress'] ?? 'شارع الملك فهد، العليا',
       merchantCity: json['merchantCity'] ?? 'الرياض',
       aiInsights: json['aiInsights'] != null ? OrderDetailAiInsightsModel.fromJson(json['aiInsights']) : null,
-      products: (json['products'] ?? json['items'] as List<dynamic>?)
-              ?.map((p) => OrderDetailProductModel.fromJson(p))
-              .toList() ??
-          [],
+      products: ((json['products'] as List<dynamic>?) ?? (json['items'] as List<dynamic>?) ?? [])
+          .map((p) => OrderDetailProductModel.fromJson(p as Map<String, dynamic>))
+          .toList(),
     );
   }
 }

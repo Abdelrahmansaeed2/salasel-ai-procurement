@@ -22,7 +22,8 @@ class CheckoutController extends GetxController {
 
       if (selectedPaymentMethod.value == 'CreditCard') {
         // 1. Create Payment Intent
-        final intentResponse = await _apiClient.dio.post('/payments/create-intent/$orderId');
+        final baseWithoutV1 = ApiClient.baseUrl.replaceAll('/v1', '');
+        final intentResponse = await _apiClient.dio.post('$baseWithoutV1/payments/create-intent/$orderId');
         
         if (intentResponse.statusCode == 200) {
           final clientSecret = intentResponse.data['clientSecret'];
@@ -36,6 +37,9 @@ class CheckoutController extends GetxController {
                 colors: PaymentSheetAppearanceColors(
                   primary: Color(0xFF004AC6),
                 ),
+              ),
+              billingDetailsCollectionConfiguration: const BillingDetailsCollectionConfiguration(
+                address: AddressCollectionMode.never,
               ),
             ),
           );

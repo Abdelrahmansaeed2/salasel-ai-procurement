@@ -396,4 +396,41 @@ public class OrdersController : ControllerBase
         var shop = await _merchantRepository.SingleOrDefaultAsync(m => m.MerchantID == order.MerchantId && m.OwnerUserId == userId);
         return shop != null;
     }
+
+    [HttpPost("{id:int}/ratings")]
+    [Authorize(Roles = "Merchant")]
+    public async Task<IActionResult> SubmitRatings(int id, [FromBody] SubmitSupplierRatingsDto request)
+    {
+        var merchantIdStr = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (!int.TryParse(merchantIdStr, out var merchantId)) return Unauthorized();
+
+        // Very basic prototype implementation for MVP:
+        // Update the ReliabilityScore for each supplier based on the rating given.
+        foreach (var kvp in request.Ratings)
+        {
+            var supplierName = kvp.Key;
+            var rating = kvp.Value; // 1-5
+            
+            // Find the supplier by name (since mobile currently maps by name)
+            var supplier = await _supplierRepository.Query()
+                .FirstOrDefaultAsync(s => s.CompanyName == supplierName);
+
+            if (supplier != null)
+            {
+                // Score out of 100. 5 stars = 100, 1 star = 20.
+                decimal ratingScore = rating * 20m;
+                
+                // Simple moving average or just assign it
+                if (supplier.ReliabilityScore == 0) 
+                    supplier.ReliabilityScore = ratingScore;
+                else
+                    supplier.ReliabilityScore = (supplier.ReliabilityScore + ratingScore) / 2m;
+                
+                await _supplierRepository.UpdateAsync(supplier);
+            }
+        }
+        await _supplierRepository.SaveChangesAsync();
+
+        return Ok(new { Message = "Ratings submitted successfully." });
+    }
 }

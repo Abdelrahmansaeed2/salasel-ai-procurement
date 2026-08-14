@@ -13,8 +13,13 @@ import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/orders/presentation/screens/checkout_screen.dart';
 import 'features/splash/presentation/screens/splash_screen.dart';
 
+import 'package:flutter_stripe/flutter_stripe.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Stripe
+  Stripe.publishableKey = 'pk_test_51U4G6zDRX6tSvbDOsuqtf0kTtSmzHXAOfQQ7g7hiEu4YijnNPmIbjOvklSQsBwlqQXHxycbHTy09GBH1smNB6mZt00sxmDSvV9'; // standard test key
   
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

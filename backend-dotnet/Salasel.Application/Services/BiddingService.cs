@@ -108,7 +108,13 @@ public class BiddingService : IBiddingService
 
         var accepted = relevant
             .Where(s => s.SupplierId == supplierId
-                        && (s.Status == FulfillmentStatus.Accepted || s.Status == FulfillmentStatus.Shipped))
+                        && s.Status == FulfillmentStatus.Accepted)
+            .Select(s => MapCard(s, myBidPrice: null))
+            .ToList();
+
+        var shipped = relevant
+            .Where(s => s.SupplierId == supplierId
+                        && s.Status == FulfillmentStatus.Shipped)
             .Select(s => MapCard(s, myBidPrice: null))
             .ToList();
 
@@ -131,6 +137,7 @@ public class BiddingService : IBiddingService
                 new() { Key = "Pending", Label = "طلبات جديدة", Cards = pending },
                 new() { Key = "Bidding", Label = "عروضي المقدمة", Cards = bidding },
                 new() { Key = "Accepted", Label = "قيد التنفيذ", Cards = accepted },
+                new() { Key = "Shipped", Label = "جاري التوصيل", Cards = shipped },
                 new() { Key = "Delivered", Label = "تم التسليم", Cards = delivered },
                 new() { Key = "Rejected", Label = "مرفوض", Cards = rejected }
             }

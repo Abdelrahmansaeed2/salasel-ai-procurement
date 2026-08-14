@@ -35,7 +35,12 @@ class VoiceOrderDetailController extends GetxController {
         error.value = 'فشل في تحميل تفاصيل الطلب';
       }
     } catch (e) {
-      error.value = 'حدث خطأ أثناء الاتصال بالخادم';
+      if (e is DioException) {
+        error.value = 'حدث خطأ أثناء الاتصال بالخادم: ${e.response?.statusCode} ${e.message}';
+      } else {
+        error.value = 'حدث خطأ غير متوقع: $e';
+        print('problems:'+e.toString());
+      }
     } finally {
       isLoading.value = false;
     }

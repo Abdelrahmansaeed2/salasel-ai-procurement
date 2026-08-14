@@ -65,7 +65,7 @@ interface BoardColumn {
 export class PortalOrdersComponent implements OnInit {
   readonly activeFilter = signal<QuickFilter | null>('high-priority');
   readonly detailOrderId = signal<string | null>(null);
-  readonly viewMode = signal<ViewMode>('feed');
+  readonly viewMode = signal<ViewMode>('board');
 
   readonly biddingOrderId = signal<string | null>(null);
   readonly bidAmount = signal<string>('');
@@ -111,6 +111,7 @@ export class PortalOrdersComponent implements OnInit {
             let color = '#191B23';
             if (col.key === 'Pending') color = '#92400E';
             if (col.key === 'Accepted' || col.key === 'Bidding') color = '#1E40AF';
+            if (col.key === 'Shipped') color = '#B45309';
             if (col.key === 'Delivered') color = '#14532D';
             if (col.key === 'Rejected') color = '#7F1D1D';
 

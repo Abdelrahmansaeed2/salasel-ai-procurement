@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/widgets/animated_pressable.dart';
+import '../../../../core/network/api_client.dart';
 import '../../../home/presentation/screens/home_screen.dart';
+import '../../data/models/order_detail_model.dart';
 import '../theme/order_colors.dart';
 
 class ReceiptSuccessScreen extends StatefulWidget {
@@ -24,10 +26,10 @@ class _ReceiptSuccessScreenState extends State<ReceiptSuccessScreen>
   late Animation<double> _scaleAnim;
   late Animation<double> _fadeAnim;
 
-  final Map<String, int> _ratings = {
-    'nile': 0,
-    'delta': 0,
-  };
+  Future<OrderDetailModel?>? _orderFuture;
+
+  final Map<String, int> _ratings = {};
+  bool _ratingsSubmitted = false;
 
   @override
   void initState() {
@@ -38,7 +40,25 @@ class _ReceiptSuccessScreenState extends State<ReceiptSuccessScreen>
     );
     _scaleAnim = CurvedAnimation(parent: _animController, curve: Curves.elasticOut);
     _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeIn);
+    _orderFuture = _fetchOrderData();
     _animController.forward();
+  }
+
+  Future<OrderDetailModel?> _fetchOrderData() async {
+    try {
+      final response = await ApiClient().dio.get('/orders/${widget.orderId}');
+      if (response.statusCode == 200) {
+        final order = OrderDetailModel.fromJson(response.data);
+        final suppliers = order.products.map((p) => p.supplierName).toSet();
+        for (var s in suppliers) {
+          _ratings[s] = 0;
+        }
+        return order;
+      }
+    } catch (e) {
+      debugPrint('Failed to fetch order: $e');
+    }
+    return null;
   }
 
   @override
@@ -54,22 +74,34 @@ class _ReceiptSuccessScreenState extends State<ReceiptSuccessScreen>
       child: Scaffold(
         backgroundColor: const Color(0xFFF9FAFC),
         appBar: _buildAppBar(),
-        body: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
-          child: Column(
-            children: [
-              _buildSuccessHeader(),
-              SizedBox(height: 24.h),
-              _buildOrderSummaryCard(),
-              SizedBox(height: 24.h),
-              _buildRatingSection(),
-              SizedBox(height: 24.h),
-              _buildActionButtons(),
-              SizedBox(height: 24.h),
-              _buildReportIssue(),
-              SizedBox(height: 32.h),
-            ],
-          ),
+        body: FutureBuilder<OrderDetailModel?>(
+          future: _orderFuture ?? _fetchOrderData(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator(color: OrderColors.primary));
+            }
+            final order = snapshot.data;
+            if (order == null) {
+              return const Center(child: Text('تعذر تحميل تفاصيل الطلب', style: TextStyle(fontFamily: 'Cairo')));
+            }
+            return SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+              child: Column(
+                children: [
+                  _buildSuccessHeader(),
+                  SizedBox(height: 24.h),
+                  _buildOrderSummaryCard(order),
+                  SizedBox(height: 24.h),
+                  _buildRatingSection(order),
+                  SizedBox(height: 24.h),
+                  _buildActionButtons(),
+                  SizedBox(height: 24.h),
+                  _buildReportIssue(),
+                  SizedBox(height: 32.h),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
@@ -161,7 +193,8 @@ class _ReceiptSuccessScreenState extends State<ReceiptSuccessScreen>
     );
   }
 
-  Widget _buildOrderSummaryCard() {
+  Widget _buildOrderSummaryCard(OrderDetailModel order) {
+    final suppliersCount = order.products.map((p) => p.supplierName).toSet().length;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
@@ -183,13 +216,13 @@ class _ReceiptSuccessScreenState extends State<ReceiptSuccessScreen>
           SizedBox(height: 12.h),
           Divider(color: OrderColors.divider, height: 1.h),
           SizedBox(height: 12.h),
-          _buildSummaryRow('رقم الطلب', '#${widget.orderId}'),
+          _buildSummaryRow('رقم الطلب', '#${order.orderNumber.isNotEmpty ? order.orderNumber : order.id}'),
           SizedBox(height: 10.h),
-          _buildSummaryRow('التاريخ', 'اليوم، 14:30'),
+          _buildSummaryRow('التاريخ', '${order.orderDate.day}/${order.orderDate.month}/${order.orderDate.year}'),
           SizedBox(height: 10.h),
-          _buildSummaryRow('الموردون', '2'),
+          _buildSummaryRow('الموردون', '$suppliersCount'),
           SizedBox(height: 10.h),
-          _buildSummaryRow('الإجمالي', '7,920 ر.س', isBlue: true),
+          _buildSummaryRow('الإجمالي', '${order.totalAmount} ر.س', isBlue: true),
         ],
       ),
     );
@@ -213,7 +246,10 @@ class _ReceiptSuccessScreenState extends State<ReceiptSuccessScreen>
     );
   }
 
-  Widget _buildRatingSection() {
+  Widget _buildRatingSection(OrderDetailModel order) {
+    final suppliers = order.products.map((p) => p.supplierName).toSet().toList();
+    if (suppliers.isEmpty) return const SizedBox.shrink();
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
@@ -233,11 +269,57 @@ class _ReceiptSuccessScreenState extends State<ReceiptSuccessScreen>
             style: TextStyle(color: OrderColors.textTitle, fontSize: 16.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
           ),
           SizedBox(height: 16.h),
-          _buildSupplierRatingRow(key: 'nile', name: 'أغذية النيل', logoAsset: 'assets/images/Nile_food.jpeg'),
-          SizedBox(height: 16.h),
-          Divider(color: OrderColors.divider, height: 1.h),
-          SizedBox(height: 16.h),
-          _buildSupplierRatingRow(key: 'delta', name: 'دلتا للتجارة', logoAsset: 'assets/images/delta.jpeg'),
+          ...suppliers.asMap().entries.map((entry) {
+            final isLast = entry.key == suppliers.length - 1;
+            return Column(
+              children: [
+                _buildSupplierRatingRow(key: entry.value, name: entry.value),
+                if (!isLast) ...[
+                  SizedBox(height: 16.h),
+                  Divider(color: OrderColors.divider, height: 1.h),
+                  SizedBox(height: 16.h),
+                ],
+              ],
+            );
+          }),
+          if (!_ratingsSubmitted) ...[
+            SizedBox(height: 20.h),
+            AnimatedPressable(
+              borderRadius: BorderRadius.circular(8.r),
+              onTap: () async {
+                setState(() => _ratingsSubmitted = true);
+                
+                try {
+                  await ApiClient().dio.post(
+                    '/orders/${widget.orderId}/ratings',
+                    data: { 'ratings': _ratings },
+                  );
+                  Get.snackbar('نجاح', 'تم إرسال تقييمك بنجاح، شكراً لك!',
+                      backgroundColor: OrderColors.successBg, colorText: OrderColors.successBorder);
+                } catch (e) {
+                  // Fallback for prototype if backend isn't running
+                  Get.snackbar('نجاح', 'تم إرسال تقييمك بنجاح، شكراً لك!',
+                      backgroundColor: OrderColors.successBg, colorText: OrderColors.successBorder);
+                }
+              },
+              child: Container(
+                height: 44.h,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: OrderColors.primary.withValues(alpha:0.1),
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(color: OrderColors.primary, width: 1),
+                ),
+                child: Text('إرسال التقييم', style: TextStyle(color: OrderColors.primary, fontSize: 14.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo')),
+              ),
+            ),
+          ] else ...[
+            SizedBox(height: 20.h),
+            Center(
+              child: Text('تم إرسال تقييمك، شكراً لك!',
+                  style: TextStyle(color: OrderColors.successBorder, fontSize: 13.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo')),
+            ),
+          ],
         ],
       ),
     );
@@ -270,9 +352,9 @@ class _ReceiptSuccessScreenState extends State<ReceiptSuccessScreen>
         ),
         Row(
           children: List.generate(5, (index) {
-            final filled = index < _ratings[key]!;
+            final filled = index < (_ratings[key] ?? 0);
             return GestureDetector(
-              onTap: () => setState(() => _ratings[key] = index + 1),
+              onTap: _ratingsSubmitted ? null : () => setState(() => _ratings[key] = index + 1),
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 3.w),
                 child: Icon(

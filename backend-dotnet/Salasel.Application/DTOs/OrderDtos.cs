@@ -29,3 +29,8 @@ public class OrderDetailDto
     public OrderDetailAiInsightsDto? AiInsights { get; set; }
     public List<OrderDetailProductDto> Products { get; set; } = new();
 }
+
+public class SubmitSupplierRatingsDto
+{
+    public Dictionary<string, int> Ratings { get; set; } = new();
+}
