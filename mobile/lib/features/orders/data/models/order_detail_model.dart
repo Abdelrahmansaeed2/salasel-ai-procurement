@@ -53,6 +53,9 @@ class OrderDetailModel {
   final DateTime orderDate;
   final String status;
   final String transcript;
+  final String merchantName;
+  final String merchantAddress;
+  final String merchantCity;
   final OrderDetailAiInsightsModel? aiInsights;
   final List<OrderDetailProductModel> products;
 
@@ -65,25 +68,32 @@ class OrderDetailModel {
     required this.orderDate,
     required this.status,
     required this.transcript,
+    required this.merchantName,
+    required this.merchantAddress,
+    required this.merchantCity,
     this.aiInsights,
     required this.products,
   });
 
   factory OrderDetailModel.fromJson(Map<String, dynamic> json) {
     return OrderDetailModel(
-      id: json['id'] ?? 0,
+      id: json['orderId'] ?? json['id'] ?? 0,
       orderNumber: json['orderNumber'] ?? '',
-      totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
+      totalAmount: (json['totalAmount'] ?? json['total'] as num?)?.toDouble() ?? 0.0,
       deliveryFee: (json['deliveryFee'] as num?)?.toDouble() ?? 0.0,
       tax: (json['tax'] as num?)?.toDouble() ?? 0.0,
       orderDate: json['orderDate'] != null ? DateTime.parse(json['orderDate']) : DateTime.now(),
       status: json['status'] ?? '',
       transcript: json['transcript'] ?? '',
+      merchantName: json['merchantName'] ?? 'مستودع الرياض الرئيسي',
+      merchantAddress: json['merchantAddress'] ?? 'شارع الملك فهد، العليا',
+      merchantCity: json['merchantCity'] ?? 'الرياض',
       aiInsights: json['aiInsights'] != null ? OrderDetailAiInsightsModel.fromJson(json['aiInsights']) : null,
-      products: (json['products'] as List<dynamic>?)
+      products: (json['products'] ?? json['items'] as List<dynamic>?)
               ?.map((p) => OrderDetailProductModel.fromJson(p))
               .toList() ??
           [],
     );
   }
 }
+

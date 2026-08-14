@@ -12,6 +12,9 @@ class CheckoutScreen extends StatefulWidget {
   final String totalAmount;
   final String supplierName;
   final String itemsSummary;
+  final String merchantName;
+  final String merchantAddress;
+  final String merchantCity;
 
   const CheckoutScreen({
     super.key,
@@ -19,6 +22,9 @@ class CheckoutScreen extends StatefulWidget {
     required this.totalAmount,
     required this.supplierName,
     required this.itemsSummary,
+    required this.merchantName,
+    required this.merchantAddress,
+    required this.merchantCity,
   });
 
   @override
@@ -413,12 +419,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'مستودع الرياض الرئيسي',
+                widget.merchantName,
                 style: TextStyle(color: OrderColors.textTitle, fontSize: 15.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
               ),
               SizedBox(height: 4.h),
               Text(
-                'شارع الملك فهد، العليا، الرياض',
+                '${widget.merchantAddress}، ${widget.merchantCity}',
                 style: TextStyle(color: OrderColors.textMuted, fontSize: 13.sp, fontFamily: 'Cairo'),
               ),
             ],

@@ -230,6 +230,8 @@ public static class OrderMapper
             orderId = o.Id,
             merchantId = o.MerchantId,
             merchantName = o.Merchant?.ShopName,
+            merchantAddress = o.Merchant?.Address,
+            merchantCity = o.Merchant?.BusinessCity,
 
             supplierId = sub?.SupplierId,
             supplierName = sub?.Supplier?.CompanyName,

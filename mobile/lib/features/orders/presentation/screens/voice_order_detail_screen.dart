@@ -722,6 +722,9 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
                             totalAmount: totalStr,
                             supplierName: supplierNameStr,
                             itemsSummary: itemsSummaryStr,
+                            merchantName: order.merchantName,
+                            merchantAddress: order.merchantAddress,
+                            merchantCity: order.merchantCity,
                           ));
                     },
                     style: ElevatedButton.styleFrom(
