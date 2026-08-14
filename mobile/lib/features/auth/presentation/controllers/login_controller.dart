@@ -65,6 +65,7 @@ class LoginController extends GetxController {
         );
       } else {
         final authResponse = await _authRepository.login(email, password);
+        storage.write('isSetupCompleted', authResponse.isSetupCompleted);
         if (authResponse.isSetupCompleted) {
           Get.offAll(
             () => HomeScreen(),
