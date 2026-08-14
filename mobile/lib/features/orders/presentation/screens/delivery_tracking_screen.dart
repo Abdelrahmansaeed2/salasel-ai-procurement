@@ -135,7 +135,7 @@ class DeliveryTrackingScreen extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Container(
-        height: 220.h,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16.r),
           color: Colors.white,
@@ -147,97 +147,65 @@ class DeliveryTrackingScreen extends StatelessWidget {
             ),
           ],
         ),
-        child: Stack(
+        child: Row(
           children: [
-            // Map Image Background
-            Positioned.fill(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16.r),
-                child: Image.asset(
-                  'assets/images/map_bg.png',
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: const Color(0xFFE2E8F0),
-                    child: Center(child: Icon(Icons.map, size: 48, color: Colors.grey)),
-                  ),
+            // Avatar
+            Container(
+              width: 48.w,
+              height: 48.h,
+              decoration: const BoxDecoration(
+                color: OrderColors.primary,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  controller.driverName.value.isNotEmpty ? controller.driverName.value[0] : 'ع',
+                  style: TextStyle(color: Colors.white, fontSize: 20.sp, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
                 ),
               ),
             ),
-            // Driver Pill Overlay
-            Positioned(
-              left: 16.w,
-              right: 16.w,
-              bottom: 16.h,
+            SizedBox(width: 12.w),
+            // Info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    controller.driverName.value,
+                    style: TextStyle(color: OrderColors.textTitle, fontSize: 16.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
+                  ),
+                  Text(
+                    controller.driverPhone.value,
+                    style: TextStyle(color: OrderColors.textMuted, fontSize: 14.sp, fontFamily: 'Cairo'),
+                  ),
+                ],
+              ),
+            ),
+            // Actions
+            GestureDetector(
+              onTap: controller.callDriver,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(999.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                width: 40.w,
+                height: 40.h,
+                decoration: const BoxDecoration(
+                  color: OrderColors.primarySoft,
+                  shape: BoxShape.circle,
                 ),
-                child: Row(
-                  children: [
-                    // Avatar
-                    Container(
-                      width: 40.w,
-                      height: 40.h,
-                      decoration: const BoxDecoration(
-                        color: OrderColors.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          controller.driverName.value.isNotEmpty ? controller.driverName.value[0] : 'ع',
-                          style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold, fontFamily: 'Cairo'),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    // Info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            controller.driverName.value,
-                            style: TextStyle(color: OrderColors.textTitle, fontSize: 14.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
-                          ),
-                          Text(
-                            controller.driverPhone.value,
-                            style: TextStyle(color: OrderColors.textMuted, fontSize: 12.sp, fontFamily: 'Cairo'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Actions
-                    Container(
-                      width: 36.w,
-                      height: 36.h,
-                      decoration: const BoxDecoration(
-                        color: OrderColors.primarySoft,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.phone, color: OrderColors.primary, size: 18.w),
-                    ),
-                    SizedBox(width: 8.w),
-                    Container(
-                      width: 36.w,
-                      height: 36.h,
-                      decoration: const BoxDecoration(
-                        color: OrderColors.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.chat_bubble, color: Colors.white, size: 16.w),
-                    ),
-                  ],
+                child: Icon(Icons.phone, color: OrderColors.primary, size: 20.w),
+              ),
+            ),
+            SizedBox(width: 12.w),
+            GestureDetector(
+              onTap: controller.whatsappDriver,
+              child: Container(
+                width: 40.w,
+                height: 40.h,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF25D366),
+                  shape: BoxShape.circle,
                 ),
+                child: Icon(Icons.chat_bubble, color: Colors.white, size: 18.w),
               ),
             ),
           ],

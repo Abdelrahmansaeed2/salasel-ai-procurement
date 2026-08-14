@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../../core/network/api_client.dart';
 import '../screens/receipt_success_screen.dart';
 
@@ -85,5 +86,29 @@ class DeliveryTrackingController extends GetxController {
     if (shippedAt.value != null) return 2;
     if (acceptedAt.value != null) return 1;
     return 0;
+  }
+
+  Future<void> callDriver() async {
+    final phone = driverPhone.value.replaceAll(RegExp(r'[^\d+]'), '');
+    if (phone.isEmpty) return;
+    
+    final uri = Uri.parse('tel:$phone');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      Get.snackbar('خطأ', 'لا يمكن فتح تطبيق الاتصال');
+    }
+  }
+
+  Future<void> whatsappDriver() async {
+    final phone = driverPhone.value.replaceAll(RegExp(r'[^\d+]'), '');
+    if (phone.isEmpty) return;
+
+    final uri = Uri.parse('https://wa.me/$phone');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      Get.snackbar('خطأ', 'لا يمكن فتح واتساب');
+    }
   }
 }
