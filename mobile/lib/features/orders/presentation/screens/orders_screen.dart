@@ -481,8 +481,199 @@ class _OrdersScreenState extends State<OrdersScreen> {
       barrierDismissible: true,
     ).then((_) => c.dismissAi());
   }
-}
+  void _showFilterModalBottomSheet(BuildContext context, OrdersController c) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+      ),
+      isScrollControlled: true,
+      builder: (context) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, MediaQuery.of(context).padding.bottom + 20.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40.w,
+                    height: 4.h,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE2E8F0),
+                      borderRadius: BorderRadius.circular(2.r),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 24.h),
+                Text(
+                  'تصفية الطلبات',
+                  style: TextStyle(
+                    color: const Color(0xFF1E293B),
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Cairo',
+                  ),
+                ),
+                SizedBox(height: 24.h),
+                Text(
+                  'نطاق التاريخ',
+                  style: TextStyle(
+                    color: const Color(0xFF64748B),
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Cairo',
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                Obx(() => Wrap(
+                  spacing: 8.w,
+                  runSpacing: 8.h,
+                  children: [
+                    _buildFilterChip('الكل', c),
+                    _buildFilterChip('آخر 7 أيام', c),
+                    _buildFilterChip('آخر 30 يوم', c),
+                    _buildFilterChip('هذا الشهر', c),
+                  ],
+                )),
+                SizedBox(height: 24.h),
+                Text(
+                  'نطاق السعر',
+                  style: TextStyle(
+                    color: const Color(0xFF64748B),
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Cairo',
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Text(
+                          'الحد الأدنى',
+                          style: TextStyle(color: const Color(0xFF94A3B8), fontSize: 13.sp, fontFamily: 'Cairo'),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Text('-', style: TextStyle(color: const Color(0xFF94A3B8))),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Text(
+                          'الحد الأعلى',
+                          style: TextStyle(color: const Color(0xFF94A3B8), fontSize: 13.sp, fontFamily: 'Cairo'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 32.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () {
+                          c.resetAdvancedFilters();
+                          Navigator.pop(context);
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                            side: BorderSide(color: const Color(0xFFE2E8F0)),
+                          ),
+                        ),
+                        child: Text(
+                          'إعادة ضبط',
+                          style: TextStyle(
+                            color: const Color(0xFF64748B),
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Cairo',
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // The controller automatically updates the displayedOrders
+                          Navigator.pop(context);
+                          Get.snackbar('تم تطبيق التصفية', 'تم تحديث قائمة الطلبات بنجاح');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2563EB),
+                          elevation: 0,
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                        ),
+                        child: Text(
+                          'تطبيق التصفية',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Cairo',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
+  Widget _buildFilterChip(String label, OrdersController c) {
+    final isSelected = c.dateFilter.value == label;
+    return GestureDetector(
+      onTap: () => c.setDateFilter(label),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(99.r),
+          border: Border.all(color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0)),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : const Color(0xFF64748B),
+            fontSize: 13.sp,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+            fontFamily: 'Cairo',
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class _OrderCard extends StatelessWidget {
   final OrderModel order;
@@ -856,198 +1047,6 @@ class _TabChip extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-  void _showFilterModalBottomSheet(BuildContext context, OrdersController c) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-      ),
-      isScrollControlled: true,
-      builder: (context) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, MediaQuery.of(context).padding.bottom + 20.h),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40.w,
-                    height: 4.h,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE2E8F0),
-                      borderRadius: BorderRadius.circular(2.r),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 24.h),
-                Text(
-                  'تصفية الطلبات',
-                  style: TextStyle(
-                    color: const Color(0xFF1E293B),
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w700,
-                    fontFamily: 'Cairo',
-                  ),
-                ),
-                SizedBox(height: 24.h),
-                Text(
-                  'نطاق التاريخ',
-                  style: TextStyle(
-                    color: const Color(0xFF64748B),
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Cairo',
-                  ),
-                ),
-                SizedBox(height: 12.h),
-                Obx(() => Wrap(
-                  spacing: 8.w,
-                  runSpacing: 8.h,
-                  children: [
-                    _buildFilterChip('الكل', c),
-                    _buildFilterChip('آخر 7 أيام', c),
-                    _buildFilterChip('آخر 30 يوم', c),
-                    _buildFilterChip('هذا الشهر', c),
-                  ],
-                )),
-                SizedBox(height: 24.h),
-                Text(
-                  'نطاق السعر',
-                  style: TextStyle(
-                    color: const Color(0xFF64748B),
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Cairo',
-                  ),
-                ),
-                SizedBox(height: 12.h),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
-                        ),
-                        child: Text(
-                          'الحد الأدنى',
-                          style: TextStyle(color: const Color(0xFF94A3B8), fontSize: 13.sp, fontFamily: 'Cairo'),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Text('-', style: TextStyle(color: const Color(0xFF94A3B8))),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
-                        ),
-                        child: Text(
-                          'الحد الأعلى',
-                          style: TextStyle(color: const Color(0xFF94A3B8), fontSize: 13.sp, fontFamily: 'Cairo'),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 32.h),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () {
-                          c.resetAdvancedFilters();
-                          Navigator.pop(context);
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 14.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                            side: BorderSide(color: const Color(0xFFE2E8F0)),
-                          ),
-                        ),
-                        child: Text(
-                          'إعادة ضبط',
-                          style: TextStyle(
-                            color: const Color(0xFF64748B),
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'Cairo',
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      flex: 2,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // The controller automatically updates the displayedOrders
-                          Navigator.pop(context);
-                          Get.snackbar('تم تطبيق التصفية', 'تم تحديث قائمة الطلبات بنجاح');
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2563EB),
-                          elevation: 0,
-                          padding: EdgeInsets.symmetric(vertical: 14.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                        ),
-                        child: Text(
-                          'تطبيق التصفية',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'Cairo',
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildFilterChip(String label, OrdersController c) {
-    final isSelected = c.dateFilter.value == label;
-    return GestureDetector(
-      onTap: () => c.setDateFilter(label),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(99.r),
-          border: Border.all(color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0)),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : const Color(0xFF64748B),
-            fontSize: 13.sp,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-            fontFamily: 'Cairo',
-          ),
         ),
       ),
     );
