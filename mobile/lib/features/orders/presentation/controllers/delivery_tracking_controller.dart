@@ -21,6 +21,7 @@ class DeliveryTrackingController extends GetxController {
   final RxString driverPhone = ''.obs;
   final RxString estimatedDeliveryTime = ''.obs;
   final RxString supplierName = ''.obs;
+  final RxString supplierStatus = ''.obs;
 
   @override
   void onInit() {
@@ -41,15 +42,17 @@ class DeliveryTrackingController extends GetxController {
         if (data['deliveredAt'] != null) deliveredAt.value = DateTime.parse(data['deliveredAt']);
         if (data['receiptConfirmedAt'] != null) receiptConfirmedAt.value = DateTime.parse(data['receiptConfirmedAt']);
 
-        driverName.value = data['driverName'] ?? 'في انتظار المندوب';
-        driverPhone.value = data['driverPhone'] ?? 'غير متاح';
-        estimatedDeliveryTime.value = data['estimatedDeliveryTime'] ?? 'غير محدد';
+        driverName.value = data['driverName'] ?? '';
+        driverPhone.value = data['driverPhone'] ?? '';
+        estimatedDeliveryTime.value = data['estimatedDeliveryTime'] ?? '';
         
         if (data['suppliers'] != null && data['suppliers'] is List && (data['suppliers'] as List).isNotEmpty) {
           final firstSupplier = data['suppliers'][0];
           supplierName.value = firstSupplier['name'] ?? 'المورد';
+          supplierStatus.value = firstSupplier['status'] ?? 'جاري التوصيل';
         } else {
           supplierName.value = 'المورد';
+          supplierStatus.value = 'جاري التوصيل';
         }
       }
     } catch (e) {
