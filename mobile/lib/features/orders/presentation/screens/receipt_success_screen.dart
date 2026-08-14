@@ -11,7 +11,7 @@ class ReceiptSuccessScreen extends StatefulWidget {
 
   const ReceiptSuccessScreen({
     super.key,
-    this.orderId = 'SL-94821',
+    required this.orderId,
   });
 
   @override

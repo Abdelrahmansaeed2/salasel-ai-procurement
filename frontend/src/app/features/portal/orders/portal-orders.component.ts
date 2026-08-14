@@ -39,10 +39,12 @@ interface BoardCard {
   subtitle: string;
   avatarInitials?: string;
   badgeLabel?: string;
-  badgeVariant?: 'success' | 'danger' | 'neutral';
+  badgeVariant?: 'success' | 'danger' | 'neutral' | 'warning';
   total: string;
   metaLeft: string;
   metaRight?: string;
+  paymentStatus?: string;
+  paymentMethod?: string;
 }
 
 interface BoardColumn {
@@ -144,7 +146,9 @@ export class PortalOrdersComponent implements OnInit {
       badgeVariant: badgeVariant,
       total: `${item.subTotalAmount} ر.س`,
       metaLeft: `الكمية: ${item.quantity}`,
-      metaRight: item.status
+      metaRight: item.status,
+      paymentStatus: item.paymentStatus,
+      paymentMethod: item.paymentMethod
     }));
   }
 

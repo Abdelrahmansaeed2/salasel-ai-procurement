@@ -1002,6 +1002,7 @@
 .board-card-badge--success { background: rgba(220, 252, 231, 0.2); color: #15803d; }
 .board-card-badge--danger { background: rgba(255, 218, 214, 0.2); color: #434655; }
 .board-card-badge--neutral { background: rgba(208, 225, 251, 0.2); color: #505f76; }
+.board-card-badge--warning { background: rgba(254, 240, 138, 0.5); color: #a16207; }
 
 .board-card-total {
   font-size: 14px;

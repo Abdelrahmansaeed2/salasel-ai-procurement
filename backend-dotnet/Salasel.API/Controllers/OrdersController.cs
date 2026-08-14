@@ -269,9 +269,17 @@ public class OrdersController : ControllerBase
             return BadRequest(new { Message = "Order is already paid." });
 
         order.PaymentMethod = request.PaymentMethod;
-        order.PaymentStatus = PaymentStatus.Paid;
-        order.PaidAt = DateTime.UtcNow;
-        order.PaymentReference = request.PaymentReference;
+
+        if (request.PaymentMethod == PaymentMethod.CashOnDelivery)
+        {
+            order.PaymentStatus = PaymentStatus.Pending;
+        }
+        else
+        {
+            order.PaymentStatus = PaymentStatus.Paid;
+            order.PaidAt = DateTime.UtcNow;
+            order.PaymentReference = request.PaymentReference;
+        }
 
         await _masterOrderRepository.UpdateAsync(order);
         await _masterOrderRepository.SaveChangesAsync();

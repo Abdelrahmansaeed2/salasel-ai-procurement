@@ -172,7 +172,9 @@ public class BiddingService : IBiddingService
             Total = total.ToString("F2"),
             ProductName = s.Product?.Name,
             Quantity = s.Quantity,
-            Status = s.Status.ToString()
+            Status = s.Status.ToString(),
+            PaymentStatus = s.MasterOrder?.PaymentStatus.ToString() ?? "Unknown",
+            PaymentMethod = s.MasterOrder?.PaymentMethod?.ToString() ?? "Unknown"
         };
     }
 

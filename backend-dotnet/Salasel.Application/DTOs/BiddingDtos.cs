@@ -25,6 +25,8 @@ public class KanbanCardDto
     public string? ProductName { get; set; }
     public int Quantity { get; set; }
     public string Status { get; set; } = string.Empty;
+    public string PaymentStatus { get; set; } = string.Empty;
+    public string PaymentMethod { get; set; } = string.Empty;
 }
 
 // PUT /api/v1/orders/rfqs/{id}/bid  (id = SubOrderId)

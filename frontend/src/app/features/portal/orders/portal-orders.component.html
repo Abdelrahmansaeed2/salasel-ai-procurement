@@ -95,6 +95,13 @@
                   } @else {
                     <span></span>
                   }
+                  
+                  @if (card.paymentMethod === 'CashOnDelivery') {
+                    <span class="board-card-badge board-card-badge--warning">COD (الدفع عند الاستلام)</span>
+                  } @else if (card.paymentMethod === 'Stripe' || card.paymentStatus === 'Paid') {
+                    <span class="board-card-badge board-card-badge--success">مدفوع عبر البطاقة</span>
+                  }
+
                   <span class="board-card-total">{{ card.total }}</span>
                 </div>
 
