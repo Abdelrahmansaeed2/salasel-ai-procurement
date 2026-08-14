@@ -337,14 +337,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         SizedBox(width: 8.w),
         Expanded(
           child: _buildPaymentMethodCard(
-            value: 'wallet',
-            title: 'المحفظة',
-            icon: Icons.account_balance_wallet_outlined,
-          ),
-        ),
-        SizedBox(width: 8.w),
-        Expanded(
-          child: _buildPaymentMethodCard(
             value: 'cod',
             title: 'الدفع عند الاستلام',
             icon: Icons.money,
@@ -359,7 +351,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return GestureDetector(
       onTap: () => setState(() => _selectedPaymentMethod = value),
       child: Container(
-        height: 76.h,
         padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 4.w),
         decoration: BoxDecoration(
           color: isSelected ? OrderColors.primarySoft : Colors.white,
