@@ -52,18 +52,20 @@ public class PaymentsController : ControllerBase
             if (stripeEvent.Type == "payment_intent.succeeded")
             {
                 var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
-                var orderIdStr = paymentIntent.Metadata["MasterOrderId"];
-
-                if (int.TryParse(orderIdStr, out var orderId))
+                
+                if (paymentIntent != null && paymentIntent.Metadata != null && paymentIntent.Metadata.TryGetValue("MasterOrderId", out var orderIdStr))
                 {
-                    var order = await _orderRepository.GetByIdAsync(orderId);
-                    if (order != null)
+                    if (int.TryParse(orderIdStr, out var orderId))
                     {
-                        order.PaymentStatus = PaymentStatus.Paid;
-                        order.PaymentMethod = Salasel.Domain.Enums.PaymentMethod.Stripe;
-                        order.StripePaymentIntentId = paymentIntent.Id;
-                        order.PaidAt = System.DateTime.UtcNow;
-                        await _orderRepository.UpdateAsync(order);
+                        var order = await _orderRepository.GetByIdAsync(orderId);
+                        if (order != null)
+                        {
+                            order.PaymentStatus = PaymentStatus.Paid;
+                            order.PaymentMethod = Salasel.Domain.Enums.PaymentMethod.Stripe;
+                            order.StripePaymentIntentId = paymentIntent.Id;
+                            order.PaidAt = System.DateTime.UtcNow;
+                            await _orderRepository.UpdateAsync(order);
+                        }
                     }
                 }
             }
