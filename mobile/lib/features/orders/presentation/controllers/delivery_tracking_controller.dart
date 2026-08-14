@@ -19,6 +19,7 @@ class DeliveryTrackingController extends GetxController {
 
   final RxString driverName = ''.obs;
   final RxString driverPhone = ''.obs;
+  final RxList<String> supplierNames = <String>['المورد'].obs;
 
   @override
   void onInit() {
@@ -29,7 +30,8 @@ class DeliveryTrackingController extends GetxController {
   Future<void> fetchTracking() async {
     try {
       isLoading.value = true;
-      final response = await _apiClient.dio.get('/orders/$orderId/tracking');
+      final numericId = orderId.replaceAll(RegExp(r'[^0-9]'), '');
+      final response = await _apiClient.dio.get('/orders/$numericId/tracking');
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -40,6 +42,11 @@ class DeliveryTrackingController extends GetxController {
 
         driverName.value = data['driverName'] ?? 'في انتظار المندوب';
         driverPhone.value = data['driverPhone'] ?? 'غير متاح';
+        
+        if (data['supplierNames'] != null && data['supplierNames'] is List) {
+          final list = List<String>.from(data['supplierNames']);
+          supplierNames.assignAll(list.isNotEmpty ? list : ['المورد']);
+        }
       }
     } catch (e) {
       debugPrint('Error fetching tracking: $e');
@@ -51,7 +58,8 @@ class DeliveryTrackingController extends GetxController {
   Future<void> confirmReceipt() async {
     try {
       isConfirming.value = true;
-      final response = await _apiClient.dio.post('/orders/$orderId/confirm-receipt');
+      final numericId = orderId.replaceAll(RegExp(r'[^0-9]'), '');
+      final response = await _apiClient.dio.post('/orders/$numericId/confirm-receipt');
       if (response.statusCode == 200) {
         Get.offAll(() => ReceiptSuccessScreen(orderId: orderId));
       } else {

@@ -309,7 +309,8 @@ public class OrdersController : ControllerBase
             DeliveredAt = subOrders.Any() ? subOrders.Min(s => s.DeliveredAt) : null,
             ReceiptConfirmedAt = subOrders.Any() ? subOrders.Min(s => s.ReceiptConfirmedAt) : null,
             DriverName = driverSubOrder?.DriverName,
-            DriverPhone = driverSubOrder?.DriverPhone
+            DriverPhone = driverSubOrder?.DriverPhone,
+            SupplierNames = subOrders.Where(s => s.Supplier != null).Select(s => s.Supplier.CompanyName).Distinct().ToList()
         });
     }
 
