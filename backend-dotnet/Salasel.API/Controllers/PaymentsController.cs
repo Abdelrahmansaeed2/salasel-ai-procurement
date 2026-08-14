@@ -4,6 +4,7 @@ using Salasel.Application.Interfaces;
 using Salasel.Domain.Enums;
 using Stripe;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Salasel.API.Controllers;
@@ -14,12 +15,18 @@ public class PaymentsController : ControllerBase
 {
     private readonly IPaymentService _paymentService;
     private readonly IMasterOrderRepository _orderRepository;
+    private readonly ISupplierProfileRepository _supplierRepository;
     private readonly IConfiguration _configuration;
 
-    public PaymentsController(IPaymentService paymentService, IMasterOrderRepository orderRepository, IConfiguration configuration)
+    public PaymentsController(
+        IPaymentService paymentService, 
+        IMasterOrderRepository orderRepository,
+        ISupplierProfileRepository supplierRepository,
+        IConfiguration configuration)
     {
         _paymentService = paymentService;
         _orderRepository = orderRepository;
+        _supplierRepository = supplierRepository;
         _configuration = configuration;
     }
 
@@ -69,6 +76,21 @@ public class PaymentsController : ControllerBase
                     }
                 }
             }
+            else if (stripeEvent.Type == "account.updated")
+            {
+                var account = stripeEvent.Data.Object as Account;
+                if (account != null && account.ChargesEnabled && account.PayoutsEnabled)
+                {
+                    // Find supplier by StripeAccountId
+                    var allSuppliers = await _supplierRepository.GetAllAsync();
+                    var supplier = allSuppliers.FirstOrDefault(s => s.StripeAccountId == account.Id);
+                    if (supplier != null && !supplier.IsStripeOnboardingComplete)
+                    {
+                        supplier.IsStripeOnboardingComplete = true;
+                        await _supplierRepository.UpdateAsync(supplier);
+                    }
+                }
+            }
 
             return Ok();
         }
@@ -107,12 +129,38 @@ public class PaymentsController : ControllerBase
         if (string.IsNullOrEmpty(order.StripePaymentIntentId))
             return BadRequest("Stripe Payment Intent ID is missing.");
 
-        var refundId = await _paymentService.RefundPaymentAsync(order.StripePaymentIntentId);
+        var refundId = await _paymentService.RefundPaymentAsync(orderId);
         
-        order.StripeRefundId = refundId;
-        order.PaymentStatus = PaymentStatus.Refunded;
-        await _orderRepository.UpdateAsync(order);
+        return Ok(new { message = "Refund approved and processed successfully.", refundId });
+    }
 
-        return Ok(new { message = "Refund approved and processed successfully." });
+    [Authorize(Roles = "Supplier,Admin")]
+    [HttpPost("supplier/{supplierId}/account-session")]
+    public async Task<IActionResult> CreateSupplierAccountSession(int supplierId)
+    {
+        try
+        {
+            var clientSecret = await _paymentService.CreateSupplierAccountSessionAsync(supplierId);
+            return Ok(new { clientSecret });
+        }
+        catch (System.Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("supplier/transfer/{subOrderId}")]
+    public async Task<IActionResult> TransferToSupplier(int subOrderId)
+    {
+        try
+        {
+            var transferId = await _paymentService.TransferFundsToSupplierAsync(subOrderId);
+            return Ok(new { message = "Funds transferred to supplier successfully.", transferId });
+        }
+        catch (System.Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
     }
 }
