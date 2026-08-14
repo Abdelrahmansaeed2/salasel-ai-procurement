@@ -84,7 +84,7 @@ class InventoryController extends GetxController {
     try {
       final response = await _apiClient.dio.put(
         '/inventory/$inventoryId/quantity',
-        data: {'newQuantity': newQty},
+        data: {'quantity': newQty},
       );
 
       if (response.statusCode == 200) {

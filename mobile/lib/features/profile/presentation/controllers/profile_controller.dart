@@ -34,6 +34,9 @@ class ProfileController extends GetxController {
   final RxString email = ''.obs;
   final RxString ownerName = ''.obs;
 
+  final RxDouble lat = 0.0.obs;
+  final RxDouble lng = 0.0.obs;
+
   final RxList<VerificationStep> verificationSteps = <VerificationStep>[].obs;
 
   @override
@@ -65,6 +68,15 @@ class ProfileController extends GetxController {
         commercialRegisterNumber.value = shop['crNumber'] ?? '';
         storeAddress.value = shop['address'] ?? '';
         phoneNumber.value = shop['contactPhone'] ?? '';
+
+        final latStr = shop['locationLat'];
+        final lngStr = shop['locationLng'];
+        if (latStr != null && latStr.toString().isNotEmpty) {
+          lat.value = double.tryParse(latStr.toString()) ?? 0.0;
+        }
+        if (lngStr != null && lngStr.toString().isNotEmpty) {
+          lng.value = double.tryParse(lngStr.toString()) ?? 0.0;
+        }
 
         final isVerified = shop['isVerified'] == true;
         
@@ -127,5 +139,18 @@ class ProfileController extends GetxController {
 
   void changeTab(int index) {
     AppNavigator.changeTab(index, currentTabIndex: 3);
+  }
+
+  Future<bool> deleteAccount() async {
+    try {
+      isLoading.value = true;
+      final response = await _apiClient.dio.delete('/users/me');
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Error deleting account: $e');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

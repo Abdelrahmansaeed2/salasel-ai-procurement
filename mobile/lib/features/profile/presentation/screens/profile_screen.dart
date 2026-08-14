@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../../core/controllers/settings_controller.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
@@ -55,6 +57,82 @@ class _ProfileScreenState extends State<ProfileScreen> {
     c = Get.put(ProfileController());
   }
 
+  void _showEditProfileModal() {
+    final nameController = TextEditingController(text: c.storeName.value);
+    final phoneController = TextEditingController(text: c.phoneNumber.value);
+    final addressController = TextEditingController(text: c.storeAddress.value);
+
+    Get.bottomSheet(
+      Container(
+        padding: EdgeInsets.all(24.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              'تعديل معلومات المنشأة',
+              style: TextStyle(fontFamily: 'Cairo', fontSize: 18.sp, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16.h),
+            Directionality(
+              textDirection: TextDirection.rtl,
+              child: TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'اسم المتجر', border: OutlineInputBorder()),
+                style: const TextStyle(fontFamily: 'Cairo'),
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Directionality(
+              textDirection: TextDirection.rtl,
+              child: TextField(
+                controller: phoneController,
+                decoration: const InputDecoration(labelText: 'رقم التواصل', border: OutlineInputBorder()),
+                style: const TextStyle(fontFamily: 'Cairo'),
+              ),
+            ),
+            SizedBox(height: 16.h),
+            Directionality(
+              textDirection: TextDirection.rtl,
+              child: TextField(
+                controller: addressController,
+                decoration: const InputDecoration(labelText: 'العنوان', border: OutlineInputBorder()),
+                style: const TextStyle(fontFamily: 'Cairo'),
+              ),
+            ),
+            SizedBox(height: 24.h),
+            SizedBox(
+              width: double.infinity,
+              height: 48.h,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: _kAccentBlue),
+                onPressed: () async {
+                  Get.back();
+                  final success = await c.updateProfile(
+                    newShopName: nameController.text,
+                    newPhone: phoneController.text,
+                    newAddress: addressController.text,
+                  );
+                  if (success) {
+                    Get.snackbar('نجاح', 'تم تحديث البيانات بنجاح', backgroundColor: Colors.green, colorText: Colors.white);
+                  } else {
+                    Get.snackbar('خطأ', 'حدث خطأ أثناء التحديث', backgroundColor: Colors.red, colorText: Colors.white);
+                  }
+                },
+                child: Text('حفظ التعديلات', style: TextStyle(fontFamily: 'Cairo', fontSize: 16.sp, color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -72,7 +150,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(height: 24.h),
             _VerificationTimeline(steps: c.verificationSteps),
             SizedBox(height: 24.h),
-            _BusinessInfoSection(),
+            _BusinessInfoSection(onEdit: _showEditProfileModal),
             SizedBox(height: 24.h),
             _ContactSection(),
             SizedBox(height: 24.h),
@@ -147,9 +225,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   border: Border.all(color: const Color(0xFFDBE1FF), width: 2),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: Image.network(
-                  'https://api.builder.io/api/v1/image/assets/TEMP/c7070914a8d0a025b8aab03d2f42684260d4b530?width=72',
-                  fit: BoxFit.cover,
+                child: Container(
+                  color: Colors.white,
+                  child: Icon(Icons.person, size: 24.w, color: _kIconGray),
                 ),
               ),
               SizedBox(width: 16.w),
@@ -202,9 +280,9 @@ class _ProfileSummary extends StatelessWidget {
                 border: Border.all(color: _kSurfaceGray, width: 4),
               ),
               clipBehavior: Clip.antiAlias,
-              child: Image.network(
-                'https://api.builder.io/api/v1/image/assets/TEMP/3ed736a9c3b1ed237938795922bf8e0ac8b48ddc?width=176',
-                fit: BoxFit.cover,
+              child: Container(
+                color: Colors.white,
+                child: Icon(Icons.store, size: 48.w, color: _kIconGray),
               ),
             ),
             Positioned(
@@ -618,6 +696,9 @@ class _InfoRow extends StatelessWidget {
 }
 
 class _BusinessInfoSection extends StatelessWidget {
+  final VoidCallback onEdit;
+  const _BusinessInfoSection({required this.onEdit});
+
   @override
   Widget build(BuildContext context) {
     final c = Get.find<ProfileController>();
@@ -666,13 +747,16 @@ class _BusinessInfoSection extends StatelessWidget {
           ),
         )),
         SizedBox(height: 16.h),
-        _MapCard(),
+        _MapCard(onEdit: onEdit),
       ],
     );
   }
 }
 
 class _MapCard extends StatelessWidget {
+  final VoidCallback onEdit;
+  const _MapCard({required this.onEdit});
+
   @override
   Widget build(BuildContext context) {
     final c = Get.find<ProfileController>();
@@ -690,10 +774,38 @@ class _MapCard extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.network(
-                  'https://api.builder.io/api/v1/image/assets/TEMP/9bc24b00c317bc97ea6fa98f4e16f9a76af1570d?width=700',
-                  fit: BoxFit.cover,
-                ),
+                Obx(() {
+                  if (c.lat.value == 0.0 && c.lng.value == 0.0) {
+                    return Container(
+                      color: const Color(0xFFE5E7EB),
+                      child: Center(
+                        child: Icon(Icons.map, size: 48.w, color: _kIconGray),
+                      ),
+                    );
+                  }
+                  return FlutterMap(
+                    options: MapOptions(
+                      initialCenter: LatLng(c.lat.value, c.lng.value),
+                      initialZoom: 15.0,
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.example.app',
+                      ),
+                      MarkerLayer(
+                        markers: [
+                          Marker(
+                            point: LatLng(c.lat.value, c.lng.value),
+                            width: 40,
+                            height: 40,
+                            child: const Icon(Icons.location_on, color: Colors.red, size: 40),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                }),
                 Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -715,7 +827,7 @@ class _MapCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
-                  onPressed: () {},
+                  onPressed: onEdit,
                   style: TextButton.styleFrom(padding: EdgeInsets.zero),
                   child: Text(
                     'تعديل',
@@ -1263,7 +1375,34 @@ class _DangerZone extends StatelessWidget {
           ),
         ),
         InkWell(
-          onTap: () {},
+          onTap: () async {
+            final confirm = await Get.dialog<bool>(
+              AlertDialog(
+                title: const Text('تأكيد الحذف', style: TextStyle(fontFamily: 'Cairo')),
+                content: const Text('هل أنت متأكد من أنك تريد حذف حسابك نهائياً؟ هذا الإجراء لا يمكن التراجع عنه.', style: TextStyle(fontFamily: 'Cairo')),
+                actions: [
+                  TextButton(
+                    onPressed: () => Get.back(result: false),
+                    child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo')),
+                  ),
+                  TextButton(
+                    onPressed: () => Get.back(result: true),
+                    child: const Text('حذف نهائياً', style: TextStyle(fontFamily: 'Cairo', color: Colors.red)),
+                  ),
+                ],
+              ),
+            );
+
+            if (confirm == true) {
+              final c = Get.find<ProfileController>();
+              final success = await c.deleteAccount();
+              if (success) {
+                Get.offAll(() => const LoginScreen());
+              } else {
+                Get.snackbar('خطأ', 'حدث خطأ أثناء حذف الحساب');
+              }
+            }
+          },
           child: Padding(
             padding: EdgeInsets.only(top: 8.h),
             child: Text(
