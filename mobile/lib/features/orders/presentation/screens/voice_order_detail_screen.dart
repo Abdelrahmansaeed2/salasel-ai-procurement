@@ -712,6 +712,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
                   height: 56.h,
                   child: ElevatedButton(
                     onPressed: () {
+                      if (order == null) return;
                       final totalStr = (order.totalAmount + order.deliveryFee + order.tax).toStringAsFixed(0) + ' ر.س';
                       final supplierNameStr = order.products.isNotEmpty ? order.products.first.supplierName : 'مورد';
                       final itemsSummaryStr = order.products.map((p) => '${p.requestedQuantity}x ${p.productName}').join(', ');
