@@ -27,7 +27,7 @@ class InventoryItemModel {
 
   factory InventoryItemModel.fromJson(Map<String, dynamic> json) {
     return InventoryItemModel(
-      inventoryId: json['inventoryId'] ?? 0,
+      inventoryId: json['inventoryID'] ?? json['inventoryId'] ?? 0,
       productId: json['productId'] ?? 0,
       productName: json['productName'] ?? '',
       sku: json['sku'] ?? '',

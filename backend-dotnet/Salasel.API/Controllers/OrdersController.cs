@@ -356,29 +356,34 @@ public class OrdersController : ControllerBase
             order.UpdatedAt = DateTime.UtcNow;
 
             // Increment Merchant Inventory for each received product
-            foreach (var sub in order.SubOrders)
+            if (order.SubOrders != null)
             {
-                var inventoryItem = await _inventoryRepository.Query()
-                    .FirstOrDefaultAsync(i => i.MerchantID == order.MerchantId && i.ProductId == sub.ProductId);
+                foreach (var sub in order.SubOrders)
+                {
+                    if (!sub.ProductId.HasValue) continue;
 
-                if (inventoryItem != null)
-                {
-                    inventoryItem.CurrentQty += sub.Quantity;
-                    inventoryItem.LastUpdated = DateTime.UtcNow;
-                    await _inventoryRepository.UpdateAsync(inventoryItem);
-                }
-                else
-                {
-                    // Create new inventory item if merchant didn't have it
-                    var newItem = new MerchantInventory
+                    var inventoryItem = await _inventoryRepository.Query()
+                        .FirstOrDefaultAsync(i => i.MerchantID == order.MerchantId && i.ProductId == sub.ProductId.Value);
+
+                    if (inventoryItem != null)
                     {
-                        MerchantID = order.MerchantId,
-                        ProductId = sub.ProductId,
-                        CurrentQty = sub.Quantity,
-                        ReorderThreshold = 10, // default
-                        LastUpdated = DateTime.UtcNow
-                    };
-                    await _inventoryRepository.AddAsync(newItem);
+                        inventoryItem.CurrentQty += sub.Quantity;
+                        inventoryItem.LastUpdated = DateTime.UtcNow;
+                        await _inventoryRepository.UpdateAsync(inventoryItem);
+                    }
+                    else
+                    {
+                        // Create new inventory item if merchant didn't have it
+                        var newItem = new MerchantInventory
+                        {
+                            MerchantID = order.MerchantId,
+                            ProductId = sub.ProductId.Value,
+                            CurrentQty = sub.Quantity,
+                            ReorderThreshold = 10, // default
+                            LastUpdated = DateTime.UtcNow
+                        };
+                        await _inventoryRepository.AddAsync(newItem);
+                    }
                 }
             }
 
