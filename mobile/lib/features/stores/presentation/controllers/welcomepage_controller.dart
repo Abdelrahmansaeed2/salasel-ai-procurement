@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../features/inventory/presentation/screens/inventory_screen.dart';
 import '../../../../features/orders/presentation/screens/orders_screen.dart';
+import '../../../../features/profile/presentation/screens/profile_screen.dart';
 
 class ShopModel {
   final int id;
@@ -70,6 +71,8 @@ class WelcomePageController extends GetxController {
     if (index == 0) {
       // Do nothing, already here
       currentIndex.value = 0;
+    } else if (index == 3) {
+      Get.to(() => const ProfileScreen(isSetupMode: true), transition: Transition.fadeIn);
     } else {
       Get.snackbar('مقفل مؤقتاً', 'ستُفتح هذه الميزة عند اكتمال توثيق السجل التجاري');
     }

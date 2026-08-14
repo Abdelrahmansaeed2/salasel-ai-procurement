@@ -11,6 +11,7 @@ import '../../../../core/widgets/animated_pressable.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../../onboarding/presentation/screens/onboarding_screen.dart';
+import '../../../profile/presentation/screens/profile_screen.dart';
 import '../controllers/registration_submitted_controller.dart';
 
 const String _kLogoUrl =
@@ -160,6 +161,8 @@ class RegistrationSubmittedScreen extends StatelessWidget {
           onTap: (index) {
             if (index == 0) {
               // They are already on the setup/store screen, do nothing.
+            } else if (index == 3) {
+              Get.to(() => const ProfileScreen(isSetupMode: true), transition: Transition.fadeIn);
             } else {
               Get.snackbar('مقفل مؤقتاً', 'ستُفتح هذه الميزة عند اكتمال توثيق السجل التجاري');
             }

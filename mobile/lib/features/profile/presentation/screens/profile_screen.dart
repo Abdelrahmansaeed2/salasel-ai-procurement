@@ -45,7 +45,8 @@ Widget _pathIcon(
 }
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final bool isSetupMode;
+  const ProfileScreen({super.key, this.isSetupMode = false});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -168,7 +169,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         bottomNavigationBar: Obx(
           () => AppBottomNavBar(
             currentIndex: c.bottomNavIndex.value,
-            onTap: c.changeTab,
+            isSetupMode: widget.isSetupMode,
+            onTap: (index) {
+              if (index == 3) return; // Already here
+              if (widget.isSetupMode) {
+                if (index == 0) {
+                  Get.back(); // Return to Welcome/Registration screen
+                } else {
+                  Get.snackbar('مقفل مؤقتاً', 'ستُفتح هذه الميزة عند اكتمال توثيق السجل التجاري');
+                }
+              } else {
+                c.changeTab(index);
+              }
+            },
           ),
         ),
       ),

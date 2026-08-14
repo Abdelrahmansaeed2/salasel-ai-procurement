@@ -42,6 +42,10 @@ class OrdersController extends GetxController {
   final RxInt bottomNavIndex = 2.obs;
   final RxInt tabIndex = 0.obs; // 0 = active, 1 = history
   final RxString selectedFilter = 'الكل'.obs;
+  final RxString dateFilter = 'الكل'.obs;
+  final RxnDouble minPrice = RxnDouble();
+  final RxnDouble maxPrice = RxnDouble();
+  
   final RxString searchText = ''.obs;
   final RxBool showAiInsights = true.obs;
   final RxBool isLoading = true.obs;
@@ -112,6 +116,10 @@ class OrdersController extends GetxController {
     final source = tabIndex.value == 0 ? activeOrders : historyOrders;
     final filter = selectedFilter.value;
     final query = searchText.value.trim();
+    final dFilter = dateFilter.value;
+    final pMin = minPrice.value;
+    final pMax = maxPrice.value;
+    final now = DateTime.now();
 
     return source.where((o) {
       final matchesFilter = filter == 'الكل' ||
@@ -122,7 +130,21 @@ class OrdersController extends GetxController {
       final matchesSearch = query.isEmpty ||
           o.orderNumber.contains(query) ||
           o.supplierName.contains(query);
-      return matchesFilter && matchesSearch;
+          
+      bool matchesDate = true;
+      if (dFilter == 'آخر 7 أيام') {
+        matchesDate = now.difference(o.date).inDays <= 7;
+      } else if (dFilter == 'آخر 30 يوم') {
+        matchesDate = now.difference(o.date).inDays <= 30;
+      } else if (dFilter == 'هذا الشهر') {
+        matchesDate = o.date.month == now.month && o.date.year == now.year;
+      }
+
+      bool matchesPrice = true;
+      if (pMin != null && o.total < pMin) matchesPrice = false;
+      if (pMax != null && o.total > pMax) matchesPrice = false;
+
+      return matchesFilter && matchesSearch && matchesDate && matchesPrice;
     }).toList();
   }
 
@@ -131,6 +153,16 @@ class OrdersController extends GetxController {
 
   void setTab(int i) => tabIndex.value = i;
   void setFilter(String f) => selectedFilter.value = f;
+  void setDateFilter(String f) => dateFilter.value = f;
+  void setPriceRange(double? min, double? max) {
+    minPrice.value = min;
+    maxPrice.value = max;
+  }
+  void resetAdvancedFilters() {
+    dateFilter.value = 'الكل';
+    minPrice.value = null;
+    maxPrice.value = null;
+  }
   void setSearch(String s) => searchText.value = s;
   void dismissAi() => showAiInsights.value = false;
 
