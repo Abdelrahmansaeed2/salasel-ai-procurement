@@ -156,11 +156,12 @@ class RegistrationSubmittedScreen extends StatelessWidget {
         ),
         bottomNavigationBar: AppBottomNavBar(
           currentIndex: 0,
+          isSetupMode: true,
           onTap: (index) {
             if (index == 0) {
-              Get.offAll(() => const HomeScreen(), transition: Transition.fadeIn);
+              // They are already on the setup/store screen, do nothing.
             } else {
-              Get.snackbar('قريباً', 'هذه الميزة قيد التطوير حالياً');
+              Get.snackbar('مقفل مؤقتاً', 'ستُفتح هذه الميزة عند اكتمال توثيق السجل التجاري');
             }
           },
         ),

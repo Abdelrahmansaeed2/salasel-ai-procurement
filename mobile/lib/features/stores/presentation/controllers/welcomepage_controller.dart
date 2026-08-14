@@ -67,13 +67,11 @@ class WelcomePageController extends GetxController {
   }
 
   void setIndex(int index) {
-    currentIndex.value = index;
-    if (index == 1) {
-      Get.to(() => const InventoryScreen(), transition: Transition.fadeIn);
+    if (index == 0) {
+      // Do nothing, already here
       currentIndex.value = 0;
-    } else if (index == 2) {
-      Get.to(() => const OrdersScreen(), transition: Transition.fadeIn);
-      currentIndex.value = 0;
+    } else {
+      Get.snackbar('مقفل مؤقتاً', 'ستُفتح هذه الميزة عند اكتمال توثيق السجل التجاري');
     }
   }
 }

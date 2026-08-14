@@ -93,6 +93,7 @@ class StoresScreen extends StatelessWidget {
       bottomNavigationBar: Obx(
         () => AppBottomNavBar(
           currentIndex: controller.currentIndex.value,
+          isSetupMode: true,
           onTap: controller.setIndex,
         ),
       ),
