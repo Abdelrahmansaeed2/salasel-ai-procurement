@@ -1,14 +1,28 @@
 using Salasel.Application.Interfaces;
 using Salasel.Domain.Entities;
 using Stripe;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using Salasel.Domain.Interfaces;
 
 namespace Salasel.Infrastructure.Services;
 
 public class StripePaymentService : IPaymentService
 {
-    public StripePaymentService()
+    private readonly IRepository<SupplierProfile> _supplierRepository;
+    private readonly IRepository<SubOrder> _subOrderRepository;
+    private readonly IRepository<MasterOrder> _masterOrderRepository;
+
+    public StripePaymentService(
+        IRepository<SupplierProfile> supplierRepository,
+        IRepository<SubOrder> subOrderRepository,
+        IRepository<MasterOrder> masterOrderRepository)
     {
+        _supplierRepository = supplierRepository;
+        _subOrderRepository = subOrderRepository;
+        _masterOrderRepository = masterOrderRepository;
     }
 
     public async Task<string> CreatePaymentIntentAsync(MasterOrder order)
@@ -17,16 +31,13 @@ public class StripePaymentService : IPaymentService
         {
             Amount = (long)(order.TotalAmount * 100), // Convert to cents
             Currency = "usd",
-            Metadata = new System.Collections.Generic.Dictionary<string, string>
+            TransferGroup = $"ORDER_{order.Id}",
+            Metadata = new Dictionary<string, string>
             {
                 { "MasterOrderId", order.Id.ToString() },
                 { "MerchantId", order.MerchantId.ToString() }
             },
-            // AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
-            // {
-            //     Enabled = true,
-            // }
-            PaymentMethodTypes = new System.Collections.Generic.List<string> { "card" }
+            PaymentMethodTypes = new List<string> { "card" }
         };
 
         var service = new PaymentIntentService();
@@ -35,15 +46,117 @@ public class StripePaymentService : IPaymentService
         return intent.ClientSecret;
     }
 
-    public async Task<string> RefundPaymentAsync(string paymentIntentId)
+    public async Task<string> CreateSupplierAccountSessionAsync(int supplierId)
     {
+        var supplier = await _supplierRepository.GetByIdAsync(supplierId);
+        if (supplier == null) throw new Exception("Supplier not found");
+
+        if (string.IsNullOrEmpty(supplier.StripeAccountId))
+        {
+            var accountOptions = new AccountCreateOptions
+            {
+                Type = "express",
+                Capabilities = new AccountCapabilitiesOptions
+                {
+                    Transfers = new AccountCapabilitiesTransfersOptions
+                    {
+                        Requested = true,
+                    },
+                },
+            };
+            var accountService = new AccountService();
+            var account = await accountService.CreateAsync(accountOptions);
+
+            supplier.StripeAccountId = account.Id;
+            await _supplierRepository.UpdateAsync(supplier);
+        }
+
+        var sessionOptions = new AccountSessionCreateOptions
+        {
+            Account = supplier.StripeAccountId,
+            Components = new AccountSessionComponentsOptions
+            {
+                AccountOnboarding = new AccountSessionComponentsAccountOnboardingOptions
+                {
+                    Enabled = true,
+                },
+            },
+        };
+
+        var sessionService = new AccountSessionService();
+        var session = await sessionService.CreateAsync(sessionOptions);
+
+        return session.ClientSecret;
+    }
+
+    public async Task<string> TransferFundsToSupplierAsync(int subOrderId)
+    {
+        var subOrder = await _subOrderRepository.GetByIdAsync(subOrderId);
+        if (subOrder == null) throw new Exception("SubOrder not found");
+        if (subOrder.SupplierId == null) throw new Exception("SubOrder has no assigned supplier");
+
+        var supplier = await _supplierRepository.GetByIdAsync(subOrder.SupplierId.Value);
+        if (string.IsNullOrEmpty(supplier?.StripeAccountId))
+            throw new Exception("Supplier does not have a connected Stripe account");
+
+        // Assuming 5% platform fee
+        var amountToTransfer = subOrder.SubTotalAmount * 0.95m;
+        var amountCents = (long)(amountToTransfer * 100);
+
+        var transferOptions = new TransferCreateOptions
+        {
+            Amount = amountCents,
+            Currency = "usd",
+            Destination = supplier.StripeAccountId,
+            TransferGroup = $"ORDER_{subOrder.MasterId}",
+            Metadata = new Dictionary<string, string>
+            {
+                { "SubOrderId", subOrder.Id.ToString() }
+            }
+        };
+
+        var transferService = new TransferService();
+        var transfer = await transferService.CreateAsync(transferOptions);
+
+        subOrder.StripeTransferId = transfer.Id;
+        await _subOrderRepository.UpdateAsync(subOrder);
+
+        return transfer.Id;
+    }
+
+    public async Task<string> RefundPaymentAsync(int orderId)
+    {
+        var masterOrder = await _masterOrderRepository.GetByIdAsync(orderId);
+        if (masterOrder == null) throw new Exception("Order not found");
+        if (string.IsNullOrEmpty(masterOrder.StripePaymentIntentId))
+            throw new Exception("No Stripe payment intent linked to this order");
+
+        // 1. Reverse transfers to suppliers if any were already paid
+        var subOrders = await _subOrderRepository.GetAllAsync();
+        var orderSubOrders = subOrders.Where(s => s.MasterId == orderId && !string.IsNullOrEmpty(s.StripeTransferId) && string.IsNullOrEmpty(s.StripeTransferReversalId)).ToList();
+
+        var transferReversalService = new TransferReversalService();
+        foreach (var sub in orderSubOrders)
+        {
+            var reversalOptions = new TransferReversalCreateOptions { };
+            var reversal = await transferReversalService.CreateAsync(sub.StripeTransferId, reversalOptions);
+            
+            sub.StripeTransferReversalId = reversal.Id;
+            await _subOrderRepository.UpdateAsync(sub);
+        }
+
+        // 2. Refund the original payment intent back to the merchant
         var options = new RefundCreateOptions
         {
-            PaymentIntent = paymentIntentId
+            PaymentIntent = masterOrder.StripePaymentIntentId
         };
 
         var service = new RefundService();
         var refund = await service.CreateAsync(options);
+
+        masterOrder.StripeRefundId = refund.Id;
+        masterOrder.PaymentStatus = Salasel.Domain.Enums.PaymentStatus.Refunded;
+        await _masterOrderRepository.UpdateAsync(masterOrder);
 
         return refund.Id;
     }

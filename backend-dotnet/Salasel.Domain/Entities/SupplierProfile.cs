@@ -26,6 +26,10 @@ public class SupplierProfile
     public bool IsActiveForRouting { get; set; }
     public MerchantVerificationStatus VerificationStatus { get; set; } = MerchantVerificationStatus.NotSubmitted;
 
+    // Stripe Connect
+    public string? StripeAccountId { get; set; }
+    public bool IsStripeOnboardingComplete { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Registration wizard (SupplierSetupDto)

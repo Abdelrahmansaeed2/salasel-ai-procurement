@@ -21,6 +21,10 @@ public class SubOrder
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
 
+    // Stripe Connect Transfer tracking
+    public string? StripeTransferId { get; set; }
+    public string? StripeTransferReversalId { get; set; }
+
     // Competitive bids while Status == Bidding and SupplierId is still null.
     public ICollection<Bid> Bids { get; set; } = new List<Bid>();
 
