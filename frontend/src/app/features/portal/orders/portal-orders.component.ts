@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, signal, inject, OnInit } from '@angular/core';
 import { OrderService } from '../../../core/services/order.service';
 import { AuthService } from '../../../core/auth/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 type OrderPriority = 'review' | 'urgent' | 'scheduled';
 type QuickFilter = 'premium' | 'low-confidence' | 'high-priority';
 type ViewMode = 'feed' | 'board';
@@ -97,6 +98,7 @@ export class PortalOrdersComponent implements OnInit {
 
   private readonly orderService = inject(OrderService);
   private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
 
   ngOnInit() {
     this.orderService.getKanban().subscribe({
@@ -171,7 +173,9 @@ export class PortalOrdersComponent implements OnInit {
         this.ngOnInit();
       },
       error: (err) => {
+        const msg = err.error?.message || err.message || 'حدث خطأ غير متوقع';
         console.error('Failed to accept order:', err);
+        this.toastService.error(msg);
       }
     });
   }
@@ -230,7 +234,9 @@ export class PortalOrdersComponent implements OnInit {
           this.ngOnInit();
         },
         error: (err) => {
+          const msg = err.error?.message || err.message || 'فشل تقديم العرض';
           console.error(err);
+          this.toastService.error(msg);
           this.isSubmittingBid.set(false);
         }
       });
@@ -253,7 +259,9 @@ export class PortalOrdersComponent implements OnInit {
         this.ngOnInit();
       },
       error: (err) => {
+        const msg = err.error?.message || err.message || 'حدث خطأ';
         console.error(err);
+        this.toastService.error(msg);
       }
     });
   }
