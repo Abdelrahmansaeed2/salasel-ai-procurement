@@ -215,6 +215,62 @@ using (var scope = app.Services.CreateScope())
         logger.LogInformation("Seeding database...");
         await Salasel.Infrastructure.Data.DatabaseSeeder.SeedAsync(db);
         logger.LogInformation("Database seeding applied successfully.");
+
+        // --- One-Time Auto Sync ---
+        logger.LogInformation("Auto-syncing historical completed orders to inventory...");
+        var allMerchants = await db.MerchantsProfiles.Select(m => m.MerchantID).ToListAsync();
+        foreach (var mId in allMerchants)
+        {
+            var existingInventory = await db.MerchantInventories.Where(i => i.MerchantID == mId).ToListAsync();
+            foreach (var item in existingInventory) item.CurrentQty = 0;
+            
+            var completedOrders = await db.MasterOrders
+                .Include(o => o.SubOrders)
+                .Where(o => o.MerchantId == mId && o.Status == Salasel.Domain.Enums.ApprovalStatus.Completed)
+                .ToListAsync();
+                
+            var qtyMap = new Dictionary<int, int>();
+            foreach (var order in completedOrders)
+            {
+                if (order.SubOrders == null) continue;
+                foreach (var sub in order.SubOrders)
+                {
+                    if (sub.Status == Salasel.Domain.Enums.FulfillmentStatus.ReceiptConfirmed && sub.ProductId.HasValue)
+                    {
+                        if (!qtyMap.ContainsKey(sub.ProductId.Value))
+                            qtyMap[sub.ProductId.Value] = 0;
+                        qtyMap[sub.ProductId.Value] += sub.Quantity;
+                    }
+                }
+            }
+            
+            foreach (var kvp in qtyMap)
+            {
+                var productId = kvp.Key;
+                var qty = kvp.Value;
+                var existingItem = existingInventory.FirstOrDefault(i => i.ProductId == productId);
+                if (existingItem != null)
+                {
+                    existingItem.CurrentQty = qty;
+                    existingItem.LastUpdated = DateTime.UtcNow;
+                }
+                else
+                {
+                    var newItem = new Salasel.Domain.Entities.MerchantInventory
+                    {
+                        MerchantID = mId,
+                        ProductId = productId,
+                        CurrentQty = qty,
+                        ReorderThreshold = 10,
+                        LastUpdated = DateTime.UtcNow
+                    };
+                    db.MerchantInventories.Add(newItem);
+                }
+            }
+        }
+        await db.SaveChangesAsync();
+        logger.LogInformation("Auto-syncing historical completed orders completed.");
+        // --- End One-Time Auto Sync ---
     }
     catch (Exception ex)
     {
