@@ -413,17 +413,14 @@ class DeliveryTrackingScreen extends StatelessWidget {
             style: TextStyle(color: OrderColors.textTitle, fontSize: 16.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
           ),
           SizedBox(height: 16.h),
-          ...controller.suppliers.map((supplier) => Padding(
-            padding: EdgeInsets.only(bottom: 12.h),
-            child: _buildSupplierCard(
-              storeName: supplier['name'] ?? 'المورد',
-              isActive: supplier['status'] != 'تم التوصيل',
-              statusLabel: supplier['status'] ?? 'جاري التوصيل',
-              driverName: supplier['driverName'] ?? controller.driverName.value,
-              timeRemaining: supplier['estimatedTime'] ?? controller.estimatedDeliveryTime.value,
-              hasTrackAction: supplier['status'] != 'تم التوصيل',
-            ),
-          )),
+          _buildSupplierCard(
+            storeName: controller.supplierName.value.isNotEmpty ? controller.supplierName.value : 'المورد',
+            isActive: true,
+            statusLabel: controller.currentStep == 3 ? 'تم التوصيل' : 'جاري التوصيل',
+            driverName: controller.driverName.value,
+            timeRemaining: controller.estimatedDeliveryTime.value,
+            hasTrackAction: true,
+          ),
         ],
       ),
     );
