@@ -154,28 +154,24 @@ export class PortalOrdersComponent implements OnInit {
     this.activeFilter.update((current) => (current === filter ? null : filter));
   }
 
-  accept(orderId: string) {
-    let masterOrderId: number;
-    if (orderId.startsWith('ORD-')) {
-      // Extract masterOrderId from format "ORD-{masterId}-{subId}"
-      const parts = orderId.split('-');
-      masterOrderId = parseInt(parts[1], 10);
+  accept(orderIdStr: string) {
+    let subOrderId: number;
+    if (orderIdStr.startsWith('ORD-')) {
+      const parts = orderIdStr.split('-');
+      subOrderId = parseInt(parts[2], 10);
     } else {
-      console.error('Cannot accept order from kanban directly as master ID is missing in SUB format.');
-      return;
+      subOrderId = parseInt(orderIdStr.replace(/[^0-9]/g, ''), 10);
     }
 
-    if (!masterOrderId) return;
+    if (!subOrderId) return;
 
-    this.orderService.approveOrder(masterOrderId).subscribe({
+    this.orderService.updateOrderStatus(subOrderId, 'Accepted').subscribe({
       next: () => {
         // Refresh both views from backend to reflect the real state
         this.ngOnInit();
       },
       error: (err) => {
-        console.error('Failed to approve order:', err);
-        // Still refresh to show real state
-        this.ngOnInit();
+        console.error('Failed to accept order:', err);
       }
     });
   }

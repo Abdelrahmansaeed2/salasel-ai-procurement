@@ -162,8 +162,6 @@ class AiClarificationController extends GetxController {
     final text = textOverride ?? textController.text.trim();
     if (text.isEmpty || isProcessing) return;
     textController.clear();
-    
-    if (currentResponse?.sessionId == null) return;
 
     isProcessing = true; 
     messages.add(ConfirmationEntry(text)); // show user message

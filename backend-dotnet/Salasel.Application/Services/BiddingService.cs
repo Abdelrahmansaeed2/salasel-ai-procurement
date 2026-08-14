@@ -323,6 +323,8 @@ public class BiddingService : IBiddingService
         var now = DateTime.UtcNow;
         var valid = (subOrder.Status, target) switch
         {
+            (FulfillmentStatus.Pending_Supplier, FulfillmentStatus.Accepted) => true,
+            (FulfillmentStatus.Pending_Supplier, FulfillmentStatus.Cancelled) => true, // Supplier rejects
             (FulfillmentStatus.Accepted, FulfillmentStatus.Shipped) => true,
             (FulfillmentStatus.Shipped, FulfillmentStatus.Delivered) => true,
             _ => false

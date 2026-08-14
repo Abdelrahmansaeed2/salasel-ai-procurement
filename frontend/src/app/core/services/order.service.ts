@@ -33,4 +33,8 @@ export class OrderService {
   dispatchOrder(id: number): Observable<any> {
     return this.http.put(`${this.apiUrl}/voice/${id}/dispatch`, {});
   }
+
+  updateOrderStatus(id: number, status: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/rfqs/${id}/status`, { status });
+  }
 }
