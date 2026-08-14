@@ -53,7 +53,7 @@ class DeliveryTrackingController extends GetxController {
       isConfirming.value = true;
       final response = await _apiClient.dio.post('/orders/$orderId/confirm-receipt');
       if (response.statusCode == 200) {
-        Get.offAll(() => const ReceiptSuccessScreen());
+        Get.offAll(() => ReceiptSuccessScreen(orderId: orderId));
       } else {
         Get.snackbar('خطأ', 'فشل تأكيد الاستلام');
       }

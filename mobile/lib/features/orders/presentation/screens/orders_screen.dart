@@ -674,6 +674,9 @@ class _OrderCard extends StatelessWidget {
                       totalAmount: '${order.total.toStringAsFixed(0)} جنيه',
                       supplierName: order.supplierName,
                       itemsSummary: order.items.isNotEmpty ? order.items[0].name : '',
+                      merchantName: 'مخبز الأمل', // Placeholder for now
+                      merchantAddress: 'شارع التحلية، بجوار المركز الرئيسي', // Placeholder
+                      merchantCity: 'الرياض', // Placeholder
                     ));
                   } else if (activeStep == 2) {
                     Get.to(() => DeliveryTrackingScreen(orderId: order.orderNumber));
