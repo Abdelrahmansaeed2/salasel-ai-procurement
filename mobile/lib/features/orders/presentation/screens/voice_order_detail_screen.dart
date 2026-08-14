@@ -711,7 +711,18 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
                   width: double.infinity,
                   height: 56.h,
                   child: ElevatedButton(
-                    onPressed: () => Get.to(() => CheckoutScreen(orderId: order.id)),
+                    onPressed: () {
+                      final totalStr = (order.totalAmount + order.deliveryFee + order.tax).toStringAsFixed(0) + ' ر.س';
+                      final supplierNameStr = order.products.isNotEmpty ? order.products.first.supplierName : 'مورد';
+                      final itemsSummaryStr = order.products.map((p) => '${p.requestedQuantity}x ${p.productName}').join(', ');
+                      
+                      Get.to(() => CheckoutScreen(
+                            orderId: order.id.toString(),
+                            totalAmount: totalStr,
+                            supplierName: supplierNameStr,
+                            itemsSummary: itemsSummaryStr,
+                          ));
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2563EB),
                       elevation: 0,
