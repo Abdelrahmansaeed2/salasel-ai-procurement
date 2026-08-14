@@ -11,6 +11,7 @@ import '../../../../core/widgets/animated_pressable.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../../onboarding/presentation/screens/onboarding_screen.dart';
+import '../controllers/registration_submitted_controller.dart';
 
 const String _kLogoUrl =
     'https://api.builder.io/api/v1/image/assets/TEMP/c0e3b351321fdab13103f562fe29b6cd429c3f43?width=140';
@@ -74,6 +75,8 @@ class RegistrationSubmittedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(RegistrationSubmittedController());
+
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
@@ -132,7 +135,7 @@ class RegistrationSubmittedScreen extends StatelessWidget {
                     AnimatedEntrance(
                       delay: const Duration(milliseconds: 180),
                       beginOffset: const Offset(0, 0.1),
-                      child: _VerificationStatusCard(),
+                      child: _VerificationStatusCard(controller: controller),
                     ),
                     AnimatedEntrance(
                       delay: const Duration(milliseconds: 260),
@@ -207,6 +210,10 @@ class _TopBar extends StatelessWidget {
 }
 
 class _VerificationStatusCard extends StatelessWidget {
+  final RegistrationSubmittedController controller;
+
+  const _VerificationStatusCard({required this.controller});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -285,10 +292,18 @@ class _VerificationStatusCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 16.h),
-          _TimelineRow(title: 'تقديم طلب التسجيل', state: _StepState.done, bold: true),
-          _TimelineRow(title: 'مراجعة المستندات (جاري)', state: _StepState.active, bold: true),
-          _TimelineRow(title: 'الموافقة النهائية', state: _StepState.pending, dimmed: true),
-          _TimelineRow(title: 'تفعيل الشراء الصوتي', state: _StepState.pending, dimmed: true, showMic: true, isLast: true),
+          Obx(() {
+            final String subDate = controller.submissionDate.value;
+            final String subtitle = subDate.isNotEmpty ? 'تم الاستلام في $subDate' : 'جاري التحميل...';
+            return Column(
+              children: [
+                _TimelineRow(title: 'تقديم طلب التسجيل', subtitle: subtitle, state: _StepState.done, bold: true),
+                _TimelineRow(title: 'مراجعة المستندات (جاري)', state: _StepState.active, bold: true),
+                _TimelineRow(title: 'الموافقة النهائية', state: _StepState.pending, dimmed: true),
+                _TimelineRow(title: 'تفعيل الشراء الصوتي', state: _StepState.pending, dimmed: true, showMic: true, isLast: true),
+              ],
+            );
+          }),
         ],
       ),
     );
@@ -299,6 +314,7 @@ enum _StepState { done, active, pending }
 
 class _TimelineRow extends StatelessWidget {
   final String title;
+  final String? subtitle;
   final _StepState state;
   final bool bold;
   final bool dimmed;
@@ -307,6 +323,7 @@ class _TimelineRow extends StatelessWidget {
 
   const _TimelineRow({
     required this.title,
+    this.subtitle,
     required this.state,
     this.bold = false,
     this.dimmed = false,
@@ -355,16 +372,35 @@ class _TimelineRow extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                color: _C.textDark,
-                fontFamily: 'Cairo',
-                fontSize: 14.sp,
-                fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
-                height: 1.43.h,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  title,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    color: _C.textDark,
+                    fontFamily: 'Cairo',
+                    fontSize: 14.sp,
+                    fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
+                    height: 1.43.h,
+                  ),
+                ),
+                if (subtitle != null)
+                  Padding(
+                    padding: EdgeInsets.only(top: 4.h),
+                    child: Text(
+                      subtitle!,
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        color: _C.textBody,
+                        fontFamily: 'Cairo',
+                        fontSize: 12.sp,
+                        height: 1.4.h,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             SizedBox(width: 16.w),
             Column(
