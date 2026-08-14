@@ -320,6 +320,8 @@ public class BiddingService : IBiddingService
         if (!Enum.TryParse<FulfillmentStatus>(status, ignoreCase: true, out var target))
             throw new InvalidOperationException($"Unknown status '{status}'.");
 
+        if (subOrder.Status == target) return;
+
         var now = DateTime.UtcNow;
         var valid = (subOrder.Status, target) switch
         {
