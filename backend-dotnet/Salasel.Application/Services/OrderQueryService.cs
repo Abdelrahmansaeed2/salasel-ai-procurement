@@ -88,6 +88,7 @@ public class OrderQueryService : IOrderQueryService
 
         string aggregatedStatus = "Pending";
         if (order.Status == ApprovalStatus.Rejected) aggregatedStatus = "Rejected";
+        else if (order.Status == ApprovalStatus.Completed) aggregatedStatus = "Completed";
         else if (order.Status == ApprovalStatus.Manually_Approved)
         {
             if (order.SubOrders != null && order.SubOrders.Count > 0)
