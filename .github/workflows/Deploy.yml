@@ -183,6 +183,25 @@ jobs:
               echo "STT_API_KEY='${{ secrets.STT_API_KEY }}'" >> .env
             fi
 
+            # Inject Stripe secrets
+            if grep -q "^STRIPE_SECRET_KEY=" .env; then
+              sed -i "s|^STRIPE_SECRET_KEY=.*|STRIPE_SECRET_KEY='${{ secrets.STRIPE_SECRET_KEY }}'|" .env
+            else
+              echo "STRIPE_SECRET_KEY='${{ secrets.STRIPE_SECRET_KEY }}'" >> .env
+            fi
+            
+            if grep -q "^STRIPE_PUBLISHABLE_KEY=" .env; then
+              sed -i "s|^STRIPE_PUBLISHABLE_KEY=.*|STRIPE_PUBLISHABLE_KEY='${{ secrets.STRIPE_PUBLISHABLE_KEY }}'|" .env
+            else
+              echo "STRIPE_PUBLISHABLE_KEY='${{ secrets.STRIPE_PUBLISHABLE_KEY }}'" >> .env
+            fi
+            
+            if grep -q "^STRIPE_WEBHOOK_SECRET=" .env; then
+              sed -i "s|^STRIPE_WEBHOOK_SECRET=.*|STRIPE_WEBHOOK_SECRET='${{ secrets.STRIPE_WEBHOOK_SECRET }}'|" .env
+            else
+              echo "STRIPE_WEBHOOK_SECRET='${{ secrets.STRIPE_WEBHOOK_SECRET }}'" >> .env
+            fi
+
             # Update or append IMAGE_TAG in .env securely
             IMAGE_TAG=sha-$(echo ${{ github.sha }} | cut -c1-7)
             if grep -q "^IMAGE_TAG=" .env; then

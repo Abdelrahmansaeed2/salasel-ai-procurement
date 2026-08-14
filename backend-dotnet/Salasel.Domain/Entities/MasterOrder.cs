@@ -24,6 +24,10 @@ public class MasterOrder
     public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Unpaid;
     public DateTime? PaidAt { get; set; }
     public string? PaymentReference { get; set; }
+    
+    // Stripe Tracking
+    public string? StripePaymentIntentId { get; set; }
+    public string? StripeRefundId { get; set; }
 
     public ICollection<SubOrder> SubOrders { get; set; } = new List<SubOrder>();
 }
