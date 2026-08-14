@@ -34,7 +34,7 @@ class HomeScreen extends StatelessWidget {
               AnimatedEntrance(
                 beginOffset: Offset.zero,
                 duration: Duration(milliseconds: 350),
-                child: _buildHeader(),
+                child: _buildHeader(controller),
               ),
               Expanded(
                 child: Obx(() {
@@ -78,7 +78,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(HomeController controller) {
     return Container(
       height: 64.h,
       padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -119,7 +119,7 @@ class HomeScreen extends StatelessWidget {
           SizedBox(width: 12.w),
           AnimatedPressable(
             borderRadius: BorderRadius.circular(20.r),
-            onTap: () => Get.snackbar('حسابي', 'إدارة حساب المتجر قريباً'),
+            onTap: () => controller.changeTab(3),
             child: Container(
               width: 40.w,
               height: 40.h,
@@ -169,7 +169,7 @@ class HomeScreen extends StatelessWidget {
               ),
               Spacer(),
               TextButton(
-                onPressed: () {},
+                onPressed: () => controller.changeTab(1),
                 child: Text(
                   'عرض الكل',
                   style: TextStyle(
@@ -235,7 +235,7 @@ class HomeScreen extends StatelessWidget {
               ),
               Spacer(),
               TextButton(
-                onPressed: () {},
+                onPressed: () => controller.changeTab(2),
                 child: Text(
                   'عرض الكل',
                   style: TextStyle(
