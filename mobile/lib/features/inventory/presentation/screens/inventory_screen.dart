@@ -89,12 +89,16 @@ class InventoryScreen extends StatelessWidget {
                       ),
                     );
                   }
-                  return ListView.separated(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                    itemCount: list.length,
-                    separatorBuilder: (context, index) => SizedBox(height: 16.h),
-                    itemBuilder: (context, index) =>
-                        _buildProductCard(list[index]),
+                  return RefreshIndicator(
+                    onRefresh: () => controller.fetchInventory(),
+                    color: const Color(0xFF2563EB),
+                    child: ListView.separated(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                      itemCount: list.length,
+                      separatorBuilder: (context, index) => SizedBox(height: 16.h),
+                      itemBuilder: (context, index) =>
+                          _buildProductCard(list[index]),
+                    ),
                   );
                 }),
               ),
