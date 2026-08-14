@@ -23,6 +23,7 @@ public class OrdersController : ControllerBase
     private readonly ISupplierProfileRepository _supplierRepository;
     private readonly IRepository<MasterOrder> _masterOrderRepository;
     private readonly INotificationService _notifications;
+    private readonly IPaymentService _paymentService;
 
     public OrdersController(
         IOrderExecutionService orderExecutionService,
@@ -31,7 +32,8 @@ public class OrdersController : ControllerBase
         IMerchantProfileRepository merchantRepository,
         ISupplierProfileRepository supplierRepository,
         IRepository<MasterOrder> masterOrderRepository,
-        INotificationService notifications)
+        INotificationService notifications,
+        IPaymentService paymentService)
     {
         _orderExecutionService = orderExecutionService;
         _orderQueryService = orderQueryService;
@@ -40,6 +42,7 @@ public class OrdersController : ControllerBase
         _supplierRepository = supplierRepository;
         _masterOrderRepository = masterOrderRepository;
         _notifications = notifications;
+        _paymentService = paymentService;
     }
 
     [HttpPost("execute")]
@@ -51,7 +54,15 @@ public class OrdersController : ControllerBase
             return BadRequest("An order must contain at least one supplier split.");
 
         var Id = await _orderExecutionService.ExecuteOrderAsync(request);
-        return Ok(new { Message = "Order executed successfully", Id = Id });
+        
+        var order = await _masterOrderRepository.GetByIdAsync(Id);
+        string? clientSecret = null;
+        if (order != null)
+        {
+            clientSecret = await _paymentService.CreatePaymentIntentAsync(order);
+        }
+
+        return Ok(new { Message = "Order executed successfully", Id = Id, ClientSecret = clientSecret });
     }
 
     // GET /api/v1/orders/summary?merchantId= — active total + % vs last month
