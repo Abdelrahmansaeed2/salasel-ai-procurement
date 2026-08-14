@@ -19,7 +19,8 @@ class DeliveryTrackingController extends GetxController {
 
   final RxString driverName = ''.obs;
   final RxString driverPhone = ''.obs;
-  final RxList<String> supplierNames = <String>['المورد'].obs;
+  final RxString estimatedDeliveryTime = ''.obs;
+  final RxList<Map<String, dynamic>> suppliers = <Map<String, dynamic>>[].obs;
 
   @override
   void onInit() {
@@ -42,10 +43,19 @@ class DeliveryTrackingController extends GetxController {
 
         driverName.value = data['driverName'] ?? 'في انتظار المندوب';
         driverPhone.value = data['driverPhone'] ?? 'غير متاح';
+        estimatedDeliveryTime.value = data['estimatedDeliveryTime'] ?? 'غير محدد';
         
-        if (data['supplierNames'] != null && data['supplierNames'] is List) {
-          final list = List<String>.from(data['supplierNames']);
-          supplierNames.assignAll(list.isNotEmpty ? list : ['المورد']);
+        if (data['suppliers'] != null && data['suppliers'] is List) {
+          suppliers.assignAll(List<Map<String, dynamic>>.from(data['suppliers']));
+        } else {
+          suppliers.assignAll([
+            {
+              'name': 'المورد',
+              'status': 'جاري التوصيل',
+              'driverName': 'في انتظار المندوب',
+              'estimatedTime': 'غير محدد'
+            }
+          ]);
         }
       }
     } catch (e) {

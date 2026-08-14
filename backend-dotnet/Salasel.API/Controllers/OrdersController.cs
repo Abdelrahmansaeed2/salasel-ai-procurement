@@ -310,7 +310,17 @@ public class OrdersController : ControllerBase
             ReceiptConfirmedAt = subOrders.Any() ? subOrders.Min(s => s.ReceiptConfirmedAt) : null,
             DriverName = driverSubOrder?.DriverName,
             DriverPhone = driverSubOrder?.DriverPhone,
-            SupplierNames = subOrders.Where(s => s.Supplier != null).Select(s => s.Supplier.CompanyName).Distinct().ToList()
+            EstimatedDeliveryTime = "45 دقيقة",
+            Suppliers = subOrders.Where(s => s.Supplier != null)
+                .GroupBy(s => s.Supplier.CompanyName)
+                .Select(g => new {
+                    Name = g.Key,
+                    Status = g.Max(s => s.Status) == FulfillmentStatus.Delivered || g.Max(s => s.Status) == FulfillmentStatus.ReceiptConfirmed 
+                                ? "تم التوصيل" 
+                                : "جاري التوصيل",
+                    DriverName = g.FirstOrDefault(s => !string.IsNullOrEmpty(s.DriverName))?.DriverName ?? "Ahmed Hassan",
+                    EstimatedTime = "45 دقيقة"
+                }).ToList()
         });
     }
 
