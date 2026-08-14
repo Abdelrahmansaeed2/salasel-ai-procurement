@@ -145,7 +145,7 @@ export class PortalOrdersComponent implements OnInit {
       subtitle: item.productName || 'منتج',
       badgeLabel: badgeLabel,
       badgeVariant: badgeVariant,
-      total: `${item.subTotalAmount} ر.س`,
+      total: `${item.total} ر.س`,
       metaLeft: `الكمية: ${item.quantity}`,
       metaRight: item.status,
       paymentStatus: item.paymentStatus,
@@ -174,6 +174,7 @@ export class PortalOrdersComponent implements OnInit {
 
     this.orderService.updateOrderStatus(subOrderId, 'Accepted').subscribe({
       next: () => {
+        this.toastService.success('تم قبول الطلب بنجاح');
         // Refresh both views from backend to reflect the real state
         this.ngOnInit();
       },
@@ -231,6 +232,7 @@ export class PortalOrdersComponent implements OnInit {
       
       this.orderService.submitBid(id, amount).subscribe({
         next: () => {
+          this.toastService.success('تم تقديم العرض بنجاح');
           this.moveCard(orderIdStr, 'pending', 'accepted');
           this.isSubmittingBid.set(false);
           this.closeBiddingDrawer();
@@ -260,6 +262,7 @@ export class PortalOrdersComponent implements OnInit {
     
     this.orderService.dispatchOrder(id).subscribe({
       next: () => {
+        this.toastService.success('تم تأكيد التوصيل بنجاح');
         this.moveCard(orderIdStr, 'accepted', 'shipped');
         this.ngOnInit();
       },

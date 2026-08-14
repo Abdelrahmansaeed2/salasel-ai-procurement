@@ -69,13 +69,15 @@ class _ReceiptSuccessScreenState extends State<ReceiptSuccessScreen>
 
   @override
   Widget build(BuildContext context) {
+    _orderFuture ??= _fetchOrderData();
+    
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: const Color(0xFFF9FAFC),
         appBar: _buildAppBar(),
         body: FutureBuilder<OrderDetailModel?>(
-          future: _orderFuture ?? _fetchOrderData(),
+          future: _orderFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator(color: OrderColors.primary));

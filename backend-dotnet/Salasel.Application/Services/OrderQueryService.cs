@@ -86,6 +86,22 @@ public class OrderQueryService : IOrderQueryService
             UnitPrice = s.Quantity > 0 ? (s.SubTotalAmount / s.Quantity) : 0m
         }).ToList();
 
+        string aggregatedStatus = "Pending";
+        if (order.Status == ApprovalStatus.Rejected) aggregatedStatus = "Rejected";
+        else if (order.Status == ApprovalStatus.Manually_Approved)
+        {
+            if (order.SubOrders != null && order.SubOrders.Count > 0)
+            {
+                var allDelivered = order.SubOrders.All(s => s.Status == FulfillmentStatus.Delivered || s.Status == FulfillmentStatus.ReceiptConfirmed);
+                var anyShipped = order.SubOrders.Any(s => s.Status == FulfillmentStatus.Shipped || s.Status == FulfillmentStatus.Delivered || s.Status == FulfillmentStatus.ReceiptConfirmed);
+                var anyAccepted = order.SubOrders.Any(s => s.Status == FulfillmentStatus.Accepted);
+
+                if (allDelivered) aggregatedStatus = "Completed";
+                else if (anyShipped) aggregatedStatus = "Shipped";
+                else if (anyAccepted) aggregatedStatus = "Accepted";
+            }
+        }
+
         return new OrderDetailDto
         {
             Id = order.Id,
@@ -94,7 +110,7 @@ public class OrderQueryService : IOrderQueryService
             DeliveryFee = 0.0, // Stub
             Tax = 0.0,         // Stub
             OrderDate = order.OrderDate,
-            Status = order.Status.ToString(),
+            Status = aggregatedStatus,
             Transcript = order.VoiceLog?.Transcript ?? string.Empty,
             AiInsights = insights,
             Products = products
