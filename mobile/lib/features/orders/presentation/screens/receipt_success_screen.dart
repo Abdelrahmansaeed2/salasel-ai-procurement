@@ -46,7 +46,8 @@ class _ReceiptSuccessScreenState extends State<ReceiptSuccessScreen>
 
   Future<OrderDetailModel?> _fetchOrderData() async {
     try {
-      final response = await ApiClient().dio.get('/orders/${widget.orderId}');
+      final numericId = widget.orderId.replaceAll(RegExp(r'[^\d]'), '');
+      final response = await ApiClient().dio.get('/orders/$numericId');
       if (response.statusCode == 200) {
         final order = OrderDetailModel.fromJson(response.data);
         final suppliers = order.products.map((p) => p.supplierName).toSet();
