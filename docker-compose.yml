@@ -67,6 +67,9 @@ services:
       Seq__Url: "http://seq:5341"
       AiService__BaseUrl: "http://ai_service:8000"
       AiService__TimeoutSeconds: "120"
+      Stripe__SecretKey: "${STRIPE_SECRET_KEY}"
+      Stripe__PublishableKey: "${STRIPE_PUBLISHABLE_KEY}"
+      Stripe__WebhookSecret: "${STRIPE_WEBHOOK_SECRET}"
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:80/health || exit 1"]
       interval: 30s
