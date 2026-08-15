@@ -343,14 +343,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         SizedBox(width: 8.w),
         Expanded(
           child: _buildPaymentMethodCard(
-            value: 'paytabs_installments',
-            title: 'تقسيط (ValU وغيرها)',
-            icon: Icons.calendar_today,
-          ),
-        ),
-        SizedBox(width: 8.w),
-        Expanded(
-          child: _buildPaymentMethodCard(
             value: 'cod',
             title: 'الدفع عند الاستلام',
             icon: Icons.money,
@@ -363,7 +355,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget _buildPaymentMethodCard({required String value, required String title, required IconData icon}) {
     final isSelected = _selectedPaymentMethod == value;
     return GestureDetector(
-      onTap: () => setState(() => _selectedPaymentMethod = value),
+      onTap: () {
+        setState(() => _selectedPaymentMethod = value);
+        _controller.selectPaymentMethod(value);
+      },
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 4.w),
         decoration: BoxDecoration(
@@ -518,7 +513,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       child: Obx(() => AnimatedPressable(
         borderRadius: BorderRadius.circular(12.r),
         onTap: _controller.isProcessing.value ? null : () {
-          _controller.processPayment(widget.orderId);
+          final rawAmount = widget.totalAmount.replaceAll(RegExp(r'[^0-9.]'), '');
+          final amount = double.tryParse(rawAmount) ?? 0.0;
+          _controller.processPayment(widget.orderId, amount);
         },
         child: Container(
           height: 52.h,

@@ -20,7 +20,7 @@ class CheckoutController extends GetxController {
     selectedPaymentMethod.value = method;
   }
 
-  Future<void> processPayment(String orderId) async {
+  Future<void> processPayment(String orderId, double amount) async {
     if (orderId.isEmpty) return;
 
     try {
@@ -28,8 +28,9 @@ class CheckoutController extends GetxController {
 
       if (selectedPaymentMethod.value == 'credit_card') {
         // 1. Create Payment Intent
+        final numericOrderId = orderId.replaceAll(RegExp(r'[^0-9]'), '');
         final baseWithoutV1 = ApiClient.baseUrl.replaceAll('/v1', '');
-        final intentResponse = await _apiClient.dio.post('$baseWithoutV1/payments/create-intent/$orderId');
+        final intentResponse = await _apiClient.dio.post('$baseWithoutV1/payments/create-intent/$numericOrderId');
         
         if (intentResponse.statusCode == 200) {
           final clientSecret = intentResponse.data['clientSecret'];
@@ -70,18 +71,20 @@ class CheckoutController extends GetxController {
             clientKey: "C7K2G9-V6BM6P-B266MK-KPDNBQ",
             cartId: orderId,
             cartDescription: "Salasel Order $orderId",
-            merchantName: "Salasel Test",
+            merchantName: "Salasel",
             screentTitle: "الدفع بالتقسيط",
-            amount: 100.0, // Hardcoded for test
+            amount: amount, // Real dynamic amount from the order
+
             showBillingInfo: false,
             forceShippingInfo: false,
             currencyCode: "EGP",
             merchantCountryCode: "EG",
             billingDetails: billingDetails,
-            alternativePaymentMethods: [PaymentSdkAPms.VALU] // Trigger ValU specifically
+            // alternativePaymentMethods: [PaymentSdkAPms.VALU] // Temporarily disabled for testing
         );
 
-        FlutterPaytabsBridge.startAlternativePaymentMethod(configuration, (event) {
+        FlutterPaytabsBridge.startCardPayment(configuration, (event) {
+          debugPrint('PayTabs Event: $event'); // Added logging
           isProcessing.value = false;
           if (event["status"] == "success") {
             Get.off(() => ReceiptSuccessScreen(orderId: orderId));
@@ -97,10 +100,12 @@ class CheckoutController extends GetxController {
         return;
       } else {
         // Cash on Delivery
+        final numericOrderId = orderId.replaceAll(RegExp(r'[^0-9]'), '');
+        final baseWithoutV1 = ApiClient.baseUrl.replaceAll('/v1', '');
         final response = await _apiClient.dio.post(
-          '/orders/$orderId/payment',
+          '$baseWithoutV1/voice-orders/$numericOrderId/payment',
           data: {
-            'paymentMethod': 'CashOnDelivery',
+            'paymentMethod': 0, // 0 corresponds to PaymentMethod.CashOnDelivery in the backend Enum
             'paymentReference': 'REF-${DateTime.now().millisecondsSinceEpoch}',
           },
         );
