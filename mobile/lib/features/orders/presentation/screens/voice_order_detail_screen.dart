@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import '../../../../../core/utils/status_mapper.dart';
 
 import '../controllers/voice_order_detail_controller.dart';
 import '../../data/models/order_detail_model.dart';
@@ -226,7 +227,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      order.status,
+                      StatusMapper.translate(order.status),
                       style: TextStyle(
                         color: const Color(0xFF166534),
                         fontFamily: 'Cairo',

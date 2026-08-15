@@ -89,6 +89,10 @@ public class OrderQueryService : IOrderQueryService
         string aggregatedStatus = order.Status.ToString();
         if (order.Status == ApprovalStatus.Rejected) aggregatedStatus = "Rejected";
         else if (order.Status == ApprovalStatus.Completed) aggregatedStatus = "Completed";
+        else if (order.Status == ApprovalStatus.Manually_Approved)
+        {
+            aggregatedStatus = order.PaymentMethod == null ? "PendingPayment" : "Accepted";
+        }
 
         return new OrderDetailDto
         {

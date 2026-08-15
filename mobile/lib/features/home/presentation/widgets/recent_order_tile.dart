@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/utils/status_mapper.dart';
 import '../controllers/home_controller.dart';
 import '../theme/home_colors.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class RecentOrderTile extends StatelessWidget {
   final RecentOrder order;
@@ -43,7 +44,7 @@ class RecentOrderTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(999.r),
                   ),
                   child: Text(
-                    order.status,
+                    StatusMapper.translate(order.status),
                     style: TextStyle(
                       color: statusColor,
                       fontFamily: 'Cairo',
