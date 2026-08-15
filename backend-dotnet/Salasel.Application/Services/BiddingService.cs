@@ -149,7 +149,8 @@ public class BiddingService : IBiddingService
         var relevant = await _subOrderRepository.Query()
             .Include(s => s.MasterOrder).ThenInclude(m => m.Merchant)
             .Include(s => s.Product)
-            .Where(s => s.SupplierId == supplierId || (s.Status == FulfillmentStatus.Bidding && s.SupplierId == null))
+            .Where(s => (s.SupplierId == supplierId && s.Status == FulfillmentStatus.Pending_Supplier) 
+                     || (s.Status == FulfillmentStatus.Bidding && s.SupplierId == null))
             .OrderByDescending(s => s.CreatedAt)
             .ToListAsync();
 
@@ -157,8 +158,8 @@ public class BiddingService : IBiddingService
         {
             Id = $"ORD-{s.MasterId}-{s.Id}",
             Merchant = s.MasterOrder.Merchant?.ShopName ?? "Unknown",
-            Priority = s.Status == FulfillmentStatus.Bidding ? "urgent" : "review",
-            PriorityLabel = s.Status == FulfillmentStatus.Bidding ? "عاجل" : "للمراجعة",
+            Priority = s.Status == FulfillmentStatus.Bidding ? "urgent" : "scheduled",
+            PriorityLabel = s.Status == FulfillmentStatus.Bidding ? "عاجل" : "جديد",
             Confidence = 95,
             ConfidenceColor = s.Status == FulfillmentStatus.Bidding ? "#2563EB" : "#10B981",
             Total = s.SubTotalAmount.ToString("F2"),
