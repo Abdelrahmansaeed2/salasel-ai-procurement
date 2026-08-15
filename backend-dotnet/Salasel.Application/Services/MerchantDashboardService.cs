@@ -81,7 +81,7 @@ public class MerchantDashboardService : IMerchantDashboardService
             _ => "Multiple Suppliers"
         };
 
-        string aggregatedStatus = "Pending";
+        string aggregatedStatus = order.Status.ToString();
         if (order.Status == ApprovalStatus.Rejected) aggregatedStatus = "Rejected";
         else if (order.Status == ApprovalStatus.Completed) aggregatedStatus = "Completed";
         else if (order.Status == ApprovalStatus.Manually_Approved)

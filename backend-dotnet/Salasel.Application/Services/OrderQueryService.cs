@@ -86,7 +86,7 @@ public class OrderQueryService : IOrderQueryService
             UnitPrice = s.Quantity > 0 ? (s.SubTotalAmount / s.Quantity) : 0m
         }).ToList();
 
-        string aggregatedStatus = "Pending";
+        string aggregatedStatus = order.Status.ToString();
         if (order.Status == ApprovalStatus.Rejected) aggregatedStatus = "Rejected";
         else if (order.Status == ApprovalStatus.Completed) aggregatedStatus = "Completed";
         else if (order.Status == ApprovalStatus.Manually_Approved)
