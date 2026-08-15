@@ -61,7 +61,8 @@ public enum PaymentMethod : byte
     CashOnDelivery,
     BankTransfer,
     CreditCard,
-    Stripe
+    Stripe,
+    PayTabs
 }
 
 public enum PaymentStatus : byte

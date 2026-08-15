@@ -343,6 +343,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         SizedBox(width: 8.w),
         Expanded(
           child: _buildPaymentMethodCard(
+            value: 'paytabs_installments',
+            title: 'تقسيط (ValU وغيرها)',
+            icon: Icons.calendar_today,
+          ),
+        ),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: _buildPaymentMethodCard(
             value: 'cod',
             title: 'الدفع عند الاستلام',
             icon: Icons.money,
