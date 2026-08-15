@@ -5,7 +5,7 @@ import '../../../../../core/network/api_client.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
-enum OrderStatus { pending, accepted, shipped, delivered }
+enum OrderStatus { pending, pendingPayment, accepted, shipped, delivered }
 
 class OrderItem {
   final String name;
@@ -78,6 +78,7 @@ class OrdersController extends GetxController {
           OrderStatus status = OrderStatus.pending;
           final String statusStr = json['status'] ?? 'Pending';
           if (statusStr == 'Pending') status = OrderStatus.pending;
+          else if (statusStr == 'PendingPayment') status = OrderStatus.pendingPayment;
           else if (statusStr == 'Accepted') status = OrderStatus.accepted;
           else if (statusStr == 'Shipped') status = OrderStatus.shipped;
           else if (statusStr == 'Completed') status = OrderStatus.delivered;
@@ -123,7 +124,7 @@ class OrdersController extends GetxController {
 
     return source.where((o) {
       final matchesFilter = filter == 'الكل' ||
-          (filter == 'قيد الانتظار' && o.status == OrderStatus.pending) ||
+          (filter == 'قيد الانتظار' && (o.status == OrderStatus.pending || o.status == OrderStatus.pendingPayment)) ||
           (filter == 'مقبول' && o.status == OrderStatus.accepted) ||
           (filter == 'تم الشحن' && o.status == OrderStatus.shipped) ||
           (filter == 'في الطريق' && o.status == OrderStatus.shipped);
@@ -174,6 +175,8 @@ class OrdersController extends GetxController {
     switch (s) {
       case OrderStatus.pending:
         return 'قيد الانتظار';
+      case OrderStatus.pendingPayment:
+        return 'بانتظار الدفع';
       case OrderStatus.accepted:
         return 'مقبول';
       case OrderStatus.shipped:
@@ -186,6 +189,8 @@ class OrdersController extends GetxController {
   Color statusColor(OrderStatus s) {
     switch (s) {
       case OrderStatus.pending:
+        return const Color(0xFFF59E0B);
+      case OrderStatus.pendingPayment:
         return const Color(0xFFF59E0B);
       case OrderStatus.accepted:
         return const Color(0xFF2563EB);
@@ -200,6 +205,8 @@ class OrdersController extends GetxController {
     switch (s) {
       case OrderStatus.pending:
         return 0;
+      case OrderStatus.pendingPayment:
+        return 1;
       case OrderStatus.accepted:
         return 1;
       case OrderStatus.shipped:

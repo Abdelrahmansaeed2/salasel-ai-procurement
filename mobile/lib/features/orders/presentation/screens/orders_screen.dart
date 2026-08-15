@@ -855,11 +855,11 @@ class _OrderCard extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  if (activeStep == 0 || activeStep == 3) {
+                  if (activeStep == 0 || activeStep == 3 || (activeStep == 1 && order.status == OrderStatus.accepted)) {
                     Get.to(() => VoiceOrderDetailScreen(
                       orderId: int.parse(order.id),
                     ));
-                  } else if (activeStep == 1) {
+                  } else if (activeStep == 1 && order.status == OrderStatus.pendingPayment) {
                     Get.to(() => CheckoutScreen(
                       orderId: order.orderNumber,
                       totalAmount: '${order.total.toStringAsFixed(0)} جنيه',
@@ -869,26 +869,26 @@ class _OrderCard extends StatelessWidget {
                       merchantAddress: 'شارع التحلية، بجوار المركز الرئيسي', // Placeholder
                       merchantCity: 'الرياض', // Placeholder
                     ));
-                  } else if (activeStep == 2) {
+                  } else if (activeStep >= 2) {
                     Get.to(() => DeliveryTrackingScreen(orderId: order.orderNumber));
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: (activeStep == 1 || activeStep == 2) ? const Color(0xFF2563EB) : Colors.white,
-                  foregroundColor: (activeStep == 1 || activeStep == 2) ? Colors.white : const Color(0xFF1E293B),
+                  backgroundColor: ((activeStep == 1 && order.status == OrderStatus.pendingPayment) || activeStep >= 2) ? const Color(0xFF2563EB) : Colors.white,
+                  foregroundColor: ((activeStep == 1 && order.status == OrderStatus.pendingPayment) || activeStep >= 2) ? Colors.white : const Color(0xFF1E293B),
                   elevation: 0,
-                  side: BorderSide(color: (activeStep == 1 || activeStep == 2) ? Colors.transparent : const Color(0xFFE2E8F0)),
+                  side: BorderSide(color: ((activeStep == 1 && order.status == OrderStatus.pendingPayment) || activeStep >= 2) ? Colors.transparent : const Color(0xFFE2E8F0)),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.r)),
                   padding: EdgeInsets.symmetric(vertical: 12.h),
                 ),
                 child: Text(
-                  activeStep == 1 ? 'الدفع الآن' : (activeStep == 2 ? 'تتبع التوصيل' : 'التفاصيل'),
+                  (activeStep == 1 && order.status == OrderStatus.pendingPayment) ? 'الدفع الآن' : (activeStep >= 2 ? 'تتبع التوصيل' : 'التفاصيل'),
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
                     fontFamily: 'Cairo',
-                    color: (activeStep == 1 || activeStep == 2) ? Colors.white : const Color(0xFF1E293B),
+                    color: ((activeStep == 1 && order.status == OrderStatus.pendingPayment) || activeStep >= 2) ? Colors.white : const Color(0xFF1E293B),
                   ),
                 ),
               ),
