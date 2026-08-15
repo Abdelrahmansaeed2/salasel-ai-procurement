@@ -291,7 +291,7 @@ public static class OrderMapper
                 order.PaymentMethod == null 
                     ? "PendingPayment" 
                     : (fulfillment == FulfillmentStatus.Shipped ? "Shipped" :
-                      (fulfillment == FulfillmentStatus.Completed ? "Completed" :
+                      (fulfillment == FulfillmentStatus.Delivered ? "Completed" :
                       (fulfillment == FulfillmentStatus.Accepted ? "Accepted" : "Confirmed"))),
             ApprovalStatus.Rejected =>
                 fulfillment == FulfillmentStatus.Cancelled ? "Declined" : "Cancelled",

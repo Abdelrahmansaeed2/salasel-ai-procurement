@@ -92,7 +92,7 @@ public class OrderQueryService : IOrderQueryService
         else if (order.Status == ApprovalStatus.Manually_Approved)
         {
             var anyShipped = order.SubOrders.Any(s => s.Status == FulfillmentStatus.Shipped);
-            var allCompleted = order.SubOrders.Any() && order.SubOrders.All(s => s.Status == FulfillmentStatus.Completed);
+            var allCompleted = order.SubOrders.Any() && order.SubOrders.All(s => s.Status == FulfillmentStatus.Delivered || s.Status == FulfillmentStatus.ReceiptConfirmed);
             
             if (allCompleted) aggregatedStatus = "Completed";
             else if (anyShipped) aggregatedStatus = "Shipped";
