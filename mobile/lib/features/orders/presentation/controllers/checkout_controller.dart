@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:flutter_paytabs_bridge/BaseBillingShippingInfo.dart';
+import 'package:flutter_paytabs_bridge/BaseBillingShippingInfo.dart' as paytabs;
 import 'package:flutter_paytabs_bridge/PaymentSdkConfigurationDetails.dart';
 import 'package:flutter_paytabs_bridge/PaymentSdkLocale.dart';
 import 'package:flutter_paytabs_bridge/PaymentSdkTokeniseType.dart';
@@ -60,7 +60,7 @@ class CheckoutController extends GetxController {
               backgroundColor: Colors.red, colorText: Colors.white);
         }
       } else if (selectedPaymentMethod.value == 'paytabs_installments') {
-        var billingDetails = BillingDetails(
+        var billingDetails = paytabs.BillingDetails(
             "Customer Name", "email@example.com", "+201000000000",
             "Cairo", "eg", "Cairo", "Cairo", "12345");
         
