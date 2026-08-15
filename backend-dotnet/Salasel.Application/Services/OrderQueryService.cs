@@ -91,7 +91,12 @@ public class OrderQueryService : IOrderQueryService
         else if (order.Status == ApprovalStatus.Completed) aggregatedStatus = "Completed";
         else if (order.Status == ApprovalStatus.Manually_Approved)
         {
-            aggregatedStatus = order.PaymentMethod == null ? "PendingPayment" : "Accepted";
+            var anyShipped = order.SubOrders.Any(s => s.Status == FulfillmentStatus.Shipped);
+            var allCompleted = order.SubOrders.Any() && order.SubOrders.All(s => s.Status == FulfillmentStatus.Completed);
+            
+            if (allCompleted) aggregatedStatus = "Completed";
+            else if (anyShipped) aggregatedStatus = "Shipped";
+            else aggregatedStatus = order.PaymentMethod == null ? "PendingPayment" : "Accepted";
         }
 
         return new OrderDetailDto

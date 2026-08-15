@@ -288,7 +288,11 @@ public static class OrderMapper
             ApprovalStatus.AI_Draft => "Draft",
             ApprovalStatus.Pending_Approval => "Confirmed",
             ApprovalStatus.Manually_Approved =>
-                order.PaymentMethod == null ? "PendingPayment" : (fulfillment == FulfillmentStatus.Accepted ? "Accepted" : "Confirmed"),
+                order.PaymentMethod == null 
+                    ? "PendingPayment" 
+                    : (fulfillment == FulfillmentStatus.Shipped ? "Shipped" :
+                      (fulfillment == FulfillmentStatus.Completed ? "Completed" :
+                      (fulfillment == FulfillmentStatus.Accepted ? "Accepted" : "Confirmed"))),
             ApprovalStatus.Rejected =>
                 fulfillment == FulfillmentStatus.Cancelled ? "Declined" : "Cancelled",
             _ => approval.ToString()
