@@ -106,9 +106,17 @@ public class BiddingService : IBiddingService
             })
             .ToList();
 
+        var awaitingPayment = relevant
+            .Where(s => s.SupplierId == supplierId
+                        && s.Status == FulfillmentStatus.Accepted
+                        && s.MasterOrder?.PaymentMethod == null)
+            .Select(s => MapCard(s, myBidPrice: null))
+            .ToList();
+
         var accepted = relevant
             .Where(s => s.SupplierId == supplierId
-                        && s.Status == FulfillmentStatus.Accepted)
+                        && s.Status == FulfillmentStatus.Accepted
+                        && s.MasterOrder?.PaymentMethod != null)
             .Select(s => MapCard(s, myBidPrice: null))
             .ToList();
 
@@ -136,6 +144,7 @@ public class BiddingService : IBiddingService
             {
                 new() { Key = "Pending", Label = "طلبات جديدة", Cards = pending },
                 new() { Key = "Bidding", Label = "عروضي المقدمة", Cards = bidding },
+                new() { Key = "AwaitingPayment", Label = "بإنتظار الدفع", Cards = awaitingPayment },
                 new() { Key = "Accepted", Label = "قيد التنفيذ", Cards = accepted },
                 new() { Key = "Shipped", Label = "جاري التوصيل", Cards = shipped },
                 new() { Key = "Delivered", Label = "تم التسليم", Cards = delivered },
