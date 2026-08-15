@@ -49,10 +49,6 @@ class DeliveryTrackingScreen extends StatelessWidget {
             ),
           );
         }),
-        bottomNavigationBar: AppBottomNavBar(
-          currentIndex: 2, // Orders tab index
-          onTap: (index) => AppNavigator.changeTab(index, currentTabIndex: 2),
-        ),
       ),
     );
   }
@@ -565,77 +561,7 @@ class DeliveryTrackingScreen extends StatelessWidget {
               ),
             ],
           ),
-        ),
-        // Bottom Navigation Bar
-        Container(
-          height: 64.h,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(top: BorderSide(color: OrderColors.cardBorder, width: 0.5)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(icon: Icons.person_outline, label: 'حسابي', isActive: true),
-              _buildNavItem(icon: Icons.receipt_long_outlined, label: 'الطلبات'),
-              _buildNavItem(icon: Icons.inventory_2_outlined, label: 'المخزون'),
-              _buildNavItem(icon: Icons.home_outlined, label: 'الرئيسية'),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNavItem({required IconData icon, required String label, bool isActive = false, String? badge}) {
-    return Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Icon(icon, color: isActive ? OrderColors.primary : OrderColors.textMuted, size: 24.w),
-              if (badge != null)
-                Positioned(
-                  top: -4.h,
-                  right: -4.w,
-                  child: Container(
-                    padding: EdgeInsets.all(4.w),
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      badge,
-                      style: TextStyle(color: Colors.white, fontSize: 8.sp, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            label,
-            style: TextStyle(
-              color: isActive ? OrderColors.primary : OrderColors.textMuted,
-              fontSize: 10.sp,
-              fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
-              fontFamily: 'Cairo',
-            ),
-          ),
-          if (isActive)
-             Container(
-               margin: EdgeInsets.only(top: 4.h),
-               width: 24.w,
-               height: 2.h,
-               decoration: BoxDecoration(
-                 color: OrderColors.primary,
-                 borderRadius: BorderRadius.circular(2.r),
-               ),
-             ),
-        ],
-      ),
+        )],
     );
   }
 }

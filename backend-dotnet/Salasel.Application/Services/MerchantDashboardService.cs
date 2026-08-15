@@ -84,19 +84,6 @@ public class MerchantDashboardService : IMerchantDashboardService
         string aggregatedStatus = order.Status.ToString();
         if (order.Status == ApprovalStatus.Rejected) aggregatedStatus = "Rejected";
         else if (order.Status == ApprovalStatus.Completed) aggregatedStatus = "Completed";
-        else if (order.Status == ApprovalStatus.Manually_Approved)
-        {
-            if (order.SubOrders != null && order.SubOrders.Count > 0)
-            {
-                var allDelivered = order.SubOrders.All(s => s.Status == FulfillmentStatus.Delivered || s.Status == FulfillmentStatus.ReceiptConfirmed);
-                var anyShipped = order.SubOrders.Any(s => s.Status == FulfillmentStatus.Shipped || s.Status == FulfillmentStatus.Delivered || s.Status == FulfillmentStatus.ReceiptConfirmed);
-                var anyAccepted = order.SubOrders.Any(s => s.Status == FulfillmentStatus.Accepted);
-
-                if (allDelivered) aggregatedStatus = "Completed";
-                else if (anyShipped) aggregatedStatus = "Shipped";
-                else if (anyAccepted) aggregatedStatus = "Accepted";
-            }
-        }
 
         return new RecentOrderDto
         {
