@@ -706,7 +706,7 @@ class _VoiceOrderDetailScreenState extends State<VoiceOrderDetailScreen> {
                 );
               }
 
-              final isApproved = status == 'Manually_Approved';
+              final isApproved = status == 'PendingPayment' || status == 'Manually_Approved';
               if (isApproved) {
                 return SizedBox(
                   width: double.infinity,

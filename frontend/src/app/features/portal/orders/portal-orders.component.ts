@@ -177,6 +177,8 @@ export class PortalOrdersComponent implements OnInit {
         this.toastService.success('تم قبول الطلب بنجاح');
         // Refresh both views from backend to reflect the real state
         this.ngOnInit();
+        // Switch to the Kanban board view so the user can see the accepted order
+        this.setViewMode('board');
       },
       error: (err) => {
         const msg = err.error?.message || err.message || 'حدث خطأ غير متوقع';

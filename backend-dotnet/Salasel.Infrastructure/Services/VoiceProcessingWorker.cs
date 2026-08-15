@@ -240,7 +240,7 @@ public static class OrderMapper
             lineTotal = i.Quantity * i.Price
         });
 
-        var status = MapStatus(o.Status, sub?.Status);
+        var status = MapStatus(o, o.Status, sub?.Status);
 
         return new
         {
@@ -281,14 +281,14 @@ public static class OrderMapper
         return Map(o, ai);
     }
 
-    private static string MapStatus(ApprovalStatus approval, FulfillmentStatus? fulfillment)
+    private static string MapStatus(MasterOrder order, ApprovalStatus approval, FulfillmentStatus? fulfillment)
     {
         return approval switch
         {
             ApprovalStatus.AI_Draft => "Draft",
             ApprovalStatus.Pending_Approval => "Confirmed",
             ApprovalStatus.Manually_Approved =>
-                fulfillment == FulfillmentStatus.Accepted ? "Accepted" : "Confirmed",
+                order.PaymentMethod == null ? "PendingPayment" : (fulfillment == FulfillmentStatus.Accepted ? "Accepted" : "Confirmed"),
             ApprovalStatus.Rejected =>
                 fulfillment == FulfillmentStatus.Cancelled ? "Declined" : "Cancelled",
             _ => approval.ToString()
