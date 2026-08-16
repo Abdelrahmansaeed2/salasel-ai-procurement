@@ -39,6 +39,12 @@ public interface IAIService
         double merchantLng,
         CancellationToken ct = default);
 
+    /// <summary>Proxy: forwards an audio file to <c>POST /api/v1/voice/transcribe</c> and returns the transcribed text.</summary>
+    Task<string> TranscribeVoiceAsync(
+        Stream audio,
+        string fileName,
+        CancellationToken ct = default);
+
     /// <summary>Uploads a knowledge document to <c>POST /api/v1/admin/knowledge/ingest</c> for RAG/Seeding.</summary>
     Task<AiProxyResponse> IngestKnowledgeAsync(
         int supplierId,
@@ -150,6 +156,37 @@ public class AIService : IAIService
             fileName, merchantId);
 
         return await SendRawAsync(() => _http.PostAsync(url, content, ct), ct);
+    }
+
+    public async Task<string> TranscribeVoiceAsync(
+        Stream audio,
+        string fileName,
+        CancellationToken ct = default)
+    {
+        using var content = new MultipartFormDataContent();
+        var fileContent = new StreamContent(audio);
+        fileContent.Headers.ContentType =
+            new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+        content.Add(fileContent, "audio", fileName);
+
+        var url = "/api/v1/voice/transcribe";
+        _logger.LogInformation("AIService: forwarding voice transcription {FileName}", fileName);
+
+        using var response = await _http.PostAsync(url, content, ct);
+        var body = await response.Content.ReadAsStringAsync(ct);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError("Transcribe error: {Body}", body);
+            return ""; // Fallback
+        }
+
+        try {
+            using var doc = JsonDocument.Parse(body);
+            return doc.RootElement.GetProperty("text").GetString() ?? "";
+        } catch {
+            return "";
+        }
     }
 
     public async Task<AiProxyResponse> IngestKnowledgeAsync(

@@ -26,6 +26,7 @@ public class SalaselDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; } = null!;
     public DbSet<ContactMessage> ContactMessages { get; set; } = null!;
     public DbSet<UserNotificationSettings> UserNotificationSettings { get; set; } = null!;
+    public DbSet<AdminApproval> AdminApprovals { get; set; } = null!;
     public DbSet<ReturnRequest> ReturnRequests { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -264,8 +265,8 @@ public class SalaselDbContext : DbContext
         modelBuilder.Entity<Bid>().Property(b => b.Status).HasConversion<string>().HasMaxLength(20);
         modelBuilder.Entity<Bid>().Property(b => b.Price).HasPrecision(18, 4);
 
-        modelBuilder.Entity<ReturnRequest>().Property(r => r.RequestedAmount).HasPrecision(18, 4);
-        modelBuilder.Entity<ReturnRequest>().Property(r => r.ApprovedAmount).HasPrecision(18, 4);
+        modelBuilder.Entity<ReturnRequest>().Property(r => r.RequestedAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<ReturnRequest>().Property(r => r.ApprovedAmount).HasPrecision(18, 2);
 
         // Product → SubOrder (optional — see SubOrder.ProductId)
         modelBuilder.Entity<SubOrder>()

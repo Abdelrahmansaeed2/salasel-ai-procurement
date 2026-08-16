@@ -22,6 +22,7 @@ public interface IInventoryService
 {
     Task<InventoryListResultDto> GetInventoryListAsync(int merchantId, string? category, string? q, string? status);
     Task<InventoryItemDetailDto?> GetInventoryItemAsync(int inventoryId);
+    Task<InventoryItemDetailDto> AddItemAsync(AddInventoryItemDto request);
     Task<InventoryItemDetailDto?> UpdateInventoryItemAsync(int inventoryId, UpdateInventoryItemDto request);
     Task<InventoryItemDetailDto?> UpdateQuantityAsync(int inventoryId, UpdateInventoryQuantityDto request);
     Task<ReorderResultDto> ReorderAsync(int inventoryId, ReorderRequestDto request);

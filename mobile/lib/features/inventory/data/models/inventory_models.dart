@@ -1,19 +1,22 @@
 class InventoryItemModel {
   final int inventoryId;
-  final int productId;
+  final int? productId; // nullable for custom items
   final String productName;
   final String sku;
   final String category;
-  final int currentQty;
-  final int maxQty;
-  final int reorderThreshold;
+  final double currentQty;
+  final double maxQty;
+  final double reorderThreshold;
   final String status;
   final String unitOfMeasure;
   final String imageUrl;
+  final bool isCustom;
+  final String? customBarcode;
+  final double costPrice;
 
   InventoryItemModel({
     required this.inventoryId,
-    required this.productId,
+    this.productId,
     required this.productName,
     required this.sku,
     required this.category,
@@ -23,21 +26,27 @@ class InventoryItemModel {
     required this.status,
     required this.unitOfMeasure,
     required this.imageUrl,
+    this.isCustom = false,
+    this.customBarcode,
+    this.costPrice = 0.0,
   });
 
   factory InventoryItemModel.fromJson(Map<String, dynamic> json) {
     return InventoryItemModel(
       inventoryId: json['inventoryID'] ?? json['inventoryId'] ?? 0,
-      productId: json['productId'] ?? 0,
+      productId: json['productId'],
       productName: json['productName'] ?? '',
       sku: json['sku'] ?? '',
       category: json['categoryName'] ?? json['category'] ?? 'عام',
-      currentQty: json['currentQty'] ?? 0,
-      maxQty: json['maxQty'] ?? 100,
-      reorderThreshold: json['reorderThreshold'] ?? 10,
+      currentQty: (json['currentQty'] as num?)?.toDouble() ?? 0.0,
+      maxQty: (json['maxQty'] as num?)?.toDouble() ?? 100.0,
+      reorderThreshold: (json['reorderThreshold'] as num?)?.toDouble() ?? 10.0,
       status: json['status'] ?? 'متوفر',
       unitOfMeasure: json['unit'] ?? json['unitOfMeasure'] ?? 'قطعة',
       imageUrl: json['imageUrl'] ?? '',
+      isCustom: json['isCustom'] ?? false,
+      customBarcode: json['customBarcode'],
+      costPrice: (json['costPrice'] as num?)?.toDouble() ?? 0.0,
     );
   }
 

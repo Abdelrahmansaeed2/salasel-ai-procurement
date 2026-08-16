@@ -77,7 +77,7 @@ class InventoryController extends GetxController {
     }
   }
 
-  Future<void> updateQuantity(int inventoryId, int currentQty, int delta) async {
+  Future<void> updateQuantity(int inventoryId, double currentQty, double delta) async {
     final newQty = currentQty + delta;
     if (newQty < 0) return;
 
@@ -104,11 +104,56 @@ class InventoryController extends GetxController {
             status: p.status,
             unitOfMeasure: p.unitOfMeasure,
             imageUrl: p.imageUrl,
+            isCustom: p.isCustom,
+            customBarcode: p.customBarcode,
+            costPrice: p.costPrice,
           );
         }
       }
     } catch (e) {
       Get.snackbar('خطأ', 'فشل في تحديث الكمية');
+    }
+  }
+
+  Future<void> addItem({
+    int? productId,
+    String? customProductName,
+    String? customCategory,
+    String? customBarcode,
+    required double currentQty,
+    required double reorderThreshold,
+    required double costPrice,
+  }) async {
+    try {
+      final shopsResponse = await _apiClient.dio.get('/merchants/me/shops');
+      int? merchantId;
+      if (shopsResponse.statusCode == 200 && (shopsResponse.data as List).isNotEmpty) {
+        merchantId = shopsResponse.data[0]['merchantID'];
+      }
+      
+      if (merchantId == null) throw Exception('No shop found');
+
+      final response = await _apiClient.dio.post(
+        '/inventory',
+        data: {
+          'merchantID': merchantId,
+          'productId': productId,
+          'customProductName': customProductName,
+          'customCategory': customCategory,
+          'customBarcode': customBarcode,
+          'currentQty': currentQty,
+          'reorderThreshold': reorderThreshold,
+          'costPrice': costPrice,
+        },
+      );
+
+      if (response.statusCode == 201) {
+        Get.snackbar('نجاح', 'تمت إضافة المنتج بنجاح');
+        // Refresh inventory
+        fetchInventory();
+      }
+    } catch (e) {
+      Get.snackbar('خطأ', 'فشل في إضافة المنتج');
     }
   }
 

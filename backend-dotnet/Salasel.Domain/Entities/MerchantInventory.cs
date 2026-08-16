@@ -7,11 +7,17 @@ public class MerchantInventory
     public int MerchantID { get; set; }
     public MerchantsProfile Merchant { get; set; } = null!;
 
-    public int ProductId { get; set; }
-    public Product Product { get; set; } = null!;
+    public int? ProductId { get; set; }
+    public Product? Product { get; set; }
 
-    public int CurrentQty { get; set; }
-    public int ReorderThreshold { get; set; }  // AI triggers order when CurrentQty <= this
+    // External / Custom Products
+    public string? CustomProductName { get; set; }
+    public string? CustomCategory { get; set; }
+    public string? CustomBarcode { get; set; }
+    public decimal CostPrice { get; set; }
+
+    public decimal CurrentQty { get; set; }
+    public decimal ReorderThreshold { get; set; }  // AI triggers order when CurrentQty <= this
     public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
 
     // Set by POST /api/v1/inventory/alerts/{id}/dismiss. The alert stays hidden as

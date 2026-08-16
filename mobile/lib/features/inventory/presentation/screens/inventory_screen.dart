@@ -6,6 +6,7 @@ import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../data/models/inventory_models.dart';
 import '../controllers/inventory_controller.dart';
 import '../widgets/ai_insights_card.dart';
+import 'add_inventory_item_screen.dart';
 
 class InventoryScreen extends StatelessWidget {
   const InventoryScreen({super.key});
@@ -104,6 +105,14 @@ class InventoryScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            // Navigate to Add Inventory Item Screen
+            Get.to(() => const AddInventoryItemScreen());
+          },
+          backgroundColor: const Color(0xFF2563EB),
+          child: const Icon(Icons.add, color: Colors.white),
         ),
         bottomNavigationBar: Obx(
           () => AppBottomNavBar(
@@ -346,7 +355,7 @@ class InventoryScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        '${product.currentQty} / ${product.maxQty}',
+                        '${product.currentQty.toStringAsFixed(product.currentQty.truncateToDouble() == product.currentQty ? 0 : 2)} / ${product.maxQty.toStringAsFixed(product.maxQty.truncateToDouble() == product.maxQty ? 0 : 2)}',
                         style: TextStyle(
                           color: color,
                           fontSize: 12.sp,
@@ -410,7 +419,7 @@ class InventoryScreen extends StatelessWidget {
                           icon: Icon(Icons.add_circle_outline, color: const Color(0xFF475569)),
                         ),
                         Text(
-                          product.currentQty.toString(),
+                          product.currentQty.toStringAsFixed(product.currentQty.truncateToDouble() == product.currentQty ? 0 : 2),
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w700,

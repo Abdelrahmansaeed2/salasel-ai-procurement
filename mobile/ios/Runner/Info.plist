@@ -47,6 +47,8 @@
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>We need access to the microphone to record your voice order.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to the camera to scan product barcodes.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need access to your location to set the shop address.</string>
 </dict>

@@ -47,6 +47,20 @@ public class InventoryController : ControllerBase
         return Ok(result);
     }
 
+    // POST /api/v1/inventory
+    [HttpPost]
+    public async Task<IActionResult> AddItem([FromBody] AddInventoryItemDto request)
+    {
+        if (request.MerchantID <= 0) return BadRequest(new { Message = "MerchantID is required." });
+        if (!await CanAccessMerchantAsync(request.MerchantID)) return Forbid();
+
+        if (request.ProductId == null && string.IsNullOrWhiteSpace(request.CustomProductName))
+            return BadRequest(new { Message = "Either ProductId or CustomProductName is required." });
+
+        var created = await _inventoryService.AddItemAsync(request);
+        return CreatedAtAction(nameof(GetById), new { id = created.InventoryID }, created);
+    }
+
     // GET /api/v1/inventory/{id}
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
@@ -56,6 +70,28 @@ public class InventoryController : ControllerBase
         if (!await CanAccessMerchantAsync(item.MerchantID)) return Forbid();
 
         return Ok(item);
+    }
+
+    // GET /api/v1/inventory/lookup?barcode=...
+    [HttpGet("lookup")]
+    public async Task<IActionResult> LookupByBarcode([FromQuery] string barcode)
+    {
+        if (string.IsNullOrWhiteSpace(barcode)) return BadRequest("Barcode is required.");
+        
+        var product = await _merchantRepository.Query<Product>()
+            .Include(p => p.Category)
+            .FirstOrDefaultAsync(p => p.SKU == barcode);
+            
+        if (product == null) return NotFound(new { Message = "Product not found." });
+        
+        return Ok(new
+        {
+            ProductId = product.ProductId,
+            ProductName = product.Name,
+            CategoryName = product.Category?.Name,
+            Unit = product.Unit,
+            ImageUrl = product.ImageUrl
+        });
     }
 
     // PUT /api/v1/inventory/{id} — edit quantity / fields

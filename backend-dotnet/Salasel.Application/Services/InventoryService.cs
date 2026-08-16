@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Salasel.Application.DTOs;
 using Salasel.Application.Interfaces;
 using Salasel.Domain.Entities;
@@ -34,14 +34,16 @@ public class InventoryService : IInventoryService
         if (!string.IsNullOrWhiteSpace(category))
         {
             var categoryLower = category.Trim().ToLower();
-            query = query.Where(i => i.Product.Category.Name.ToLower() == categoryLower);
+            query = query.Where(i => (i.Product != null && i.Product.Category.Name.ToLower() == categoryLower) || 
+                                     (i.CustomCategory != null && i.CustomCategory.ToLower() == categoryLower));
         }
 
         if (!string.IsNullOrWhiteSpace(q))
         {
             var qLower = q.Trim().ToLower();
-            query = query.Where(i => i.Product.Name.ToLower().Contains(qLower)
-                                      || i.Product.SKU.ToLower().Contains(qLower));
+            query = query.Where(i => (i.Product != null && (i.Product.Name.ToLower().Contains(qLower) || i.Product.SKU.ToLower().Contains(qLower))) ||
+                                     (i.CustomProductName != null && i.CustomProductName.ToLower().Contains(qLower)) ||
+                                     (i.CustomBarcode != null && i.CustomBarcode.ToLower().Contains(qLower)));
         }
 
         var items = (await query.ToListAsync()).Select(MapToDetailDto).ToList();
@@ -65,6 +67,28 @@ public class InventoryService : IInventoryService
 
     // ─────────────────────────────── Edits ────────────────────────────────
 
+    public async Task<InventoryItemDetailDto> AddItemAsync(AddInventoryItemDto request)
+    {
+        var item = new MerchantInventory
+        {
+            MerchantID = request.MerchantID,
+            ProductId = request.ProductId,
+            CustomProductName = request.CustomProductName,
+            CustomCategory = request.CustomCategory,
+            CustomBarcode = request.CustomBarcode,
+            CurrentQty = request.CurrentQty,
+            ReorderThreshold = request.ReorderThreshold,
+            CostPrice = request.CostPrice,
+            LastUpdated = DateTime.UtcNow
+        };
+
+        await _inventoryRepository.AddAsync(item);
+        await _inventoryRepository.SaveChangesAsync();
+
+        // Refetch to include Product navigation property for mapping
+        return (await GetInventoryItemAsync(item.InventoryID))!;
+    }
+
     public async Task<InventoryItemDetailDto?> UpdateInventoryItemAsync(int inventoryId, UpdateInventoryItemDto request)
     {
         var item = await _inventoryRepository.GetByIdAsync(inventoryId);
@@ -72,6 +96,7 @@ public class InventoryService : IInventoryService
 
         item.CurrentQty = request.CurrentQty;
         item.ReorderThreshold = request.ReorderThreshold;
+        item.CostPrice = request.CostPrice;
         item.LastUpdated = DateTime.UtcNow;
         ClearStaleDismissal(item);
 
@@ -114,8 +139,11 @@ public class InventoryService : IInventoryService
         if (item == null)
             throw new KeyNotFoundException($"Inventory item {inventoryId} not found.");
 
+        if (item.ProductId == null)
+            throw new InvalidOperationException("Cannot auto-reorder a custom/external item.");
+
         var quantity = request.Quantity ?? Math.Max(item.ReorderThreshold * 2 - item.CurrentQty, 1);
-        var supplierProduct = await FindBestSupplierProductAsync(item.ProductId, quantity);
+        var supplierProduct = await FindBestSupplierProductAsync(item.ProductId.Value, (int)quantity);
 
         var order = new MasterOrder
         {
@@ -157,8 +185,11 @@ public class InventoryService : IInventoryService
         if (item == null)
             throw new KeyNotFoundException($"Inventory item {inventoryId} not found.");
 
+        if (item.ProductId == null)
+            throw new InvalidOperationException("Cannot auto-reorder a custom/external item.");
+
         var quantity = Math.Max(item.ReorderThreshold * 2 - item.CurrentQty, 1);
-        var supplierProduct = await FindBestSupplierProductAsync(item.ProductId, quantity);
+        var supplierProduct = await FindBestSupplierProductAsync(item.ProductId.Value, (int)quantity);
         var lineTotal = supplierProduct.UnitPrice * quantity;
 
         var draftOrder = await _masterOrderRepository.Query()
@@ -237,8 +268,8 @@ public class InventoryService : IInventoryService
             {
                 InventoryID = i.InventoryID,
                 ProductId = i.ProductId,
-                ProductName = i.Product.Name,
-                SKU = i.Product.SKU,
+                ProductName = i.Product != null ? i.Product.Name : (i.CustomProductName ?? string.Empty),
+                SKU = i.Product != null ? i.Product.SKU : (i.CustomBarcode ?? string.Empty),
                 CurrentQty = i.CurrentQty,
                 ReorderThreshold = i.ReorderThreshold,
                 EstimatedDaysUntilStockOut = null // see InventoryAlertDto for why
@@ -275,14 +306,17 @@ public class InventoryService : IInventoryService
             InventoryID = i.InventoryID,
             MerchantID = i.MerchantID,
             ProductId = i.ProductId,
-            ProductName = i.Product.Name,
-            SKU = i.Product.SKU,
-            Unit = i.Product.Unit,
-            ImageUrl = i.Product.ImageUrl,
-            CategoryId = i.Product.CategoryId,
-            CategoryName = i.Product.Category?.Name ?? string.Empty,
+            ProductName = i.Product?.Name ?? i.CustomProductName ?? string.Empty,
+            SKU = i.Product?.SKU ?? i.CustomBarcode ?? string.Empty,
+            Unit = i.Product?.Unit ?? "Piece",
+            ImageUrl = i.Product?.ImageUrl,
+            CategoryId = i.Product?.CategoryId,
+            CategoryName = i.Product?.Category?.Name ?? i.CustomCategory ?? string.Empty,
             CurrentQty = i.CurrentQty,
             ReorderThreshold = i.ReorderThreshold,
+            CostPrice = i.CostPrice,
+            IsCustom = i.ProductId == null,
+            CustomBarcode = i.CustomBarcode,
             Status = status,
             LastUpdated = i.LastUpdated
         };
