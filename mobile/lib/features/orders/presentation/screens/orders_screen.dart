@@ -1058,8 +1058,8 @@ class _OrderStepper extends StatelessWidget {
             ),
           ],
         );
-      });
-    });
+      }));
+    }
   }
 
   Widget _buildReturnCard(ReturnOrderModel ret, OrdersController c) {
@@ -1138,7 +1138,7 @@ class _OrderStepper extends StatelessWidget {
       ),
     );
   }
-}
+
 
 class _TabChip extends StatelessWidget {
   final String label;
