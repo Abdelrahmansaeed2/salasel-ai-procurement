@@ -66,11 +66,11 @@ public class AiController : ControllerBase
 
             recommendations.Add(new ProductRecommendationDto
             {
-                ProductId = alert.ProductId,
+                ProductId = alert.ProductId ?? 0,
                 ProductName = alert.ProductName,
                 Reason = "Stock is at or below the reorder threshold.",
-                CurrentQty = alert.CurrentQty,
-                ReorderThreshold = alert.ReorderThreshold,
+                CurrentQty = (int)alert.CurrentQty,
+                ReorderThreshold = (int)alert.ReorderThreshold,
                 RecommendedSupplierId = bestOffer?.SupplierId,
                 RecommendedSupplierName = bestOffer?.Supplier.CompanyName,
                 RecommendedUnitPrice = bestOffer?.UnitPrice,

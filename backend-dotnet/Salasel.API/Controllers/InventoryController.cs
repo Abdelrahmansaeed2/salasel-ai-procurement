@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Salasel.Application.DTOs;
 using Salasel.Application.Interfaces;
+using Salasel.Domain.Entities;
+using Salasel.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Salasel.API.Controllers;
 
@@ -13,11 +16,16 @@ public class InventoryController : ControllerBase
 {
     private readonly IInventoryService _inventoryService;
     private readonly IMerchantProfileRepository _merchantRepository;
+    private readonly IRepository<Product> _productRepository;
 
-    public InventoryController(IInventoryService inventoryService, IMerchantProfileRepository merchantRepository)
+    public InventoryController(
+        IInventoryService inventoryService, 
+        IMerchantProfileRepository merchantRepository,
+        IRepository<Product> productRepository)
     {
         _inventoryService = inventoryService;
         _merchantRepository = merchantRepository;
+        _productRepository = productRepository;
     }
 
     // Kept for backward compatibility with any client already calling this;
@@ -78,7 +86,7 @@ public class InventoryController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(barcode)) return BadRequest("Barcode is required.");
         
-        var product = await _merchantRepository.Query<Product>()
+        var product = await _productRepository.Query()
             .Include(p => p.Category)
             .FirstOrDefaultAsync(p => p.SKU == barcode);
             
@@ -86,7 +94,7 @@ public class InventoryController : ControllerBase
         
         return Ok(new
         {
-            ProductId = product.ProductId,
+            ProductId = product.Id,
             ProductName = product.Name,
             CategoryName = product.Category?.Name,
             Unit = product.Unit,

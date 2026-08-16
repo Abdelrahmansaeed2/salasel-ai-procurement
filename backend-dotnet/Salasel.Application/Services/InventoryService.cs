@@ -159,7 +159,7 @@ public class InventoryService : IInventoryService
         {
             SupplierId = supplierProduct.SupplierId,
             ProductId = item.ProductId,
-            Quantity = quantity,
+            Quantity = (int)quantity,
             SubTotalAmount = supplierProduct.UnitPrice * quantity,
             Status = FulfillmentStatus.Pending_Supplier
         });
@@ -215,7 +215,7 @@ public class InventoryService : IInventoryService
         {
             SupplierId = supplierProduct.SupplierId,
             ProductId = item.ProductId,
-            Quantity = quantity,
+            Quantity = (int)quantity,
             SubTotalAmount = lineTotal,
             Status = FulfillmentStatus.Pending_Supplier
         });
@@ -288,7 +288,7 @@ public class InventoryService : IInventoryService
         if (item == null) return false;
 
         item.LowStockAlertDismissedAt = DateTime.UtcNow;
-        item.LowStockAlertDismissedAtQty = item.CurrentQty;
+        item.LowStockAlertDismissedAtQty = (int)item.CurrentQty;
 
         await _inventoryRepository.UpdateAsync(item);
         await _inventoryRepository.SaveChangesAsync();
