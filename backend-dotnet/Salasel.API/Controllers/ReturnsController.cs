@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Salasel.Domain.Entities;
 using Salasel.Infrastructure.Data;
 using Salasel.Infrastructure.Services;
+using Salasel.Application.Interfaces;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -16,13 +17,13 @@ public class ReturnsController : ControllerBase
 {
     private readonly SalaselDbContext _db;
     private readonly INotificationService _notifications;
-    private readonly StripePaymentService _stripe;
+    private readonly IPaymentService _stripe;
     private readonly ILogger<ReturnsController> _logger;
 
     public ReturnsController(
         SalaselDbContext db,
         INotificationService notifications,
-        StripePaymentService stripe,
+        IPaymentService stripe,
         ILogger<ReturnsController> logger)
     {
         _db = db;

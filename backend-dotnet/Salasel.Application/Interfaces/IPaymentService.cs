@@ -9,4 +9,5 @@ public interface IPaymentService
     Task<string> RefundPaymentAsync(int orderId);
     Task<string> CreateSupplierAccountSessionAsync(int supplierId);
     Task<string> TransferFundsToSupplierAsync(int subOrderId);
+    Task<string> RefundPartialAsync(int orderId, decimal amountToRefund, string? subOrderStripeTransferId = null);
 }
