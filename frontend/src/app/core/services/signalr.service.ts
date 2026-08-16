@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
-import { AuthService } from './auth.service';
+import { AuthService } from '../auth/auth.service';
 import { environment } from '../../../environments/environment';
 
 @Injectable({

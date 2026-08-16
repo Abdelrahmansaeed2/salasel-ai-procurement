@@ -29,6 +29,10 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this.session() !== null);
   readonly currentUser = computed(() => this.session());
 
+  getToken(): string | null {
+    return localStorage.getItem(TOKEN_KEY);
+  }
+
   login(email: string, password: string): Observable<AuthResponseDto> {
     return this.http.post<AuthResponseDto>(`${environment.apiUrl}/auth/login`, { email, password }).pipe(
       tap((res) => {

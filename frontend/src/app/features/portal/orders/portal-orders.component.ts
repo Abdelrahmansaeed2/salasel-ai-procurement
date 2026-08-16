@@ -101,14 +101,14 @@ export class PortalOrdersComponent implements OnInit {
 
   private readonly orderService = inject(OrderService);
   private readonly authService = inject(AuthService);
-  private readonly toast = inject(ToastService);
+  private readonly toastService = inject(ToastService);
   private readonly signalR = inject(SignalRService);
 
   ngOnInit() {
     this.fetchSupplierOrders();
     this.signalR.startConnection();
     this.signalR.on('NewOrderReceived', () => {
-      this.toast.success('تم استلام طلب جديد!', 'تحديث');
+      this.toastService.success('تم استلام طلب جديد!');
       this.fetchSupplierOrders();
     });
     this.signalR.on('OrderUpdated', () => {
