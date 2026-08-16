@@ -26,6 +26,7 @@ public class SalaselDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; } = null!;
     public DbSet<ContactMessage> ContactMessages { get; set; } = null!;
     public DbSet<UserNotificationSettings> UserNotificationSettings { get; set; } = null!;
+    public DbSet<ReturnRequest> ReturnRequests { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,6 +49,7 @@ public class SalaselDbContext : DbContext
         modelBuilder.Entity<User>().Property(u => u.Role).HasConversion<string>().HasMaxLength(20);
         modelBuilder.Entity<MasterOrder>().Property(m => m.Status).HasConversion<string>().HasMaxLength(30);
         modelBuilder.Entity<MasterOrder>().Property(m => m.Source).HasConversion<string>().HasMaxLength(20);
+        modelBuilder.Entity<ReturnRequest>().Property(r => r.Status).HasConversion<string>().HasMaxLength(30);
         modelBuilder.Entity<MasterOrder>().Property(m => m.PaymentMethod).HasConversion<string>().HasMaxLength(20);
         modelBuilder.Entity<MasterOrder>().Property(m => m.PaymentStatus).HasConversion<string>().HasMaxLength(20);
         modelBuilder.Entity<SubOrder>().Property(s => s.Status).HasConversion<string>().HasMaxLength(30);
@@ -261,6 +263,9 @@ public class SalaselDbContext : DbContext
 
         modelBuilder.Entity<Bid>().Property(b => b.Status).HasConversion<string>().HasMaxLength(20);
         modelBuilder.Entity<Bid>().Property(b => b.Price).HasPrecision(18, 4);
+
+        modelBuilder.Entity<ReturnRequest>().Property(r => r.RequestedAmount).HasPrecision(18, 4);
+        modelBuilder.Entity<ReturnRequest>().Property(r => r.ApprovedAmount).HasPrecision(18, 4);
 
         // Product → SubOrder (optional — see SubOrder.ProductId)
         modelBuilder.Entity<SubOrder>()

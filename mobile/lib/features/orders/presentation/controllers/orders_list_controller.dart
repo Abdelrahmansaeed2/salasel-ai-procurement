@@ -15,6 +15,26 @@ class OrderItem {
   OrderItem({required this.name, required this.quantity, required this.unit});
 }
 
+enum ReturnStatus { pending, approved, rejected, escalated, refunded, closed }
+
+class ReturnOrderModel {
+  final String id;
+  final String masterOrderId;
+  final ReturnStatus status;
+  final double requestedAmount;
+  final double? approvedAmount;
+  final DateTime date;
+  
+  ReturnOrderModel({
+    required this.id,
+    required this.masterOrderId,
+    required this.status,
+    required this.requestedAmount,
+    this.approvedAmount,
+    required this.date,
+  });
+}
+
 class OrderModel {
   final String id;
   final String orderNumber;
@@ -41,7 +61,7 @@ class OrderModel {
 
 class OrdersController extends GetxController {
   final RxInt bottomNavIndex = 2.obs;
-  final RxInt tabIndex = 0.obs; // 0 = active, 1 = history
+  final RxInt tabIndex = 0.obs; // 0 = active, 1 = history, 2 = returns
   final RxString selectedFilter = 'الكل'.obs;
   final RxString dateFilter = 'الكل'.obs;
   final RxnDouble minPrice = RxnDouble();
@@ -60,6 +80,7 @@ class OrdersController extends GetxController {
   ];
 
   final RxList<OrderModel> allOrders = <OrderModel>[].obs;
+  final RxList<ReturnOrderModel> returnsOrders = <ReturnOrderModel>[].obs;
   final ApiClient _apiClient = ApiClient();
   HubConnection? _hubConnection;
 
@@ -67,6 +88,7 @@ class OrdersController extends GetxController {
   void onInit() {
     super.onInit();
     fetchOrders();
+    fetchReturns();
     _initSignalR();
   }
 
@@ -160,6 +182,33 @@ class OrdersController extends GetxController {
     }
   }
 
+  Future<void> fetchReturns() async {
+    try {
+      final response = await _apiClient.dio.get('/returns');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        returnsOrders.value = data.map((json) {
+          ReturnStatus st = ReturnStatus.pending;
+          final str = json['status'] ?? 'Pending';
+          if (str == 'Approved') st = ReturnStatus.approved;
+          if (str == 'Rejected') st = ReturnStatus.rejected;
+          if (str == 'Refunded') st = ReturnStatus.refunded;
+          
+          return ReturnOrderModel(
+            id: json['id']?.toString() ?? '',
+            masterOrderId: json['masterOrderId']?.toString() ?? '',
+            status: st,
+            requestedAmount: (json['requestedAmount'] as num?)?.toDouble() ?? 0.0,
+            approvedAmount: (json['approvedAmount'] as num?)?.toDouble(),
+            date: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+          );
+        }).toList();
+      }
+    } catch (e) {
+      debugPrint('Failed to load returns: $e');
+    }
+  }
+
   List<OrderModel> get activeOrders =>
       allOrders.where((o) => o.status != OrderStatus.delivered).toList();
 
@@ -167,6 +216,7 @@ class OrdersController extends GetxController {
       allOrders.where((o) => o.status == OrderStatus.delivered).toList();
 
   List<OrderModel> get displayedOrders {
+    // displayedOrders is now only for tab 0 and 1. Tab 2 uses returnsOrders directly.
     final source = tabIndex.value == 0 ? activeOrders : historyOrders;
     final filter = selectedFilter.value;
     final query = searchText.value.trim();

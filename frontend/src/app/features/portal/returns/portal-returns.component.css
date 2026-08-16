@@ -1,0 +1,133 @@
+.page-header {
+  margin-bottom: 32px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1E293B;
+  margin: 0 0 8px 0;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #64748B;
+  margin: 0;
+}
+
+.loading-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 0;
+  color: #64748B;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #E2E8F0;
+  border-top-color: #2563EB;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.returns-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.return-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #E2E8F0;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.card-header h3 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  color: #1E293B;
+}
+
+.order-ref {
+  font-size: 13px;
+  color: #64748B;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.pending { background: #FEF3C7; color: #D97706; }
+.status-badge.approved { background: #DBEAFE; color: #2563EB; }
+.status-badge.rejected { background: #FEE2E2; color: #DC2626; }
+.status-badge.refunded { background: #D1FAE5; color: #059669; }
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.info-row .label { color: #64748B; }
+.info-row .value { color: #1E293B; font-weight: 500; }
+
+.amount-row {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed #E2E8F0;
+}
+
+.amount-row .value {
+  font-size: 18px;
+  font-weight: 800;
+  color: #2563EB;
+}
+
+.card-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btn-primary { background: #2563EB; color: white; }
+.btn-primary:hover { background: #1D4ED8; }
+
+.btn-outline { background: white; border: 1px solid #E2E8F0; color: #64748B; }
+.btn-outline:hover { background: #F8FAFC; color: #1E293B; }
+
+.btn-success { background: #10B981; color: white; }
+.btn-success:hover { background: #059669; }

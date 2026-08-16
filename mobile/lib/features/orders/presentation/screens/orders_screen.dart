@@ -7,6 +7,7 @@ import '../controllers/orders_list_controller.dart';
 import 'checkout_screen.dart';
 import 'delivery_tracking_screen.dart';
 import 'voice_order_detail_screen.dart';
+import 'return_request_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -118,6 +119,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     count: c.historyOrders.length,
                     isSelected: c.tabIndex.value == 1,
                     onTap: () => c.setTab(1),
+                  ),
+                ),
+                Expanded(
+                  child: _TabChip(
+                    label: 'المرتجعات',
+                    count: c.returnsOrders.length,
+                    isSelected: c.tabIndex.value == 2,
+                    onTap: () => c.setTab(2),
                   ),
                 ),
               ],
@@ -257,6 +266,47 @@ class _OrdersScreenState extends State<OrdersScreen> {
   
   Widget _buildBody(OrdersController c) {
     return Obx(() {
+      if (c.isLoading.value) {
+        return const Center(child: CircularProgressIndicator(color: Color(0xFF2563EB)));
+      }
+
+      if (c.tabIndex.value == 2) {
+        final returns = c.returnsOrders;
+        if (returns.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.inventory_2_outlined,
+                    size: 64.w, color: const Color(0xFFCBD5E1)),
+                SizedBox(height: 16.h),
+                Text(
+                  'لا توجد طلبات استرجاع',
+                  style: TextStyle(
+                    color: const Color(0xFF64748B),
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Cairo',
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        return RefreshIndicator(
+          onRefresh: c.fetchReturns,
+          color: const Color(0xFF2563EB),
+          child: ListView.separated(
+            padding: EdgeInsets.all(16.w),
+            itemCount: returns.length,
+            separatorBuilder: (_, __) => SizedBox(height: 16.h),
+            itemBuilder: (context, index) {
+              return _buildReturnCard(returns[index], c);
+            },
+          ),
+        );
+      }
+
       final orders = c.displayedOrders;
       if (orders.isEmpty) {
         return Center(
@@ -851,47 +901,82 @@ class _OrderCard extends StatelessWidget {
 
           Padding(
             padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (activeStep == 0 || activeStep == 3 || (activeStep == 1 && order.status == OrderStatus.accepted)) {
-                    Get.to(() => VoiceOrderDetailScreen(
-                      orderId: int.parse(order.id),
-                    ));
-                  } else if (activeStep == 1 && order.status == OrderStatus.pendingPayment) {
-                    Get.to(() => CheckoutScreen(
-                      orderId: order.orderNumber,
-                      totalAmount: '${order.total.toStringAsFixed(0)} جنيه',
-                      supplierName: order.supplierName,
-                      itemsSummary: order.items.isNotEmpty ? order.items[0].name : '',
-                      merchantName: 'مخبز الأمل', // Placeholder for now
-                      merchantAddress: 'شارع التحلية، بجوار المركز الرئيسي', // Placeholder
-                      merchantCity: 'الرياض', // Placeholder
-                    ));
-                  } else if (activeStep >= 2) {
-                    Get.to(() => DeliveryTrackingScreen(orderId: order.orderNumber));
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ((activeStep == 1 && order.status == OrderStatus.pendingPayment) || activeStep >= 2) ? const Color(0xFF2563EB) : Colors.white,
-                  foregroundColor: ((activeStep == 1 && order.status == OrderStatus.pendingPayment) || activeStep >= 2) ? Colors.white : const Color(0xFF1E293B),
-                  elevation: 0,
-                  side: BorderSide(color: ((activeStep == 1 && order.status == OrderStatus.pendingPayment) || activeStep >= 2) ? Colors.transparent : const Color(0xFFE2E8F0)),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r)),
-                  padding: EdgeInsets.symmetric(vertical: 12.h),
-                ),
-                child: Text(
-                  (activeStep == 1 && order.status == OrderStatus.pendingPayment) ? 'الدفع الآن' : (activeStep >= 2 ? 'تتبع التوصيل' : 'التفاصيل'),
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                    fontFamily: 'Cairo',
-                    color: ((activeStep == 1 && order.status == OrderStatus.pendingPayment) || activeStep >= 2) ? Colors.white : const Color(0xFF1E293B),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (activeStep == 0 || activeStep == 3 || (activeStep == 1 && order.status == OrderStatus.accepted)) {
+                        Get.to(() => VoiceOrderDetailScreen(
+                          orderId: int.parse(order.id),
+                        ));
+                      } else if (activeStep == 1 && order.status == OrderStatus.pendingPayment) {
+                        Get.to(() => CheckoutScreen(
+                          orderId: order.orderNumber,
+                          totalAmount: '${order.total.toStringAsFixed(0)} جنيه',
+                          supplierName: order.supplierName,
+                          itemsSummary: order.items.isNotEmpty ? order.items[0].name : '',
+                          merchantName: 'مخبز الأمل', // Placeholder for now
+                          merchantAddress: 'شارع التحلية، بجوار المركز الرئيسي', // Placeholder
+                          merchantCity: 'الرياض', // Placeholder
+                        ));
+                      } else if (activeStep >= 2) {
+                        Get.to(() => DeliveryTrackingScreen(orderId: order.orderNumber));
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ((activeStep == 1 && order.status == OrderStatus.pendingPayment) || activeStep == 2) ? const Color(0xFF2563EB) : Colors.white,
+                      foregroundColor: ((activeStep == 1 && order.status == OrderStatus.pendingPayment) || activeStep == 2) ? Colors.white : const Color(0xFF1E293B),
+                      elevation: 0,
+                      side: BorderSide(color: ((activeStep == 1 && order.status == OrderStatus.pendingPayment) || activeStep == 2) ? Colors.transparent : const Color(0xFFE2E8F0)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r)),
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                    ),
+                    child: Text(
+                      (activeStep == 1 && order.status == OrderStatus.pendingPayment) ? 'الدفع الآن' : (activeStep == 2 ? 'تتبع التوصيل' : 'التفاصيل'),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: 'Cairo',
+                        color: ((activeStep == 1 && order.status == OrderStatus.pendingPayment) || activeStep == 2) ? Colors.white : const Color(0xFF1E293B),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                if (order.status == OrderStatus.delivered) ...[
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.to(() => ReturnRequestScreen(
+                          orderId: order.orderNumber,
+                          masterOrderId: order.id,
+                          totalAmount: order.total,
+                        ));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFFEF4444), // Red for return
+                        elevation: 0,
+                        side: const BorderSide(color: Color(0xFFEF4444)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r)),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                      ),
+                      child: Text(
+                        'إرجاع الطلب',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'Cairo',
+                          color: const Color(0xFFEF4444),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
         ],
@@ -973,11 +1058,87 @@ class _OrderStepper extends StatelessWidget {
             ),
           ],
         );
-      }),
+      });
+    });
+  }
+
+  Widget _buildReturnCard(ReturnOrderModel ret, OrdersController c) {
+    String statusStr = 'قيد الانتظار';
+    Color statusColor = const Color(0xFFF59E0B);
+
+    if (ret.status == ReturnStatus.approved) {
+      statusStr = 'تمت الموافقة (بانتظار الاستلام)';
+      statusColor = const Color(0xFF2563EB);
+    } else if (ret.status == ReturnStatus.rejected) {
+      statusStr = 'مرفوض';
+      statusColor = const Color(0xFFEF4444);
+    } else if (ret.status == ReturnStatus.refunded) {
+      statusStr = 'تم الاسترجاع';
+      statusColor = const Color(0xFF10B981);
+    }
+
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(color: const Color(0xFFF1F5F9)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'الطلب الأصلي: ${ret.masterOrderId}',
+                style: TextStyle(
+                  color: const Color(0xFF1E293B),
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Cairo',
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
+                child: Text(
+                  statusStr,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Cairo',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            'المبلغ المطلوب: ${ret.requestedAmount} ر.س',
+            style: TextStyle(
+              color: const Color(0xFF64748B),
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Cairo',
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
-
 
 class _TabChip extends StatelessWidget {
   final String label;

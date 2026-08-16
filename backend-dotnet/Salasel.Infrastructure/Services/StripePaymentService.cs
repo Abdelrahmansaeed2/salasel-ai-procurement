@@ -171,4 +171,38 @@ public class StripePaymentService : IPaymentService
 
         return refund.Id;
     }
+
+    public async Task<string> RefundPartialAsync(int orderId, decimal amountToRefund, string? subOrderStripeTransferId = null)
+    {
+        var masterOrder = await _masterOrderRepository.GetByIdAsync(orderId);
+        if (masterOrder == null) throw new Exception("Order not found");
+        if (string.IsNullOrEmpty(masterOrder.StripePaymentIntentId))
+            throw new Exception("No Stripe payment intent linked to this order");
+
+        // 1. Reverse part of the transfer to the supplier if applicable
+        if (!string.IsNullOrEmpty(subOrderStripeTransferId))
+        {
+            var transferReversalService = new TransferReversalService();
+            var reversalOptions = new TransferReversalCreateOptions 
+            { 
+                Amount = (long)(amountToRefund * 0.95m * 100) // Reversing 95% from supplier (assuming 5% platform fee)
+            };
+            await transferReversalService.CreateAsync(subOrderStripeTransferId, reversalOptions);
+        }
+
+        // 2. Refund the amount back to the merchant
+        var options = new RefundCreateOptions
+        {
+            PaymentIntent = masterOrder.StripePaymentIntentId,
+            Amount = (long)(amountToRefund * 100)
+        };
+
+        var service = new RefundService();
+        var refund = await service.CreateAsync(options);
+
+        // Optionally, we could record partial refunds on MasterOrder.
+        // masterOrder.PaymentStatus = Salasel.Domain.Enums.PaymentStatus.PartiallyRefunded;
+        
+        return refund.Id;
+    }
 }

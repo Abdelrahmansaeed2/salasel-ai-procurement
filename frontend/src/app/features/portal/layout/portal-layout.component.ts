@@ -5,7 +5,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 interface PortalNavItem {
   label: string;
   route: string;
-  icon: 'dashboard' | 'orders' | 'catalog' | 'analytics' | 'audit' | 'team' | 'roles' | 'settings';
+  icon: 'dashboard' | 'orders' | 'returns' | 'catalog' | 'analytics' | 'audit' | 'team' | 'roles' | 'settings';
   badge?: number;
 }
 
@@ -61,6 +61,7 @@ export class PortalLayoutComponent {
       return [
         { label: 'التحليلات', route: '/portal/analytics', icon: 'analytics' },
         { label: 'اعتمادات النظام', route: '/portal/approvals', icon: 'audit', badge: 2 },
+        { label: 'المرتجعات والنزاعات', route: '/portal/returns', icon: 'returns' },
         { label: 'مصفوفة الأدوار', route: '/portal/roles', icon: 'roles' },
         { label: 'إدارة مركز المساعدة', route: '/portal/help-center-editor', icon: 'settings' },
         { label: 'الإعدادات', route: '/portal/settings', icon: 'settings' },
@@ -70,6 +71,7 @@ export class PortalLayoutComponent {
       return [
         { label: 'لوحة التحكم', route: '/portal/dashboard', icon: 'dashboard' },
         { label: 'الطلبات', route: '/portal/orders', icon: 'orders', badge: 7 },
+        { label: 'المرتجعات', route: '/portal/returns', icon: 'returns', badge: 1 },
         { label: 'الكتالوج (قاعدة المعرفة)', route: '/portal/supplier-knowledge', icon: 'catalog' },
         { label: 'الإعدادات', route: '/portal/settings', icon: 'settings' },
       ];

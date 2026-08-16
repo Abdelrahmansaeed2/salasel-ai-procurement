@@ -61,6 +61,11 @@ export const routes: Routes = [
           import('./features/portal/orders/portal-orders.component').then((m) => m.PortalOrdersComponent),
       },
       {
+        path: 'returns',
+        loadComponent: () =>
+          import('./features/portal/returns/portal-returns.component').then((m) => m.PortalReturnsComponent),
+      },
+      {
         path: 'catalog',
         loadComponent: () =>
           import('./features/portal/catalog/portal-catalog.component').then((m) => m.PortalCatalogComponent),
