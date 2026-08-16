@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, signal, inject, OnInit } 
 import { OrderService } from '../../../core/services/order.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { SignalRService } from '../../../core/services/signalr.service';
 type OrderPriority = 'review' | 'urgent' | 'scheduled';
 type QuickFilter = 'premium' | 'low-confidence' | 'high-priority';
 type ViewMode = 'feed' | 'board';
@@ -100,12 +101,24 @@ export class PortalOrdersComponent implements OnInit {
 
   private readonly orderService = inject(OrderService);
   private readonly authService = inject(AuthService);
-  private readonly toastService = inject(ToastService);
+  private readonly toast = inject(ToastService);
+  private readonly signalR = inject(SignalRService);
 
   ngOnInit() {
+    this.fetchSupplierOrders();
+    this.signalR.startConnection();
+    this.signalR.on('NewOrderReceived', () => {
+      this.toast.success('تم استلام طلب جديد!', 'تحديث');
+      this.fetchSupplierOrders();
+    });
+    this.signalR.on('OrderUpdated', () => {
+      this.fetchSupplierOrders();
+    });
+  }
+
+  private fetchSupplierOrders() {
     this.orderService.getKanban().subscribe({
       next: (data) => {
-        // Map the columns from backend
         if (data && data.columns) {
           const cols: BoardColumn[] = data.columns.map((col: any) => {
             let color = '#191B23';

@@ -33,4 +33,11 @@ public class NotificationHub : Hub
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, "suppliers");
         }
     }
+
+    public async Task JoinAsAdmin(int adminId)
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"admin-{adminId}");
+        await Groups.AddToGroupAsync(Context.ConnectionId, "admins");
+        await Clients.Caller.SendAsync("Joined", new { role = "admin", id = adminId });
+    }
 }

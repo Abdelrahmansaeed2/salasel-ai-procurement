@@ -91,7 +91,9 @@ public class VoiceOrdersController : ControllerBase
         var supplierId = order.SubOrders.FirstOrDefault()?.SupplierId;
 
         if (supplierId.HasValue)
-            await _notifications.NotifySupplierAsync(supplierId.Value, "NewOrder", payload);
+            await _notifications.NotifySupplierAsync(supplierId.Value, "NewOrderReceived", payload);
+
+        await _notifications.NotifyAllAdminsAsync("NewOrderReceived", payload);
 
         await _notifications.NotifyMerchantAsync(order.MerchantId, "OrderConfirmed", payload);
 
