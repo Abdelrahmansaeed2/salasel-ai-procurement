@@ -34,6 +34,7 @@ dependencies:
   flutter_screenutil: any
   intl: ^0.20.2
   flutter_stripe: any
+  signalr_netcore: any
 
 dev_dependencies:
   flutter_test:

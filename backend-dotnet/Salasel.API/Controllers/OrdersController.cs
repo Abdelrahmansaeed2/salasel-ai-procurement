@@ -323,6 +323,18 @@ public class OrdersController : ControllerBase
         {
             // Moving to Shipped status
             await _biddingService.UpdateRfqStatusAsync(id, supplierId.Value, FulfillmentStatus.Shipped.ToString());
+
+            var subOrder = await _masterOrderRepository.Query()
+                .SelectMany(m => m.SubOrders)
+                .Where(s => s.Id == id)
+                .Select(s => new { MerchantId = s.MasterOrder.MerchantId })
+                .FirstOrDefaultAsync();
+
+            if (subOrder != null)
+            {
+                await _notifications.NotifyMerchantAsync(subOrder.MerchantId, "OrderShipped", new { SubOrderId = id });
+            }
+
             return Ok(new { Message = "Order dispatched successfully." });
         }
         catch (KeyNotFoundException ex)

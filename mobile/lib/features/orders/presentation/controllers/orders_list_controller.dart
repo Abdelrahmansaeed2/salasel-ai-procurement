@@ -4,6 +4,7 @@ import '../../../../../core/navigation/app_navigator.dart';
 import '../../../../../core/network/api_client.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
+import 'package:signalr_netcore/signalr_client.dart';
 
 enum OrderStatus { pending, pendingPayment, accepted, shipped, delivered }
 
@@ -60,11 +61,63 @@ class OrdersController extends GetxController {
 
   final RxList<OrderModel> allOrders = <OrderModel>[].obs;
   final ApiClient _apiClient = ApiClient();
+  HubConnection? _hubConnection;
 
   @override
   void onInit() {
     super.onInit();
     fetchOrders();
+    _initSignalR();
+  }
+
+  Future<void> _initSignalR() async {
+    try {
+      final token = await _apiClient.getToken();
+      if (token == null) return;
+
+      _hubConnection = HubConnectionBuilder()
+          .withUrl(
+            '${ApiClient.baseUrl.replaceAll('/api/', '')}/hubs/notifications', // e.g., https://salasel.otlob-egy.online/hubs/notifications
+            options: HttpConnectionOptions(
+              accessTokenFactory: () async => token,
+            ),
+          )
+          .withAutomaticReconnect()
+          .build();
+
+      _hubConnection?.on('OrderAccepted', _handleOrderUpdate);
+      _hubConnection?.on('OrderShipped', _handleOrderUpdate);
+      _hubConnection?.on('OrderDelivered', _handleOrderUpdate);
+      _hubConnection?.on('OrderDeclined', _handleOrderUpdate);
+      _hubConnection?.on('OrderCancelled', _handleOrderUpdate);
+      _hubConnection?.on('OrderStatusChanged', _handleOrderUpdate);
+
+      await _hubConnection?.start();
+      
+      // Tell the hub we are a merchant so it puts us in the right group
+      final profileRes = await _apiClient.dio.get('/users/me');
+      if (profileRes.statusCode == 200 && profileRes.data['shops'] != null) {
+        final shops = profileRes.data['shops'] as List;
+        if (shops.isNotEmpty) {
+          final merchantId = shops.first['merchantID'];
+          await _hubConnection?.invoke('JoinAsMerchant', args: [merchantId]);
+          debugPrint('Joined SignalR as merchant $merchantId');
+        }
+      }
+    } catch (e) {
+      debugPrint('SignalR init error: $e');
+    }
+  }
+
+  void _handleOrderUpdate(List<dynamic>? arguments) {
+    debugPrint('SignalR Update received. Fetching latest orders...');
+    fetchOrders();
+  }
+
+  @override
+  void onClose() {
+    _hubConnection?.stop();
+    super.onClose();
   }
 
   Future<void> fetchOrders() async {
