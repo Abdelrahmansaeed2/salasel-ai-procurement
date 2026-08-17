@@ -67,6 +67,17 @@ public class SupplierProfileDto
     public decimal ReliabilityScore { get; set; }
     public bool IsActiveForRouting { get; set; }
     public string VerificationStatus { get; set; } = string.Empty;
+    public bool IsStripeOnboardingComplete { get; set; }
+    
+    // New Settings Fields
+    public string BusinessType { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+    public string JobTitle { get; set; } = string.Empty;
+    public decimal CoverageRadiusKm { get; set; }
+    public string PaymentTerms { get; set; } = string.Empty;
+    public string VatNumber { get; set; } = string.Empty;
+    public bool IsVatExempt { get; set; }
+    
     public List<WarehouseDto> Warehouses { get; set; } = new();
 }
 
@@ -77,6 +88,16 @@ public class UpdateSupplierProfileDto
     public string ContactPhone { get; set; } = string.Empty;
     public string BankName { get; set; } = string.Empty;
     public string Iban { get; set; } = string.Empty;
+    
+    public string Address { get; set; } = string.Empty;
+    public string BusinessType { get; set; } = string.Empty;
+    public string JobTitle { get; set; } = string.Empty;
+    public string CrNumber { get; set; } = string.Empty;
+    public string TaxNumber { get; set; } = string.Empty;
+    public string VatNumber { get; set; } = string.Empty;
+    public bool IsVatExempt { get; set; }
+    public decimal CoverageRadiusKm { get; set; }
+    public string PaymentTerms { get; set; } = string.Empty;
 }
 
 // GET /api/v1/suppliers/me/dashboard

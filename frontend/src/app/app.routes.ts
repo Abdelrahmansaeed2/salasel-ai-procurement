@@ -107,6 +107,15 @@ export const routes: Routes = [
             (m) => m.PortalSettingsComponent,
           ),
       },
+      {
+        path: 'admin-settings',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin'] },
+        loadComponent: () =>
+          import('./features/portal/admin-settings/admin-settings.component').then(
+            (m) => m.AdminSettingsComponent,
+          ),
+      },
       { path: '**', redirectTo: 'dashboard' },
     ],
   },

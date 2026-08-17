@@ -26,6 +26,7 @@ public class SalaselDbContext : DbContext
     public DbSet<Notification> Notifications { get; set; } = null!;
     public DbSet<ContactMessage> ContactMessages { get; set; } = null!;
     public DbSet<UserNotificationSettings> UserNotificationSettings { get; set; } = null!;
+    public DbSet<SystemConfiguration> SystemConfigurations { get; set; } = null!;
 
     public DbSet<ReturnRequest> ReturnRequests { get; set; } = null!;
 

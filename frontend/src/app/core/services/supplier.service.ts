@@ -15,7 +15,31 @@ export interface SupplierProfileDto {
   isSetupCompleted: boolean;
   reliabilityScore: number;
   isActiveForRouting: boolean;
+  isStripeOnboardingComplete: boolean;
+  businessType: string;
+  address: string;
+  jobTitle: string;
+  coverageRadiusKm: number;
+  paymentTerms: string;
+  vatNumber: string;
+  isVatExempt: boolean;
   warehouses: any[];
+}
+
+export interface UpdateSupplierProfileDto {
+  companyName: string;
+  contactPhone: string;
+  bankName: string;
+  iban: string;
+  address: string;
+  businessType: string;
+  jobTitle: string;
+  crNumber: string;
+  taxNumber: string;
+  vatNumber: string;
+  isVatExempt: boolean;
+  coverageRadiusKm: number;
+  paymentTerms: string;
 }
 
 @Injectable({
@@ -31,5 +55,17 @@ export class SupplierService {
 
   getSupplierById(id: number): Observable<SupplierProfileDto> {
     return this.http.get<SupplierProfileDto>(`${this.apiUrl}/${id}`);
+  }
+
+  getMe(): Observable<SupplierProfileDto> {
+    return this.http.get<SupplierProfileDto>(`${this.apiUrl}/me`);
+  }
+
+  updateMe(data: UpdateSupplierProfileDto): Observable<SupplierProfileDto> {
+    return this.http.put<SupplierProfileDto>(`${this.apiUrl}/me`, data);
+  }
+
+  createStripeAccountSession(supplierId: number): Observable<{ clientSecret: string }> {
+    return this.http.post<{ clientSecret: string }>(`${environment.apiUrl}/v1/payments/supplier/${supplierId}/account-session`, {});
   }
 }

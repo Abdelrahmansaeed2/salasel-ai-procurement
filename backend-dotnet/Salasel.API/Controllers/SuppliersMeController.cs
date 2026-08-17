@@ -154,6 +154,16 @@ public class SuppliersMeController : ControllerBase
         supplier.ContactPhone = request.ContactPhone;
         supplier.BankName = request.BankName;
         supplier.Iban = request.Iban;
+        
+        supplier.Address = request.Address;
+        supplier.BusinessType = request.BusinessType;
+        supplier.JobTitle = request.JobTitle;
+        supplier.CrNumber = request.CrNumber;
+        supplier.TaxNumber = request.TaxNumber;
+        supplier.VatNumber = request.VatNumber;
+        supplier.IsVatExempt = request.IsVatExempt;
+        supplier.CoverageRadiusKm = request.CoverageRadiusKm;
+        supplier.PaymentTerms = request.PaymentTerms;
 
         await _supplierRepository.UpdateAsync(supplier);
         await _supplierRepository.SaveChangesAsync();
@@ -369,6 +379,14 @@ public class SuppliersMeController : ControllerBase
             ReliabilityScore = supplier.ReliabilityScore,
             IsActiveForRouting = supplier.IsActiveForRouting,
             VerificationStatus = supplier.VerificationStatus.ToString(),
+            IsStripeOnboardingComplete = supplier.IsStripeOnboardingComplete,
+            BusinessType = supplier.BusinessType,
+            Address = supplier.Address,
+            JobTitle = supplier.JobTitle,
+            CoverageRadiusKm = supplier.CoverageRadiusKm,
+            PaymentTerms = supplier.PaymentTerms,
+            VatNumber = supplier.VatNumber,
+            IsVatExempt = supplier.IsVatExempt,
             Warehouses = warehouses.Select(w => new WarehouseDto { City = w.City, Lat = w.Lat, Lng = w.Lng }).ToList()
         };
     }
