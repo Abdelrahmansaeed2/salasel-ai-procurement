@@ -86,15 +86,4 @@ export class SupplierLoginComponent {
       }
     });
   }
-
-  loginWithProvider(provider: 'microsoft' | 'google'): void {
-    this.errorMessage.set(null);
-    this.isSubmitting.set(true);
-
-    // TODO: Implement actual OAuth when API supports it
-    window.setTimeout(() => {
-      this.isSubmitting.set(false);
-      this.errorMessage.set('تسجيل الدخول عبر الحسابات غير مدعوم حالياً');
-    }, 700);
-  }
 }
