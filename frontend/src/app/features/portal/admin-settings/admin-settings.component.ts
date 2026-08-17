@@ -8,10 +8,10 @@ import { AdminSettingsService, SystemConfigurationDto } from '../../../core/serv
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="admin-settings-container">
+    <div class="admin-settings-container" dir="rtl">
       <div class="header">
-        <h2>Global Platform Settings</h2>
-        <p>Manage AI routing thresholds, platform fees, and other core parameters.</p>
+        <h2>إعدادات المنصة العامة</h2>
+        <p>إدارة عمولات المنصة، وتوجيهات الذكاء الاصطناعي، والمعلمات الأساسية الأخرى.</p>
       </div>
 
       <div class="settings-content" *ngIf="settingsForm">
@@ -19,8 +19,8 @@ import { AdminSettingsService, SystemConfigurationDto } from '../../../core/serv
           
           <div class="setting-group">
             <div class="setting-info">
-              <h3>Platform Commission Fee (%)</h3>
-              <p>The percentage fee deducted from each sub-order payout via Stripe.</p>
+              <h3>نسبة عمولة المنصة (%)</h3>
+              <p>نسبة العمولة التي يتم خصمها من كل طلب فرعي عبر بوابة Stripe.</p>
             </div>
             <div class="setting-input">
               <input type="number" formControlName="PlatformFeePercentage" class="form-control" step="0.1">
@@ -29,8 +29,8 @@ import { AdminSettingsService, SystemConfigurationDto } from '../../../core/serv
 
           <div class="setting-group">
             <div class="setting-info">
-              <h3>AI Threshold: Max Suppliers per Order</h3>
-              <p>Maximum number of suppliers the AI will split an order among.</p>
+              <h3>الحد الأقصى للموردين (الذكاء الاصطناعي)</h3>
+              <p>أقصى عدد من الموردين يمكن للذكاء الاصطناعي تقسيم الطلب عليهم.</p>
             </div>
             <div class="setting-input">
               <input type="number" formControlName="AiMaxSuppliers" class="form-control">
@@ -39,8 +39,8 @@ import { AdminSettingsService, SystemConfigurationDto } from '../../../core/serv
 
           <div class="setting-group">
             <div class="setting-info">
-              <h3>Supplier Lead Time Penalty (Score)</h3>
-              <p>How much a supplier's routing score is penalized per day of lead time.</p>
+              <h3>عقوبة تأخير التوصيل (التقييم)</h3>
+              <p>مقدار الخصم من تقييم توجيه المورد لكل يوم تأخير في التوصيل.</p>
             </div>
             <div class="setting-input">
               <input type="number" formControlName="LeadTimePenalty" class="form-control" step="0.1">
@@ -49,7 +49,7 @@ import { AdminSettingsService, SystemConfigurationDto } from '../../../core/serv
 
           <div class="form-actions">
             <button type="submit" [disabled]="settingsForm.invalid || isSaving" class="btn-primary">
-              {{ isSaving ? 'Saving...' : 'Save Settings' }}
+              {{ isSaving ? 'جاري الحفظ...' : 'حفظ الإعدادات' }}
             </button>
             <div *ngIf="successMessage" class="success-msg">{{ successMessage }}</div>
           </div>
@@ -64,7 +64,7 @@ import { AdminSettingsService, SystemConfigurationDto } from '../../../core/serv
       border-radius: 12px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       margin: 1.5rem;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Cairo', sans-serif;
     }
     .header {
       margin-bottom: 2.5rem;

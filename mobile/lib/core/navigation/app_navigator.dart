@@ -4,15 +4,17 @@ import 'package:get/get.dart';
 import '../../features/inventory/presentation/screens/inventory_screen.dart';
 import '../../features/orders/presentation/screens/orders_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/catalog/presentation/screens/catalog_screen.dart';
 
 /// مركز التنقل — كل الـ controllers بتستخدمه عشان مفيش circular imports
 class AppNavigator {
   AppNavigator._();
 
   /// index 0 → الرئيسية
-  /// index 1 → المخزون
-  /// index 2 → الطلبات
-  /// index 3 → حسابي
+  /// index 1 → التسوق
+  /// index 2 → المخزون
+  /// index 3 → الطلبات
+  /// index 4 → حسابي
   static void changeTab(int index, {required int currentTabIndex}) {
     if (index == currentTabIndex) {
       Get.until((route) => route.isFirst);
@@ -23,17 +25,23 @@ class AppNavigator {
 
     if (index == 1) {
       Get.to(
-        () => const InventoryScreen(),
+        () => const CatalogScreen(),
         transition: Transition.fadeIn,
         duration: const Duration(milliseconds: 200),
       );
     } else if (index == 2) {
       Get.to(
-        () => const OrdersScreen(),
+        () => const InventoryScreen(),
         transition: Transition.fadeIn,
         duration: const Duration(milliseconds: 200),
       );
     } else if (index == 3) {
+      Get.to(
+        () => const OrdersScreen(),
+        transition: Transition.fadeIn,
+        duration: const Duration(milliseconds: 200),
+      );
+    } else if (index == 4) {
       Get.to(
         () => const ProfileScreen(),
         transition: Transition.fadeIn,

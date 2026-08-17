@@ -1,4 +1,5 @@
 class OrderDetailProductModel {
+  final int productId;
   final String supplierName;
   final String productName;
   final String requestedQuantity;
@@ -6,6 +7,7 @@ class OrderDetailProductModel {
   final double unitPrice;
 
   OrderDetailProductModel({
+    required this.productId,
     required this.supplierName,
     required this.productName,
     required this.requestedQuantity,
@@ -15,6 +17,7 @@ class OrderDetailProductModel {
 
   factory OrderDetailProductModel.fromJson(Map<String, dynamic> json) {
     return OrderDetailProductModel(
+      productId: json['productId'] ?? 0,
       supplierName: json['supplierName'] ?? '',
       productName: json['productName'] ?? '',
       requestedQuantity: json['requestedQuantity'] ?? '',

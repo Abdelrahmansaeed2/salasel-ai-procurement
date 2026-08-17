@@ -8,16 +8,16 @@ import { SupplierService, SupplierProfileDto } from '../../../core/services/supp
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="settings-container" *ngIf="profile">
+    <div class="settings-container" *ngIf="profile" dir="rtl">
       <div class="settings-header">
-        <h2>Supplier Settings</h2>
-        <p>Manage your business profile, logistics preferences, and payouts.</p>
+        <h2>إعدادات المورد</h2>
+        <p>إدارة الملف الشخصي لعملك، تفضيلات الخدمات اللوجستية، والمدفوعات.</p>
       </div>
 
       <div class="tabs">
-        <button [class.active]="activeTab === 'profile'" (click)="activeTab = 'profile'">Business Profile</button>
-        <button [class.active]="activeTab === 'logistics'" (click)="activeTab = 'logistics'">Logistics</button>
-        <button [class.active]="activeTab === 'financials'" (click)="activeTab = 'financials'">Financials (Stripe)</button>
+        <button [class.active]="activeTab === 'profile'" (click)="activeTab = 'profile'">الملف الشخصي</button>
+        <button [class.active]="activeTab === 'logistics'" (click)="activeTab = 'logistics'">الخدمات اللوجستية</button>
+        <button [class.active]="activeTab === 'financials'" (click)="activeTab = 'financials'">المدفوعات (Stripe)</button>
       </div>
 
       <div class="tab-content">
@@ -26,50 +26,50 @@ import { SupplierService, SupplierProfileDto } from '../../../core/services/supp
           <div *ngIf="activeTab === 'profile'">
             <div class="form-row">
               <div class="form-group">
-                <label>Company Name</label>
+                <label>اسم الشركة</label>
                 <input type="text" formControlName="companyName" class="form-control">
               </div>
               <div class="form-group">
-                <label>Business Type</label>
+                <label>نوع العمل</label>
                 <input type="text" formControlName="businessType" class="form-control">
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
-                <label>Contact Phone</label>
+                <label>هاتف التواصل</label>
                 <input type="text" formControlName="contactPhone" class="form-control">
               </div>
               <div class="form-group">
-                <label>Job Title</label>
+                <label>المسمى الوظيفي</label>
                 <input type="text" formControlName="jobTitle" class="form-control">
               </div>
             </div>
 
             <div class="form-group">
-              <label>Address</label>
+              <label>العنوان</label>
               <textarea formControlName="address" class="form-control" rows="2"></textarea>
             </div>
 
             <div class="form-row">
               <div class="form-group">
-                <label>CR Number</label>
+                <label>رقم السجل التجاري</label>
                 <input type="text" formControlName="crNumber" class="form-control">
               </div>
               <div class="form-group">
-                <label>Tax Number</label>
+                <label>الرقم الضريبي</label>
                 <input type="text" formControlName="taxNumber" class="form-control">
               </div>
             </div>
             
             <div class="form-row">
               <div class="form-group">
-                <label>VAT Number</label>
+                <label>رقم ضريبة القيمة المضافة (VAT)</label>
                 <input type="text" formControlName="vatNumber" class="form-control">
               </div>
               <div class="form-group checkbox-group">
                 <label>
-                  <input type="checkbox" formControlName="isVatExempt"> VAT Exempt
+                  <input type="checkbox" formControlName="isVatExempt"> معفى من الضريبة
                 </label>
               </div>
             </div>
@@ -78,11 +78,11 @@ import { SupplierService, SupplierProfileDto } from '../../../core/services/supp
           <div *ngIf="activeTab === 'logistics'">
             <div class="form-row">
               <div class="form-group">
-                <label>Coverage Radius (km) <small>Used for AI matching</small></label>
+                <label>نطاق التغطية (كم) <small>يستخدم لمطابقة الذكاء الاصطناعي</small></label>
                 <input type="number" formControlName="coverageRadiusKm" class="form-control">
               </div>
               <div class="form-group">
-                <label>Payment Terms <small>e.g., Net 30, COD</small></label>
+                <label>شروط الدفع <small>مثال: الدفع عند الاستلام، خلال 30 يوم</small></label>
                 <input type="text" formControlName="paymentTerms" class="form-control">
               </div>
             </div>
@@ -90,7 +90,7 @@ import { SupplierService, SupplierProfileDto } from '../../../core/services/supp
 
           <div class="form-actions">
             <button type="submit" [disabled]="settingsForm.invalid || isSaving" class="btn-primary">
-              {{ isSaving ? 'Saving...' : 'Save Changes' }}
+              {{ isSaving ? 'جاري الحفظ...' : 'حفظ التغييرات' }}
             </button>
             <div *ngIf="successMessage" class="success-msg">{{ successMessage }}</div>
           </div>
@@ -98,23 +98,23 @@ import { SupplierService, SupplierProfileDto } from '../../../core/services/supp
 
         <!-- Stripe Financials -->
         <div *ngIf="activeTab === 'financials'" class="stripe-section">
-          <h3>Payouts via Stripe Connect</h3>
-          <p>We use Stripe to make sure you get paid on time and to keep your personal bank and details secure.</p>
+          <h3>المدفوعات عبر بوابة Stripe</h3>
+          <p>نحن نستخدم Stripe لضمان استلامك لأموالك في الوقت المحدد وللحفاظ على أمان تفاصيل حسابك البنكي.</p>
           
           <div *ngIf="profile.isStripeOnboardingComplete" class="stripe-success">
             <div class="icon-circle">
               <i class="fas fa-check"></i>
             </div>
             <div>
-              <h4>Account Connected</h4>
-              <p>Your Stripe account is fully set up for payouts.</p>
+              <h4>تم ربط الحساب بنجاح</h4>
+              <p>حساب Stripe الخاص بك جاهز تمامًا لاستقبال المدفوعات.</p>
             </div>
           </div>
 
           <div *ngIf="!profile.isStripeOnboardingComplete" class="stripe-pending">
-            <p>You need to connect a bank account to receive payments from Salasel AI Procurement.</p>
+            <p>يجب عليك ربط حساب بنكي لتلقي المدفوعات من منصة Salasel AI Procurement.</p>
             <button (click)="connectStripe()" [disabled]="isConnectingStripe" class="btn-stripe">
-              {{ isConnectingStripe ? 'Loading...' : 'Connect Bank Account' }}
+              {{ isConnectingStripe ? 'جاري التحميل...' : 'ربط الحساب البنكي' }}
             </button>
           </div>
         </div>
@@ -128,7 +128,7 @@ import { SupplierService, SupplierProfileDto } from '../../../core/services/supp
       border-radius: 12px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       margin: 1.5rem;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Cairo', sans-serif;
     }
     .settings-header {
       margin-bottom: 2rem;

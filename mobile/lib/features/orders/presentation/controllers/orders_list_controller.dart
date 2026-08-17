@@ -2,6 +2,9 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import '../../../../../core/navigation/app_navigator.dart';
 import '../../../../../core/network/api_client.dart';
+import '../../../cart/presentation/controllers/cart_controller.dart';
+import '../../../cart/presentation/screens/cart_screen.dart';
+import '../../data/models/order_detail_model.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 import 'package:signalr_netcore/signalr_client.dart';
@@ -184,7 +187,7 @@ class OrdersController extends GetxController {
 
   Future<void> fetchReturns() async {
     try {
-      final response = await _apiClient.dio.get('/returns');
+      final response = await _apiClient.dio.get('/merchants/me/returns');
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         returnsOrders.value = data.map((json) {
@@ -206,6 +209,50 @@ class OrdersController extends GetxController {
       }
     } catch (e) {
       debugPrint('Failed to load returns: $e');
+    }
+  }
+
+  Future<void> reorder(OrderModel order) async {
+    try {
+      Get.dialog(
+        const Center(child: CircularProgressIndicator(color: Color(0xFF2563EB))),
+        barrierDismissible: false,
+      );
+
+      final response = await _apiClient.dio.get('/orders/${order.id}');
+      Get.back(); // close loading
+
+      if (response.statusCode == 200) {
+        final orderDetails = OrderDetailModel.fromJson(response.data);
+        
+        final cartCtrl = Get.put(CartController());
+        cartCtrl.clearCart();
+
+        for (var product in orderDetails.products) {
+          final parts = product.requestedQuantity.trim().split(' ');
+          final int quantity = parts.isNotEmpty ? (int.tryParse(parts.first) ?? 1) : 1;
+          final String unit = parts.length > 1 ? parts.sublist(1).join(' ') : 'وحدة';
+          
+          cartCtrl.addItem(CartItem(
+            productId: product.productId,
+            name: product.productName,
+            sku: '',
+            unit: unit,
+            imageUrl: '', 
+            price: product.unitPrice,
+            quantity: quantity,
+          ));
+        }
+
+        Get.snackbar('نجاح', 'تمت إضافة عناصر الطلب إلى سلة التسوق',
+            backgroundColor: Colors.green, colorText: Colors.white);
+        
+        Get.to(() => const CartScreen());
+      }
+    } catch (e) {
+      Get.back(); // close loading
+      Get.snackbar('خطأ', 'فشل في استرجاع تفاصيل الطلب لإعادة الطلب');
+      debugPrint('Failed to reorder: $e');
     }
   }
 

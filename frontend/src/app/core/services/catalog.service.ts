@@ -21,7 +21,7 @@ export interface CatalogProduct {
 })
 export class CatalogService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/v1/suppliers/me/products`;
+  private apiUrl = `${environment.apiUrl}/suppliers/me/products`;
 
   getCatalogs(): Observable<CatalogProduct[]> {
     return this.http.get<CatalogProduct[]>(this.apiUrl);

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "492818497742",
+    "project_id": "salasel-308fa",
+    "storage_bucket": "salasel-308fa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:492818497742:android:bf4e7ebef39aaea206509f",
+        "android_client_info": {
+          "package_name": "com.salasel.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCaGGd1jE-xh-P9CRQ6378eX5DIg24c2qs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

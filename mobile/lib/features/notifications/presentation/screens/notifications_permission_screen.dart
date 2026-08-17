@@ -7,6 +7,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../permissions/presentation/screens/setup_complete_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/network/api_client.dart';
+import '../../../../core/services/push_notification_service.dart';
 
 class NotificationsPermissionScreen extends StatelessWidget {
   const NotificationsPermissionScreen({super.key});
@@ -81,10 +83,16 @@ class NotificationsPermissionScreen extends StatelessWidget {
                   
                   var status = await Permission.notification.request();
                   if (status.isGranted) {
-                    
+                    try {
+                      // Initialize push service which will fetch and send token
+                      final pushService = PushNotificationService(ApiClient());
+                      await pushService.init();
+                    } catch (e) {
+                      debugPrint('Push init error: $e');
+                    }
                     Get.to(() => SetupCompleteScreen());
                   } else {
-                    
+                    Get.to(() => SetupCompleteScreen());
                   }
                 },
                 style: ElevatedButton.styleFrom(

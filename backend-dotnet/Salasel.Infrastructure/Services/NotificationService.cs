@@ -67,11 +67,11 @@ public class NotificationService : INotificationService
             using var scope = _scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<SalaselDbContext>();
 
-            int? ownerUserId = isSupplier
-                ? await db.SupplierProfiles.Where(s => s.SupplierID == profileId).Select(s => (int?)s.OwnerUserId).FirstOrDefaultAsync(ct)
-                : await db.MerchantsProfiles.Where(m => m.MerchantID == profileId).Select(m => (int?)m.OwnerUserId).FirstOrDefaultAsync(ct);
+            var userInfo = isSupplier
+                ? await db.SupplierProfiles.Where(s => s.SupplierID == profileId).Select(s => new { Id = (int?)s.OwnerUserId, Token = s.Owner.FcmToken }).FirstOrDefaultAsync(ct)
+                : await db.MerchantsProfiles.Where(m => m.MerchantID == profileId).Select(m => new { Id = (int?)m.OwnerUserId, Token = m.Owner.FcmToken }).FirstOrDefaultAsync(ct);
 
-            if (ownerUserId is null)
+            if (userInfo?.Id is null)
             {
                 _logger.LogWarning(
                     "Could not persist notification — no {Kind} profile {ProfileId} found.",
@@ -81,7 +81,7 @@ public class NotificationService : INotificationService
 
             db.Notifications.Add(new Notification
             {
-                UserId = ownerUserId.Value,
+                UserId = userInfo.Id.Value,
                 EventName = eventName,
                 PayloadJson = JsonSerializer.Serialize(payload),
                 IsRead = false,
@@ -89,6 +89,27 @@ public class NotificationService : INotificationService
             });
 
             await db.SaveChangesAsync(ct);
+
+            // Fire Firebase Push Notification if token exists
+            if (!string.IsNullOrEmpty(userInfo.Token))
+            {
+                var message = new FirebaseAdmin.Messaging.Message()
+                {
+                    Token = userInfo.Token,
+                    Notification = new FirebaseAdmin.Messaging.Notification()
+                    {
+                        Title = "Salasel App",
+                        Body = $"New update: {eventName}"
+                    },
+                    Data = new Dictionary<string, string>
+                    {
+                        { "eventName", eventName }
+                    }
+                };
+                
+                // Fire-and-forget so it doesn't block
+                _ = FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance.SendAsync(message, ct);
+            }
         }
         catch (Exception ex)
         {

@@ -12,6 +12,8 @@ public class User
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public string FcmToken { get; set; } = string.Empty;
+
     public int TokenVersion { get; set; } = 0;
 
     // Flips true the first time the merchant/supplier fills in their real

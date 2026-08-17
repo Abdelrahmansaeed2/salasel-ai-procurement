@@ -47,7 +47,7 @@ export interface UpdateSupplierProfileDto {
 })
 export class SupplierService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/v1/suppliers`;
+  private apiUrl = `${environment.apiUrl}/suppliers`;
 
   getSuppliers(): Observable<SupplierProfileDto[]> {
     return this.http.get<SupplierProfileDto[]>(this.apiUrl);
@@ -66,6 +66,6 @@ export class SupplierService {
   }
 
   createStripeAccountSession(supplierId: number): Observable<{ clientSecret: string }> {
-    return this.http.post<{ clientSecret: string }>(`${environment.apiUrl}/v1/payments/supplier/${supplierId}/account-session`, {});
+    return this.http.post<{ clientSecret: string }>(`${environment.apiUrl}/payments/supplier/${supplierId}/account-session`, {});
   }
 }

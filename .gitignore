@@ -166,3 +166,5 @@ htmlcov/
 .DS_Store
 backend-dotnet/Salasel.Infrastructure/Migrations/20260816150751_AddReturnRequests.Designer.cs
 backend-dotnet/Salasel.Infrastructure/Migrations/20260816150751_AddReturnRequests.cs
+# Firebase Service Account
+firebase-admin.json

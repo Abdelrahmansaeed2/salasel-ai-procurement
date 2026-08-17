@@ -65,7 +65,6 @@ export class PortalLayoutComponent {
         { label: 'مصفوفة الأدوار', route: '/portal/roles', icon: 'roles' },
         { label: 'إدارة مركز المساعدة', route: '/portal/help-center-editor', icon: 'settings' },
         { label: 'إعدادات النظام', route: '/portal/admin-settings', icon: 'settings' },
-        { label: 'إعدادات الحساب', route: '/portal/settings', icon: 'settings' },
       ];
     } else {
       // Default: Supplier

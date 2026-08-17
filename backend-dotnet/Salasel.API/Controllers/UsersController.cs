@@ -49,6 +49,24 @@ public class UsersController : ControllerBase
         return Ok(new { Message = "Account deleted." });
     }
 
+    public class FcmTokenRequest { public string Token { get; set; } = string.Empty; }
+
+    [HttpPut("me/fcm-token")]
+    public async Task<IActionResult> UpdateFcmToken([FromBody] FcmTokenRequest request)
+    {
+        var idStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(idStr, out var userId)) return Unauthorized();
+
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null) return NotFound();
+
+        user.FcmToken = request.Token;
+        await _userRepository.UpdateAsync(user);
+        await _userRepository.SaveChangesAsync();
+
+        return Ok(new { Message = "Token updated." });
+    }
+
     // GET /api/v1/users/me/notification-settings
     [HttpGet("me/notification-settings")]
     public async Task<IActionResult> GetNotificationSettings()

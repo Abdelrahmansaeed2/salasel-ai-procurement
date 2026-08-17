@@ -17,10 +17,17 @@ import 'features/shop_registration/presentation/screens/registration_submitted_s
 import 'features/stores/presentation/screens/welcomepage_screen.dart';
 
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'core/services/push_notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   // Initialize Stripe
   Stripe.publishableKey = 'pk_test_51U4G6zDRX6tSvbDOsuqtf0kTtSmzHXAOfQQ7g7hiEu4YijnNPmIbjOvklSQsBwlqQXHxycbHTy09GBH1smNB6mZt00sxmDSvV9'; // standard test key
   

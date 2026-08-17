@@ -20,7 +20,7 @@ export interface UpdateSystemConfigurationDto {
 })
 export class AdminSettingsService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/v1/admin/settings`;
+  private apiUrl = `${environment.apiUrl}/admin/settings`;
 
   getSettings(): Observable<SystemConfigurationDto[]> {
     return this.http.get<SystemConfigurationDto[]>(this.apiUrl);

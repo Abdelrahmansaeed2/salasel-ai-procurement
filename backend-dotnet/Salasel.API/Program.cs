@@ -32,6 +32,15 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
+var firebaseKeyPath = Path.Combine(builder.Environment.ContentRootPath, "firebase-admin.json");
+if (File.Exists(firebaseKeyPath))
+{
+    FirebaseAdmin.FirebaseApp.Create(new FirebaseAdmin.AppOptions
+    {
+        Credential = Google.Apis.Auth.OAuth2.GoogleCredential.FromFile(firebaseKeyPath)
+    });
+}
+
 // Add DbContext
 builder.Services.AddDbContext<SalaselDbContext>(options =>
     options.UseSqlServer(

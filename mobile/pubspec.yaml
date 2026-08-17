@@ -36,6 +36,9 @@ dependencies:
   flutter_stripe: any
   signalr_netcore: any
   mobile_scanner: ^5.0.1
+  firebase_core: any
+  firebase_messaging: any
+  flutter_local_notifications: any
 
 dev_dependencies:
   flutter_test:

@@ -975,6 +975,29 @@ class _OrderCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => controller.reorder(order),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF10B981), // Green for reorder
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r)),
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                      ),
+                      child: Text(
+                        'إعادة الطلب',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'Cairo',
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ],
             ),

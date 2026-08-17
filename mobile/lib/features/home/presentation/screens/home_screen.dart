@@ -13,6 +13,9 @@ import '../theme/home_colors.dart';
 import '../widgets/quick_stat_card.dart';
 import '../widgets/recent_order_tile.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../cart/presentation/screens/cart_screen.dart';
+import '../../../cart/presentation/controllers/cart_controller.dart';
+import '../../../catalog/presentation/screens/catalog_screen.dart';
 
 const String _avatarUrl =
     'https://api.builder.io/api/v1/image/assets/TEMP/c7070914a8d0a025b8aab03d2f42684260d4b530?width=72';
@@ -105,6 +108,45 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
+          SizedBox(width: 12.w),
+          // Cart Icon
+          Obx(() {
+            final cartController = Get.isRegistered<CartController>() ? Get.find<CartController>() : Get.put(CartController());
+            return AnimatedPressable(
+              borderRadius: BorderRadius.circular(20.r),
+              onTap: () => Get.to(() => const CartScreen()),
+              child: SizedBox(
+                width: 40.w,
+                height: 40.h,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(Icons.shopping_cart_outlined, color: Color(0xFF434655), size: 24.w),
+                    if (cartController.itemCount > 0)
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: HomeColors.micGradientStart,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            '${cartController.itemCount}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      )
+                  ],
+                ),
+              ),
+            );
+          }),
           Spacer(),
           Obx(() => Text(
             controller.storeName.value.isEmpty ? 'جاري التحميل...' : controller.storeName.value,
@@ -119,7 +161,7 @@ class HomeScreen extends StatelessWidget {
           SizedBox(width: 12.w),
           AnimatedPressable(
             borderRadius: BorderRadius.circular(20.r),
-            onTap: () => controller.changeTab(3),
+            onTap: () => controller.changeTab(4),
             child: Container(
               width: 40.w,
               height: 40.h,
