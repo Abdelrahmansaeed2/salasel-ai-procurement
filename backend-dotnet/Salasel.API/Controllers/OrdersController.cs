@@ -68,6 +68,48 @@ public class OrdersController : ControllerBase
         return Ok(new { Message = "Order executed successfully", Id = Id, ClientSecret = clientSecret });
     }
 
+    [HttpPost("manual")]
+    [Authorize(Roles = "Merchant")]
+    public async Task<IActionResult> CreateManualOrder([FromBody] ManualOrderRequestDto request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        if (request.Items == null || !request.Items.Any()) return BadRequest("Cart is empty.");
+
+        var merchantId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+        if (merchantId == 0) return Unauthorized();
+
+        var supplierAssignment = HttpContext.RequestServices.GetRequiredService<ISupplierAssignmentService>();
+        
+        // Simplified strategy: Find nearest supplier and assign all items to them for MVP
+        // In a real scenario, this would check inventory per supplier.
+        var supplierId = await supplierAssignment.GetNearestSupplierAsync(merchantId);
+        if (supplierId == 0) return BadRequest("No suppliers available in your area.");
+
+        var executionRequest = new OrderExecutionRequestDto
+        {
+            MerchantID = merchantId,
+            TotalOrderCost = request.Items.Sum(i => i.Quantity * 100m), // Mock price since manual cart didn't fetch it
+            Splits = request.Items.Select(i => new SubOrderDto
+            {
+                SupplierID = supplierId,
+                ProductId = i.ProductId,
+                QuantityOrdered = i.Quantity,
+                SubTotalCost = i.Quantity * 100m // Mock price
+            }).ToList()
+        };
+
+        var orderId = await _orderExecutionService.ExecuteOrderAsync(executionRequest);
+        
+        var order = await _masterOrderRepository.GetByIdAsync(orderId);
+        string? clientSecret = null;
+        if (order != null)
+        {
+            clientSecret = await _paymentService.CreatePaymentIntentAsync(order);
+        }
+
+        return Ok(new { Message = "Manual order created successfully", Id = orderId, ClientSecret = clientSecret });
+    }
+
     // GET /api/v1/orders/summary?merchantId= — active total + % vs last month
     [HttpGet("summary")]
     [Authorize(Roles = "Merchant,Admin")]

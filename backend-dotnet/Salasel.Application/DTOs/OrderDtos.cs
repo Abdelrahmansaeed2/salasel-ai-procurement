@@ -2,6 +2,7 @@ namespace Salasel.Application.DTOs;
 
 public class OrderDetailProductDto
 {
+    public int ProductId { get; set; }
     public string SupplierName { get; set; } = string.Empty;
     public string ProductName { get; set; } = string.Empty;
     public string RequestedQuantity { get; set; } = string.Empty;
