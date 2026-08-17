@@ -2,11 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/widgets/animated_entrance.dart';
 import '../../../../core/widgets/animated_pressable.dart';
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../../../voice_order/presentation/screens/voice_recording_screen.dart';
+import '../../../voice_order/presentation/screens/mic_permission_screen.dart';
 import '../../../notifications/presentation/screens/notifications_screen.dart';
 import '../controllers/home_controller.dart';
 import '../theme/home_colors.dart';
@@ -335,11 +337,19 @@ class _MicSectionState extends State<_MicSection>
     super.dispose();
   }
 
-  void _openVoiceRecording() {
-    Get.to(
-      () => VoiceRecordingScreen(),
-      transition: Transition.fadeIn,
-    );
+  void _openVoiceRecording() async {
+    final status = await Permission.microphone.status;
+    if (status.isGranted) {
+      Get.to(
+        () => VoiceRecordingScreen(),
+        transition: Transition.fadeIn,
+      );
+    } else {
+      Get.to(
+        () => MicPermissionScreen(),
+        transition: Transition.fadeIn,
+      );
+    }
   }
 
   @override

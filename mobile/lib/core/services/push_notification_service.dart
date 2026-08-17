@@ -1,12 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mobile/core/network/api_client.dart';
-import 'package:mobile/core/utils/logger.dart';
 
 // Top-level background message handler
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  logger.i('Handling a background message: ${message.messageId}');
+  debugPrint('Handling a background message: ${message.messageId}');
 }
 
 class PushNotificationService {
@@ -28,7 +28,7 @@ class PushNotificationService {
     );
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      logger.i('User granted push notification permission');
+      debugPrint('User granted push notification permission');
       
       // Get the token and send it to backend
       String? token = await _fcm.getToken();
@@ -41,11 +41,11 @@ class PushNotificationService {
 
       // Handle foreground messages
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        logger.i('Received foreground message: ${message.notification?.title}');
+        debugPrint('Received foreground message: ${message.notification?.title}');
         _showLocalNotification(message);
       });
     } else {
-      logger.w('User declined or has not accepted push notification permissions');
+      debugPrint('User declined or has not accepted push notification permissions');
     }
   }
 
@@ -55,9 +55,9 @@ class PushNotificationService {
         '/v1/users/me/fcm-token',
         data: {'token': token},
       );
-      logger.i('Successfully registered FCM token with backend');
+      debugPrint('Successfully registered FCM token with backend');
     } catch (e) {
-      logger.e('Failed to register FCM token with backend: $e');
+      debugPrint('Failed to register FCM token with backend: $e');
     }
   }
 
@@ -77,10 +77,10 @@ class PushNotificationService {
           NotificationDetails(android: androidPlatformChannelSpecifics);
 
       await _localNotificationsPlugin.show(
-        notification.hashCode,
-        notification.title,
-        notification.body,
-        platformChannelSpecifics,
+        id: notification.hashCode,
+        title: notification.title,
+        body: notification.body,
+        notificationDetails: platformChannelSpecifics,
       );
     }
   }

@@ -1,9 +1,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../notifications/presentation/screens/notifications_permission_screen.dart';
+import '../../../permissions/presentation/screens/setup_complete_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MicPermissionScreen extends StatelessWidget {
@@ -87,9 +89,23 @@ class MicPermissionScreen extends StatelessWidget {
               
               // Allow Button
               ElevatedButton(
-                onPressed: () {
-                  // الانتقال إلى شاشة التنبيهات
-                  Get.to(() => NotificationsPermissionScreen());
+                onPressed: () async {
+                  var status = await Permission.microphone.request();
+                  if (status.isGranted) {
+                    var notifStatus = await Permission.notification.status;
+                    if (notifStatus.isGranted) {
+                      Get.to(() => SetupCompleteScreen()); // or VoiceRecordingScreen
+                    } else {
+                      Get.to(() => NotificationsPermissionScreen());
+                    }
+                  } else {
+                    var notifStatus = await Permission.notification.status;
+                    if (notifStatus.isGranted) {
+                      Get.to(() => SetupCompleteScreen());
+                    } else {
+                      Get.to(() => NotificationsPermissionScreen());
+                    }
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
