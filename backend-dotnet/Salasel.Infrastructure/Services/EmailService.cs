@@ -44,29 +44,25 @@ public class EmailService : IEmailService
                 "
             };
 
-            // Fake SMTP config, or real if provided in appsettings
-            var host = _configuration["Smtp:Host"] ?? "localhost";
-            var portStr = _configuration["Smtp:Port"] ?? "1025";
-            int port = int.TryParse(portStr, out var p) ? p : 1025;
+            // SMTP config
+            var host = _configuration["Smtp:Host"] ?? "smtp.gmail.com";
+            var portStr = _configuration["Smtp:Port"] ?? "587";
+            int port = int.TryParse(portStr, out var p) ? p : 587;
+            var username = _configuration["Smtp:Username"];
+            var password = _configuration["Smtp:Password"];
 
-            // In this specific enterprise simulation, we will log the email instead of actually failing 
-            // if an SMTP server isn't running locally. 
             _logger.LogInformation("=========================================");
             _logger.LogInformation($"ENTERPRISE EMAIL DISPATCHED to {toEmail}");
-            _logger.LogInformation($"Subject: {message.Subject}");
-            _logger.LogInformation($"Body: {message.Body}");
             _logger.LogInformation("=========================================");
 
-            // Uncomment to send real emails via MailKit:
-            /*
             using var client = new SmtpClient();
-            await client.ConnectAsync(host, port, MailKit.Security.SecureSocketOptions.Auto);
-            // await client.AuthenticateAsync("user", "pass");
+            await client.ConnectAsync(host, port, MailKit.Security.SecureSocketOptions.StartTls);
+            if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+            {
+                await client.AuthenticateAsync(username, password);
+            }
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
-            */
-            
-            await Task.CompletedTask;
         }
         catch (Exception ex)
         {
