@@ -79,7 +79,7 @@ public class OrderQueryService : IOrderQueryService
 
         var products = order.SubOrders.Select(s => new OrderDetailProductDto
         {
-            ProductId = s.ProductId,
+            ProductId = s.ProductId ?? 0,
             SupplierName = s.Supplier?.CompanyName ?? "Unknown",
             ProductName = s.Product?.Name ?? "Unknown Product",
             RequestedQuantity = $"{s.Quantity} {(s.Product?.Unit ?? "")}".Trim(),
