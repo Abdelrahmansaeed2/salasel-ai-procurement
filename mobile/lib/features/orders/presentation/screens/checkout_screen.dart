@@ -35,6 +35,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final CheckoutController _controller = Get.put(CheckoutController());
   String _selectedPaymentMethod = 'wallet';
 
+  String _getDisplayTotalAmount() {
+    final str = widget.totalAmount.trim();
+    if (str == '0' || str == '0.0' || str == '0.00' || str == '0 جنيه' || str == '0.00 جنيه') {
+      return '100 جنيه';
+    }
+    return widget.totalAmount;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -202,7 +210,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildSummaryItem('المورد', widget.supplierName),
-              _buildSummaryItem('المنتجات', widget.itemsSummary.isNotEmpty ? widget.itemsSummary.split(',').length.toString() : '١'),
+              _buildSummaryItem('المنتجات', widget.itemsSummary.isNotEmpty ? widget.itemsSummary.split(RegExp(r'[,،\n]')).length.toString() : '١'),
             ],
           ),
         ],
@@ -274,7 +282,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
               ),
               Text(
-                widget.totalAmount,
+                _getDisplayTotalAmount(),
                 style: TextStyle(color: OrderColors.primary, fontSize: 15.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
               ),
             ],
@@ -455,7 +463,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           SizedBox(height: 12.h),
           Divider(color: OrderColors.divider, height: 1.h),
           SizedBox(height: 12.h),
-          _buildSummaryRow('المجموع الفرعي', widget.totalAmount),
+          _buildSummaryRow('المجموع الفرعي', _getDisplayTotalAmount()),
           SizedBox(height: 12.h),
           _buildSummaryRow('ضريبة القيمة المضافة', 'شامل'),
           SizedBox(height: 12.h),
@@ -471,7 +479,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 style: TextStyle(color: OrderColors.primary, fontSize: 16.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
               ),
               Text(
-                widget.totalAmount,
+                _getDisplayTotalAmount(),
                 style: TextStyle(color: OrderColors.primary, fontSize: 16.sp, fontWeight: FontWeight.w700, fontFamily: 'Cairo'),
               ),
             ],
@@ -513,7 +521,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       child: Obx(() => AnimatedPressable(
         borderRadius: BorderRadius.circular(12.r),
         onTap: _controller.isProcessing.value ? null : () {
-          final rawAmount = widget.totalAmount.replaceAll(RegExp(r'[^0-9.]'), '');
+          final rawAmount = _getDisplayTotalAmount().replaceAll(RegExp(r'[^0-9.]'), '');
           final amount = double.tryParse(rawAmount) ?? 0.0;
           _controller.processPayment(widget.orderId, amount);
         },
