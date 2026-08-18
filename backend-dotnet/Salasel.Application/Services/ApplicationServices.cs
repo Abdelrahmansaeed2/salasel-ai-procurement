@@ -50,7 +50,7 @@ public class OrderExecutionService : IOrderExecutionService
 
     public async Task<int> ExecuteOrderAsync(OrderExecutionRequestDto request)
     {
-        var approvalStatus = ApprovalStatus.AI_Draft;
+        var approvalStatus = request.VoiceLogID.HasValue ? ApprovalStatus.AI_Draft : ApprovalStatus.Manually_Approved;
 
         var order = new MasterOrder
         {

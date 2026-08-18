@@ -103,7 +103,7 @@ class CheckoutController extends GetxController {
         final numericOrderId = orderId.replaceAll(RegExp(r'[^0-9]'), '');
         final baseWithoutV1 = ApiClient.baseUrl.replaceAll('/v1', '');
         final response = await _apiClient.dio.post(
-          '$baseWithoutV1/voice-orders/$numericOrderId/payment',
+          '$baseWithoutV1/orders/$numericOrderId/payment',
           data: {
             'paymentMethod': 0, // 0 corresponds to PaymentMethod.CashOnDelivery in the backend Enum
             'paymentReference': 'REF-${DateTime.now().millisecondsSinceEpoch}',
