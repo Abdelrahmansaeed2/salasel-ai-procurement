@@ -30,7 +30,7 @@ class CartController extends GetxController {
 
   int get itemCount => items.fold(0, (sum, item) => sum + item.quantity);
   
-  double get subtotal => items.fold(0.0, (sum, item) => sum + (item.price * item.quantity));
+  double get subtotal => items.fold(0.0, (sum, item) => sum + ((item.price > 0 ? item.price : 100.0) * item.quantity));
 
   void addItem(CartItem newItem) {
     final index = items.indexWhere((item) => item.productId == newItem.productId);
@@ -80,7 +80,7 @@ class CartController extends GetxController {
       if (response.statusCode == 200) {
         final orderId = response.data['id'].toString();
         final supplierName = response.data['supplierName'] ?? 'مورد غير معروف';
-        final itemsNames = items.map((i) => i.name).join('، ');
+        final itemsNames = items.map((i) => '${i.name} (${i.quantity} ${i.unit}) - ${(i.price > 0 ? i.price : 100.0) * i.quantity} جنيه').join('\n');
         
         Get.off(() => CheckoutScreen(
           orderId: orderId,
