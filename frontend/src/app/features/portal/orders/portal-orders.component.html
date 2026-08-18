@@ -46,7 +46,7 @@
     </section>
 
     <section class="board-columns">
-      @for (column of boardColumns(); track column.key) {
+      @for (column of filteredBoardColumns(); track column.key) {
         <div class="board-column">
           <div class="board-column-header">
             <div class="board-column-actions">
@@ -141,7 +141,7 @@
     </section>
 
     <section class="order-cards">
-      @for (order of orders(); track order.id) {
+      @for (order of filteredOrders(); track order.id) {
         <article class="order-card">
           <div class="order-card-top">
             <div class="confidence-ring" [style.--ring-color]="order.confidenceColor" [style.--ring-percent]="order.confidence">
@@ -195,7 +195,7 @@
           </div>
         </article>
       }
-      @if (orders().length === 0) {
+      @if (filteredOrders().length === 0) {
         <p class="empty-state">لا توجد طلبات نشطة حالياً.</p>
       }
     </section>

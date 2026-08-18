@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
+import { SearchService } from '../../../core/services/search.service';
 
 interface PortalNavItem {
   label: string;
@@ -21,6 +22,7 @@ interface PortalNavItem {
 export class PortalLayoutComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly searchService = inject(SearchService);
 
   readonly sidebarCollapsed = signal(false);
   readonly userMenuOpen = signal(false);
@@ -92,5 +94,9 @@ export class PortalLayoutComponent {
   logout() {
     this.auth.logout();
     this.router.navigate(['/supplier-login']);
+  }
+
+  onSearch(query: string) {
+    this.searchService.setQuery(query);
   }
 }
