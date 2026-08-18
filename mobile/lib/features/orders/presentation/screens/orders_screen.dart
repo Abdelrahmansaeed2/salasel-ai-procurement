@@ -1199,14 +1199,17 @@ class _TabChip extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              label,
-              style: TextStyle(
-                color:
-                    isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
-                fontFamily: 'Cairo',
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color:
+                      isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Cairo',
+                ),
               ),
             ),
             SizedBox(width: 8.w),

@@ -18,7 +18,7 @@ class VerificationStep {
 enum VerificationStepStatus { done, pending, upcoming }
 
 class ProfileController extends GetxController {
-  final RxInt bottomNavIndex = 3.obs;
+  final RxInt bottomNavIndex = 4.obs;
 
   final RxBool businessHoursEnabled = true.obs;
 

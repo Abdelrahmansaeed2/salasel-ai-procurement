@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../../../../core/navigation/app_navigator.dart';
 import '../../../../core/network/api_client.dart';
@@ -46,55 +47,72 @@ class HomeController extends GetxController {
   Future<void> fetchDashboardData() async {
     try {
       isLoading.value = true;
-      
-      // 1. Fetch Dashboard Stats
-      final statsResponse = await _apiClient.dio.get('/merchants/me/dashboard');
-      if (statsResponse.statusCode == 200) {
-        dashboardStats.value = DashboardStatsModel.fromJson(statsResponse.data);
-      }
-
-      // 2. Fetch User's Primary Shop to get the merchantId and shopName
-      final shopsResponse = await _apiClient.dio.get('/merchants/me/shops');
       int? merchantId;
-      if (shopsResponse.statusCode == 200) {
-        final List<dynamic> shops = shopsResponse.data;
-        if (shops.isNotEmpty) {
-          merchantId = shops.first['merchantID'];
-          storeName.value = shops.first['shopName'] ?? 'متجر';
+
+      // 1. Fetch User's Primary Shop
+      try {
+        final shopsResponse = await _apiClient.dio.get('/merchants/me/shops');
+        if (shopsResponse.statusCode == 200) {
+          final List<dynamic> shops = shopsResponse.data;
+          if (shops.isNotEmpty) {
+            merchantId = shops.first['merchantID'];
+            storeName.value = shops.first['shopName'] ?? 'متجر';
+          }
         }
+      } catch (e) {
+        debugPrint('Failed to load shops: $e');
       }
 
-      // 3. Fetch AI Alerts (Using dynamic merchantId)
+      // 2. Fetch Dashboard Stats
+      try {
+        final statsResponse = await _apiClient.dio.get('/merchants/me/dashboard');
+        if (statsResponse.statusCode == 200) {
+          dashboardStats.value = DashboardStatsModel.fromJson(statsResponse.data);
+        }
+      } catch (e) {
+        debugPrint('Failed to load dashboard stats: $e');
+      }
+
+      // 3. Fetch AI Alerts
       if (merchantId != null) {
-        final aiResponse = await _apiClient.dio.get(
-          '/ai/predictions/out-of-stock',
-          queryParameters: {'merchantId': merchantId},
-        );
-        if (aiResponse.statusCode == 200) {
-          final List<dynamic> data = aiResponse.data;
-          aiAlerts.value = data.map((json) => AiAlertModel.fromJson(json)).toList();
+        try {
+          final aiResponse = await _apiClient.dio.get(
+            '/ai/predictions/out-of-stock',
+            queryParameters: {'merchantId': merchantId},
+          );
+          if (aiResponse.statusCode == 200) {
+            final List<dynamic> data = aiResponse.data;
+            aiAlerts.value = data.map((json) => AiAlertModel.fromJson(json)).toList();
+          }
+        } catch (e) {
+          debugPrint('Failed to load AI alerts: $e');
         }
       }
 
       // 4. Fetch Recent Orders
-      final ordersResponse = await _apiClient.dio.get(
-        '/merchants/me/recent-orders',
-        queryParameters: {'take': 5},
-      );
-      if (ordersResponse.statusCode == 200) {
-        final List<dynamic> ordersData = ordersResponse.data;
-        recentOrders.value = ordersData.map((json) => RecentOrder(
-          emoji: '📦',
-          supplier: json['supplier'] ?? 'مورد',
-          items: json['itemsSummary']?.isNotEmpty == true ? json['itemsSummary'] : 'طلب رقم #${json['id'] ?? ''}',
-          status: json['status'] ?? 'جديد',
-          isDelivered: json['status'] == 'Approved',
-          time: 'الآن',
-        )).toList();
+      try {
+        final ordersResponse = await _apiClient.dio.get(
+          '/merchants/me/recent-orders',
+          queryParameters: {'take': 5},
+        );
+        if (ordersResponse.statusCode == 200) {
+          final List<dynamic> ordersData = ordersResponse.data;
+          recentOrders.value = ordersData.map((json) => RecentOrder(
+            emoji: '📦',
+            supplier: json['supplier'] ?? 'مورد',
+            items: json['itemsSummary']?.isNotEmpty == true ? json['itemsSummary'] : 'طلب رقم #${json['id'] ?? ''}',
+            status: json['status'] ?? 'جديد',
+            isDelivered: json['status'] == 'Approved',
+            time: 'الآن',
+          )).toList();
+        }
+      } catch (e) {
+        debugPrint('Failed to load recent orders: $e');
       }
 
     } catch (e) {
-      Get.snackbar('خطأ', 'فشل في تحميل بيانات لوحة القيادة');
+      debugPrint('Critical dashboard error: $e');
+      Get.snackbar('خطأ', 'فشل في تحميل بيانات لوحة القيادة', snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
     }

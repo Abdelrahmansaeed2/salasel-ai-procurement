@@ -4,7 +4,7 @@ import '../../../../../core/network/api_client.dart';
 import '../../data/models/inventory_models.dart';
 
 class InventoryController extends GetxController {
-  final RxInt bottomNavIndex = 1.obs;
+  final RxInt bottomNavIndex = 2.obs;
   
   final List<String> filters = ['الكل', 'بقالة', 'حبوب', 'منظفات', 'حلويات'];
   final RxString selectedFilter = 'الكل'.obs;

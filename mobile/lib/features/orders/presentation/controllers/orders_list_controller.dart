@@ -63,7 +63,7 @@ class OrderModel {
 // ─── Controller ───────────────────────────────────────────────────────────────
 
 class OrdersController extends GetxController {
-  final RxInt bottomNavIndex = 2.obs;
+  final RxInt bottomNavIndex = 3.obs;
   final RxInt tabIndex = 0.obs; // 0 = active, 1 = history, 2 = returns
   final RxString selectedFilter = 'الكل'.obs;
   final RxString dateFilter = 'الكل'.obs;
