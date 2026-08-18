@@ -75,8 +75,12 @@ public class OrdersController : ControllerBase
         if (!ModelState.IsValid) return BadRequest(ModelState);
         if (request.Items == null || !request.Items.Any()) return BadRequest("Cart is empty.");
 
-        var merchantId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-        if (merchantId == 0) return Unauthorized();
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+        if (userId == 0) return Unauthorized();
+
+        var shop = await _merchantRepository.Query().FirstOrDefaultAsync(m => m.OwnerUserId == userId);
+        if (shop == null) return NotFound(new { Message = "No shop found. Register a shop first." });
+        var merchantId = shop.MerchantID;
 
         var supplierAssignment = HttpContext.RequestServices.GetRequiredService<ISupplierAssignmentService>();
         
