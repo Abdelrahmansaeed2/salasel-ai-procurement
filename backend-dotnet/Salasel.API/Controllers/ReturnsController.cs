@@ -40,9 +40,13 @@ public class ReturnsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateReturnRequest([FromBody] ReturnRequestDto dto)
     {
-        var merchantId = GetCurrentUserId();
+        var userId = GetCurrentUserId();
         if (GetCurrentUserRole() != "Merchant")
             return Forbid();
+
+        var shop = await _db.MerchantsProfiles.FirstOrDefaultAsync(m => m.OwnerUserId == userId);
+        if (shop == null) return NotFound("Merchant profile not found.");
+        var merchantId = shop.MerchantID;
 
         var order = await _db.MasterOrders
             .Include(o => o.SubOrders)
@@ -93,8 +97,18 @@ public class ReturnsController : ControllerBase
             .Include(r => r.MasterOrder)
             .AsQueryable();
 
-        if (role == "Merchant") query = query.Where(r => r.MerchantId == userId);
-        else if (role == "Supplier") query = query.Where(r => r.SupplierId == userId);
+        if (role == "Merchant") 
+        {
+            var shop = await _db.MerchantsProfiles.FirstOrDefaultAsync(m => m.OwnerUserId == userId);
+            if (shop != null) query = query.Where(r => r.MerchantId == shop.MerchantID);
+            else query = query.Where(r => false); // Return empty if no profile
+        }
+        else if (role == "Supplier") 
+        {
+            var supplier = await _db.SupplierProfiles.FirstOrDefaultAsync(s => s.OwnerUserId == userId);
+            if (supplier != null) query = query.Where(r => r.SupplierId == supplier.SupplierID);
+            else query = query.Where(r => false); // Return empty if no profile
+        }
         
         var list = await query.OrderByDescending(r => r.CreatedAt).ToListAsync();
         return Ok(list);
@@ -104,7 +118,10 @@ public class ReturnsController : ControllerBase
     public async Task<IActionResult> ApproveReturn(int id, [FromBody] ApproveReturnDto dto)
     {
         if (GetCurrentUserRole() != "Supplier") return Forbid();
-        var supplierId = GetCurrentUserId();
+        var userId = GetCurrentUserId();
+        var supplier = await _db.SupplierProfiles.FirstOrDefaultAsync(s => s.OwnerUserId == userId);
+        if (supplier == null) return NotFound("Supplier profile not found");
+        var supplierId = supplier.SupplierID;
 
         var ret = await _db.ReturnRequests.FirstOrDefaultAsync(r => r.Id == id && r.SupplierId == supplierId);
         if (ret == null) return NotFound();
@@ -128,7 +145,10 @@ public class ReturnsController : ControllerBase
     public async Task<IActionResult> RejectReturn(int id, [FromBody] RejectReturnDto dto)
     {
         if (GetCurrentUserRole() != "Supplier") return Forbid();
-        var supplierId = GetCurrentUserId();
+        var userId = GetCurrentUserId();
+        var supplier = await _db.SupplierProfiles.FirstOrDefaultAsync(s => s.OwnerUserId == userId);
+        if (supplier == null) return NotFound("Supplier profile not found");
+        var supplierId = supplier.SupplierID;
 
         var ret = await _db.ReturnRequests.FirstOrDefaultAsync(r => r.Id == id && r.SupplierId == supplierId);
         if (ret == null) return NotFound();
@@ -146,7 +166,10 @@ public class ReturnsController : ControllerBase
     public async Task<IActionResult> ConfirmReceiptAndRefund(int id)
     {
         if (GetCurrentUserRole() != "Supplier") return Forbid();
-        var supplierId = GetCurrentUserId();
+        var userId = GetCurrentUserId();
+        var supplier = await _db.SupplierProfiles.FirstOrDefaultAsync(s => s.OwnerUserId == userId);
+        if (supplier == null) return NotFound("Supplier profile not found");
+        var supplierId = supplier.SupplierID;
 
         var ret = await _db.ReturnRequests
             .Include(r => r.MasterOrder).ThenInclude(m => m.SubOrders)
