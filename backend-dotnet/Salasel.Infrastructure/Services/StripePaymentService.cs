@@ -73,22 +73,18 @@ public class StripePaymentService : IPaymentService
             await _supplierRepository.UpdateAsync(supplier);
         }
 
-        var sessionOptions = new AccountSessionCreateOptions
+        var linkOptions = new AccountLinkCreateOptions
         {
             Account = supplier.StripeAccountId,
-            Components = new AccountSessionComponentsOptions
-            {
-                AccountOnboarding = new AccountSessionComponentsAccountOnboardingOptions
-                {
-                    Enabled = true,
-                },
-            },
+            RefreshUrl = "https://salasel.otlob-egy.online/portal/settings",
+            ReturnUrl = "https://salasel.otlob-egy.online/portal/settings",
+            Type = "account_onboarding",
         };
 
-        var sessionService = new AccountSessionService();
-        var session = await sessionService.CreateAsync(sessionOptions);
+        var linkService = new AccountLinkService();
+        var accountLink = await linkService.CreateAsync(linkOptions);
 
-        return session.ClientSecret;
+        return accountLink.Url;
     }
 
     public async Task<string> TransferFundsToSupplierAsync(int subOrderId)
