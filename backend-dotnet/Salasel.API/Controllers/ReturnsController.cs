@@ -101,7 +101,7 @@ public class ReturnsController : ControllerBase
     }
 
     [HttpPut("{id:int}/approve")]
-    public async Task<IActionResult> ApproveReturn(int id, [FromBody] decimal approvedAmount)
+    public async Task<IActionResult> ApproveReturn(int id, [FromBody] ApproveReturnDto dto)
     {
         if (GetCurrentUserRole() != "Supplier") return Forbid();
         var supplierId = GetCurrentUserId();
@@ -111,7 +111,7 @@ public class ReturnsController : ControllerBase
         if (ret.Status != ReturnStatus.Pending) return BadRequest("Only pending returns can be approved.");
 
         ret.Status = ReturnStatus.Approved;
-        ret.ApprovedAmount = approvedAmount;
+        ret.ApprovedAmount = dto.ApprovedAmount;
         ret.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
@@ -125,7 +125,7 @@ public class ReturnsController : ControllerBase
     }
 
     [HttpPut("{id:int}/reject")]
-    public async Task<IActionResult> RejectReturn(int id, [FromBody] string reason)
+    public async Task<IActionResult> RejectReturn(int id, [FromBody] RejectReturnDto dto)
     {
         if (GetCurrentUserRole() != "Supplier") return Forbid();
         var supplierId = GetCurrentUserId();
@@ -137,7 +137,7 @@ public class ReturnsController : ControllerBase
         ret.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
-        await _notifications.NotifyMerchantAsync(ret.MerchantId, "ReturnRejected", new { ret.Id, Reason = reason });
+        await _notifications.NotifyMerchantAsync(ret.MerchantId, "ReturnRejected", new { ret.Id, Reason = dto.Reason });
 
         return Ok(ret);
     }
@@ -197,4 +197,14 @@ public class ReturnItemDto
 {
     public int ProductId { get; set; }
     public int Quantity { get; set; }
+}
+
+public class ApproveReturnDto
+{
+    public decimal ApprovedAmount { get; set; }
+}
+
+public class RejectReturnDto
+{
+    public string Reason { get; set; } = string.Empty;
 }

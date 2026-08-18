@@ -54,7 +54,7 @@ export class PortalReturnsComponent implements OnInit {
 
   approveReturn(ret: ReturnRequest) {
     if (confirm(`هل أنت متأكد من الموافقة على الاسترجاع بمبلغ ${ret.requestedAmount}؟`)) {
-      this.http.put(`https://salasel.otlob-egy.online/api/v1/returns/${ret.id}/approve`, ret.requestedAmount).subscribe({
+      this.http.put(`https://salasel.otlob-egy.online/api/v1/returns/${ret.id}/approve`, { approvedAmount: ret.requestedAmount }).subscribe({
         next: () => {
           this.toast.success('تمت الموافقة بنجاح');
           this.fetchReturns();
@@ -66,7 +66,7 @@ export class PortalReturnsComponent implements OnInit {
 
   rejectReturn(ret: ReturnRequest) {
     if (confirm(`هل أنت متأكد من رفض طلب الاسترجاع؟`)) {
-      this.http.put(`https://salasel.otlob-egy.online/api/v1/returns/${ret.id}/reject`, '"تم الرفض من قبل المورد"').subscribe({
+      this.http.put(`https://salasel.otlob-egy.online/api/v1/returns/${ret.id}/reject`, { reason: 'تم الرفض من قبل المورد' }).subscribe({
         next: () => {
           this.toast.success('تم الرفض بنجاح');
           this.fetchReturns();

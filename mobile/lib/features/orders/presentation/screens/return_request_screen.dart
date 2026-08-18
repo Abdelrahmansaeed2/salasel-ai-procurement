@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import '../../../../core/network/api_client.dart';
 
 class ReturnRequestScreen extends StatefulWidget {
   final String orderId;
@@ -19,6 +20,8 @@ class ReturnRequestScreen extends StatefulWidget {
 }
 
 class _ReturnRequestScreenState extends State<ReturnRequestScreen> {
+  final ApiClient _apiClient = ApiClient();
+  bool _isLoading = false;
   String? selectedReason;
   final reasons = [
     'منتج تالف أو به عيب',
@@ -202,9 +205,31 @@ class _ReturnRequestScreenState extends State<ReturnRequestScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: selectedReason == null ? null : () {
-                  Get.back();
-                  Get.snackbar('نجاح', 'تم إرسال طلب الاسترجاع بنجاح');
+                onPressed: (selectedReason == null || _isLoading) ? null : () async {
+                  setState(() => _isLoading = true);
+                  try {
+                    final response = await _apiClient.dio.post(
+                      '${ApiClient.baseUrl}/returns',
+                      data: {
+                        'masterOrderId': int.parse(widget.masterOrderId.replaceAll(RegExp(r'[^0-9]'), '')),
+                        'reason': selectedReason,
+                        'photos': [], // Placeholder for future photo upload support
+                        'items': [], // Placeholder for specific items
+                        'requestedAmount': widget.totalAmount,
+                      },
+                    );
+                    
+                    if (response.statusCode == 200 || response.statusCode == 201) {
+                      Get.back();
+                      Get.snackbar('نجاح', 'تم إرسال طلب الاسترجاع بنجاح', backgroundColor: Colors.green, colorText: Colors.white);
+                    } else {
+                      Get.snackbar('خطأ', 'فشل إرسال طلب الاسترجاع', backgroundColor: Colors.red, colorText: Colors.white);
+                    }
+                  } catch (e) {
+                    Get.snackbar('خطأ', 'حدث خطأ أثناء الاتصال بالخادم', backgroundColor: Colors.red, colorText: Colors.white);
+                  } finally {
+                    setState(() => _isLoading = false);
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2563EB),
@@ -214,7 +239,7 @@ class _ReturnRequestScreenState extends State<ReturnRequestScreen> {
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                 ),
-                child: Text(
+                child: _isLoading ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text(
                   'إرسال الطلب',
                   style: TextStyle(
                     color: Colors.white,
