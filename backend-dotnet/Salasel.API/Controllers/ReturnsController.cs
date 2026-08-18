@@ -187,6 +187,10 @@ public class ReturnsController : ControllerBase
             var refundId = await _stripe.RefundPartialAsync(ret.MasterOrderId, ret.ApprovedAmount.Value, subOrder?.StripeTransferId);
             _logger.LogInformation("Processed refund {RefundId} for return {ReturnId}", refundId, ret.Id);
         }
+        catch (Exception ex) when (ex.Message.Contains("No Stripe payment intent"))
+        {
+            _logger.LogWarning("Manual or offline order: No Stripe payment intent for order {OrderId}. Skipping Stripe refund.", ret.MasterOrderId);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to process Stripe refund for return {ReturnId}", ret.Id);
