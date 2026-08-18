@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal, inject, OnInit } from '@angular/core';
+import { DatePipe, NgClass, CommonModule } from '@angular/common';
+import { SearchService } from '../../../core/services/search.service';
 import { OrderService } from '../../../core/services/order.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -74,7 +76,21 @@ export class PortalOrdersComponent implements OnInit {
 
   readonly orders = signal<OperationsOrder[]>([]);
 
-  readonly activeOrdersCount = computed(() => this.orders().length);
+  private readonly searchService = inject(SearchService);
+  
+  readonly filteredOrders = computed(() => {
+    const q = this.searchService.searchQuery();
+    if (!q) return this.orders();
+    return this.orders().filter(o => {
+      const anyO = o as any;
+      return (anyO.id && anyO.id.toString().toLowerCase().includes(q)) || 
+             (anyO.merchant && anyO.merchant.toLowerCase().includes(q)) || 
+             (anyO.status && anyO.status.toLowerCase().includes(q)) ||
+             (anyO.total && anyO.total.toString().includes(q));
+    });
+  });
+
+  readonly activeOrdersCount = computed(() => this.filteredOrders().length);
 
   readonly detailOrder = computed(() => {
     const id = this.detailOrderId();
@@ -98,6 +114,21 @@ export class PortalOrdersComponent implements OnInit {
     { key: 'shipped', label: 'تم التسليم', count: 0, color: '#14532D', cards: [] },
     { key: 'rejected', label: 'مرفوض', count: 0, color: '#7F1D1D', cards: [] }
   ]);
+
+  readonly filteredBoardColumns = computed(() => {
+    const q = this.searchService.searchQuery();
+    const cols = this.boardColumns();
+    if (!q) return cols;
+
+    return cols.map(col => ({
+      ...col,
+      cards: col.cards.filter(c => 
+        c.id.toLowerCase().includes(q) || 
+        c.merchant.toLowerCase().includes(q) || 
+        c.subtitle.toLowerCase().includes(q)
+      )
+    })).map(col => ({ ...col, count: col.cards.length }));
+  });
 
   private readonly orderService = inject(OrderService);
   private readonly authService = inject(AuthService);
