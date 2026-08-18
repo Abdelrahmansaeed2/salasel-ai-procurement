@@ -79,12 +79,14 @@ class CartController extends GetxController {
       
       if (response.statusCode == 200) {
         final orderId = response.data['id'].toString();
+        final supplierName = response.data['supplierName'] ?? 'مورد غير معروف';
+        final itemsNames = items.map((i) => i.name).join('، ');
         
         Get.off(() => CheckoutScreen(
           orderId: orderId,
-          totalAmount: subtotal.toStringAsFixed(2),
-          supplierName: 'موردين متعددين',
-          itemsSummary: '${items.length} منتجات',
+          totalAmount: '${subtotal.toStringAsFixed(0)} جنيه',
+          supplierName: supplierName,
+          itemsSummary: itemsNames,
           merchantName: 'تاجر', // Would come from auth state
           merchantAddress: 'عنوان التوصيل الافتراضي',
           merchantCity: 'الرياض',

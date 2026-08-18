@@ -111,7 +111,15 @@ public class OrdersController : ControllerBase
             clientSecret = await _paymentService.CreatePaymentIntentAsync(order);
         }
 
-        return Ok(new { Message = "Manual order created successfully", Id = orderId, ClientSecret = clientSecret });
+        var supplier = await _supplierRepository.GetByIdAsync(supplierId);
+        var supplierName = supplier?.CompanyName ?? "مورد غير معروف";
+
+        return Ok(new { 
+            Message = "Manual order created successfully", 
+            Id = orderId, 
+            ClientSecret = clientSecret,
+            SupplierName = supplierName
+        });
     }
 
     // GET /api/v1/orders/summary?merchantId= — active total + % vs last month
