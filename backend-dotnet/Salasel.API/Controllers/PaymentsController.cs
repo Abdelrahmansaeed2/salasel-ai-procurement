@@ -54,7 +54,7 @@ public class PaymentsController : ControllerBase
         return Ok(new { clientSecret });
     }
 
-    [HttpPost("webhook")]
+    
     [HttpPost("paytabs-webhook")]
     public async Task<IActionResult> PayTabsWebhook()
     {
@@ -78,6 +78,8 @@ public class PaymentsController : ControllerBase
 
         return Ok();
     }
+
+    [HttpPost("webhook")]
     public async Task<IActionResult> Webhook()
     {
         var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
