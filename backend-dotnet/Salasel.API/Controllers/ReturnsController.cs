@@ -11,7 +11,7 @@ using System.Text.Json;
 namespace Salasel.API.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v1/returns")]
 [Authorize]
 public class ReturnsController : ControllerBase
 {

@@ -6,7 +6,7 @@ using Salasel.Domain.Interfaces;
 namespace Salasel.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/suppliers")]
 [Authorize]
 public class SuppliersController : ControllerBase
 {

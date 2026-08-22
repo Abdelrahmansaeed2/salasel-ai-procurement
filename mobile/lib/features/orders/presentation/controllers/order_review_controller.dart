@@ -61,7 +61,7 @@ class OrderReviewController extends GetxController {
   Future<void> _fetchSupplierDetails(String supplierId) async {
     try {
       final ApiClient apiClient = ApiClient();
-      final response = await apiClient.dio.get('https://salasel.otlob-egy.online/api/Suppliers/$supplierId');
+      final response = await apiClient.dio.get('https://salasel.otlob-egy.online/api/v1/suppliers/$supplierId');
       if (response.statusCode == 200) {
         recommendedSupplier.value = SupplierModel.fromJson(response.data);
       }

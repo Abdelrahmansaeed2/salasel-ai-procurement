@@ -90,13 +90,13 @@
       @for (member of teamMembers; track $index) {
         <div class="team-card" appReveal [style.transition-delay.ms]="$index * 80">
           <div class="team-card__photo">
-            <img src="assets/images/team-founder.png" alt="{{ member.name }}" />
+            <img [src]="member.image" alt="{{ member.name }}" />
             <span class="team-card__badge">{{ member.englishName }}</span>
           </div>
           <div class="team-card__body">
             <h3 class="team-card__name">{{ member.name }}</h3>
             <p class="team-card__role">{{ member.role }}</p>
-            <p class="team-card__bio">{{ member.bio }}</p>
+            <!-- <p class="team-card__bio">{{ member.bio }}</p> -->
           </div>
         </div>
       }
