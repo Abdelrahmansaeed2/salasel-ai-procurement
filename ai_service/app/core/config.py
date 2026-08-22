@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     health_timeout_seconds: int = 3
 
     llm_provider: str = "groq"
-    llm_model: str = "llama-3.1-8b-instant"
+    llm_model: str = "qwen/qwen3.6-27b"
     llm_groq_api_key: str = ""
     llm_anthropic_api_key: str = ""
     llm_temperature: float = 0.0
@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     llm_max_tokens: int = 4096
 
     llm_formatting_provider: str = "groq"
-    llm_formatting_model: str = "llama-3.1-8b-instant"
+    llm_formatting_model: str = "qwen/qwen3.6-27b"
     llm_formatting_temperature: float = 0.0
 
     stt_provider: str = "groq"

@@ -74,9 +74,17 @@ export class SupplierLoginComponent {
         // If they are not verified/setup yet, you could route them to the setup wizard here
         // if (!res.isSetupCompleted) { ... }
         
-        this.router.navigateByUrl(returnUrl ?? '/portal/dashboard');
+        if (!returnUrl) {
+          if (res.role === 'Admin') {
+            this.router.navigateByUrl('/portal/analytics');
+          } else {
+            this.router.navigateByUrl('/portal/dashboard');
+          }
+        } else {
+          this.router.navigateByUrl(returnUrl);
+        }
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isSubmitting.set(false);
         if (err.status === 401) {
           this.errorMessage.set('البريد الإلكتروني أو كلمة المرور غير صحيحة');

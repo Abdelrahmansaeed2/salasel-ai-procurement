@@ -5,6 +5,7 @@ import { OrderService } from '../../../core/services/order.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { SignalRService } from '../../../core/services/signalr.service';
+import { Router } from '@angular/router';
 type OrderPriority = 'review' | 'urgent' | 'scheduled';
 type QuickFilter = 'premium' | 'low-confidence' | 'high-priority';
 type ViewMode = 'feed' | 'board';
@@ -134,8 +135,14 @@ export class PortalOrdersComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly toastService = inject(ToastService);
   private readonly signalR = inject(SignalRService);
+  private readonly router = inject(Router);
 
   ngOnInit() {
+    if (this.authService.currentUser()?.role === 'Admin') {
+      this.router.navigate(['/portal/analytics']);
+      return;
+    }
+
     this.fetchSupplierOrders();
     this.signalR.startConnection();
     this.signalR.on('NewOrderReceived', () => {

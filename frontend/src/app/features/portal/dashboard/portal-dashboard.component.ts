@@ -3,7 +3,8 @@ import { AreaLineChartComponent } from '../ui/area-line-chart.component';
 import { DonutChartComponent, DonutSegment } from '../ui/donut-chart.component';
 import { RadialGaugeComponent } from '../ui/radial-gauge.component';
 import { SupplierDashboardService, DashboardOrderRow, TopProduct } from '../../../core/services/supplier-dashboard.service';
-
+import { AuthService } from '../../../core/auth/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-portal-dashboard',
@@ -24,6 +25,8 @@ export class PortalDashboardComponent implements OnInit {
   };
 
   private dashboardService = inject(SupplierDashboardService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   readonly revenueByPeriod = signal<Record<'6m' | '3m' | '1y', number[]>>({
     '6m': [], '3m': [], '1y': []
@@ -39,6 +42,11 @@ export class PortalDashboardComponent implements OnInit {
   readonly recentOrders = signal<DashboardOrderRow[]>([]);
 
   ngOnInit() {
+    if (this.authService.currentUser()?.role === 'Admin') {
+      this.router.navigate(['/portal/analytics']);
+      return;
+    }
+
     this.dashboardService.getDashboardStats().subscribe({
       next: (stats) => {
         this.revenueByPeriod.set(stats.revenueByPeriod);
