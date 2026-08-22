@@ -1,5 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { SupplierService, SupplierProfileDto, SupplierProductDto } from '../../core/services/supplier.service';
+import { SiteHeaderComponent } from '../../shared/site-header/site-header.component';
+import { SiteFooterComponent } from '../../shared/site-footer/site-footer.component';
 
 interface SummaryStat {
   label: string;
@@ -13,16 +17,7 @@ interface KpiCard {
   label: string;
 }
 
-interface Product {
-  id: number;
-  name: string;
-  brand: string;
-  price: string;
-  minQtyLabel: string;
-  image: string;
-  category: string;
-  discountBadge?: string;
-}
+
 
 interface Certification {
   icon: string;
@@ -47,16 +42,33 @@ interface PerformanceBar {
 @Component({
   selector: 'app-supplier-details',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, SiteHeaderComponent, SiteFooterComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './supplier-details.component.html',
   styleUrl: './supplier-details.component.css',
 })
-export class SupplierDetailsComponent {
+export class SupplierDetailsComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private supplierService = inject(SupplierService);
+
+  readonly supplier = signal<SupplierProfileDto | null>(null);
+  readonly catalog = signal<SupplierProductDto[]>([]);
   readonly isFavorite = signal(false);
   readonly activeCategory = signal('الكل');
   readonly productSearch = signal('');
   readonly cartCount = signal(0);
+  
+  ngOnInit(): void {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (id) {
+      this.supplierService.getSupplierById(id).subscribe((data) => {
+        this.supplier.set(data);
+      });
+      this.supplierService.getSupplierCatalog(id).subscribe((products) => {
+        this.catalog.set(products);
+      });
+    }
+  }
 
   readonly categories = ['مجمدات', 'ألبان', 'أفران', 'الكل'];
 
@@ -77,54 +89,16 @@ export class SupplierDetailsComponent {
     { value: '+5,000', label: 'منتج متاح' },
   ];
 
-  readonly products: Product[] = [
-    {
-      id: 1,
-      name: 'أرز بسمتي ذهبي - 5 كجم',
-      brand: 'الماركة: المطبخ',
-      price: '340.00 EGP',
-      minQtyLabel: 'أقل كمية: 4 عبوات',
-      image: 'assets/images/product-rice.jpg',
-      category: 'أفران',
-    },
-    {
-      id: 2,
-      name: 'تونا قطعة واحدة - 185 جم',
-      brand: 'الماركة: صن شاين',
-      price: '52.00 EGP',
-      minQtyLabel: 'أقل كمية: 24 قطعة',
-      image: 'assets/images/product-tuna.jpg',
-      category: 'مجمدات',
-    },
-    {
-      id: 3,
-      name: 'حليب كامل الدسم - عبوة 1 لتر',
-      brand: 'الماركة: جهينة',
-      price: '24.50 EGP',
-      minQtyLabel: 'أقل كمية: 12 قطعة',
-      image: 'assets/images/product-milk.jpg',
-      category: 'ألبان',
-      discountBadge: 'خصم 5%',
-    },
-    {
-      id: 4,
-      name: 'بن محوج ممتاز - 250 جم',
-      brand: 'الماركة: بن شاهين',
-      price: '115.00 EGP',
-      minQtyLabel: 'أقل كمية: 10 قطع',
-      image: 'assets/images/product-coffee.jpg',
-      category: 'أفران',
-    },
-  ];
+
 
   readonly filteredProducts = computed(() => {
     const category = this.activeCategory();
     const query = this.productSearch().trim().toLowerCase();
 
-    return this.products.filter((product) => {
-      const matchesCategory = category === 'الكل' || product.category === category;
+    return this.catalog().filter((product) => {
+      const matchesCategory = category === 'الكل' || product.categoryName === category;
       const matchesQuery =
-        !query || product.name.toLowerCase().includes(query) || product.brand.toLowerCase().includes(query);
+        !query || product.productName.toLowerCase().includes(query) || product.sku.toLowerCase().includes(query);
       return matchesCategory && matchesQuery;
     });
   });
@@ -171,9 +145,9 @@ export class SupplierDetailsComponent {
     this.activeCategory.set(category);
   }
 
-  addToCart(product: Product): void {
+  addToCart(product: SupplierProductDto): void {
     this.cartCount.update((count) => count + 1);
     
-    console.log(`تمت إضافة ${product.name} إلى السلة`);
+    console.log(`تمت إضافة ${product.productName} إلى السلة`);
   }
 }

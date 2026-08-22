@@ -1,30 +1,9 @@
 <div class="page">
-  <header class="topbar">
-    <div class="topbar__actions">
-      <button type="button" class="topbar__icon-btn" aria-label="الإشعارات">
-        <img src="assets/icons/icon-bell.svg" alt="" />
-        <span class="topbar__badge"></span>
-      </button>
-      <button type="button" class="topbar__icon-btn" aria-label="المساعدة">
-        <img src="assets/icons/icon-help.svg" alt="" />
-      </button>
-      <span class="topbar__divider"></span>
-      <div class="topbar__user">
-        <div class="topbar__user-info">
-          <span class="topbar__user-name">مورد سلاسل</span>
-          <span class="topbar__user-role">صلاحيات المسؤول</span>
-        </div>
-        <img src="assets/images/avatar-supplier-admin.png" alt="" class="topbar__avatar" />
-      </div>
-    </div>
+  <app-site-header></app-site-header>
 
-    <div class="topbar__search">
-      <input type="text" placeholder="ابحث عن الموارد والطلبات والموردين..." />
-      <img src="assets/icons/icon-search-gray.svg" alt="" />
-    </div>
-  </header>
 
   <main class="content">
+    @if (supplier(); as sup) {
     <div class="content__row">
       <aside class="summary-col">
         <div class="summary-card">
@@ -69,7 +48,7 @@
 
       <section class="main-col">
         <nav class="breadcrumb" aria-label="مسار التنقل">
-          <span class="breadcrumb__current">شركة البركة لتجارة الجملة</span>
+          <span class="breadcrumb__current">{{ sup.companyName }}</span>
           <img src="assets/icons/icon-chevron-breadcrumb.svg" alt="" />
           <span class="breadcrumb__link">الموردين</span>
           <img src="assets/icons/icon-chevron-breadcrumb.svg" alt="" />
@@ -78,7 +57,7 @@
 
         <div class="hero">
           <div class="hero__image-wrap">
-            <img src="assets/images/supplier-details-hero.jpg" alt="شركة البركة لتجارة الجملة" class="hero__image" />
+            <img src="assets/images/supplier-details-hero.jpg" [alt]="sup.companyName" class="hero__image" />
             <div class="hero__gradient"></div>
             <div class="hero__actions">
               <button type="button" class="hero__icon-btn" aria-label="مشاركة">
@@ -98,14 +77,14 @@
 
           <div class="hero__info">
             <div class="hero__meta-col">
-              <h1 class="hero__title">شركة البركة لتجارة الجملة</h1>
+              <h1 class="hero__title">{{ sup.companyName }}</h1>
               <div class="hero__meta-row">
                 <span class="hero__meta-item">
                   <span>15 عاماً في السوق</span>
                   <img src="assets/icons/icon-years.svg" alt="" />
                 </span>
                 <span class="hero__meta-item">
-                  <span>المقر الرئيسي: القاهرة</span>
+                  <span>المقر الرئيسي: {{ sup.address || 'غير محدد' }}</span>
                   <img src="assets/icons/icon-pin-gray.svg" alt="" />
                 </span>
                 <span class="hero__meta-item">
@@ -117,7 +96,7 @@
             </div>
 
             <div class="hero__logo-frame">
-              <img src="assets/images/al-barakah-logo.png" alt="شعار شركة البركة" class="hero__logo" />
+              <img src="assets/images/al-barakah-logo.png" [alt]="sup.companyName" class="hero__logo" />
             </div>
           </div>
         </div>
@@ -162,21 +141,18 @@
             @for (product of filteredProducts(); track product.id) {
               <article class="product-card">
                 <div class="product-card__image-wrap">
-                  <img [src]="product.image" [alt]="product.name" />
-                  @if (product.discountBadge) {
-                    <span class="product-card__badge">{{ product.discountBadge }}</span>
-                  }
+                  <img [src]="product.imageUrl || 'assets/images/placeholder-product.png'" [alt]="product.productName" />
                 </div>
                 <div class="product-card__body">
-                  <h4 class="product-card__name">{{ product.name }}</h4>
-                  <span class="product-card__brand">{{ product.brand }}</span>
+                  <h4 class="product-card__name">{{ product.productName }}</h4>
+                  <span class="product-card__brand">SKU: {{ product.sku }}</span>
                   <div class="product-card__footer">
                     <button type="button" class="product-card__add" (click)="addToCart(product)" aria-label="أضف إلى السلة">
                       <img src="assets/icons/icon-cart-add.svg" alt="" />
                     </button>
                     <div class="product-card__price-col">
-                      <span class="product-card__price">{{ product.price }}</span>
-                      <span class="product-card__min-qty">{{ product.minQtyLabel }}</span>
+                      <span class="product-card__price">{{ product.unitPrice }} EGP</span>
+                      <span class="product-card__min-qty">أقل كمية: {{ product.minOrderQty }}</span>
                     </div>
                   </div>
                 </div>
@@ -255,5 +231,10 @@
         </section>
       </section>
     </div>
+    } @else {
+      <div class="loading-state">
+        <p>جاري تحميل بيانات المورد...</p>
+      </div>
+    }
   </main>
 </div>

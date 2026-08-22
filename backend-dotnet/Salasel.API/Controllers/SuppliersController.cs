@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Salasel.Application.DTOs;
+using Salasel.Application.Interfaces;
 using Salasel.Domain.Entities;
 using Salasel.Domain.Interfaces;
 
@@ -11,10 +14,14 @@ namespace Salasel.API.Controllers;
 public class SuppliersController : ControllerBase
 {
     private readonly IRepository<SupplierProfile> _repository;
+    private readonly ISupplierProductRepository _productRepository;
 
-    public SuppliersController(IRepository<SupplierProfile> repository)
+    public SuppliersController(
+        IRepository<SupplierProfile> repository,
+        ISupplierProductRepository productRepository)
     {
         _repository = repository;
+        _productRepository = productRepository;
     }
 
     [HttpGet]
@@ -33,6 +40,37 @@ public class SuppliersController : ControllerBase
         var supplier = await _repository.GetByIdAsync(id);
         if (supplier == null || !supplier.IsActiveForRouting) return NotFound();
         return Ok(supplier);
+    }
+
+    [HttpGet("{id:int}/catalog")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetCatalogBySupplierId(int id)
+    {
+        var supplier = await _repository.GetByIdAsync(id);
+        if (supplier == null || !supplier.IsActiveForRouting) return NotFound();
+
+        var products = await _productRepository.Query()
+            .Include(sp => sp.Product)
+            .ThenInclude(p => p.Category)
+            .Where(sp => sp.SupplierId == id && sp.IsActive)
+            .Select(sp => new SupplierProductDto
+            {
+                Id = sp.Id,
+                ProductId = sp.ProductId,
+                ProductName = sp.Product.Name,
+                SKU = sp.Product.SKU,
+                CategoryName = sp.Product.Category != null ? sp.Product.Category.Name : string.Empty,
+                ImageUrl = sp.Product.ImageUrl,
+                UnitPrice = sp.UnitPrice,
+                AvailableQty = sp.AvailableQty,
+                MinOrderQty = sp.MinOrderQty,
+                LeadTimeDays = sp.LeadTimeDays,
+                IsActive = sp.IsActive,
+                LastUpdated = sp.LastUpdated
+            })
+            .ToListAsync();
+
+        return Ok(products);
     }
 
     [HttpPost]
