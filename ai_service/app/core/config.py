@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     health_timeout_seconds: int = 3
 
     llm_provider: str = "groq"
-    llm_model: str = "llama-3.3-70b-versatile"
+    llm_model: str = "llama-3.1-8b-instant"
     llm_groq_api_key: str = ""
     llm_anthropic_api_key: str = ""
     llm_temperature: float = 0.0
