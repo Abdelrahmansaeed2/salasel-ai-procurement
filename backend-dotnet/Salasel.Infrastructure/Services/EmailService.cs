@@ -28,7 +28,7 @@ public class EmailService : IEmailService
             message.Subject = "Salasel - Password Reset Instructions";
 
             // In a real scenario, this would be a URL to the frontend app
-            var resetLink = $"https://app.salasel.com/reset-password?token={resetToken}";
+            var resetLink = $"https://salasel.otlob-egy.online/reset-password?token={resetToken}";
 
             message.Body = new TextPart(TextFormat.Html)
             {
@@ -81,7 +81,7 @@ public class EmailService : IEmailService
             message.Subject = "Salasel - Supplier Account Approved!";
 
             // Using the production frontend URL
-            var setupLink = $"https://app.salasel.com/reset-password?token={setupToken}";
+            var setupLink = $"https://salasel.otlob-egy.online/reset-password?token={setupToken}";
 
             message.Body = new TextPart(TextFormat.Html)
             {
