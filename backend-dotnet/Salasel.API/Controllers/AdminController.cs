@@ -5,6 +5,8 @@ using Salasel.Domain.Entities;
 using Salasel.Domain.Enums;
 using Salasel.Infrastructure.Data;
 using Salasel.Infrastructure.Services;
+using Salasel.Application.Interfaces;
+using Salasel.Application.DTOs;
 
 namespace Salasel.API.Controllers;
 
@@ -14,10 +16,14 @@ namespace Salasel.API.Controllers;
 public class AdminController : ControllerBase
 {
     private readonly SalaselDbContext _context;
+    private readonly IAuthService _authService;
+    private readonly IEmailService _emailService;
 
-    public AdminController(SalaselDbContext context)
+    public AdminController(SalaselDbContext context, IAuthService authService, IEmailService emailService)
     {
         _context = context;
+        _authService = authService;
+        _emailService = emailService;
     }
 
     // ─────────────────────────── Merchant moderation ───────────────────────
@@ -110,7 +116,19 @@ public class AdminController : ControllerBase
         supplier.IsActiveForRouting = true;
 
         await _context.SaveChangesAsync();
-        return Ok(new { Message = "Supplier approved successfully." });
+        
+        // Retrieve associated user and send setup email
+        var user = await _context.Users.FindAsync(supplier.OwnerUserId);
+        if (user != null)
+        {
+            var token = await _authService.GeneratePasswordResetTokenAsync(new ForgotPasswordRequestDto { Email = user.Email });
+            if (!string.IsNullOrEmpty(token))
+            {
+                await _emailService.SendSupplierApprovalEmailAsync(user.Email, token);
+            }
+        }
+
+        return Ok(new { Message = "Supplier approved successfully and setup email dispatched." });
     }
 
     [HttpPut("suppliers/{id:int}/reject")]

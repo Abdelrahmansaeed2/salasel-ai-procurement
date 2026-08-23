@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { SiteFooterComponent } from '../../shared/site-footer/site-footer.component';
 import { SiteHeaderComponent } from '../../shared/site-header/site-header.component';
@@ -20,7 +21,7 @@ interface FaqItem {
 @Component({
   selector: 'app-contact-page',
   standalone: true,
-  imports: [FormsModule, SiteHeaderComponent, SiteFooterComponent, RevealDirective],
+  imports: [FormsModule, SiteHeaderComponent, SiteFooterComponent, RevealDirective, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './contact-page.component.html',
   styleUrl: './contact-page.component.css',

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { RevealDirective } from '../../shared/animations/reveal.directive';
 import { SiteFooterComponent } from '../../shared/site-footer/site-footer.component';
@@ -32,7 +33,7 @@ interface TeamMember {
 @Component({
   selector: 'app-about-page',
   standalone: true,
-  imports: [RevealDirective, SiteHeaderComponent, SiteFooterComponent],
+  imports: [RevealDirective, SiteHeaderComponent, SiteFooterComponent, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './about-page.component.html',
   styleUrl: './about-page.component.css',
@@ -111,6 +112,20 @@ export class AboutPageComponent {
       role: 'مطور خلفية | هندسة برمجيات',
       bio: 'متخصص في تطوير النظم الخلفية وربط العمليات الحيوية للارتقاء بأداء المنصة.',
       image: 'assets/images/islam.jpeg',
+    },
+    {
+      name: 'إبراهيم رضا محمد',
+      englishName: 'Ebrahim Reda Mohamed',
+      role: 'مهندس برمجيات',
+      bio: 'متخصص في هندسة البرمجيات وبناء الحلول التقنية المبتكرة لتحسين كفاءة سلاسل الإمداد.',
+      image: 'assets/images/ebrahim.jpeg',
+    },
+    {
+      name: 'محمد عبدالجواد محمد',
+      englishName: 'Mohamed Abdelgawad Mohamed',
+      role: 'مهندس برمجيات',
+      bio: 'شغوف بتطوير التطبيقات وتصميم الأنظمة لضمان جودة الأداء والموثوقية العالية.',
+      image: 'assets/images/mohamed abdulgawad.jpeg',
     }
   ];
 
