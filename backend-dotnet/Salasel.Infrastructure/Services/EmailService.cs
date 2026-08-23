@@ -80,8 +80,8 @@ public class EmailService : IEmailService
             message.To.Add(MailboxAddress.Parse(toEmail));
             message.Subject = "Salasel - Supplier Account Approved!";
 
-            // Using localhost for local development testing, replace with production URL when deploying
-            var setupLink = $"http://localhost:4200/reset-password?token={setupToken}";
+            // Using the production frontend URL
+            var setupLink = $"https://app.salasel.com/reset-password?token={setupToken}";
 
             message.Body = new TextPart(TextFormat.Html)
             {
