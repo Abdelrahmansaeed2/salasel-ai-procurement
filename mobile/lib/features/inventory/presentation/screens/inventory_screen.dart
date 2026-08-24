@@ -7,7 +7,7 @@ import '../../data/models/inventory_models.dart';
 import '../controllers/inventory_controller.dart';
 import '../widgets/ai_insights_card.dart';
 import 'add_inventory_item_screen.dart';
-import '../../cart/presentation/controllers/cart_controller.dart';
+import '../../../cart/presentation/controllers/cart_controller.dart';
 
 class InventoryScreen extends StatelessWidget {
   const InventoryScreen({super.key});
@@ -37,10 +37,10 @@ class InventoryScreen extends StatelessWidget {
                     cartCtrl.addItem(CartItem(
                       productId: rec.productId,
                       name: productName,
-                      sku: rec.sku,
-                      unit: rec.unit,
+                      sku: '',
+                      unit: 'قطعة',
                       imageUrl: '',
-                      price: 0, // AI recommendation might not have price immediately, but this gets the user started
+                      price: rec.recommendedUnitPrice,
                       quantity: 1,
                     ));
                   }
