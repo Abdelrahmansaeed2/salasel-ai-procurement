@@ -30,7 +30,6 @@ void main() async {
 
   // Initialize Stripe
   Stripe.publishableKey = 'pk_test_51U4G6zDRX6tSvbDOsuqtf0kTtSmzHXAOfQQ7g7hiEu4YijnNPmIbjOvklSQsBwlqQXHxycbHTy09GBH1smNB6mZt00sxmDSvV9'; // standard test key
-  
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -45,7 +44,7 @@ void main() async {
 }
 
 class SalaselApp extends StatelessWidget {
-  const SalaselApp({super.key});
+  const SalaselApp({super.key}); 
 
   @override
   Widget build(BuildContext context) {
