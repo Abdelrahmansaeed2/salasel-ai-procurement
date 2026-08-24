@@ -29,8 +29,7 @@ class CheckoutController extends GetxController {
       if (selectedPaymentMethod.value == 'credit_card') {
         // 1. Create Payment Intent
         final numericOrderId = orderId.replaceAll(RegExp(r'[^0-9]'), '');
-        final baseWithoutV1 = ApiClient.baseUrl.replaceAll('/v1', '');
-        final intentResponse = await _apiClient.dio.post('$baseWithoutV1/payments/create-intent/$numericOrderId');
+        final intentResponse = await _apiClient.dio.post('https://salasel.otlob-egy.online/api/v1/payments/create-intent/$numericOrderId');
         
         if (intentResponse.statusCode == 200) {
           final clientSecret = intentResponse.data['clientSecret'];
@@ -101,14 +100,14 @@ class CheckoutController extends GetxController {
       } else {
         // Cash on Delivery
         final numericOrderId = orderId.replaceAll(RegExp(r'[^0-9]'), '');
-        final baseWithoutV1 = ApiClient.baseUrl.replaceAll('/v1', '');
         final response = await _apiClient.dio.post(
-          '$baseWithoutV1/orders/$numericOrderId/payment',
+          'https://salasel.otlob-egy.online/api/v1/orders/$numericOrderId/payment',
           data: {
             'paymentMethod': 0, // 0 corresponds to PaymentMethod.CashOnDelivery in the backend Enum
             'paymentReference': 'REF-${DateTime.now().millisecondsSinceEpoch}',
           },
         );
+
 
         if (response.statusCode == 200) {
           Get.off(() => ReceiptSuccessScreen(orderId: orderId));

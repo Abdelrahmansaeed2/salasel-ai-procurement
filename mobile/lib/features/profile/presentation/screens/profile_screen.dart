@@ -148,21 +148,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
           padding: EdgeInsets.symmetric(horizontal: 20.w),
           children: [
             SizedBox(height: 20.h),
-            _ProfileSummary(),
+            _ProfileSummary(c: c),
             SizedBox(height: 24.h),
-            _VoiceOrderStatusCard(),
+            _VoiceOrderStatusCard(c: c),
             SizedBox(height: 24.h),
             _VerificationTimeline(steps: c.verificationSteps),
             SizedBox(height: 24.h),
-            _BusinessInfoSection(onEdit: _showEditProfileModal),
+            _BusinessInfoSection(c: c, onEdit: _showEditProfileModal),
             SizedBox(height: 24.h),
-            _ContactSection(),
+            _ContactSection(c: c),
             SizedBox(height: 24.h),
             _AppSettingsSection(),
             SizedBox(height: 24.h),
             _HelpSupportSection(),
             SizedBox(height: 24.h),
-            _DangerZone(),
+            _DangerZone(c: c),
             SizedBox(height: 34.h),
           ],
         ),
@@ -280,9 +280,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 }
 
 class _ProfileSummary extends StatelessWidget {
+  final ProfileController c;
+  const _ProfileSummary({required this.c});
+
   @override
   Widget build(BuildContext context) {
-    final c = Get.find<ProfileController>();
     return Obx(() => Column(
       children: [
         Stack(
@@ -361,9 +363,11 @@ class _ProfileSummary extends StatelessWidget {
 }
 
 class _VoiceOrderStatusCard extends StatelessWidget {
+  final ProfileController c;
+  const _VoiceOrderStatusCard({required this.c});
+
   @override
   Widget build(BuildContext context) {
-    final c = Get.find<ProfileController>();
     
     return Obx(() {
       final status = c.verificationStatus.value;
@@ -740,12 +744,12 @@ class _InfoRow extends StatelessWidget {
 }
 
 class _BusinessInfoSection extends StatelessWidget {
+  final ProfileController c;
   final VoidCallback onEdit;
-  const _BusinessInfoSection({required this.onEdit});
+  const _BusinessInfoSection({required this.c, required this.onEdit});
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.find<ProfileController>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -791,19 +795,19 @@ class _BusinessInfoSection extends StatelessWidget {
           ),
         )),
         SizedBox(height: 16.h),
-        _MapCard(onEdit: onEdit),
+        _MapCard(c: c, onEdit: onEdit),
       ],
     );
   }
 }
 
 class _MapCard extends StatelessWidget {
+  final ProfileController c;
   final VoidCallback onEdit;
-  const _MapCard({required this.onEdit});
+  const _MapCard({required this.c, required this.onEdit});
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.find<ProfileController>();
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -919,9 +923,11 @@ class _MapCard extends StatelessWidget {
 }
 
 class _ContactSection extends StatelessWidget {
+  final ProfileController c;
+  const _ContactSection({required this.c});
+
   @override
   Widget build(BuildContext context) {
-    final c = Get.find<ProfileController>();
     return Column(
       children: [
         Container(
@@ -1354,6 +1360,9 @@ class _HelpButton extends StatelessWidget {
 }
 
 class _DangerZone extends StatelessWidget {
+  final ProfileController c;
+  const _DangerZone({required this.c});
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -1415,7 +1424,6 @@ class _DangerZone extends StatelessWidget {
             );
 
             if (confirm == true) {
-              final c = Get.find<ProfileController>();
               final success = await c.deleteAccount();
               if (success) {
                 Get.offAll(() => const LoginScreen());

@@ -484,34 +484,7 @@ class OrderSuccessScreen extends StatelessWidget {
   Widget _buildActions() {
     return Column(
       children: [
-        AnimatedPressable(
-          borderRadius: BorderRadius.circular(8.r),
-          onTap: () => Get.snackbar('تتبع الطلب', 'جاري فتح خريطة التتبع المباشر'),
-          child: Container(
-            height: 56.h,
-            decoration: BoxDecoration(
-              color: OrderColors.primary,
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SvgPicture.string(_Icons.track, width: 20.w, height: 20.h),
-                SizedBox(width: 8.w),
-                Text(
-                  'تتبع الطلب',
-                  style: TextStyle(
-                    color: Color(0xFFEEEFFF),
-                    fontFamily: 'Cairo',
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(height: 12.h),
+      
         AnimatedPressable(
           borderRadius: BorderRadius.circular(8.r),
           onTap: () => Get.offAll(() => HomeScreen(), transition: Transition.fadeIn),
