@@ -7,6 +7,7 @@ import '../../data/models/inventory_models.dart';
 import '../controllers/inventory_controller.dart';
 import '../widgets/ai_insights_card.dart';
 import 'add_inventory_item_screen.dart';
+import '../../cart/presentation/controllers/cart_controller.dart';
 
 class InventoryScreen extends StatelessWidget {
   const InventoryScreen({super.key});
@@ -28,7 +29,22 @@ class InventoryScreen extends StatelessWidget {
                 productName: controller.aiRecommendations.isNotEmpty ? controller.aiRecommendations.first.productName : 'منتج',
                 days: controller.aiRecommendations.isNotEmpty ? controller.aiRecommendations.first.recommendedLeadTimeDays.toString() : '2',
                 onAdd: () {
-                  final productName = controller.aiRecommendations.isNotEmpty ? controller.aiRecommendations.first.productName : 'المنتج';
+                  final rec = controller.aiRecommendations.isNotEmpty ? controller.aiRecommendations.first : null;
+                  final productName = rec?.productName ?? 'المنتج';
+                  
+                  if (rec != null) {
+                    final cartCtrl = Get.put(CartController());
+                    cartCtrl.addItem(CartItem(
+                      productId: rec.productId,
+                      name: productName,
+                      sku: rec.sku,
+                      unit: rec.unit,
+                      imageUrl: '',
+                      price: 0, // AI recommendation might not have price immediately, but this gets the user started
+                      quantity: 1,
+                    ));
+                  }
+
                   controller.dismissAiInsights();
                   Get.back();
                   Get.snackbar(
