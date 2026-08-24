@@ -27,8 +27,8 @@ public class EmailService : IEmailService
             message.To.Add(MailboxAddress.Parse(toEmail));
             message.Subject = "Salasel - Password Reset Instructions";
 
-            // Using localhost for local development testing
-            var resetLink = $"http://localhost:4200/reset-password?token={resetToken}";
+            // Using production URL for Vercel deployment
+            var resetLink = $"https://salasel-ai-procurement.vercel.app/forgot-password/reset?token={resetToken}";
 
             message.Body = new TextPart(TextFormat.Html)
             {
@@ -80,8 +80,8 @@ public class EmailService : IEmailService
             message.To.Add(MailboxAddress.Parse(toEmail));
             message.Subject = "Salasel - Supplier Account Approved!";
 
-            // Using localhost for local development testing
-            var setupLink = $"http://localhost:4200/reset-password?token={setupToken}";
+            // Using production URL for Vercel deployment
+            var setupLink = $"https://salasel-ai-procurement.vercel.app/forgot-password/reset?token={setupToken}";
 
             message.Body = new TextPart(TextFormat.Html)
             {
