@@ -28,6 +28,15 @@ export class ReviewSubmitFormComponent {
     ];
   }
 
+  get contactInfo() {
+    return {
+      name: this.data.fullName || 'غير محدد',
+      role: this.data.jobTitle || 'غير محدد',
+      email: this.data.email || 'غير محدد',
+      phone: this.data.phoneNumber || 'غير محدد'
+    };
+  }
+
   get legalTaxInfo() {
     return [
       { label: 'الرقم الضريبي (VAT)', value: this.data.vatNumber || 'غير محدد', highlighted: true },

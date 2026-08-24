@@ -5,7 +5,7 @@ using Salasel.Infrastructure.Data;
 namespace Salasel.API.Controllers.VoiceChat;
 
 [ApiController]
-[Route("api/voice-lookups")]
+[Route("api/v1/voice-lookups")]
 public class LookupsController : ControllerBase
 {
     private readonly SalaselDbContext _db;

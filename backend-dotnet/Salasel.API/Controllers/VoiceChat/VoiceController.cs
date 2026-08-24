@@ -7,7 +7,7 @@ using Salasel.Infrastructure.Services;
 namespace Salasel.API.Controllers.VoiceChat;
 
 [ApiController]
-[Route("api/voice")]
+[Route("api/v1/voice")]
 public class VoiceController : ControllerBase
 {
     private readonly SalaselDbContext _db;

@@ -11,7 +11,7 @@ namespace Salasel.API.Controllers.VoiceChat;
 
 
 [ApiController]
-[Route("api/voice-orders")]
+[Route("api/v1/voice-orders")]
 public class VoiceOrdersController : ControllerBase
 {
     private readonly SalaselDbContext _db;

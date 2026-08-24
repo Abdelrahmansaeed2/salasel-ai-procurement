@@ -25,7 +25,6 @@ export class SiteFooterComponent {
       title: 'المنتج',
       links: [
         { label: 'المميزات', route: '/features-ai' },
-        { label: 'لوحة التحكم', route: '/dashboard' },
         { label: 'دليل الموردين', route: '/suppliers' },
       ],
     },
@@ -54,5 +53,7 @@ export class SiteFooterComponent {
     },
   ];
 
-  readonly socialLinks = ['Twitter / X', 'LinkedIn', 'GitHub'];
+  readonly socialLinks = [
+    { name: 'Facebook', url: 'https://www.facebook.com/people/Salasel/61593526056230/' }
+  ];
 }

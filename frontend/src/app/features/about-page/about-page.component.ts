@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { RevealDirective } from '../../shared/animations/reveal.directive';
 import { SiteFooterComponent } from '../../shared/site-footer/site-footer.component';
@@ -26,12 +27,13 @@ interface TeamMember {
   englishName: string;
   role: string;
   bio: string;
+  image: string;
 }
 
 @Component({
   selector: 'app-about-page',
   standalone: true,
-  imports: [RevealDirective, SiteHeaderComponent, SiteFooterComponent],
+  imports: [RevealDirective, SiteHeaderComponent, SiteFooterComponent, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './about-page.component.html',
   styleUrl: './about-page.component.css',
@@ -82,12 +84,50 @@ export class AboutPageComponent {
     description: 'فقدان البيانات في المكالمات يؤدي إلى معدلات خطأ مرتفعة واختلال في دورة التوريد.',
   };
 
-  readonly teamMembers: TeamMember[] = Array.from({ length: 4 }, () => ({
-    name: 'أحمد ماهر',
-    englishName: 'Ahmed Maher',
-    role: 'مهندس برمجيات | مصمم و مطور ويب',
-    bio: 'مهندس برمجيات سابق في Careem وSwvl. خريج AUC وMIT Sloan. شغف برقمنة التجارة المصرية.',
-  }));
+  readonly teamMembers: TeamMember[] = [
+    {
+      name: 'عبدالرحمن سعيد',
+      englishName: 'Abd Elrahman Saeed',
+      role: 'مطور واجهات | هندسة برمجيات',
+      bio: 'مهندس برمجيات متخصص في تطوير الواجهات باستخدام التقنيات الحديثة وبناء تجربة مستخدم سلسة.',
+      image: 'assets/images/abdelrahmansaeed.jpg',
+    },
+    {
+      name: 'أحمد ماهر',
+      englishName: 'Ahmed Maher',
+      role: 'مهندس برمجيات | مصمم ومطور ويب',
+      bio: 'شغف برقمنة التجارة المصرية وبناء حلول فعالة لمنظومة الأعمال المتكاملة.',
+      image: 'assets/images/ahmedmaher.jpeg',
+    },
+    {
+      name: 'دانيال سامي',
+      englishName: 'Daniel Samy',
+      role: 'مطور خلفية | هندسة برمجيات',
+      bio: 'خبير في بناء البنية التحتية الدقيقة للأنظمة وقواعد البيانات لضمان أعلى درجات الموثوقية.',
+      image: 'assets/images/daniel.jpeg',
+    },
+    {
+      name: 'إسلام سعيد',
+      englishName: 'Islam Saeed',
+      role: 'مطور خلفية | هندسة برمجيات',
+      bio: 'متخصص في تطوير النظم الخلفية وربط العمليات الحيوية للارتقاء بأداء المنصة.',
+      image: 'assets/images/islam.jpeg',
+    },
+    {
+      name: 'إبراهيم رضا محمد',
+      englishName: 'Ebrahim Reda Mohamed',
+      role: 'مهندس برمجيات',
+      bio: 'متخصص في هندسة البرمجيات وبناء الحلول التقنية المبتكرة لتحسين كفاءة سلاسل الإمداد.',
+      image: 'assets/images/ebrahim.jpeg',
+    },
+    {
+      name: 'محمد عبدالجواد محمد',
+      englishName: 'Mohamed Abdelgawad Mohamed',
+      role: 'مهندس برمجيات',
+      bio: 'شغوف بتطوير التطبيقات وتصميم الأنظمة لضمان جودة الأداء والموثوقية العالية.',
+      image: 'assets/images/mohamed abdulgawad.jpeg',
+    }
+  ];
 
   readonly technologyPartners = ['Google Cloud', 'Microsoft', 'Anthropic', 'AWS'];
 }

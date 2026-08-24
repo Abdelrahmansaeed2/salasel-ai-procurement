@@ -57,6 +57,8 @@ public class CatalogsController : ControllerBase
                 ProductId = sp.ProductId,
                 ProductName = sp.Product.Name,
                 SKU = sp.Product.SKU,
+                CategoryName = sp.Product.Category != null ? sp.Product.Category.Name : string.Empty,
+                ImageUrl = sp.Product.ImageUrl,
                 UnitPrice = sp.UnitPrice,
                 AvailableQty = sp.AvailableQty,
                 MinOrderQty = sp.MinOrderQty,

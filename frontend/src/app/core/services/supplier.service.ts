@@ -26,6 +26,21 @@ export interface SupplierProfileDto {
   warehouses: any[];
 }
 
+export interface SupplierProductDto {
+  id: number;
+  productId: number;
+  productName: string;
+  sku: string;
+  categoryName: string;
+  imageUrl: string;
+  unitPrice: number;
+  availableQty: number;
+  minOrderQty: number;
+  leadTimeDays: number;
+  isActive: boolean;
+  lastUpdated: string;
+}
+
 export interface UpdateSupplierProfileDto {
   companyName: string;
   contactPhone: string;
@@ -55,6 +70,10 @@ export class SupplierService {
 
   getSupplierById(id: number): Observable<SupplierProfileDto> {
     return this.http.get<SupplierProfileDto>(`${this.apiUrl}/${id}`);
+  }
+
+  getSupplierCatalog(id: number): Observable<SupplierProductDto[]> {
+    return this.http.get<SupplierProductDto[]>(`${this.apiUrl}/${id}/catalog`);
   }
 
   getMe(): Observable<SupplierProfileDto> {

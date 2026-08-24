@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Salasel.API.Controllers;
 
-[Route("api/v1/[controller]")]
+[Route("api/v1/payments")]
 [ApiController]
 public class PaymentsController : ControllerBase
 {
