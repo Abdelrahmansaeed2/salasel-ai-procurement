@@ -187,7 +187,7 @@ class OrdersController extends GetxController {
 
   Future<void> fetchReturns() async {
     try {
-      final response = await _apiClient.dio.get('/merchants/me/returns');
+      final response = await _apiClient.dio.get('/returns');
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         returnsOrders.value = data.map((json) {
