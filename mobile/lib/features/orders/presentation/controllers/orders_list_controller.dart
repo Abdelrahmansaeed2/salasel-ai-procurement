@@ -5,6 +5,7 @@ import '../../../../../core/network/api_client.dart';
 import '../../../cart/presentation/controllers/cart_controller.dart';
 import '../../../cart/presentation/screens/cart_screen.dart';
 import '../../data/models/order_detail_model.dart';
+import '../../data/models/insight_model.dart';
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 import 'package:signalr_netcore/signalr_client.dart';
@@ -71,8 +72,9 @@ class OrdersController extends GetxController {
   final RxnDouble maxPrice = RxnDouble();
   
   final RxString searchText = ''.obs;
-  final RxBool showAiInsights = true.obs;
+  final RxBool showAiInsights = false.obs;
   final RxBool isLoading = true.obs;
+  final Rx<InsightModel?> currentInsight = Rx<InsightModel?>(null);
 
   final List<String> filters = [
     'الكل',
@@ -92,7 +94,30 @@ class OrdersController extends GetxController {
     super.onInit();
     fetchOrders();
     fetchReturns();
+    fetchInsights();
     _initSignalR();
+  }
+
+  Future<void> fetchInsights() async {
+    try {
+      final profileRes = await _apiClient.dio.get('/users/me');
+      if (profileRes.statusCode == 200 && profileRes.data['shops'] != null) {
+        final shops = profileRes.data['shops'] as List;
+        if (shops.isNotEmpty) {
+          final merchantId = shops.first['merchantID'];
+          final response = await _apiClient.dio.get('/ai/recommendations?merchantId=$merchantId');
+          if (response.statusCode == 200 && response.data != null) {
+            final List<dynamic> data = response.data;
+            if (data.isNotEmpty) {
+              currentInsight.value = InsightModel.fromJson(data.first);
+              showAiInsights.value = true;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Failed to load insights: $e');
+    }
   }
 
   Future<void> _initSignalR() async {

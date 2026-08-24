@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../../core/widgets/app_bottom_nav_bar.dart';
 import '../controllers/orders_list_controller.dart';
+import '../../../cart/presentation/controllers/cart_controller.dart';
 import 'checkout_screen.dart';
 import 'delivery_tracking_screen.dart';
 import 'voice_order_detail_screen.dart';
@@ -401,6 +402,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   
   void _showAiDialog(OrdersController c) {
+    final insight = c.currentInsight.value;
+    if (insight == null) return;
+
     Get.dialog(
       Dialog(
         backgroundColor: Colors.transparent,
@@ -456,20 +460,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       height: 1.7,
                       fontFamily: 'Cairo',
                     ),
-                    children: const [
+                    children: [
+                      TextSpan(text: 'بناءً على طلباتك الأخيرة، نوصي بإعادة طلب '),
                       TextSpan(
-                          text:
-                              'بناءً على طلباتك الأخيرة، نوصي بإعادة طلب '),
-                      TextSpan(
-                        text: '"الحليب الطويل الأجل"',
+                        text: '"${insight.productName}"',
                         style: TextStyle(
-                          color: Color(0xFF2563EB),
+                          color: const Color(0xFF2563EB),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      TextSpan(
-                          text:
-                              ' من المراعي غداً لتجنب نقص المخزون المتوقعة نهاية الأسبوع.'),
+                      if (insight.recommendedSupplierName != null)
+                        TextSpan(text: ' من ${insight.recommendedSupplierName} '),
+                      TextSpan(text: 'لأن ${insight.reason}'),
                     ],
                   ),
                 ),
@@ -481,6 +483,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         onPressed: () {
                           c.dismissAi();
                           Get.back();
+                          
+                          final cartCtrl = Get.put(CartController());
+                          cartCtrl.addItem(CartItem(
+                            productId: insight.productId,
+                            name: insight.productName,
+                            sku: '',
+                            unit: 'وحدة',
+                            imageUrl: '',
+                            price: insight.recommendedUnitPrice ?? 100.0,
+                            quantity: insight.reorderThreshold > 0 ? insight.reorderThreshold : 1,
+                          ));
+
                           Get.snackbar('تمت الإضافة',
                               'تمت إضافة الطلب للسلة بنجاح',
                               backgroundColor:
