@@ -982,16 +982,19 @@ class _ProductItemCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                product.productName,
-                style: TextStyle(
-                  color: const Color(0xFF191C1E),
-                  fontFamily: 'Cairo',
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  height: 24 / 16,
+              Expanded(
+                child: Text(
+                  product.productName,
+                  style: TextStyle(
+                    color: const Color(0xFF191C1E),
+                    fontFamily: 'Cairo',
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    height: 24 / 16,
+                  ),
                 ),
               ),
+              SizedBox(width: 8.w),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                 decoration: BoxDecoration(

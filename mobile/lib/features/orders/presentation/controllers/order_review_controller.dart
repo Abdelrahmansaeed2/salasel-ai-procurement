@@ -138,4 +138,22 @@ class OrderReviewController extends GetxController {
       isSubmitting.value = false;
     }
   }
+
+  Future<List<dynamic>> searchProducts(String query) async {
+    if (query.trim().length < 2) return [];
+    try {
+      final ApiClient apiClient = ApiClient();
+      final response = await apiClient.dio.get('/products/search', queryParameters: {'q': query});
+      if (response.statusCode == 200) {
+        return response.data as List<dynamic>;
+      }
+    } catch (e) {
+      Get.log('Failed to search products: $e');
+    }
+    return [];
+  }
+
+  void addProduct(ExtractedProduct product) {
+    products.add(product);
+  }
 }

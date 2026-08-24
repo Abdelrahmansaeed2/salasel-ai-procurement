@@ -8,6 +8,7 @@ import '../../../../core/widgets/animated_pressable.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../domain/order_review_models.dart';
 import '../controllers/order_review_controller.dart';
+import 'add_product_bottom_sheet.dart';
 import '../theme/order_colors.dart';
 import 'order_success_screen.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -745,7 +746,14 @@ class _AddProductButton extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(top: 10.h),
       child: DottedBorderButton(
-        onTap: () => Get.snackbar('إضافة منتج', 'اختر منتجاً لإضافته إلى الطلب'),
+        onTap: () {
+          final controller = Get.find<OrderReviewController>();
+          Get.bottomSheet(
+            AddProductBottomSheet(controller: controller),
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+          );
+        },
       ),
     );
   }
