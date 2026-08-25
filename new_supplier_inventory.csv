@@ -1,0 +1,7 @@
+Item Code,Description,Category,Unit,Price (EGP),Available Stock,Notes
+SKU-5001-A,"عصير برتقال طبيعي ١ لتر",Beverages - Juice,Carton,420,120,Fresh
+SKU-5002-B,"مناديل ورقية ناعمة ٥٠٠ منديل",Hygiene,Pack,18,500,High demand
+SKU-5003-C,"بسكويت بالشوكولاتة",Snacks,Box,150,80,
+SKU-5004-D,"زيت ذرة نقي ١٫٥ لتر",Grocery,Bottle,115,200,
+SKU-5005-E,"أكياس قمامة سوداء كبيرة",Cleaning,Roll,45,300,
+SKU-5006-F,"شوكولاتة بالحليب فاخرة",Snacks,Box,350,0,Out of stock

@@ -53,22 +53,28 @@ class LoginController extends GetxController {
 
     isLoading.value = true;
     errorMessage.value = '';
-    // Check if the merchant has already completed shop registration
-    final storage = GetStorage();
-    final isShopRegistered = storage.read('shopRegistered') == true;
     try {
-      if (isShopRegistered) {
+      final authResponse = await _authRepository.login(email, password);
+      
+      final storage = GetStorage();
+      storage.write('isSetupCompleted', authResponse.isSetupCompleted);
+      
+      if (authResponse.isSetupCompleted) {
+        // If the backend confirms setup is completed, clear any local 'pending' state
+        storage.remove('shopRegistered');
+        
         Get.offAll(
-          () => const RegistrationSubmittedScreen(),
+          () => HomeScreen(),
           transition: Transition.fadeIn,
           duration: const Duration(milliseconds: 350),
         );
       } else {
-        final authResponse = await _authRepository.login(email, password);
-        storage.write('isSetupCompleted', authResponse.isSetupCompleted);
-        if (authResponse.isSetupCompleted) {
+        // If setup is not complete, check if they locally registered a shop recently
+        final isShopRegistered = storage.read('shopRegistered') == true;
+        
+        if (isShopRegistered) {
           Get.offAll(
-            () => HomeScreen(),
+            () => const RegistrationSubmittedScreen(),
             transition: Transition.fadeIn,
             duration: const Duration(milliseconds: 350),
           );
