@@ -124,7 +124,7 @@ public class KnowledgeIndexingWorker : BackgroundService
         var category = await db.Categories.FirstOrDefaultAsync(c => c.Name == "General", ct);
         if (category == null)
         {
-            category = new Salasel.Domain.Entities.Category { Name = "General", Description = "Auto-generated" };
+            category = new Salasel.Domain.Entities.Category { Name = "General" };
             db.Categories.Add(category);
             await db.SaveChangesAsync(ct);
         }
