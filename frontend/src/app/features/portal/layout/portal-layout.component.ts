@@ -74,7 +74,8 @@ export class PortalLayoutComponent {
         { label: 'لوحة التحكم', route: '/portal/dashboard', icon: 'dashboard' },
         { label: 'الطلبات', route: '/portal/orders', icon: 'orders', badge: 7 },
         { label: 'المرتجعات', route: '/portal/returns', icon: 'returns', badge: 1 },
-        { label: 'الكتالوج (قاعدة المعرفة)', route: '/portal/supplier-knowledge', icon: 'catalog' },
+        { label: 'قاعدة المعرفة (رفع الملفات)', route: '/portal/supplier-knowledge', icon: 'audit' },
+        { label: 'كتالوج المنتجات', route: '/portal/catalog', icon: 'catalog' },
         { label: 'الإعدادات', route: '/portal/settings', icon: 'settings' },
       ];
     }

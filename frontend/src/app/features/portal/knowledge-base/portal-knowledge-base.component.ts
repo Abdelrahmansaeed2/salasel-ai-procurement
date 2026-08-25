@@ -9,6 +9,7 @@ import { KnowledgeService, KnowledgeDocument } from '../../../core/services/know
   imports: [CommonModule, PaginationComponent],
   templateUrl: './portal-knowledge-base.component.html',
   styleUrl: './portal-knowledge-base.component.css',
+  host: { dir: 'ltr' }
 })
 export class PortalKnowledgeBaseComponent implements OnInit {
   private knowledgeService = inject(KnowledgeService);
